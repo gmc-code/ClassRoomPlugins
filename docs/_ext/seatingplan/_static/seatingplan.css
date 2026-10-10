@@ -1,0 +1,208 @@
+/* seatingplan directive styles. Everything is prefixed sp- to avoid clashing with the theme. */
+
+.seatingplan {
+    margin: 1em 0;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #f1f5f9;
+    color: #0f172a;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.3;
+    overflow: hidden;
+}
+.seatingplan *, .sp-modal * { box-sizing: border-box; }
+
+
+.seatingplan .sp-title {
+    background: #0f172a;
+    color: #fff;
+    font-weight: 600;
+    padding: 8px 14px;
+    outline: none;
+    cursor: text;
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+    user-select: text !important;
+    pointer-events: auto !important;
+    transition: background-color 0.2s;
+}
+.seatingplan .sp-title:hover {
+    background: #1e293b;
+}
+.seatingplan .sp-title:focus {
+    background: #1e293b;
+    box-shadow: inset 0 0 0 2px #3b82f6;
+}
+
+.seatingplan .sp-toolbar {
+    background: #1e293b; padding: 8px 10px;
+    display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+}
+.seatingplan .sp-layouts {
+    display: flex; gap: 3px; background: #0f172a; padding: 3px;
+    border-radius: 6px; border: 1px solid #334155;
+}
+.seatingplan .sp-file { display: none; }
+
+.sp-btn {
+    background: #3b82f6; color: #fff; border: none; border-radius: 4px;
+    padding: 5px 10px; font: 500 12px/1.2 inherit; font-family: inherit;
+    cursor: pointer; transition: background-color .2s;
+}
+.sp-btn:hover { background: #2563eb; }
+.sp-btn-layout { background: transparent; color: #94a3b8; padding: 4px 8px; }
+.sp-btn-layout:hover { background: #1e293b; color: #f8fafc; }
+.sp-btn-layout.sp-active { background: #3b82f6; color: #fff; font-weight: 600; }
+.sp-btn-toggle { background: #0f172a; color: #38bdf8; border: 1px solid #0284c7; font-weight: 600; }
+.sp-btn-toggle:hover { background: #0284c7; color: #fff; }
+.sp-btn-grey { background: #475569; }   .sp-btn-grey:hover { background: #334155; }
+.sp-btn-amber { background: #d97706; } .sp-btn-amber:hover { background: #b45309; }
+.sp-btn-purple { background: #7c3aed; } .sp-btn-purple:hover { background: #6d28d9; }
+.sp-btn-teal { background: #0d9488; }  .sp-btn-teal:hover { background: #0f766e; }
+.sp-btn-red { background: #dc2626; }   .sp-btn-red:hover { background: #b91c1c; }
+
+.seatingplan .sp-status { display: none; padding: 6px 12px; font-size: 12px; background: #fef3c7; color: #92400e; border-bottom: 1px solid #fcd34d; }
+.seatingplan .sp-status.sp-show { display: block; }
+
+.seatingplan .sp-body { display: flex; min-height: 360px; }
+.seatingplan .sp-sidebar {
+    width: 200px; flex: none; background: #fff; border-right: 1px solid #e2e8f0;
+    padding: 8px; display: flex; flex-direction: column; max-height: 700px;
+}
+.seatingplan .sp-side-title {
+    font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase;
+    letter-spacing: .5px; margin-bottom: 6px;
+}
+.seatingplan .sp-pool { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+
+.seatingplan .sp-canvas { flex: 1; min-width: 0; padding: 12px; overflow-x: auto; }
+.seatingplan .sp-whiteboard {
+    background: #e2e8f0; border: 2px dashed #94a3b8; border-radius: 6px; text-align: center;
+    padding: 5px; font-size: 12px; font-weight: 600; color: #475569; letter-spacing: 1px; margin-bottom: 12px;
+}
+.seatingplan .sp-grid { display: flex; flex-direction: column; gap: 10px; }
+.seatingplan .sp-row { display: grid; gap: 8px; }
+
+.seatingplan .sp-desk {
+    background: #fff; border: 2px dashed #cbd5e1; border-radius: 6px; height: 64px;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    position: relative; transition: background-color .2s, border-color .2s; min-width: 0;
+}
+.seatingplan .sp-desk.sp-drag-over { border-color: #3b82f6; background: #eff6ff; }
+.seatingplan .sp-desk.sp-occupied { border-style: solid; border-color: #94a3b8; }
+.seatingplan .sp-desk.sp-conflict {
+    border: 3px solid #ef4444 !important; background: #fef2f2 !important; animation: sp-pulse 1.5s infinite;
+}
+@keyframes sp-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(239,68,68,.5); }
+    70% { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+    100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+}
+.seatingplan .sp-desk-num { position: absolute; top: 1px; left: 4px; font-size: 9px; color: #94a3b8; }
+
+/* Creates subtle visual spacing between 2-column desk blocks */
+.seatingplan .sp-desk:nth-child(2n) {
+    margin-right: 6px;
+}
+
+.seatingplan .sp-card {
+    background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px;
+    font-weight: 500; cursor: grab; user-select: none; line-height: 1.15; min-width: 0;
+}
+.seatingplan .sp-card:active { cursor: grabbing; }
+.seatingplan .sp-card.sp-has-sep { border: 2px solid #ea580c; background: #fff7ed; }
+.seatingplan .sp-card.sp-has-pair { border: 2px solid #059669; background: #ecfdf5; }
+.seatingplan .sp-card.sp-has-pos { border: 2px solid #2563eb; background: #eff6ff; }
+
+.seatingplan .sp-sidebar .sp-card {
+    padding: 3px 6px; display: flex; justify-content: space-between; align-items: center; height: 28px;
+}
+
+.seatingplan .sp-sidebar.sp-hidden {
+    display: none !important;
+}
+
+
+.seatingplan .sp-side-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.seatingplan .sp-desk .sp-card {
+    width: 94%; height: 86%; padding: 2px 3px; background: #e0f2fe; border-color: #38bdf8;
+    display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+}
+.seatingplan .sp-desk .sp-card.sp-has-sep { background: #fff7ed; border-color: #ea580c; }
+.seatingplan .sp-desk .sp-card.sp-has-pair { background: #ecfdf5; border-color: #059669; }
+.seatingplan .sp-desk .sp-card.sp-has-pos { background: #eff6ff; border-color: #2563eb; }
+.seatingplan .sp-first { font-weight: 600; font-size: 12px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.seatingplan .sp-last { font-size: 11px; color: #334155; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.sp-badges { display: flex; gap: 2px; align-items: center; justify-content: center; margin-top: 1px; }
+.sp-badge { font-size: 9.5px; font-weight: 700; padding: 0 3px; border-radius: 3px; white-space: nowrap; }
+.sp-badge-hr { background: #bae6fd; color: #0369a1; }
+.sp-badge-sep { background: #ffedd5; color: #c2410c; border: 1px solid #f97316; }
+.sp-badge-pair { background: #d1fae5; color: #047857; border: 1px solid #10b981; }
+.sp-badge-pos { background: #dbeafe; color: #1d4ed8; border: 1px solid #3b82f6; }
+
+@media (max-width: 700px) {
+    .seatingplan .sp-body { flex-direction: column; }
+    .seatingplan .sp-sidebar { width: auto; max-height: 150px; border-right: none; border-bottom: 1px solid #e2e8f0; }
+}
+
+/* ---- Rules dialog (appended to <body>) ---- */
+.sp-modal {
+    display: none; position: fixed; inset: 0; z-index: 10000; background: rgba(15,23,42,.6);
+    justify-content: center; align-items: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px; color: #0f172a;
+}
+.sp-modal.sp-open { display: flex; }
+.sp-modal-card {
+    background: #fff; border-radius: 8px; width: 580px; max-width: 94%; max-height: 85vh;
+    display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,.25);
+}
+.sp-modal-head {
+    background: #1e293b; color: #fff; padding: 12px 18px; font-weight: 600;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.sp-modal-close { background: transparent; border: none; color: #94a3b8; font-size: 18px; cursor: pointer; }
+.sp-modal-close:hover { color: #fff; }
+.sp-modal-body { padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+.sp-rule-form {
+    display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+    grid-template-areas: "s1 type" "s2 add"; gap: 10px; align-items: center;
+    background: #f8fafc; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px;
+}
+.sp-c-s1 { grid-area: s1; } .sp-c-type { grid-area: type; } .sp-c-s2 { grid-area: s2; }
+.sp-rule-form select {
+    display: block; width: 100%; min-width: 0; height: 38px; margin: 0; padding: 6px 10px;
+    border: 1px solid #cbd5e1; border-radius: 5px; background: #fff; color: #0f172a; font: 400 13px/1.3 inherit; font-family: inherit;
+}
+.sp-rule-form .sp-c-add { grid-area: add; justify-self: start; min-height: 38px; }
+.sp-feedback { font-size: 13px; color: #64748b; min-height: 1em; }
+.sp-feedback.sp-error { color: #b91c1c; }
+.sp-feedback.sp-success { color: #047857; }
+.sp-modal-sub { font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: -6px; }
+.sp-rules-list { display: flex; flex-direction: column; gap: 6px; }
+.sp-rules-empty { font-size: 13px; color: #64748b; }
+.sp-rule-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 10px; background: #f1f5f9; border-radius: 4px; font-size: 13px;
+}
+.sp-rule-item.sp-sep { border-left: 4px solid #ea580c; }
+.sp-rule-item.sp-pair { border-left: 4px solid #059669; }
+.sp-rule-item.sp-pos { border-left: 4px solid #2563eb; }
+.sp-del-rule { background: transparent; border: none; color: #ef4444; font-size: 16px; cursor: pointer; padding: 0 4px; }
+@media (max-width: 480px) {
+    .sp-rule-form { grid-template-columns: minmax(0,1fr); grid-template-areas: "s1" "type" "s2" "add"; }
+    .sp-rule-form .sp-c-add { width: 100%; }
+}
+
+
+/* Printing the docs page normally: show just the plan, hide the controls. */
+@media print {
+    .seatingplan { border: none; background: #fff; }
+    .seatingplan .sp-toolbar, .seatingplan .sp-sidebar, .seatingplan .sp-status, .sp-modal { display: none !important; }
+    .seatingplan .sp-desk { break-inside: avoid; }
+    .sp-badge-hr { border: none !important; background: transparent; padding: 0 2px; }
+}

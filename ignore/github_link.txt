@@ -1,0 +1,35 @@
+echo "# ClassRoomPlugins >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/gmc-code/ClassRoomPlugins.git
+
+git pull origin main --allow-unrelated-histories
+
+git push -u origin main
+
+
+echo "# ClassRoomPlugins" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M master
+git remote add origin https://github.com/gmc-code/ClassRoomPlugins.git
+git push -u origin master
+
+
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/gmc-code/ClassRoomPlugins.git
+git push -u origin main
+
+
+git init
+git add .
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/gmc-code/ClassRoomPlugins.git
+git push -u origin main
