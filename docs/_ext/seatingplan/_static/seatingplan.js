@@ -571,6 +571,7 @@
                 box.addEventListener('change', function () {
                     state.display[key] = box.checked;
                     applyDisplayClasses();
+                    if (key === 'hideBadges' && box.checked) hideRuleStatus();
                     save();
                     if (key !== 'ignoreRules') refreshCards();
                 });
@@ -617,6 +618,15 @@
             if (document.fullscreenElement === root && document.exitFullscreen) {
                 document.exitFullscreen().catch(function () {});
             }
+        }
+
+        /* Remove the "rules left out" message (it names students and their rules) but keep
+           any warning about students without a desk. */
+        function hideRuleStatus() {
+            if (!ui.status.classList.contains('sp-show')) return;
+            if (ui.status.textContent.indexOf('Not every rule') === -1) return;
+            var unseated = ui.pool.querySelectorAll('.sp-card').length;
+            setStatus(unseated ? unseatedMessage(unseated) : '');
         }
 
         function setStatus(msg) {
@@ -1042,7 +1052,7 @@
 
             var unseatedRev = state.students.filter(function (s) { return !seated[s.id]; }).length;
             var revMsgs = [];
-            if (dropped.length) revMsgs.push(droppedMessage(dropped));
+            if (dropped.length && !state.display.hideBadges) revMsgs.push(droppedMessage(dropped));
             if (unseatedRev) revMsgs.push(unseatedMessage(unseatedRev));
             if (revMsgs.length) setStatus('Seating reversed. ' + revMsgs.join(' '));
         }
@@ -1186,7 +1196,7 @@
 
             var unseated = list.filter(function (s) { return !seated[s.id]; }).length;
             var msgs = [];
-            if (dropped.length) msgs.push(droppedMessage(dropped));
+            if (dropped.length && !state.display.hideBadges) msgs.push(droppedMessage(dropped));
             if (unseated) msgs.push(unseatedMessage(unseated));
             if (msgs.length) setStatus(msgs.join(' '));
         }

@@ -212,6 +212,10 @@
 
 /* ---- Hide rule badges ---- */
 .seatingplan.sp-hide-badges .sp-badges { display: none; }
+/* ...and the red highlight on desks that break a rule, so the class can't see who has one */
+.seatingplan.sp-hide-badges .sp-desk.sp-conflict {
+    border: 2px solid #94a3b8 !important; background: #fff !important; animation: none;
+}
 
 /* ---- Projector view ---- */
 .seatingplan .sp-projector-exit { display: none; }

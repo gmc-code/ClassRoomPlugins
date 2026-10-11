@@ -189,7 +189,8 @@ Using the seating plan
 Students can be dragged between the **Unassigned** list and classroom desks.
 Dropping a student onto an occupied desk swaps the two students.
 
-Desks that violate seating rules are highlighted in red.
+Desks that violate seating rules are highlighted in red, unless **Hide Rule
+Badges** is ticked.
 
 Toolbar controls
 ~~~~~~~~~~~~~~~~
@@ -246,9 +247,11 @@ Display options
      - Shows each name on a single line, making the desks shorter. Printouts
        use the same layout.
    * - **Hide Rule Badges**
-     - Hides the rule badges (Sep, Pair, Front, Back and so on) and their card
-       colours, which is useful when the plan is displayed to the class. The
-       rules still apply, and desks breaking a rule are still highlighted red.
+     - Hides every sign of the rules, which is useful when the plan is
+       displayed to the class: the rule badges (Sep, Pair, Front, Back and so
+       on), their card colours, the red highlight on desks breaking a rule and
+       the message listing rules that were left out. The rules still apply
+       when students are arranged. Untick it to check for broken rules.
 
 What the browser remembers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
