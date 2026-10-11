@@ -212,7 +212,7 @@
             state.noRepeat = !!cfg.noRepeat;
             state.surnameInitial = !!cfg.surnameInitial;
             state.showHomeroom = cfg.showHomeroom !== false;
-            state.skipAnimation = false;
+            state.skipAnimation = !!cfg.skipAnimation;
             state.absent = {};
             state.picked = {};
             state.lastResult = [];
@@ -294,6 +294,7 @@
 
             root.innerHTML =
                 '<div class="np-title" data-role="title" title="Click to edit title"></div>' +
+                '<button type="button" class="np-projector-exit" data-action="projector-exit">✕ Exit projector view</button>' +
                 '<div class="np-toolbar">' +
                 '<div class="np-toolbar-row">' +
                 '<button type="button" class="np-btn" data-action="import">' +
@@ -321,6 +322,10 @@
                 '<button type="button" class="np-btn np-btn-purple" data-action="class-list">' +
                 icon('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>') +
                 'Class List</button>' +
+
+                '<button type="button" class="np-btn np-btn-teal" data-action="projector">' +
+                icon('<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/>') +
+                'Projector View</button>' +
                 '</div>' +
 
                 '<div class="np-toolbar-row">' +
@@ -395,6 +400,50 @@
             ui['toggle-skip-animation'].addEventListener('change', function () {
                 state.skipAnimation = ui['toggle-skip-animation'].checked; save();
             });
+
+            document.addEventListener('fullscreenchange', function () {
+                if (!document.fullscreenElement && root.classList.contains('np-projector')) exitProjector();
+            });
+            document.addEventListener('keydown', function (e) {
+                if (!root.classList.contains('np-projector')) return;
+                if (e.key === 'Escape') { exitProjector(); return; }
+                /* space bar (or a presentation clicker) picks, unless the title is being edited */
+                if ((e.key === ' ' || e.key === 'PageDown' || e.key === 'ArrowRight') && e.target !== ui.title) {
+                    e.preventDefault();
+                    if (!ui.pick.disabled) spin();
+                }
+            });
+            window.addEventListener('resize', fitProjector);
+        }
+
+        /* ---------- projector view ---------- */
+        function enterProjector() {
+            root.classList.add('np-projector');
+            document.documentElement.classList.add('np-projector-open');
+            fitProjector();
+            if (root.requestFullscreen) {
+                root.requestFullscreen().then(fitProjector).catch(function () { /* stays as a full-window overlay */ });
+            }
+        }
+
+        function exitProjector() {
+            if (!root.classList.contains('np-projector')) return;
+            root.classList.remove('np-projector');
+            document.documentElement.classList.remove('np-projector-open');
+            ui.stage.style.zoom = '';
+            if (document.fullscreenElement === root && document.exitFullscreen) {
+                document.exitFullscreen().catch(function () {});
+            }
+        }
+
+        /* Scale the whole card stack so the full stack fits the screen. The cards are positioned in
+           pixels by the script, so zooming the stage keeps the animation maths unchanged. */
+        function fitProjector() {
+            if (!root.classList.contains('np-projector')) return;
+            var vis = view && view.vis ? view.vis : MAX_VISIBLE;
+            var byHeight = (window.innerHeight - 260) / stackHeight(vis);
+            var byWidth = (window.innerWidth - 64) / 440;
+            ui.stage.style.zoom = clamp(Math.min(byHeight, byWidth), 1, 2.4).toFixed(2);
         }
 
         function setStatus(msg) {
@@ -432,7 +481,7 @@
             var t = e.target.closest('[data-action]');
             if (!t || !root.contains(t)) return;
             var action = t.getAttribute('data-action');
-            if (view && view.busy && action !== 'print') return;
+            if (view && view.busy && action !== 'print' && action !== 'projector-exit') return;
             switch (action) {
                 case 'pick': spin(); break;
                 case 'count':
@@ -446,6 +495,8 @@
                 case 'forget-picks': forgetPicks(); break;
                 case 'reset': resetToPage(); break;
                 case 'print': printResult(); break;
+                case 'projector': enterProjector(); break;
+                case 'projector-exit': exitProjector(); break;
             }
         }
 
@@ -492,6 +543,7 @@
             }
             ui.stage.style.height = stackHeight(view.vis) + 'px';
             draw(0);
+            fitProjector();
         }
 
         function poolKey(pool) {

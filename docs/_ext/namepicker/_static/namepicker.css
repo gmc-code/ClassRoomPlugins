@@ -140,6 +140,27 @@
     .namepicker .np-first { font-size: 19px; }
     .namepicker .np-last { font-size: 14px; }
 }
+/* ---- Projector view ---- */
+.namepicker .np-projector-exit { display: none; }
+html.np-projector-open, html.np-projector-open body { overflow: hidden; }
+.namepicker.np-projector {
+    position: fixed; inset: 0; z-index: 9999; margin: 0; border: none; border-radius: 0;
+    overflow-y: auto; background: #f1f5f9; display: flex; flex-direction: column;
+}
+.namepicker.np-projector .np-toolbar,
+.namepicker.np-projector .np-status { display: none !important; }
+.namepicker.np-projector .np-title { font-size: 30px; padding: 14px 24px; padding-right: 220px; }
+.namepicker.np-projector .np-projector-exit {
+    display: block; position: fixed; top: 12px; right: 16px; z-index: 10001;
+    background: #475569; color: #fff; border: none; border-radius: 6px;
+    padding: 8px 14px; font: inherit; font-size: 14px; cursor: pointer; opacity: .75;
+}
+.namepicker.np-projector .np-projector-exit:hover { opacity: 1; }
+.namepicker.np-projector .np-body { flex: 1; justify-content: flex-start; gap: 20px; padding: 24px 24px 18px; }
+.namepicker.np-projector .np-pick { font-size: 26px; padding: 14px 56px; }
+.namepicker.np-projector .np-result { font-size: 24px; font-weight: 600; color: #0f172a; }
+.namepicker.np-projector .np-info { font-size: 15px; }
+
 /* ---- Class list dialog ---- */
 .np-modal {
     display: none; position: fixed; inset: 0; z-index: 10000; background: rgba(15,23,42,.6);

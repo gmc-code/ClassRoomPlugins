@@ -159,6 +159,7 @@ class NamePickerDirective(SphinxDirective):
         "no-repeat": directives.flag,
         "surname-initial": directives.flag,
         "hide-homeroom": directives.flag,
+        "skip-animation": directives.flag,
         "storage-key": directives.unchanged,
         "class": directives.class_option,
     }
@@ -236,6 +237,7 @@ class NamePickerDirective(SphinxDirective):
             "noRepeat": "no-repeat" in self.options,
             "surnameInitial": "surname-initial" in self.options,
             "showHomeroom": "hide-homeroom" not in self.options,
+            "skipAnimation": "skip-animation" in self.options,
             "students": students,
         }
         node["classes"] = self.options.get("class", [])

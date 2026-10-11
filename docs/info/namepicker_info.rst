@@ -1,314 +1,329 @@
-===============================
-Noise Monitor directive info
-===============================
+===================================
+Name Picker Directive info
+===================================
 
-The ``noisemonitor`` directive adds a live classroom noise meter to a page. It listens through the
-computer's microphone, shows the current sound level on a meter bar, and swaps a large picture and
-message as the room gets louder. Each of the six levels (Level 0 to Level 5) has its own picture and
-its own message, so students can see at a glance how they are going and what the consequence is.
+The ``namepicker`` directive embeds an animated random name picker in a
+documentation page.
 
-.. contents:: On this page
+A stack of brightly coloured name cards cycles upwards and settles with the
+chosen students on top. Students can be imported from CSV or Excel files or
+entered directly in the directive, marked absent, picked one or several at a
+time, kept from being picked twice, shown full screen on a projector, saved as
+JSON and printed as a list.
+
+.. contents::
    :local:
    :depth: 1
 
+----
 
 Quick start
 -----------
 
-.. code-block:: rst
-
-   .. noisemonitor::
-
-That is all that is needed. The monitor appears with the default levels, a threshold of 60 and a
-meter range of 0 to 100. To tune it for your room and your own wording:
+Add the directive to an RST page:
 
 .. code-block:: rst
 
-   .. noisemonitor::
-      :threshold: 55
-      :image-min: 10
-      :image-max: 70
-      :msg0: Level 0 - Zoo Zen. Even the meerkats are meditating. Perfect silence!
-      :msg1: Level 1 - Sneaky Safari. Whisper like a mouse sneaking past a sleeping lion!
-      :msg2: Level 2 - Monkey Business! The monkeys are chattering. Bring the volume down!
-      :msg3: Level 3 - Feeding Frenzy! The parrots are squawking and the monkeys are going bananas!
-      :msg4: Level 4 - ROAR ALERT! The lions have joined the conversation. Quieten things down!
-      :msg5: Level 5 - ZOO-MAGEDDON! The elephants are trumpeting, the monkeys are screaming, and the whole zoo is stampeding! SOUND THE ALARM!
+   .. namepicker::
+      :title: Who's Up?
 
-The directive takes no content, only options.
+      Alex Smith, H11
+      Sam Jones, B11
+      Priya Patel, N12
+      Jordan Lee, N12
+      Mia Chen, H11
+      Tom Brown, B11
 
+Directive options
+-----------------
 
-How it works
-------------
+``:count:``
+   Sets how many students are picked each time.
 
-1. The teacher presses **Start Mic Monitor**. The browser asks for permission to use the microphone.
-2. Sound from the room is measured many times a second and turned into a number from 0 to 100.
-3. The meter bar fills according to that number. It is green below the threshold and turns red at or
-   above it, and the status line changes to a warning.
-4. The number is also converted into one of six **levels**. The picture and the large message change
-   to match the level.
-5. Pressing **Stop Mic Monitor** releases the microphone.
+   * ``1`` — one student (default).
+   * Any whole number from ``1`` to ``10``. Other values give a build warning
+     and fall back to ``1``.
 
-The number is a relative scale
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   The number can also be changed in the browser.
 
-The number shown next to "dB" is worked out from the microphone signal as a value between 0 and 100.
-It is **not** a calibrated sound pressure level or a true decibel reading, and the same room will give different numbers on different
-computers, microphones and volume settings. Use the sliders described below to adjust the monitor to
-suit each room, rather than relying on the numbers matching a sound meter.
+``:duration:``
+   Sets how long the cards cycle before settling, in seconds.
 
-How levels are chosen
-~~~~~~~~~~~~~~~~~~~~~
+   * ``6`` — six seconds (default).
+   * Any number from ``1`` to ``20``, including halves such as ``2.5``. Other
+     values give a build warning and fall back to ``6``.
 
-The range between **Min Level** and **Max Level** is split into six equal bands. A reading at or
-below the minimum is Level 0, and a reading at or above the maximum is Level 5.
+``:easing:``
+   Sets how the cycling cards slow down.
 
-For example, with a minimum of 10 and a maximum of 70, each band is 10 wide:
+   * ``ease-out`` — smooth slow down (default).
+   * ``linear`` — constant speed, then a sudden stop.
+   * ``ease-in-out`` — slow start and slow end.
+   * ``ease-out-strong`` — fast, then a long crawl to the end.
+   * ``back`` — slips past the final name and settles back.
+   * ``elastic`` — springy finish.
+   * ``bounce`` — bounces into place.
 
-.. list-table::
-   :header-rows: 1
-   :widths: 25 25
+``:roster:``
+   Loads a roster from a CSV file or Excel workbook (``.xlsx``), relative to
+   the documentation page. Students listed in the directive body are added
+   after the roster.
 
-   * - Reading
-     - Level
-   * - Below 20
-     - Level 0
-   * - 20 to 29
-     - Level 1
-   * - 30 to 39
-     - Level 2
-   * - 40 to 49
-     - Level 3
-   * - 50 to 59
-     - Level 4
-   * - 60 and above
-     - Level 5
+   Excel support requires ``openpyxl``.
 
-Moving the minimum up ignores background hum. Moving the maximum down makes the monitor more
-sensitive, so the top levels are reached with less noise.
+   Supported columns:
 
-Going up fast, coming down slowly
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * ``Preferred`` or ``First Name``
+   * ``Surname`` or ``Last Name`` (optional)
+   * ``Homeroom`` (optional)
 
-The monitor reacts straight away when the room gets louder, jumping up to the new level at once. When
-the room goes quiet again, it steps **down one level every 3 seconds** rather than dropping back
-immediately. A sudden shout therefore stays on the board for a moment, and the class has to settle
-for a few seconds to work their way back to Level 0.
+``:title:``
+   Sets the initial title displayed above the picker. The title can also be
+   edited in the browser and is included on printouts.
 
-The meter bar and the number respond instantly. Only the picture, message and level change slowly.
+``:no-repeat:``
+   Starts with **Skip Students Already Picked** ticked, so each student is
+   picked once before anyone is picked again.
 
+``:surname-initial:``
+   Starts with **Surname Initial Only** ticked.
 
-Options
--------
+``:hide-homeroom:``
+   Starts with **Show Homeroom** unticked.
 
-All options are optional.
+``:skip-animation:``
+   Starts with **Skip Animation** ticked, so the result appears straight away.
 
-.. list-table::
-   :header-rows: 1
-   :widths: 20 14 66
+These four options take no value. They set how the page first appears; the
+matching checkboxes can still be changed in the browser. See
+`What the browser remembers`_.
 
-   * - Option
-     - Default
-     - Description
-   * - ``:threshold:``
-     - ``60``
-     - A whole number from 0 to 100. At or above this reading the meter bar turns red and the status
-       reads "Warning: Exceeding Noise Threshold!". It does not change the level on its own.
-   * - ``:image-min:``
-     - ``0``
-     - The reading that counts as the bottom of the scale (Level 0). Whole number from 0 to 100.
-   * - ``:image-max:``
-     - ``100``
-     - The reading that counts as the top of the scale (Level 5). Whole number from 0 to 100. It must
-       be greater than ``:image-min:``. Otherwise a build warning appears and the range falls back to
-       0 to 100.
-   * - ``:msg0:`` to ``:msg5:``
-     - see below
-     - The message shown for each level. Plain text on one line. Any HTML characters are shown as
-       typed rather than being interpreted.
+For example, a picker that chooses three students at a time, takes everyone
+in turn and finishes with a bounce:
 
-Default messages
-~~~~~~~~~~~~~~~~
+.. code-block:: rst
 
-The default messages follow a zoo theme, getting wilder as the room gets louder.
+   .. namepicker::
+      :title: Practical Team Leaders
+      :count: 3
+      :duration: 8
+      :easing: bounce
+      :no-repeat:
+      :surname-initial:
 
-.. list-table::
-   :header-rows: 1
-   :widths: 15 85
+``:storage-key:``
+   Sets a custom key for storing the class list and settings in the browser.
+   If omitted, the page name and directive position are used automatically.
 
-   * - Level
-     - Message
-   * - 0
-     - Level 0 - Zoo Zen. Even the meerkats are meditating. Perfect silence!
-   * - 1
-     - Level 1 - Sneaky Safari. Whisper like a mouse sneaking past a sleeping lion!
-   * - 2
-     - Level 2 - Monkey Business! The monkeys are chattering. Bring the volume down!
-   * - 3
-     - Level 3 - Feeding Frenzy! The parrots are squawking and the monkeys are going bananas!
-   * - 4
-     - Level 4 - ROAR ALERT! The lions have joined the conversation. Quieten things down!
-   * - 5
-     - Level 5 - ZOO-MAGEDDON! The elephants are trumpeting, the monkeys are screaming, and the
-       whole zoo is stampeding! SOUND THE ALARM!
+``:class:``
+   Adds CSS classes to the name picker container.
 
-You can set only some of the messages. Any level you leave out keeps its default.
+Student definitions
+-------------------
 
+Each non-blank content line defines a student. Lines beginning with ``#`` are
+ignored.
 
-Controls on the page
---------------------
+Student entries
+~~~~~~~~~~~~~~~
 
-.. list-table::
-   :header-rows: 1
-   :widths: 28 72
-
-   * - Control
-     - What it does
-   * - **Start / Stop Mic Monitor**
-     - Turns the microphone on and off. The button turns red while monitoring.
-   * - **Threshold Level** slider
-     - Changes the point where the meter bar turns red and the warning appears.
-   * - **Min Level** slider
-     - Sets the bottom of the scale. If it is moved up to or past the maximum, the maximum is pushed
-       up by 1 to stay ahead of it.
-   * - **Max Level** slider
-     - Sets the top of the scale. If it is moved down to or below the minimum, the minimum is pushed
-       down by 1.
-   * - **Custom Level Messages**
-     - Six text boxes, one per level. Edit any of them and the message on screen updates straight away.
-   * - **Export Settings**
-     - Downloads the current threshold, min and max levels and all six messages as a file called
-       ``noise-monitor-settings.json``.
-   * - **Import Settings**
-     - Loads a settings file saved with **Export Settings** and applies it straight away. A message under
-       the buttons says whether it worked.
-
-The meter bar is drawn with level markers **L0** to **L5** along it, so students can see which band
-the noise is in.
-
-The sliders and message boxes are for adjusting the monitor during a lesson. Changes are **not
-saved automatically**. When the page is reloaded the values written in the directive are used again.
-Use **Export Settings** to keep a set you are happy with, or copy the final values into the
-directive options.
-
-
-Saving and sharing settings
----------------------------
-
-**Export Settings** and **Import Settings** let teachers keep several setups, such as a quiet
-written task, a practical lesson and a group discussion, and switch between them in seconds. Each
-setup is a small file that can be stored on the computer or shared with colleagues who use a
-different room or microphone.
-
-1. Adjust the sliders and messages until the monitor suits the lesson.
-2. Press **Export Settings**. The browser saves ``noise-monitor-settings.json``. Rename the file to
-   say what it is for, for example ``practical-lab.json``.
-3. On any noise monitor page, press **Import Settings** and choose the file. The sliders, level
-   markers and messages update at once.
-
-The file is plain text in JSON format and can be edited in any text editor:
-
-.. code-block:: json
-
-   {
-     "type": "noisemonitor-settings",
-     "version": 1,
-     "threshold": 55,
-     "imageMin": 10,
-     "imageMax": 70,
-     "messages": [
-        "Level 0 - Zoo Zen. Even the meerkats are meditating. Perfect silence!",
-        "Level 1 - Sneaky Safari. Whisper like a mouse sneaking past a sleeping lion!",
-        "Level 2 - Monkey Business! The monkeys are chattering. Bring the volume down!",
-        "Level 3 - Feeding Frenzy! The parrots are squawking and the monkeys are going bananas!",
-        "Level 4 - ROAR ALERT! The lions have joined the conversation. Quieten things down!",
-        "Level 5 - ZOO-MAGEDDON! The elephants are trumpeting, the monkeys are screaming, and the whole zoo is stampeding! SOUND THE ALARM!"
-        ]
-   }
-
-When a file is imported:
-
-* Numbers are rounded to whole numbers and kept between 0 and 100.
-* If ``imageMax`` is not above ``imageMin``, the range falls back to 0 to 100, as it does for the
-  directive option, and a note appears.
-* Anything missing from the file is left as it is, so a file with only ``"threshold": 45`` changes
-  just the threshold.
-* A file that is not valid JSON, or has none of the settings above, is rejected and nothing
-  changes.
-
-Importing changes only the page in front of you. It does not edit the source of the documentation,
-and the settings are lost when the page is reloaded unless they are imported again.
-
-
-Setting it up for a room
-------------------------
-
-1. Press **Start Mic Monitor** while the class is working silently and note the number. Set
-   ``:image-min:`` a little above it so that normal quiet work sits at Level 0.
-2. Ask the class for the loudest "acceptable" talking and note that number. This is a good place for
-   ``:threshold:``.
-3. Ask for a very loud noise, such as everyone speaking at once, and set ``:image-max:`` near that
-   number so the top level can be reached.
-4. Copy the final values into the directive options so they are used each time the page loads.
-
-Place the computer where the microphone picks up the room evenly. A laptop on the teacher's desk
-usually reads quieter than one on a bench in the middle of the class.
-
-
-Pictures
---------
-
-Six pictures are included with the extension, one for each level, in its ``_static`` folder:
+Enter students using any of these formats:
 
 .. code-block:: text
 
-   noise0.png   noise1.png   noise2.png   noise3.png   noise4.png   noise5.png
+   First
+   First Surname
+   First Surname, Homeroom
 
-The picture for the current level is shown at 60% of the width of the monitor, between the button
-and the message. To use your own pictures, replace these files with images of the same names before
-building. The pictures are shared by every noise monitor in the site.
+For example:
 
+.. code-block:: text
 
-Requirements and limits
------------------------
+   Alex
+   Priya Patel, N12
+   Mia Chen, Hughes 11
 
-* **A secure page is needed.** Browsers only allow microphone access on pages served over
-  ``https://`` or from ``localhost``. Read the Docs and most school intranets using https are fine.
-  A page opened as a plain ``http://`` address will show "Unable to access the microphone".
-* **The teacher must allow the microphone.** If permission is blocked, reset it in the browser's site
-  settings and try again.
-* **Audio stays on the device.** The sound is analysed in the browser and is not recorded or sent
-  anywhere.
-* **Use one monitor per page.** Each monitor asks for the microphone, and the sliders and message
-  boxes use fixed ids, so a second monitor on the same page can confuse the labels.
-* **HTML output only.** The directive has no output for PDF or text builds, so a page that contains
-  it will report an error in those builders.
-* **Use the** ``html`` **builder.** The extension copies its pictures, style sheet and script when an
-  ``html`` build finishes. Other HTML-based builders, such as ``dirhtml``, are not copied.
+The first word becomes the student's first name, and the remaining text
+becomes the surname. Homerooms are abbreviated automatically where possible,
+so ``Hughes 11`` is shown as ``H11``.
 
+If two students have the same name, the build shows a warning. Give them
+different names, for example by adding an initial, so the class can tell them
+apart.
 
-Installing the extension
+Using the name picker
+---------------------
+
+Press **Pick!** to start. The name cards cycle upwards for the chosen
+animation time, then the stack settles with the picked students on top,
+numbered in order. Their names are also listed under the cards.
+
+Press **Pick Again!** to choose again. The previous result slides back into
+the stack before the cards start cycling.
+
+* The line under the cards shows how many students are in the hat and, when
+  **Skip Students Already Picked** is ticked, how many have not been picked
+  yet.
+* Click the title to rename it.
+* In **Projector View**, the :kbd:`Space` bar also presses **Pick!**, as do
+  :kbd:`Page Down` and :kbd:`→`, so a presentation clicker works too.
+
+Toolbar controls
+~~~~~~~~~~~~~~~~
+
+.. list-table::
+   :widths: 24 76
+   :header-rows: 1
+
+   * - Control
+     - Function
+   * - **Import Roster**
+     - Loads a CSV or Excel class list into the browser, replacing the
+       current students. Imported data is not uploaded anywhere.
+   * - **Import JSON**
+     - Restores a previously exported picker, including its settings,
+       absences and picks.
+   * - **Export JSON**
+     - Downloads the students, settings, absences, students already picked
+       and the last result.
+   * - **Reset**
+     - Restores the class list and settings originally defined in the
+       directive.
+   * - **Print**
+     - Opens a print-friendly list of the students picked last time.
+   * - **Class List**
+     - Opens the class list, where students can be marked present or absent.
+   * - **Projector View**
+     - Shows only the title, the **Pick!** button and the cards, filling the
+       screen, with the card stack enlarged to fit. Press **Exit projector
+       view** or :kbd:`Esc` to return.
+   * - **Students to pick**
+     - Sets how many students are picked each time, from 1 to 10.
+   * - **Animation time**
+     - Sets how long the cards cycle, from 1 to 20 seconds.
+   * - **Easing**
+     - Sets how the cards slow down. See ``:easing:`` above.
+   * - **Forget Picks**
+     - Clears the record of students already picked, so everyone present can
+       be chosen again.
+
+Display options
+~~~~~~~~~~~~~~~
+
+.. list-table::
+   :widths: 30 70
+   :header-rows: 1
+
+   * - Option
+     - Effect
+   * - **Surname Initial Only**
+     - Shows only the first letter of each surname.
+   * - **Show Homeroom**
+     - Shows or hides homerooms on the cards and printouts.
+   * - **Skip Students Already Picked**
+     - Picks only students who have not been picked yet. When too few are
+       left, everyone goes back in the hat and a message says so.
+   * - **Skip Animation**
+     - Shows the result straight away, without cycling the cards.
+
+Marking students absent
+~~~~~~~~~~~~~~~~~~~~~~~
+
+**Class List** opens a list of every student with a tick box. Untick a
+student to mark them absent, so they can't be picked. **All Present** and
+**None Present** tick or untick everyone at once. Students who have already
+been picked are tagged *picked*.
+
+If fewer students are present than the number to pick, everyone present is
+picked and a message says so.
+
+What the browser remembers
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The browser remembers the title, students, absences, students already picked,
+the last result and all settings for each directive. This means absences and
+the "already picked" record carry over between lessons until they are changed,
+**Forget Picks** is pressed or the page is reset.
+
+Remembered settings take priority over the directive's options on later
+visits. **Reset** returns the page to the students and settings written in the
+directive.
+
+Privacy and student data
 ------------------------
 
-1. Copy the ``noisemonitor`` folder (containing ``__init__.py``, ``noisemonitor.py`` and ``_static``
-   with the six pictures, ``noisemonitor.css`` and ``noisemonitor.js``) next to your ``conf.py``.
-2. Add it to the extensions list:
+.. warning::
 
-   .. code-block:: python
+   A roster supplied directly in the directive or through ``:roster:``
+   becomes part of the generated HTML page.
 
-      extensions = [
-          "noisemonitor",
-      ]
+   Do not publish real student names on a public documentation site.
 
-3. Build as usual. The files are copied into ``_static`` in the output folder automatically.
+   For public sites, leave the directive empty and use **Import Roster** in
+   the browser instead, or host the documentation privately.
 
-
-Live example
+Installation
 ------------
 
-Press **Start Mic Monitor** and allow the microphone to try it.
+Copy the ``namepicker`` folder next to ``conf.py``. It contains:
 
-.. noisemonitor::
-   :threshold: 55
-   :image-min: 10
-   :image-max: 70
+* ``__init__.py``
+* ``namepicker.py``
+* ``_static/namepicker.css``
+* ``_static/namepicker.js``
+
+Add the extension to ``conf.py``:
+
+.. code-block:: python
+
+   import os
+   import sys
+
+   sys.path.insert(0, os.path.abspath('.'))
+
+   extensions = [
+       'namepicker',
+   ]
+
+The CSS and JavaScript assets are automatically copied into the generated
+``_static`` directory during HTML builds, so no additional configuration is
+required on Read the Docs. The directive produces no output in PDF or text
+builds.
+
+To enable build-time reading of Excel roster files, add ``openpyxl`` to your
+documentation requirements. Excel files imported in the browser need an
+internet connection the first time, to load the Excel reader.
+
+Examples
+--------
+
+Example class
+~~~~~~~~~~~~~
+
+This example picks two students at a time, without picking anyone twice.
+
+.. namepicker::
+   :title: Example Class
+   :count: 2
+   :no-repeat:
+
+   Alex Smith, H11
+   Sam Jones, H11
+   Priya Patel, N12
+   Jordan Lee, N12
+   Mia Chen, H11
+   Tom Brown, N12
+   Zoe Adams, H11
+   Ben Clark, N12
+   Ava Wilson, H11
+   Lucas White, N12
+   Noah Green, H11
+   Ella Taylor, N12
+
+Empty class
+~~~~~~~~~~~
+
+Use an empty directive when you want users to import their own class list.
+
+.. namepicker::
+   :title: Empty Class
