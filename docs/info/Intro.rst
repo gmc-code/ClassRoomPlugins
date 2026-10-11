@@ -12,14 +12,14 @@ The directives covered in this documentation include:
 - `namepicker <https://classroomplugins.readthedocs.io/en/latest/info/namepicker_info.html>`_
 - `noisemonitor <https://classroomplugins.readthedocs.io/en/latest/info/noisemonitor_info.html>`_
 
-- `seatingplan info <info/seatingplan_info.html>`_
-- `randomgroups info <info/randomgroups_info.html>`_
-- `namepicker info <info/namepicker_info.html>`_
-- `noisemonitor info <info/noisemonitor_info.html>`_
+- `seatingplan info </info/seatingplan_info.html>`_
+- `randomgroups info </info/randomgroups_info.html>`_
+- `namepicker info </info/namepicker_info.html>`_
+- `noisemonitor info </info/noisemonitor_info.html>`_
 
 Working examples are at:
 
-- `seatingplan <info/seatingplan.html>`_
-- `randomgroups <info/randomgroups.html>`_
-- `namepicker <info/namepicker.html>`_
-- `noisemonitor <info/noisemonitor.html>`_
+- `seatingplan </tools/seatingplan.html>`_
+- `randomgroups </tools/randomgroups.html>`_
+- `namepicker </tools/namepicker.html>`_
+- `noisemonitor </tools/noisemonitor.html>`_
