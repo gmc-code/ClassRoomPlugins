@@ -1,3 +1,0 @@
-
-
-from .randomgroups import setup

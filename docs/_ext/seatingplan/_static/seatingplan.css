@@ -38,8 +38,45 @@
 
 .seatingplan .sp-toolbar {
     background: #1e293b; padding: 8px 10px;
-    display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    display: flex; flex-direction: column; flex-wrap: wrap; gap: 6px; align-items: center;
 }
+
+/* .seatingplan .sp-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+} */
+
+.seatingplan .sp-toolbar-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    flex-basis: 100%;
+}
+
+/* Ensure checkbox label text is visible on dark backgrounds */
+.sp-toolbar-row--options {
+  color: #f8fafc !important; /* Light text */
+}
+
+.sp-checkbox-label {
+  color: #f8fafc !important;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.sp-checkbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #38bdf8; /* Bright accent for the checkbox input */
+  cursor: pointer;
+}
+
 .seatingplan .sp-layouts {
     display: flex; gap: 3px; background: #0f172a; padding: 3px;
     border-radius: 6px; border: 1px solid #334155;
@@ -50,13 +87,23 @@
     background: #3b82f6; color: #fff; border: none; border-radius: 4px;
     padding: 5px 10px; font: 500 12px/1.2 inherit; font-family: inherit;
     cursor: pointer; transition: background-color .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem; /* 6px spacing between icon and text */
 }
+
+.sp-btn-icon {
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
 .sp-btn:hover { background: #2563eb; }
 .sp-btn-layout { background: transparent; color: #94a3b8; padding: 4px 8px; }
 .sp-btn-layout:hover { background: #1e293b; color: #f8fafc; }
 .sp-btn-layout.sp-active { background: #3b82f6; color: #fff; font-weight: 600; }
+.sp-btn-toggle:hover{ background: #0284c7; color: #fff; }
 .sp-btn-toggle { background: #0f172a; color: #38bdf8; border: 1px solid #0284c7; font-weight: 600; }
-.sp-btn-toggle:hover { background: #0284c7; color: #fff; }
+.sp-btn-blue { background: #c430b0; }   .sp-btn-blue:hover { background: #b30077; }
 .sp-btn-grey { background: #475569; }   .sp-btn-grey:hover { background: #334155; }
 .sp-btn-amber { background: #d97706; } .sp-btn-amber:hover { background: #b45309; }
 .sp-btn-purple { background: #7c3aed; } .sp-btn-purple:hover { background: #6d28d9; }
@@ -86,7 +133,7 @@
 .seatingplan .sp-row { display: grid; gap: 8px; }
 
 .seatingplan .sp-desk {
-    background: #fff; border: 2px dashed #cbd5e1; border-radius: 6px; height: 64px;
+    background: #fff; border: 2px dashed #cbd5e1; border-radius: 6px; height: 75px;
     display: flex; flex-direction: column; justify-content: center; align-items: center;
     position: relative; transition: background-color .2s, border-color .2s; min-width: 0;
 }
@@ -128,7 +175,7 @@
 .seatingplan .sp-side-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .seatingplan .sp-desk .sp-card {
-    width: 94%; height: 86%; padding: 2px 3px; background: #e0f2fe; border-color: #38bdf8;
+    width: 98%; height: 97%; padding: 2px 3px; background: #e0f2fe; border-color: #38bdf8;
     display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
 }
 .seatingplan .sp-desk .sp-card.sp-has-sep { background: #fff7ed; border-color: #ea580c; }
@@ -143,6 +190,55 @@
 .sp-badge-sep { background: #ffedd5; color: #c2410c; border: 1px solid #f97316; }
 .sp-badge-pair { background: #d1fae5; color: #047857; border: 1px solid #10b981; }
 .sp-badge-pos { background: #dbeafe; color: #1d4ed8; border: 1px solid #3b82f6; }
+
+.sp-badge-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    margin-top: 2px;
+}
+
+/* ---- One-line names (compact desks) ---- */
+.seatingplan.sp-compact .sp-desk { height: 48px; }
+.seatingplan.sp-compact .sp-grid { gap: 8px; }
+.seatingplan.sp-compact .sp-name-line {
+    display: flex; align-items: baseline; justify-content: center; gap: 4px;
+    max-width: 100%; min-width: 0; overflow: hidden; white-space: nowrap;
+}
+.seatingplan.sp-compact .sp-name-line .sp-first { flex: none; max-width: 100%; }
+.seatingplan.sp-compact .sp-name-line .sp-last { min-width: 0; }
+.seatingplan.sp-compact .sp-badge-stack { flex-direction: row; flex-wrap: nowrap; margin-top: 1px; }
+
+/* ---- Hide rule badges ---- */
+.seatingplan.sp-hide-badges .sp-badges { display: none; }
+
+/* ---- Projector view ---- */
+.seatingplan .sp-projector-exit { display: none; }
+html.sp-projector-open, html.sp-projector-open body { overflow: hidden; }
+.seatingplan.sp-projector {
+    position: fixed; inset: 0; z-index: 9999; margin: 0; border: none; border-radius: 0;
+    overflow-y: auto; background: #f1f5f9;
+}
+.seatingplan.sp-projector .sp-toolbar,
+.seatingplan.sp-projector .sp-status,
+.seatingplan.sp-projector .sp-sidebar { display: none !important; }
+.seatingplan.sp-projector .sp-title { font-size: 30px; padding: 14px 24px; padding-right: 220px; }
+.seatingplan.sp-projector .sp-projector-exit {
+    display: block; position: fixed; top: 12px; right: 16px; z-index: 10001;
+    background: #475569; color: #fff; border: none; border-radius: 6px;
+    padding: 8px 14px; font: inherit; font-size: 14px; cursor: pointer; opacity: .75;
+}
+.seatingplan.sp-projector .sp-projector-exit:hover { opacity: 1; }
+.seatingplan.sp-projector .sp-body { min-height: 0; }
+.seatingplan.sp-projector .sp-canvas { padding: 18px 24px; }
+.seatingplan.sp-projector .sp-whiteboard { font-size: 18px; padding: 8px; margin-bottom: 18px; }
+.seatingplan.sp-projector .sp-grid { gap: 16px; }
+.seatingplan.sp-projector .sp-row { gap: 12px; }
+.seatingplan.sp-projector .sp-desk { height: 112px; border-width: 3px; }
+.seatingplan.sp-projector .sp-desk-num { font-size: 12px; }
+.seatingplan.sp-projector .sp-badge { font-size: 13px; padding: 1px 5px; }
+.seatingplan.sp-projector.sp-compact .sp-desk { height: 70px; }
 
 @media (max-width: 700px) {
     .seatingplan .sp-body { flex-direction: column; }

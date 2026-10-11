@@ -17,17 +17,22 @@
     var PRINT_CSS =
         '@page{size:landscape;margin:10mm}' +
         'body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#000}' +
-        'h1{font-size:16px;margin:0 0 8px}' +
-        '.wb{border:2px solid #000;text-align:center;padding:5px;font-weight:700;letter-spacing:1px;font-size:12px;margin-bottom:12px}' +
-        '.sp-grid{display:flex;flex-direction:column;gap:10px}' +
-        '.sp-row{display:grid;gap:8px}' +
-        '.sp-desk{border:1px solid #000;border-radius:5px;height:64px;position:relative;display:flex;align-items:center;justify-content:center;min-width:0;break-inside:avoid}' +
-        '.sp-desk-num{position:absolute;top:1px;left:4px;font-size:8px;color:#666}' +
-        '.sp-card{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;width:94%}' +
-        '.sp-first{font-weight:700;font-size:12px}.sp-last{font-size:11px}' +
-        '.sp-badges{display:flex;gap:2px;align-items:center;justify-content:center;margin-top:1px}' +
-        '.sp-badge{font-size:9px;font-weight:700;border:1px solid #000;border-radius:3px;padding:0 3px}' +
-        '.sp-badge-hr{border:none !important;background:transparent;padding:0 2px}';
+        'h1{font-size:22px;margin:0 0 8px}' +
+        '.wb{border:2px solid #000;text-align:center;padding:6px;font-weight:700;letter-spacing:1px;font-size:14px;margin-bottom:12px}' +
+        '.sp-grid{display:flex;flex-direction:column;gap:12px}' +
+        '.sp-row{display:grid;gap:10px}' +
+        '.sp-desk{border:1px solid #000;border-radius:5px;height:80px;position:relative;display:flex;align-items:center;justify-content:center;min-width:0;break-inside:avoid}' +
+        '.sp-desk-num{position:absolute;top:2px;left:6px;font-size:10px;color:#000}' +
+        '.sp-card{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;width:96%}' +
+        '.sp-first{font-weight:700}.sp-last{}' +
+        '.sp-badges{display:flex;gap:3px;align-items:center;justify-content:center;margin-top:2px}' +
+        '.sp-badge{font-size:11px;font-weight:700;border:1px solid #000;border-radius:3px;padding:1px 4px}' +
+        '.sp-badge-hr{border:none !important;background:transparent;padding:0 2px}' +
+        '.sp-badge-stack{display:flex;flex-direction:column;align-items:center;gap:2px}' +
+        '/* One-line names: shorter desks with first name and surname side by side */' +
+        '.sp-compact .sp-desk{height:46px}' +
+        '.sp-compact .sp-name-line{display:flex;align-items:baseline;justify-content:center;gap:4px;max-width:100%;overflow:hidden;white-space:nowrap}' +
+        '.sp-compact .sp-badge-stack{flex-direction:row;margin-top:1px}';
 
     /* ---------------- helpers ---------------- */
 
@@ -54,7 +59,7 @@
     }
 
     function isSingleStudentRule(type) {
-        return type === 'FRONT_ROW' || type === 'BACK_ROW' || type === 'EMPTY_SEAT';
+        return type === 'FRONT_ROW' || type === 'BACK_ROW' || type === 'EMPTY_SEAT' || type === 'SIT_LEFT' || type === 'SIT_RIGHT';
     }
 
     function adjacent(a, b) {
@@ -67,6 +72,163 @@
         var colDiff = Math.abs(a.col - b.col);
         if (colDiff !== 1) return false;
         return Math.floor(a.col / 2) === Math.floor(b.col / 2);
+    }
+
+    /* ---------------- seating solver (pure: no DOM) ---------------- */
+    function solveSeating(desks, layout, rules, randomise, maxNodes) {
+        var lastRow = layout.length - 1;
+        var vars = [], varIndex = {};
+
+        function addVar(id, owner) {
+            if (varIndex[id] != null) return;
+            varIndex[id] = vars.length;
+            vars.push({ id: id, owner: owner || null, pos: [], rel: {}, deg: 0, prio: 7, sep: false });
+        }
+        function link(a, b, kind) {
+            a.rel[b.id] = a.rel[b.id] || {};
+            a.rel[b.id][kind] = true;
+        }
+        function bump(v, p) { if (p < v.prio) v.prio = p; }
+
+        rules.forEach(function (r) {
+            addVar(r.student1Id);
+            if (r.student2Id) addVar(r.student2Id);
+        });
+        rules.forEach(function (r) {
+            if (r.type === 'EMPTY_SEAT') addVar('__empty__' + r.student1Id, r.student1Id);
+        });
+
+        rules.forEach(function (r) {
+            var a = vars[varIndex[r.student1Id]];
+            if (r.type === 'SIT_LEFT' || r.type === 'SIT_RIGHT') { a.pos.push(r.type); bump(a, 1); return; }
+            if (r.type === 'FRONT_ROW') { a.pos.push(r.type); bump(a, 2); return; }
+            if (r.type === 'BACK_ROW') { a.pos.push(r.type); bump(a, 3); return; }
+            if (r.type === 'EMPTY_SEAT') {
+                var ph = vars[varIndex['__empty__' + r.student1Id]];
+                link(a, ph, 'empty'); link(ph, a, 'empty');
+                bump(a, 6); bump(ph, 6);
+                return;
+            }
+            if (!r.student2Id) return;
+            var b = vars[varIndex[r.student2Id]];
+            var kind = r.type === 'SEPARATE' ? 'sep' : 'pair';
+            link(a, b, kind); link(b, a, kind);
+            bump(a, kind === 'sep' ? 4 : 5); bump(b, kind === 'sep' ? 4 : 5);
+            if (kind === 'sep') { a.sep = true; b.sep = true; }
+        });
+        vars.forEach(function (v) { v.deg = Object.keys(v.rel).length; });
+
+        vars.forEach(function (v) {
+            var seen = {}, stack = [v.id], n = 0;
+            seen[v.id] = true;
+            while (stack.length) {
+                var cur = vars[varIndex[stack.pop()]];
+                n++;
+                Object.keys(cur.rel).forEach(function (oid) {
+                    if (cur.rel[oid].pair && !seen[oid]) { seen[oid] = true; stack.push(oid); }
+                });
+            }
+            v.pairSize = n;
+        });
+
+        if (vars.length > desks.length) return null;
+
+        function unaryOk(v, d) {
+            for (var i = 0; i < v.pos.length; i++) {
+                var t = v.pos[i];
+                if (t === 'FRONT_ROW' && d.row !== 0) return false;
+                if (t === 'BACK_ROW' && d.row !== lastRow) return false;
+                if (t === 'SIT_LEFT' && d.col !== 0) return false;
+                if (t === 'SIT_RIGHT' && d.col !== layout[d.row] - 1) return false;
+            }
+            return true;
+        }
+
+        function compatible(va, da, vb, db) {
+            var rel = va.rel[vb.id];
+            if (!rel) return true;
+            if (rel.empty) return da.row === db.row && Math.abs(da.col - db.col) === 1;
+            if (rel.sep && rel.pair) return false;
+            if (rel.sep && adjacent(da, db)) return false;
+            if (rel.pair) {
+                if (va.pairSize > 2 ? !isNextTo(da, db) : !isSideBySidePair(da, db)) return false;
+            }
+            return true;
+        }
+
+        function shuffle(arr) {
+            for (var i = arr.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+            }
+            return arr;
+        }
+
+        var domains = vars.map(function (v) { return desks.filter(function (d) { return unaryOk(v, d); }); });
+        for (var q = 0; q < domains.length; q++) if (!domains[q].length) return null;
+
+        var asg = vars.map(function () { return -1; });
+        var used = {}, nodes = 0, limit = maxNodes || 60000;
+
+        function freeNeighbours(d) {
+            var n = 0;
+            for (var i = 0; i < desks.length; i++) {
+                if (desks[i].index !== d.index && !used[desks[i].index] && adjacent(d, desks[i])) n++;
+            }
+            return n;
+        }
+
+        function search(doms, remaining) {
+            if (++nodes > limit) return false;
+            if (!remaining) return true;
+
+            var pick = -1;
+            for (var i = 0; i < vars.length; i++) {
+                if (asg[i] !== -1) continue;
+                if (pick === -1) { pick = i; continue; }
+                var a = doms[i].length, b = doms[pick].length;
+                if (a < b ||
+                    (a === b && vars[i].prio < vars[pick].prio) ||
+                    (a === b && vars[i].prio === vars[pick].prio && vars[i].deg > vars[pick].deg)) pick = i;
+            }
+
+            var v = vars[pick];
+            var vals = doms[pick].slice();
+            if (randomise) shuffle(vals);
+            else if (v.sep) vals.sort(function (x, y) { return (freeNeighbours(y) - freeNeighbours(x)) || (x.index - y.index); });
+
+            for (var k = 0; k < vals.length; k++) {
+                var d = vals[k];
+                var next = doms.slice(), ok = true;
+                for (var j = 0; j < vars.length && ok; j++) {
+                    if (j === pick || asg[j] !== -1) continue;
+                    var vj = vars[j];
+                    next[j] = doms[j].filter(function (x) {
+                        return x.index !== d.index && compatible(v, d, vj, x);
+                    });
+                    if (!next[j].length) ok = false;
+                }
+                if (!ok) continue;
+                asg[pick] = d.index; used[d.index] = true;
+                if (search(next, remaining - 1)) return true;
+                asg[pick] = -1; delete used[d.index];
+                if (nodes > limit) return false;
+            }
+            return false;
+        }
+
+        if (!search(domains, vars.length)) return null;
+
+        var assignment = {}, reservedDesks = {};
+        vars.forEach(function (v, i) {
+            if (v.owner) reservedDesks[asg[i]] = true;
+            else assignment[v.id] = asg[i];
+        });
+        return { assignment: assignment, reservedDesks: reservedDesks };
+    }
+
+    function isNextTo(a, b) {
+        return a.row === b.row && Math.abs(a.col - b.col) === 1;
     }
 
     function loadXlsx() {
@@ -155,7 +317,15 @@
             rules: [],
             layout: cfg.layout.slice(),
             fillFromLast: cfg.fill === 'last',
-            sortMode: cfg.sort || 'DEFAULT'
+            sortMode: cfg.sort || 'DEFAULT',
+            display: {}
+        };
+        var DISPLAY_TOGGLES = {
+            surnameInitial: 'toggle-surname-initial',
+            homeroom: 'toggle-homeroom',
+            ignoreRules: 'toggle-ignore-rules',
+            oneLine: 'toggle-oneline',
+            hideBadges: 'toggle-hide-badges'
         };
         var draggingId = null;
         var ui = {};
@@ -164,7 +334,19 @@
 
         /* ----- data ----- */
 
+        function displayFromConfig() {
+            var d = cfg.display || {};
+            return {
+                surnameInitial: d.surnameInitial === true,
+                homeroom: d.homeroom !== false,
+                ignoreRules: d.ignoreRules === true,
+                oneLine: d.oneLine === true,
+                hideBadges: d.hideBadges === true
+            };
+        }
+
         function defaultsFromConfig() {
+            state.display = displayFromConfig();
             state.title = cfg.title || 'Seating Plan';
             state.students = (cfg.students || []).map(function (s, idx) {
                 var first = clean(s.firstName) || 'Student';
@@ -190,7 +372,9 @@
         function save() {
             try {
                 var currentTitle = ui.title ? ui.title.textContent.trim() : state.title;
-                localStorage.setItem(storageKey, JSON.stringify({ title: currentTitle, students: state.students, rules: state.rules }));
+                localStorage.setItem(storageKey, JSON.stringify({
+                    title: currentTitle, students: state.students, rules: state.rules, display: state.display
+                }));
             } catch (e) { /* storage blocked */ }
         }
 
@@ -203,6 +387,11 @@
                     if (d.title) state.title = d.title;
                     state.students = d.students;
                     state.rules = Array.isArray(d.rules) ? d.rules : [];
+                    if (d.display && typeof d.display === 'object') {
+                        Object.keys(state.display).forEach(function (k) {
+                            if (typeof d.display[k] === 'boolean') state.display[k] = d.display[k];
+                        });
+                    }
                     return true;
                 }
             } catch (e) { /* ignore */ }
@@ -240,27 +429,106 @@
 
             root.innerHTML =
                 '<div class="sp-title" data-role="title" title="Click to edit class title"></div>' +
+                '<button type="button" class="sp-projector-exit" data-action="projector-exit">✕ Exit projector view</button>' +
                 '<div class="sp-toolbar">' +
+
+                /* Row 1: Import and export controls */
+                '<div class="sp-toolbar-row">' +
+                '<button type="button" class="sp-btn" data-action="import">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>' +
+                'Import Roster</button>' +
+                '<input type="file" class="sp-file" accept=".xlsx,.xls,.csv" data-role="file">' +
+
+                '<button type="button" class="sp-btn sp-btn-teal" data-action="import-json">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L8.6 3.3A2 2 0 0 0 6.9 2.5H4a2 2 0 0 0-2 2v13.5a2 2 0 0 0 2 2z"/><path d="M12 10v6"/><path d="m9 13 3-3 3 3"/></svg>' +
+                'Import JSON</button>' +
+                '<input type="file" class="sp-file" accept=".json" data-role="json-file">' +
+
+                '<button type="button" class="sp-btn sp-btn-teal" data-action="export-json">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>' +
+                'Export JSON</button>' +
+
+                '<button type="button" class="sp-btn sp-btn-grey" data-action="reset">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>' +
+                'Reset</button>' +
+
+                '<button type="button" class="sp-btn sp-btn-teal" data-action="print">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>' +
+                'Print</button>' +
+
+                '<button type="button" class="sp-btn sp-btn-teal" data-action="projector">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>' +
+                'Projector View</button>' +
+                '</div>' +
+
+                /* Row 2: Student ordering and seating plan management */
+                '<div class="sp-toolbar-row">' +
+                '<button type="button" class="sp-btn sp-btn-red" data-action="clear">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>' +
+                'Clear</button>' +
+
+                '<button type="button" class="sp-btn sp-btn-purple" data-action="sort" data-mode="AZ">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/><path d="M15 4h5l-5 6h5"/><path d="M15 20v-3.5a1.5 1.5 0 0 1 3 0V20"/><path d="M15 17h3"/></svg>' +
+                'A → Z</button>' +
+
+                '<button type="button" class="sp-btn sp-btn-purple" data-action="sort" data-mode="ZA">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="M15 4h5l-5 6h5"/><path d="M15 20v-3.5a1.5 1.5 0 0 1 3 0V20"/><path d="M15 17h3"/></svg>' +
+                'Z → A</button>' +
+
+                '<button type="button" class="sp-btn sp-btn-purple" data-action="sort" data-mode="HOMEROOM">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M4 6h16M4 12h16M4 18h7"/></svg>' +
+                'Homeroom A → Z</button>' +
+
+                '<button type="button" class="sp-btn sp-btn-amber" data-action="sort" data-mode="RANDOM">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"/><path d="m18 2 4 4-4 4"/><path d="M2 6h1.4c1.3 0 2.5.6 3.3 1.7l6.1 8.6c.7 1.1 2 1.7 3.3 1.7H22"/><path d="m18 14 4 4-4 4"/></svg>' +
+                'Random</button>' +
+
+                '<button type="button" class="sp-btn sp-btn-purple" data-action="reverse">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>' +
+                'Reverse</button>' +
+
+                '<button type="button" class="sp-btn sp-btn-teal" data-action="rules">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><line x1="4" x2="20" y1="21" y2="21"/><line x1="4" x2="8" y1="14" y2="14"/><line x1="12" x2="20" y1="14" y2="14"/><line x1="16" x2="20" y1="7" y2="7"/><line x1="4" x2="12" y1="7" y2="7"/><circle cx="10" cy="14" r="2"/><circle cx="14" cy="7" r="2"/></svg>' +
+                'Rules</button>' +
+                '</div>' +
+
+                /* Row 3: Layout presets and fill orientation */
+                '<div class="sp-toolbar-row">' +
+                '<button type="button" class="sp-btn sp-btn-purple" data-action="fill" data-role="fill"></button>' +
                 '<div class="sp-layouts" data-role="layouts">' +
                 layoutBtns.map(function (p) {
                     return '<button type="button" class="sp-btn sp-btn-layout" data-action="layout" data-layout="' +
-                        p.rows.join(',') + '">' + esc(p.label) + '</button>';
+                        p.rows.join(',') + '">' +
+                        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>' +
+                        esc(p.label) + '</button>';
                 }).join('') +
                 '</div>' +
-                '<button type="button" class="sp-btn sp-btn-toggle" data-action="fill" data-role="fill"></button>' +
-                '<button type="button" class="sp-btn sp-btn-teal" data-action="rules">Rules</button>' +
-                '<button type="button" class="sp-btn" data-action="import">Import Roster</button>' +
-                '<input type="file" class="sp-file" accept=".xlsx,.xls,.csv" data-role="file">' +
-                '<button type="button" class="sp-btn sp-btn-teal" data-action="export-json">Export JSON</button>' +
-                '<button type="button" class="sp-btn sp-btn-teal" data-action="import-json">Import JSON</button>' +
-                '<input type="file" class="sp-file" accept=".json" data-role="json-file">' +
-                '<button type="button" class="sp-btn sp-btn-grey" data-action="sort" data-mode="AZ">A → Z</button>' +
-                '<button type="button" class="sp-btn sp-btn-grey" data-action="sort" data-mode="ZA">Z → A</button>' +
-                '<button type="button" class="sp-btn sp-btn-amber" data-action="sort" data-mode="RANDOM">Random</button>' +
-                '<button type="button" class="sp-btn sp-btn-purple" data-action="reverse">Reverse</button>' +
-                '<button type="button" class="sp-btn sp-btn-red" data-action="clear">Clear</button>' +
-                '<button type="button" class="sp-btn sp-btn-grey" data-action="reset">Reset</button>' +
-                '<button type="button" class="sp-btn sp-btn-grey" data-action="print">Print</button>' +
+                '</div>' +
+
+                /* Row 4: Display Preferences (Checkboxes) */
+                '<div class="sp-toolbar-row sp-toolbar-row--options">' +
+                '<label class="sp-checkbox-label">' +
+                '<input type="checkbox" data-role="toggle-surname-initial" class="sp-checkbox">' +
+                'Surname Initial Only' +
+                '</label>' +
+                '<label class="sp-checkbox-label">' +
+                '<input type="checkbox" data-role="toggle-homeroom" class="sp-checkbox" checked>' +
+                'Show Homeroom' +
+                '</label>' +
+                '<label class="sp-checkbox-label">' +
+                '<input type="checkbox" data-role="toggle-ignore-rules" class="sp-checkbox">' +
+                'Ignore Rules' +
+                '</label>' +
+                '<label class="sp-checkbox-label">' +
+                '<input type="checkbox" data-role="toggle-oneline" class="sp-checkbox">' +
+                'One-line Names' +
+                '</label>' +
+                '<label class="sp-checkbox-label">' +
+                '<input type="checkbox" data-role="toggle-hide-badges" class="sp-checkbox">' +
+                'Hide Rule Badges' +
+                '</label>' +
+                '</div>' +
+
                 '</div>' +
                 '<div class="sp-status" data-role="status" role="status" aria-live="polite"></div>' +
                 '<div class="sp-body">' +
@@ -270,7 +538,7 @@
                 '<div class="sp-grid" data-role="grid"></div></div>' +
                 '</div>';
 
-            ['title', 'layouts', 'fill', 'file', 'json-file', 'status', 'count', 'pool', 'grid'].forEach(function (r) {
+            ['title', 'layouts', 'fill', 'file', 'json-file', 'toggle-surname-initial', 'toggle-homeroom', 'toggle-ignore-rules', 'toggle-oneline', 'toggle-hide-badges', 'status', 'count', 'pool', 'grid'].forEach(function (r) {
                 ui[r] = root.querySelector('[data-role="' + r + '"]');
             });
 
@@ -297,8 +565,57 @@
             ui.status.addEventListener('click', onStatusClick);
             ui.file.addEventListener('change', onFileChosen);
             ui['json-file'].addEventListener('change', onJsonFileChosen);
+            Object.keys(DISPLAY_TOGGLES).forEach(function (key) {
+                var box = ui[DISPLAY_TOGGLES[key]];
+                box.addEventListener('change', function () {
+                    state.display[key] = box.checked;
+                    applyDisplayClasses();
+                    save();
+                    if (key !== 'ignoreRules') refreshCards();
+                });
+            });
+            syncDisplayControls();
+            document.addEventListener('fullscreenchange', function () {
+                if (!document.fullscreenElement && root.classList.contains('sp-projector')) exitProjector();
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && root.classList.contains('sp-projector')) exitProjector();
+            });
             ui.pool.addEventListener('dragover', function (e) { e.preventDefault(); });
             ui.pool.addEventListener('drop', onPoolDrop);
+        }
+
+        function applyDisplayClasses() {
+            root.classList.toggle('sp-compact', state.display.oneLine);
+            root.classList.toggle('sp-hide-badges', state.display.hideBadges);
+        }
+
+        function syncDisplayControls() {
+            Object.keys(DISPLAY_TOGGLES).forEach(function (key) {
+                var box = ui[DISPLAY_TOGGLES[key]];
+                if (box) box.checked = state.display[key];
+            });
+            applyDisplayClasses();
+        }
+
+        /* Projector view: whiteboard and desks only, large text, filling the screen */
+        function enterProjector() {
+            root.classList.add('sp-projector');
+            document.documentElement.classList.add('sp-projector-open');
+            refreshCards();
+            if (root.requestFullscreen) {
+                root.requestFullscreen().catch(function () { /* stays as a full-window overlay */ });
+            }
+        }
+
+        function exitProjector() {
+            if (!root.classList.contains('sp-projector')) return;
+            root.classList.remove('sp-projector');
+            document.documentElement.classList.remove('sp-projector-open');
+            refreshCards();
+            if (document.fullscreenElement === root && document.exitFullscreen) {
+                document.exitFullscreen().catch(function () {});
+            }
         }
 
         function setStatus(msg) {
@@ -349,50 +666,96 @@
                 case 'clear': clearSeats(); break;
                 case 'reset': resetToPage(); break;
                 case 'print': printPlan(); break;
+                case 'projector': enterProjector(); break;
+                case 'projector-exit': exitProjector(); break;
             }
         }
 
         /* ----- cards ----- */
 
-        function buildBadges(student, flags) {
-            var row = make('div', 'sp-badges');
-            if (student.homeroom) row.appendChild(make('span', 'sp-badge sp-badge-hr', student.homeroom));
-            if (flags.sep) row.appendChild(make('span', 'sp-badge sp-badge-sep sp-badge-rule', '⚠️ Sep'));
-            if (flags.pair) row.appendChild(make('span', 'sp-badge sp-badge-pair sp-badge-rule', '🔗 Pair'));
-            if (flags.front) row.appendChild(make('span', 'sp-badge sp-badge-pos sp-badge-rule', '⬆ Front'));
-            if (flags.back) row.appendChild(make('span', 'sp-badge sp-badge-pos sp-badge-rule', '⬇ Back'));
-            if (flags.empty) row.appendChild(make('span', 'sp-badge sp-badge-pos sp-badge-rule', '🪑 Empty'));
-            return row;
+        function buildBadges(student, flags, showHomeroom) {
+            var container = make('div', 'sp-badge-stack');
+
+            // 1. Homeroom badge on top (if shown and present)
+            if (showHomeroom && student.homeroom) {
+                container.appendChild(make('span', 'sp-badge sp-badge-hr', student.homeroom));
+            }
+
+            // 2. Rule badges row below homeroom
+            var ruleRow = make('div', 'sp-badges');
+            if (flags.sep) ruleRow.appendChild(make('span', 'sp-badge sp-badge-sep sp-badge-rule', '⚠️ Sep'));
+            if (flags.pair) ruleRow.appendChild(make('span', 'sp-badge sp-badge-pair sp-badge-rule', '🔗 Pair'));
+            if (flags.front) ruleRow.appendChild(make('span', 'sp-badge sp-badge-pos sp-badge-rule', '⬆ Front'));
+            if (flags.back) ruleRow.appendChild(make('span', 'sp-badge sp-badge-pos sp-badge-rule', '⬇ Back'));
+            if (flags.empty) ruleRow.appendChild(make('span', 'sp-badge sp-badge-pos sp-badge-rule', '🪑 Empty'));
+            if (flags.left) ruleRow.appendChild(make('span', 'sp-badge sp-badge-pos sp-badge-rule', '⬅ Left'));
+            if (flags.right) ruleRow.appendChild(make('span', 'sp-badge sp-badge-pos sp-badge-rule', '➡ Right'));
+
+            if (ruleRow.children.length > 0) {
+                container.appendChild(ruleRow);
+            }
+
+            return container;
         }
 
-        function renderCard(card, student, isDesk) {
+        function renderCard(card, student, isDesk, colCount) {
             var rs = rulesFor(student.id);
             var flags = {
                 sep: rs.some(function (r) { return r.type === 'SEPARATE'; }),
                 pair: rs.some(function (r) { return r.type === 'PAIR'; }),
                 front: rs.some(function (r) { return r.type === 'FRONT_ROW'; }),
                 back: rs.some(function (r) { return r.type === 'BACK_ROW'; }),
-                empty: rs.some(function (r) { return r.type === 'EMPTY_SEAT'; })
+                empty: rs.some(function (r) { return r.type === 'EMPTY_SEAT'; }),
+                left: rs.some(function (r) { return r.type === 'SIT_LEFT'; }),
+                right: rs.some(function (r) { return r.type === 'SIT_RIGHT'; })
             };
+            if (state.display.hideBadges) {
+                flags = { sep: false, pair: false, front: false, back: false, empty: false, left: false, right: false };
+            }
             card.classList.remove('sp-has-sep', 'sp-has-pair', 'sp-has-pos');
             if (flags.sep) card.classList.add('sp-has-sep');
             else if (flags.pair) card.classList.add('sp-has-pair');
-            else if (flags.front || flags.back || flags.empty) card.classList.add('sp-has-pos');
+            else if (flags.front || flags.back || flags.empty || flags.left || flags.right) card.classList.add('sp-has-pos');
 
             card.textContent = '';
+
+            var surnameDisplay = student.surname;
+            if (state.display.surnameInitial && student.surname) {
+                surnameDisplay = student.surname.charAt(0) + '.';
+            }
+            var showHomeroom = state.display.homeroom;
+
             if (isDesk) {
-                card.appendChild(make('span', 'sp-first', student.firstName));
-                card.appendChild(make('span', 'sp-last', student.surname));
-                card.appendChild(buildBadges(student, flags));
+                var cols = colCount || 6;
+                var dynamicFontSize = Math.max(11, Math.min(20, Math.floor(110 / cols)));
+                if (root.classList.contains('sp-projector')) dynamicFontSize = Math.round(dynamicFontSize * 1.6);
+
+                var firstSpan = make('span', 'sp-first', student.firstName);
+                firstSpan.style.fontSize = dynamicFontSize + 'px';
+
+                var lastSpan = make('span', 'sp-last', surnameDisplay);
+                lastSpan.style.fontSize = Math.max(10, dynamicFontSize - 2) + 'px';
+
+                var nameHolder = card;
+                if (state.display.oneLine) {
+                    nameHolder = make('span', 'sp-name-line');
+                    card.appendChild(nameHolder);
+                }
+                nameHolder.appendChild(firstSpan);
+                nameHolder.appendChild(lastSpan);
+
+                if ((showHomeroom && student.homeroom) || flags.sep || flags.pair || flags.front || flags.back || flags.empty || flags.left || flags.right) {
+                    card.appendChild(buildBadges(student, flags, showHomeroom));
+                }
             } else {
-                card.appendChild(make('span', 'sp-side-name', student.fullName));
-                card.appendChild(buildBadges(student, flags));
+                card.appendChild(make('span', 'sp-side-name', student.firstName + ' ' + surnameDisplay));
             }
         }
 
-        function createCard(student, isDesk) {
+        function createCard(student, isDesk, colCount) {
             var card = make('div', 'sp-card');
             card.dataset.sid = student.id;
+            card.dataset.cols = colCount || 6;
             card.draggable = true;
             card.addEventListener('dragstart', function (e) {
                 draggingId = student.id;
@@ -400,7 +763,7 @@
                 e.dataTransfer.effectAllowed = 'move';
             });
             card.addEventListener('dragend', function () { draggingId = null; });
-            renderCard(card, student, isDesk);
+            renderCard(card, student, isDesk, colCount);
             return card;
         }
 
@@ -411,7 +774,11 @@
         function refreshCards() {
             Array.prototype.forEach.call(root.querySelectorAll('.sp-card'), function (card) {
                 var s = studentById(card.dataset.sid);
-                if (s) renderCard(card, s, !!card.parentElement.classList.contains('sp-desk'));
+                if (s) {
+                    var desk = card.closest('.sp-desk');
+                    var cols = desk ? parseInt(desk.dataset.cols, 10) : 6;
+                    renderCard(card, s, !!desk, cols);
+                }
             });
         }
 
@@ -446,6 +813,7 @@
                     var desk = make('div', 'sp-desk');
                     desk.dataset.row = r;
                     desk.dataset.col = c;
+                    desk.dataset.cols = cols;
                     desk.appendChild(make('span', 'sp-desk-num', String(n)));
                     desk.addEventListener('dragover', onDeskDragOver);
                     desk.addEventListener('dragleave', onDeskDragLeave);
@@ -457,6 +825,21 @@
             });
         }
 
+        function pairGroupSize(id) {
+            var seen = {}, stack = [id], n = 0;
+            seen[id] = true;
+            while (stack.length) {
+                var cur = stack.pop();
+                n++;
+                state.rules.forEach(function (r) {
+                    if (r.type !== 'PAIR') return;
+                    var other = r.student1Id === cur ? r.student2Id : (r.student2Id === cur ? r.student1Id : null);
+                    if (other && !seen[other]) { seen[other] = true; stack.push(other); }
+                });
+            }
+            return n;
+        }
+
         function validate() {
             var desks = getDesks();
             var lastRow = state.layout.length - 1;
@@ -464,7 +847,7 @@
             desks.forEach(function (d) {
                 d.classList.remove('sp-conflict');
                 var card = d.querySelector('.sp-card');
-                if (card) seated[card.dataset.sid] = { desk: d, row: +d.dataset.row, col: +d.dataset.col };
+                if (card) seated[card.dataset.sid] = { desk: d, row: +d.dataset.row, col: +d.dataset.col, cols: +d.dataset.cols };
             });
 
             state.rules.forEach(function (rule) {
@@ -476,6 +859,14 @@
                     return;
                 }
                 if (rule.type === 'BACK_ROW' && a.row !== lastRow) {
+                    a.desk.classList.add('sp-conflict');
+                    return;
+                }
+                if (rule.type === 'SIT_LEFT' && a.col !== 0) {
+                    a.desk.classList.add('sp-conflict');
+                    return;
+                }
+                if (rule.type === 'SIT_RIGHT' && a.col !== state.layout[a.row] - 1) {
                     a.desk.classList.add('sp-conflict');
                     return;
                 }
@@ -499,7 +890,7 @@
                 if (rule.type === 'SEPARATE' && adjacent(a, b)) {
                     a.desk.classList.add('sp-conflict');
                     b.desk.classList.add('sp-conflict');
-                } else if (rule.type === 'PAIR' && !isSideBySidePair(a, b)) {
+                } else if (rule.type === 'PAIR' && !(pairGroupSize(rule.student1Id) > 2 ? isNextTo(a, b) : isSideBySidePair(a, b))) {
                     a.desk.classList.add('sp-conflict');
                     b.desk.classList.add('sp-conflict');
                 }
@@ -523,17 +914,20 @@
             var existing = target.querySelector('.sp-card');
             if (existing === dragged) return;
 
+            var targetCols = parseInt(target.dataset.cols, 10) || 6;
+
             if (existing) {
                 var other = studentById(existing.dataset.sid);
                 var sourceIsDesk = source.classList.contains('sp-desk');
-                if (other) renderCard(existing, other, sourceIsDesk);
+                var sourceCols = sourceIsDesk ? (parseInt(source.dataset.cols, 10) || 6) : 6;
+                if (other) renderCard(existing, other, sourceIsDesk, sourceCols);
                 source.appendChild(existing);
                 if (sourceIsDesk) source.classList.add('sp-occupied');
             } else if (source.classList.contains('sp-desk')) {
                 source.classList.remove('sp-occupied');
             }
 
-            if (student) renderCard(dragged, student, true);
+            if (student) renderCard(dragged, student, true, targetCols);
             target.classList.add('sp-occupied');
             target.appendChild(dragged);
             draggingId = null;
@@ -592,17 +986,10 @@
             var byId = {};
             state.students.forEach(function (s) { byId[s.id] = s; });
 
-            var constrainedIds = [];
-            state.rules.forEach(function (r) {
-                if (constrainedIds.indexOf(r.student1Id) === -1) constrainedIds.push(r.student1Id);
-                if (r.student2Id && constrainedIds.indexOf(r.student2Id) === -1) constrainedIds.push(r.student2Id);
-            });
-            var constrained = constrainedIds.map(function (id) { return byId[id]; }).filter(Boolean);
-
-            var solverResult = solve(constrained, desks, false);
-            var placement = solverResult ? solverResult.assignment : {};
-            var reservedDesks = solverResult ? solverResult.reservedDesks : {};
-            var failed = !solverResult;
+            var solverResult = solveBest(desks, false);
+            var placement = solverResult.assignment;
+            var reservedDesks = solverResult.reservedDesks;
+            var dropped = solverResult.dropped;
 
             var seatedByDesk = {}, seated = {};
             Object.keys(placement).forEach(function (id) {
@@ -639,7 +1026,8 @@
                 var s = seatedByDesk[idx];
                 if (!s) return;
                 desk.classList.add('sp-occupied');
-                desk.appendChild(createCard(s, true));
+                var cols = parseInt(desk.dataset.cols, 10) || 6;
+                desk.appendChild(createCard(s, true, cols));
             });
 
             state.students.forEach(function (s) {
@@ -651,132 +1039,67 @@
             validate();
             updateCount();
 
-            if (failed) {
-                setStatus('Seating reversed, but active rules could not all be satisfied automatically. Conflict desks are highlighted in red.');
-            }
+            var unseatedRev = state.students.filter(function (s) { return !seated[s.id]; }).length;
+            var revMsgs = [];
+            if (dropped.length) revMsgs.push(droppedMessage(dropped));
+            if (unseatedRev) revMsgs.push(unseatedMessage(unseatedRev));
+            if (revMsgs.length) setStatus('Seating reversed. ' + revMsgs.join(' '));
         }
 
-        function solve(ruleStudents, deskSlots, randomise) {
-            if (!ruleStudents.length) return { assignment: {}, reservedDesks: {} };
-            if (ruleStudents.length > deskSlots.length) return null;
+        function unseatedMessage(n) {
+            return n + (n === 1 ? ' student is' : ' students are') + ' still unseated: there are not enough desks ' +
+                '(seats kept empty by rules use up desks too). Choose a larger layout or remove an empty-seat rule.';
+        }
 
+        function describeRule(r) {
+            var a = studentById(r.student1Id), b = r.student2Id ? studentById(r.student2Id) : null;
+            var an = a ? a.fullName : '?', bn = b ? b.fullName : '?';
+            switch (r.type) {
+                case 'SEPARATE': return an + ' apart from ' + bn;
+                case 'PAIR': return an + ' with ' + bn;
+                case 'FRONT_ROW': return an + ' in the front row';
+                case 'BACK_ROW': return an + ' in the back row';
+                case 'SIT_LEFT': return an + ' on the left';
+                case 'SIT_RIGHT': return an + ' on the right';
+                case 'EMPTY_SEAT': return an + ' with an empty seat beside them';
+            }
+            return an;
+        }
+
+        function droppedMessage(dropped) {
+            return 'Not every rule could be satisfied at once, so these were left out (earlier rules take priority): ' +
+                dropped.map(describeRule).join('; ') + '. Desks breaking a rule are highlighted red.';
+        }
+
+        function validRules() {
+            var ignoreRules = state.display.ignoreRules;
+            if (ignoreRules) return [];
+            return state.rules.filter(function (r) {
+                return studentById(r.student1Id) && (!r.student2Id || studentById(r.student2Id));
+            });
+        }
+
+        function solve(deskSlots, randomise, rules) {
             var desks = deskSlots.map(function (d, i) { return { index: i, row: +d.dataset.row, col: +d.dataset.col }; });
-            var ids = ruleStudents.map(function (s) { return s.id; });
-            function shuffle(arr) {
-                for (var i = arr.length - 1; i > 0; i--) {
-                    var j = Math.floor(Math.random() * (i + 1));
-                    var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
-                }
-                return arr;
-            }
-            if (randomise) shuffle(ids);
-            var lastRow = state.layout.length - 1;
-            var assignment = {}, used = {}, nodes = 0, MAX_NODES = 120000;
+            return solveSeating(desks, state.layout, rules, randomise, 60000);
+        }
 
-            function has(id) { return Object.prototype.hasOwnProperty.call(assignment, id); }
+        function solveBest(deskSlots, randomise) {
+            var all = validRules();
+            if (!all.length) return { assignment: {}, reservedDesks: {}, dropped: [] };
 
-            function positionOk(id, desk) {
-                return state.rules.every(function (rule) {
-                    if (rule.student1Id !== id) return true;
-                    if (rule.type === 'FRONT_ROW') return desk.row === 0;
-                    if (rule.type === 'BACK_ROW') return desk.row === lastRow;
-                    if (rule.type === 'EMPTY_SEAT') {
-                        return desks.some(function (d) {
-                            return d.row === desk.row && Math.abs(d.col - desk.col) === 1 && !used[d.index];
-                        });
-                    }
-                    return true;
-                });
-            }
+            var res = solve(deskSlots, randomise, all);
+            if (!res && randomise) res = solve(deskSlots, false, all);
+            if (res) { res.dropped = []; return res; }
 
-            function allowed(id, desk) {
-                if (!positionOk(id, desk)) return false;
-                for (var other in assignment) {
-                    if (!has(other)) continue;
-                    var type = ruleTypeBetween(id, other);
-                    if (!type) continue;
-                    if (type === 'CONFLICT') return false;
-                    var otherDesk = desks[assignment[other]];
-                    if (type === 'SEPARATE' && adjacent(desk, otherDesk)) return false;
-                    if (type === 'PAIR' && !isSideBySidePair(desk, otherDesk)) return false;
-                }
-                return true;
-            }
-
-            function domain(id) {
-                return desks.filter(function (d) { return !used[d.index] && allowed(id, d); });
-            }
-
-            function forwardCheck() {
-                for (var i = 0; i < ids.length; i++) {
-                    var id = ids[i];
-                    if (has(id)) continue;
-                    var dom = domain(id);
-                    if (!dom.length) return false;
-                    for (var j = 0; j < ids.length; j++) {
-                        var o = ids[j];
-                        if (o === id || has(o) || ruleTypeBetween(id, o) !== 'PAIR') continue;
-                        var odom = domain(o);
-                        var ok = dom.some(function (c) {
-                            return odom.some(function (oc) { return c.index !== oc.index && isSideBySidePair(c, oc); });
-                        });
-                        if (!ok) return false;
-                    }
-                }
-                return true;
-            }
-
-            function search() {
-                if (++nodes > MAX_NODES) return false;
-                if (Object.keys(assignment).length === ids.length) return true;
-
-                var pick = null, pickDom = null, pickDeg = -1;
-                ids.forEach(function (id) {
-                    if (has(id)) return;
-                    var dom = domain(id);
-                    var deg = state.rules.filter(function (r) { return r.student1Id === id || r.student2Id === id; }).length;
-                    if (pickDom === null || dom.length < pickDom.length || (dom.length === pickDom.length && deg > pickDeg)) {
-                        pick = id; pickDom = dom; pickDeg = deg;
-                    }
-                });
-                if (!pickDom || !pickDom.length) return false;
-
-                function freeNeighbours(d) {
-                    return desks.filter(function (x) { return x.index !== d.index && adjacent(d, x) && !used[x.index]; }).length;
-                }
-                if (randomise) shuffle(pickDom);
-                else pickDom.sort(function (a, b) { return freeNeighbours(b) - freeNeighbours(a); });
-
-                for (var k = 0; k < pickDom.length; k++) {
-                    var cand = pickDom[k];
-                    assignment[pick] = cand.index;
-                    used[cand.index] = true;
-                    if (forwardCheck() && search()) return true;
-                    delete assignment[pick];
-                    delete used[cand.index];
-                    if (nodes > MAX_NODES) break;
-                }
-                return false;
-            }
-
-            if (search()) {
-                var reservedDesks = {};
-                ids.forEach(function (id) {
-                    var hasEmptyRule = state.rules.some(function (r) { return r.student1Id === id && r.type === 'EMPTY_SEAT'; });
-                    if (hasEmptyRule && assignment[id] != null) {
-                        var desk = desks[assignment[id]];
-                        var emptyDeskCandidate = desks.find(function (d) {
-                            return d.row === desk.row && Math.abs(d.col - desk.col) === 1 && !used[d.index] && !reservedDesks[d.index];
-                        });
-                        if (emptyDeskCandidate) {
-                            reservedDesks[emptyDeskCandidate.index] = true;
-                        }
-                    }
-                });
-                return { assignment: assignment, reservedDesks: reservedDesks };
-            }
-
-            return null;
+            var kept = [], dropped = [], best = { assignment: {}, reservedDesks: {} };
+            all.forEach(function (rule) {
+                var trial = kept.concat([rule]);
+                var s = solve(deskSlots, false, trial);
+                if (s) { kept = trial; best = s; } else dropped.push(rule);
+            });
+            best.dropped = dropped;
+            return best;
         }
 
         function autoArrange(mode) {
@@ -799,6 +1122,18 @@
                     if (r === 0) r = String(a.firstName).localeCompare(String(b.firstName));
                     return r * dir;
                 });
+            } else if (mode === 'HOMEROOM') {
+                list.sort(function (a, b) {
+                    var hrA = clean(a.homeroom), hrB = clean(b.homeroom);
+                    if (hrA !== hrB) {
+                        if (!hrA) return 1;
+                        if (!hrB) return -1;
+                        return hrA.localeCompare(hrB);
+                    }
+                    var r = String(a.surname).localeCompare(String(b.surname));
+                    if (r === 0) r = String(a.firstName).localeCompare(String(b.firstName));
+                    return r;
+                });
             } else if (mode === 'RANDOM') {
                 for (var i = list.length - 1; i > 0; i--) {
                     var j = Math.floor(Math.random() * (i + 1));
@@ -815,28 +1150,11 @@
 
             var byId = {};
             state.students.forEach(function (s) { byId[s.id] = s; });
-            var constrainedIds = [];
-            state.rules.forEach(function (r) {
-                if (constrainedIds.indexOf(r.student1Id) === -1) constrainedIds.push(r.student1Id);
-                if (r.student2Id && constrainedIds.indexOf(r.student2Id) === -1) constrainedIds.push(r.student2Id);
-            });
-            var constrained = constrainedIds.map(function (id) { return byId[id]; }).filter(Boolean);
 
-            var placement = {}, reservedDesks = {}, failed = false;
-            if (constrained.length > capacity) {
-                failed = true;
-            } else if (constrained.length) {
-                var randomise = mode === 'RANDOM';
-                var solverResult = solve(constrained, desks, randomise);
-                if (!solverResult && randomise) solverResult = solve(constrained, desks, false);
-                if (solverResult) {
-                    placement = solverResult.assignment;
-                    reservedDesks = solverResult.reservedDesks;
-                } else {
-                    failed = true;
-                    placement = {};
-                }
-            }
+            var solverResult = solveBest(desks, mode === 'RANDOM');
+            var placement = solverResult.assignment;
+            var reservedDesks = solverResult.reservedDesks;
+            var dropped = solverResult.dropped;
 
             var seatedByDesk = {}, seated = {};
             Object.keys(placement).forEach(function (id) {
@@ -855,7 +1173,8 @@
                 var s = seatedByDesk[idx];
                 if (!s) return;
                 desk.classList.add('sp-occupied');
-                desk.appendChild(createCard(s, true));
+                var cols = parseInt(desk.dataset.cols, 10) || 6;
+                desk.appendChild(createCard(s, true, cols));
             });
             list.forEach(function (s) {
                 if (!seated[s.id]) ui.pool.appendChild(createCard(s, false));
@@ -864,11 +1183,11 @@
             validate();
             updateCount();
 
-            if (failed) {
-                setStatus('The seating rules could not all be satisfied automatically (too many rule students for the desks, ' +
-                    'or the rules contradict each other). Students are seated in the chosen order and desks breaking a rule are ' +
-                    'highlighted red. Edit the rules or pick a larger layout, then arrange again.');
-            }
+            var unseated = list.filter(function (s) { return !seated[s.id]; }).length;
+            var msgs = [];
+            if (dropped.length) msgs.push(droppedMessage(dropped));
+            if (unseated) msgs.push(unseatedMessage(unseated));
+            if (msgs.length) setStatus(msgs.join(' '));
         }
 
         function resetToPage() {
@@ -876,6 +1195,7 @@
             try { localStorage.removeItem(storageKey); } catch (e) { /* ignore */ }
             defaultsFromConfig();
             if (ui.title) ui.title.textContent = state.title;
+            syncDisplayControls();
             autoArrange(cfg.sort || 'DEFAULT');
         }
 
@@ -958,7 +1278,8 @@
                             if (item.deskIndex != null && desks[item.deskIndex]) {
                                 var d = desks[item.deskIndex];
                                 d.classList.add('sp-occupied');
-                                d.appendChild(createCard(s, true));
+                                var cols = parseInt(d.dataset.cols, 10) || 6;
+                                d.appendChild(createCard(s, true, cols));
                             } else {
                                 ui.pool.appendChild(createCard(s, false));
                             }
@@ -1033,7 +1354,8 @@
             var win = window.open('', '_blank');
             if (!win) { window.print(); return; }
             win.document.write('<!doctype html><html><head><meta charset="utf-8"><title>' + esc(title) +
-                '</title><style>' + PRINT_CSS + '</style></head><body><h1>' + esc(title) +
+                '</title><style>' + PRINT_CSS + '</style></head><body' +
+                (state.display.oneLine ? ' class="sp-compact"' : '') + '><h1>' + esc(title) +
                 '</h1><div class="wb">FRONT OF CLASSROOM / WHITEBOARD</div>' + clone.outerHTML + '</body></html>');
             win.document.close();
             win.focus();
@@ -1108,6 +1430,8 @@
                 ['PAIR', 'Keep Together With'],
                 ['FRONT_ROW', 'Must Sit In Front Row'],
                 ['BACK_ROW', 'Must Sit In Back Row'],
+                ['SIT_LEFT', 'Must Sit on Left Side'],
+                ['SIT_RIGHT', 'Must Sit on Right Side'],
                 ['EMPTY_SEAT', 'Must Have Empty Seat Next to Them']
             ].forEach(function (o) {
                 var opt = make('option', null, o[1]);
@@ -1165,12 +1489,16 @@
                 if (state.rules.some(function (r) { return r.student1Id === s1 && r.type === type; }))
                     return feedback('That rule already exists.', 'error');
 
-                // Allow combining FRONT_ROW or BACK_ROW with EMPTY_SEAT
                 var hasFront = state.rules.some(function (r) { return r.student1Id === s1 && r.type === 'FRONT_ROW'; });
                 var hasBack = state.rules.some(function (r) { return r.student1Id === s1 && r.type === 'BACK_ROW'; });
+                var hasLeft = state.rules.some(function (r) { return r.student1Id === s1 && r.type === 'SIT_LEFT'; });
+                var hasRight = state.rules.some(function (r) { return r.student1Id === s1 && r.type === 'SIT_RIGHT'; });
 
                 if ((type === 'FRONT_ROW' && hasBack) || (type === 'BACK_ROW' && hasFront)) {
                     return feedback('A student cannot be assigned to both front and back rows simultaneously.', 'error');
+                }
+                if ((type === 'SIT_LEFT' && hasRight) || (type === 'SIT_RIGHT' && hasLeft)) {
+                    return feedback('A student cannot be assigned to both left and right sides simultaneously.', 'error');
                 }
 
                 state.rules.push(newRule(s1, null, type));
@@ -1212,6 +1540,8 @@
                     strong(s1.fullName);
                     if (r.type === 'FRONT_ROW') text(' ⬆ must sit in the front row');
                     else if (r.type === 'BACK_ROW') text(' ⬇ must sit in the back row');
+                    else if (r.type === 'SIT_LEFT') text(' ⬅ must sit on the left side');
+                    else if (r.type === 'SIT_RIGHT') text(' ➡ must sit on the right side');
                     else if (r.type === 'EMPTY_SEAT') text(' 🪑 must have an empty seat next to them');
                 } else {
                     var s2 = studentById(r.student2Id);
@@ -1233,7 +1563,7 @@
             });
             if (!shown) {
                 mui.list.appendChild(make('div', 'sp-rules-empty',
-                    'No rules defined yet. Add a rule above to flag students who should sit apart, together, in the front or back row, or leave an adjacent empty seat.'));
+                    'No rules defined yet. Add a rule above to flag students who should sit apart, together, left, right, front/back, or leave an adjacent empty seat.'));
             }
         }
 

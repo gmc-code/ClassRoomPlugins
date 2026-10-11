@@ -1,6 +1,6 @@
-/* seatingplan directive styles. Everything is prefixed sp- to avoid clashing with the theme. */
+/* namepicker directive styles. Prefixed with np- */
 
-.seatingplan {
+.namepicker {
     margin: 1em 0;
     border: 1px solid #cbd5e1;
     border-radius: 8px;
@@ -11,198 +11,167 @@
     line-height: 1.3;
     overflow: hidden;
 }
-.seatingplan *, .sp-modal * { box-sizing: border-box; }
+.namepicker *, .np-modal * { box-sizing: border-box; }
 
-
-.seatingplan .sp-title {
+.namepicker .np-title {
     background: #0f172a;
     color: #fff;
     font-weight: 600;
     padding: 8px 14px;
     outline: none;
     cursor: text;
-    -webkit-user-select: text !important;
-    -moz-user-select: text !important;
-    -ms-user-select: text !important;
     user-select: text !important;
-    pointer-events: auto !important;
     transition: background-color 0.2s;
 }
-.seatingplan .sp-title:hover {
-    background: #1e293b;
-}
-.seatingplan .sp-title:focus {
-    background: #1e293b;
-    box-shadow: inset 0 0 0 2px #3b82f6;
-}
+.namepicker .np-title:hover { background: #1e293b; }
+.namepicker .np-title:focus { background: #1e293b; box-shadow: inset 0 0 0 2px #3b82f6; }
 
-.seatingplan .sp-toolbar {
+.namepicker .np-toolbar {
     background: #1e293b; padding: 8px 10px;
-    display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    display: flex; flex-direction: column; gap: 6px; align-items: center;
 }
-.seatingplan .sp-layouts {
-    display: flex; gap: 3px; background: #0f172a; padding: 3px;
-    border-radius: 6px; border: 1px solid #334155;
+.namepicker .np-toolbar-row {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px; width: 100%;
 }
-.seatingplan .sp-file { display: none; }
+.np-toolbar-row--options { color: #f8fafc !important; }
+.np-toolbar-label { color: #94a3b8; font-size: 12px; font-weight: 600; }
 
-.sp-btn {
+.np-checkbox-label {
+    color: #f8fafc !important; cursor: pointer; display: inline-flex; align-items: center; gap: 0.375rem;
+}
+.np-checkbox { width: 1rem; height: 1rem; accent-color: #38bdf8; cursor: pointer; }
+
+.namepicker .np-sizes {
+    display: flex; gap: 3px; background: #0f172a; padding: 3px; border-radius: 6px; border: 1px solid #334155;
+}
+.namepicker .np-file { display: none; }
+
+.np-btn {
     background: #3b82f6; color: #fff; border: none; border-radius: 4px;
-    padding: 5px 10px; font: 500 12px/1.2 inherit; font-family: inherit;
-    cursor: pointer; transition: background-color .2s;
+    padding: 5px 10px; font: inherit; font-size: 12px; font-weight: 500; line-height: 1.2; cursor: pointer; transition: background-color .2s;
+    display: inline-flex; align-items: center; gap: 0.375rem;
 }
-.sp-btn:hover { background: #2563eb; }
-.sp-btn-layout { background: transparent; color: #94a3b8; padding: 4px 8px; }
-.sp-btn-layout:hover { background: #1e293b; color: #f8fafc; }
-.sp-btn-layout.sp-active { background: #3b82f6; color: #fff; font-weight: 600; }
-.sp-btn-toggle { background: #0f172a; color: #38bdf8; border: 1px solid #0284c7; font-weight: 600; }
-.sp-btn-toggle:hover { background: #0284c7; color: #fff; }
-.sp-btn-grey { background: #475569; }   .sp-btn-grey:hover { background: #334155; }
-.sp-btn-amber { background: #d97706; } .sp-btn-amber:hover { background: #b45309; }
-.sp-btn-purple { background: #7c3aed; } .sp-btn-purple:hover { background: #6d28d9; }
-.sp-btn-teal { background: #0d9488; }  .sp-btn-teal:hover { background: #0f766e; }
-.sp-btn-red { background: #dc2626; }   .sp-btn-red:hover { background: #b91c1c; }
+.np-btn-icon { flex-shrink: 0; vertical-align: middle; }
+.np-btn:hover { background: #2563eb; }
+.np-btn:disabled { opacity: .55; cursor: not-allowed; }
+.np-btn-size { background: transparent; color: #94a3b8; padding: 4px 8px; min-width: 26px; justify-content: center; }
+.np-btn-size:hover { background: #1e293b; color: #f8fafc; }
+.np-btn-size.np-active { background: #3b82f6; color: #fff; font-weight: 600; }
+.np-btn-grey { background: #475569; } .np-btn-grey:hover { background: #334155; }
+.np-btn-amber { background: #d97706; } .np-btn-amber:hover { background: #b45309; }
+.np-btn-purple { background: #7c3aed; } .np-btn-purple:hover { background: #6d28d9; }
+.np-btn-teal { background: #0d9488; } .np-btn-teal:hover { background: #0f766e; }
+.np-btn-red { background: #dc2626; } .np-btn-red:hover { background: #b91c1c; }
 
-.seatingplan .sp-status { display: none; padding: 6px 12px; font-size: 12px; background: #fef3c7; color: #92400e; border-bottom: 1px solid #fcd34d; }
-.seatingplan .sp-status.sp-show { display: block; }
-
-.seatingplan .sp-body { display: flex; min-height: 360px; }
-.seatingplan .sp-sidebar {
-    width: 200px; flex: none; background: #fff; border-right: 1px solid #e2e8f0;
-    padding: 8px; display: flex; flex-direction: column; max-height: 700px;
-}
-.seatingplan .sp-side-title {
-    font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase;
-    letter-spacing: .5px; margin-bottom: 6px;
-}
-.seatingplan .sp-pool { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
-
-.seatingplan .sp-canvas { flex: 1; min-width: 0; padding: 12px; overflow-x: auto; }
-.seatingplan .sp-whiteboard {
-    background: #e2e8f0; border: 2px dashed #94a3b8; border-radius: 6px; text-align: center;
-    padding: 5px; font-size: 12px; font-weight: 600; color: #475569; letter-spacing: 1px; margin-bottom: 12px;
-}
-.seatingplan .sp-grid { display: flex; flex-direction: column; gap: 10px; }
-.seatingplan .sp-row { display: grid; gap: 8px; }
-
-.seatingplan .sp-desk {
-    background: #fff; border: 2px dashed #cbd5e1; border-radius: 6px; height: 64px;
-    display: flex; flex-direction: column; justify-content: center; align-items: center;
-    position: relative; transition: background-color .2s, border-color .2s; min-width: 0;
-}
-.seatingplan .sp-desk.sp-drag-over { border-color: #3b82f6; background: #eff6ff; }
-.seatingplan .sp-desk.sp-occupied { border-style: solid; border-color: #94a3b8; }
-.seatingplan .sp-desk.sp-conflict {
-    border: 3px solid #ef4444 !important; background: #fef2f2 !important; animation: sp-pulse 1.5s infinite;
-}
-@keyframes sp-pulse {
-    0% { box-shadow: 0 0 0 0 rgba(239,68,68,.5); }
-    70% { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
-    100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
-}
-.seatingplan .sp-desk-num { position: absolute; top: 1px; left: 4px; font-size: 9px; color: #94a3b8; }
-
-/* Creates subtle visual spacing between 2-column desk blocks */
-.seatingplan .sp-desk:nth-child(2n) {
-    margin-right: 6px;
+.namepicker .np-range { width: 170px; max-width: 45vw; accent-color: #38bdf8; cursor: pointer; }
+.namepicker .np-time-out { color: #f8fafc; font-size: 12px; font-weight: 600; min-width: 44px; font-variant-numeric: tabular-nums; }
+.namepicker .np-select {
+    background: #0f172a; color: #f8fafc; border: 1px solid #334155; border-radius: 4px;
+    padding: 4px 6px; font: inherit; font-size: 12px; cursor: pointer;
 }
 
-.seatingplan .sp-card {
-    background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px;
-    font-weight: 500; cursor: grab; user-select: none; line-height: 1.15; min-width: 0;
+.namepicker .np-status { display: none; padding: 6px 12px; font-size: 12px; background: #fef3c7; color: #92400e; border-bottom: 1px solid #fcd34d; }
+.namepicker .np-status.np-show { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; cursor: pointer; }
+.namepicker .np-status-text { flex: 1; }
+.namepicker .np-status-close { background: transparent; border: none; color: #92400e; cursor: pointer; font-size: 14px; padding: 0 2px; }
+
+/* ---- Stage ---- */
+.namepicker .np-body {
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    padding: 16px 12px 14px; background: #f1f5f9;
 }
-.seatingplan .sp-card:active { cursor: grabbing; }
-.seatingplan .sp-card.sp-has-sep { border: 2px solid #ea580c; background: #fff7ed; }
-.seatingplan .sp-card.sp-has-pair { border: 2px solid #059669; background: #ecfdf5; }
-.seatingplan .sp-card.sp-has-pos { border: 2px solid #2563eb; background: #eff6ff; }
+.namepicker .np-pick {
+    background: #16a34a; font-size: 18px; font-weight: 700; padding: 10px 34px; border-radius: 999px;
+    box-shadow: 0 4px 0 #166534; transition: transform .1s, box-shadow .1s, background-color .2s;
+    letter-spacing: .3px;
+}
+.namepicker .np-pick:hover { background: #15803d; }
+.namepicker .np-pick:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 #166534; }
 
-.seatingplan .sp-sidebar .sp-card {
-    padding: 3px 6px; display: flex; justify-content: space-between; align-items: center; height: 28px;
+.namepicker .np-stage {
+    position: relative; width: 100%; max-width: 440px; margin: 0 auto;
+    transition: height .45s cubic-bezier(.22,1,.36,1);
+}
+.namepicker .np-empty {
+    padding: 28px 12px; text-align: center; color: #64748b; font-size: 13px; width: 100%; max-width: 440px;
 }
 
-.seatingplan .sp-sidebar.sp-hidden {
-    display: none !important;
+.namepicker .np-card {
+    position: absolute; left: 0; right: 0; top: 0; height: 56px;
+    border-radius: 12px; color: #fff; font-weight: 700;
+    display: flex; align-items: flex-end; justify-content: center; gap: 8px;
+    padding: 0 14px 7px; white-space: nowrap; overflow: hidden;
+    box-shadow: 0 2px 6px rgba(15,23,42,.28), inset 0 -3px 0 rgba(0,0,0,.14), inset 0 2px 0 rgba(255,255,255,.28);
+    text-shadow: 0 1px 2px rgba(0,0,0,.35);
+    background-image: linear-gradient(rgba(255,255,255,.18), rgba(255,255,255,0) 60%);
+    transform-origin: 50% 0; will-change: transform, opacity;
+    user-select: none; pointer-events: none;
+}
+.namepicker .np-card.np-dark-text { color: #1e1b4b; text-shadow: 0 1px 0 rgba(255,255,255,.35); }
+.namepicker .np-first { font-size: 22px; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; }
+.namepicker .np-last { font-size: 16px; font-weight: 600; line-height: 1.1; opacity: .92; overflow: hidden; text-overflow: ellipsis; }
+.namepicker .np-hr {
+    font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 999px;
+    background: rgba(255,255,255,.28); text-shadow: none; align-self: flex-end; margin-bottom: 2px;
+}
+.namepicker .np-rank {
+    position: absolute; left: 10px; top: 50%; margin-top: -13px; width: 26px; height: 26px; border-radius: 50%;
+    background: #fff; color: #0f172a; font-size: 14px; font-weight: 800; text-shadow: none;
+    display: none; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,.3);
 }
 
-
-.seatingplan .sp-side-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-.seatingplan .sp-desk .sp-card {
-    width: 94%; height: 86%; padding: 2px 3px; background: #e0f2fe; border-color: #38bdf8;
-    display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+/* settled layout: the transitions only apply once the spin has finished */
+.namepicker .np-stage.np-settled .np-card {
+    transition: transform .55s cubic-bezier(.22,1,.36,1), opacity .4s ease;
+    align-items: center; padding-bottom: 0;
 }
-.seatingplan .sp-desk .sp-card.sp-has-sep { background: #fff7ed; border-color: #ea580c; }
-.seatingplan .sp-desk .sp-card.sp-has-pair { background: #ecfdf5; border-color: #059669; }
-.seatingplan .sp-desk .sp-card.sp-has-pos { background: #eff6ff; border-color: #2563eb; }
-.seatingplan .sp-first { font-weight: 600; font-size: 12px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.seatingplan .sp-last { font-size: 11px; color: #334155; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.namepicker .np-stage.np-settled .np-card.np-chosen {
+    box-shadow: 0 0 0 3px #fff, 0 0 0 5px rgba(15,23,42,.35), 0 8px 20px rgba(15,23,42,.35),
+        inset 0 -3px 0 rgba(0,0,0,.14);
+}
+.namepicker .np-stage.np-settled.np-multi .np-card.np-chosen .np-rank { display: flex; }
+.namepicker .np-stage.np-settled.np-big .np-first { font-size: 26px; }
+.namepicker .np-stage.np-settled.np-big .np-last { font-size: 19px; }
 
-.sp-badges { display: flex; gap: 2px; align-items: center; justify-content: center; margin-top: 1px; }
-.sp-badge { font-size: 9.5px; font-weight: 700; padding: 0 3px; border-radius: 3px; white-space: nowrap; }
-.sp-badge-hr { background: #bae6fd; color: #0369a1; }
-.sp-badge-sep { background: #ffedd5; color: #c2410c; border: 1px solid #f97316; }
-.sp-badge-pair { background: #d1fae5; color: #047857; border: 1px solid #10b981; }
-.sp-badge-pos { background: #dbeafe; color: #1d4ed8; border: 1px solid #3b82f6; }
+.namepicker .np-result { min-height: 1.3em; font-size: 13px; color: #334155; text-align: center; }
+.namepicker .np-info { font-size: 12px; color: #64748b; text-align: center; }
 
 @media (max-width: 700px) {
-    .seatingplan .sp-body { flex-direction: column; }
-    .seatingplan .sp-sidebar { width: auto; max-height: 150px; border-right: none; border-bottom: 1px solid #e2e8f0; }
+    .namepicker .np-first { font-size: 19px; }
+    .namepicker .np-last { font-size: 14px; }
 }
-
-/* ---- Rules dialog (appended to <body>) ---- */
-.sp-modal {
+/* ---- Class list dialog ---- */
+.np-modal {
     display: none; position: fixed; inset: 0; z-index: 10000; background: rgba(15,23,42,.6);
-    justify-content: center; align-items: center;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    justify-content: center; align-items: center; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     font-size: 14px; color: #0f172a;
 }
-.sp-modal.sp-open { display: flex; }
-.sp-modal-card {
-    background: #fff; border-radius: 8px; width: 580px; max-width: 94%; max-height: 85vh;
+.np-modal.np-open { display: flex; }
+.np-modal-card {
+    background: #fff; border-radius: 8px; width: 520px; max-width: 94%; max-height: 85vh;
     display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,.25);
 }
-.sp-modal-head {
+.np-modal-head {
     background: #1e293b; color: #fff; padding: 12px 18px; font-weight: 600;
     display: flex; justify-content: space-between; align-items: center;
 }
-.sp-modal-close { background: transparent; border: none; color: #94a3b8; font-size: 18px; cursor: pointer; }
-.sp-modal-close:hover { color: #fff; }
-.sp-modal-body { padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
-.sp-rule-form {
-    display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr);
-    grid-template-areas: "s1 type" "s2 add"; gap: 10px; align-items: center;
-    background: #f8fafc; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px;
+.np-modal-close { background: transparent; border: none; color: #94a3b8; font-size: 18px; cursor: pointer; }
+.np-modal-close:hover { color: #fff; }
+.np-modal-body { padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+.np-modal-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.np-modal-count { font-size: 13px; color: #475569; margin-left: auto; }
+.np-class-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 4px 12px; }
+.np-class-item {
+    display: flex; align-items: center; gap: 8px; padding: 5px 8px; background: #f1f5f9; border-radius: 4px;
+    font-size: 13px; cursor: pointer; min-width: 0;
 }
-.sp-c-s1 { grid-area: s1; } .sp-c-type { grid-area: type; } .sp-c-s2 { grid-area: s2; }
-.sp-rule-form select {
-    display: block; width: 100%; min-width: 0; height: 38px; margin: 0; padding: 6px 10px;
-    border: 1px solid #cbd5e1; border-radius: 5px; background: #fff; color: #0f172a; font: 400 13px/1.3 inherit; font-family: inherit;
-}
-.sp-rule-form .sp-c-add { grid-area: add; justify-self: start; min-height: 38px; }
-.sp-feedback { font-size: 13px; color: #64748b; min-height: 1em; }
-.sp-feedback.sp-error { color: #b91c1c; }
-.sp-feedback.sp-success { color: #047857; }
-.sp-modal-sub { font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: -6px; }
-.sp-rules-list { display: flex; flex-direction: column; gap: 6px; }
-.sp-rules-empty { font-size: 13px; color: #64748b; }
-.sp-rule-item {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 6px 10px; background: #f1f5f9; border-radius: 4px; font-size: 13px;
-}
-.sp-rule-item.sp-sep { border-left: 4px solid #ea580c; }
-.sp-rule-item.sp-pair { border-left: 4px solid #059669; }
-.sp-rule-item.sp-pos { border-left: 4px solid #2563eb; }
-.sp-del-rule { background: transparent; border: none; color: #ef4444; font-size: 16px; cursor: pointer; padding: 0 4px; }
-@media (max-width: 480px) {
-    .sp-rule-form { grid-template-columns: minmax(0,1fr); grid-template-areas: "s1" "type" "s2" "add"; }
-    .sp-rule-form .sp-c-add { width: 100%; }
-}
+.np-class-item input { accent-color: #0d9488; width: 1rem; height: 1rem; flex: none; }
+.np-class-item.np-absent { color: #94a3b8; text-decoration: line-through; }
+.np-class-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.np-class-tag { font-size: 10px; font-weight: 700; background: #d1fae5; color: #047857; border-radius: 3px; padding: 0 4px; flex: none; }
+.np-rules-empty { font-size: 13px; color: #64748b; }
 
-
-/* Printing the docs page normally: show just the plan, hide the controls. */
 @media print {
-    .seatingplan { border: none; background: #fff; }
-    .seatingplan .sp-toolbar, .seatingplan .sp-sidebar, .seatingplan .sp-status, .sp-modal { display: none !important; }
-    .seatingplan .sp-desk { break-inside: avoid; }
-    .sp-badge-hr { border: none !important; background: transparent; padding: 0 2px; }
+    .namepicker { border: none; background: #fff; }
+    .namepicker .np-toolbar, .namepicker .np-status, .namepicker .np-pick, .np-modal { display: none !important; }
 }

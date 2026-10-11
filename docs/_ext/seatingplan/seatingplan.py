@@ -5,9 +5,12 @@ Embeds an interactive classroom seating plan designer in a page.
     .. seatingplan::
        :layout: 5x6
        :roster: students.csv
+       :one-line:
 
        separate: Alex Smith | Sam Jones
        front: Priya Patel
+       left: Mia Chen
+       empty: Tom Brown
 
 The page is rendered client-side by seatingplan.js / seatingplan.css, which are
 copied into ``_static`` by Sphinx during an HTML build.
@@ -32,13 +35,17 @@ logger = logging.getLogger(__name__)
 HERE = Path(__file__).parent
 ASSETS = ("seatingplan.css", "seatingplan.js")
 
-RULE_RE = re.compile(r"^(separate|pair|front|back)\s*:\s*(.+)$", re.IGNORECASE)
+RULE_RE = re.compile(r"^(separate|pair|front|back|left|right|empty)\s*:\s*(.+)$", re.IGNORECASE)
 RULE_TYPES = {
     "separate": "SEPARATE",
     "pair": "PAIR",
     "front": "FRONT_ROW",
     "back": "BACK_ROW",
+    "left": "SIT_LEFT",
+    "right": "SIT_RIGHT",
+    "empty": "EMPTY_SEAT",
 }
+SINGLE_STUDENT_RULES = ("front", "back", "left", "right", "empty")
 
 
 # ----------------------------------------------------------------------------
@@ -133,7 +140,12 @@ class SeatingPlanDirective(SphinxDirective):
         "roster": directives.path,
         "title": directives.unchanged,
         "fill": _choice("first", "last"),
-        "sort": _choice("none", "az", "za", "random"),
+        "sort": _choice("none", "az", "za", "homeroom", "random"),
+        "one-line": directives.flag,
+        "surname-initial": directives.flag,
+        "hide-homeroom": directives.flag,
+        "hide-badges": directives.flag,
+        "ignore-rules": directives.flag,
         "storage-key": directives.unchanged,
         "class": directives.class_option,
     }
@@ -200,7 +212,7 @@ class SeatingPlanDirective(SphinxDirective):
 
         rules = []
         for kind, body in rule_lines:
-            if kind in ("front", "back"):
+            if kind in SINGLE_STUDENT_RULES:
                 rules.append({"type": RULE_TYPES[kind], "a": find(body), "b": None})
             else:
                 names = [n.strip() for n in body.split("|")]
@@ -216,9 +228,17 @@ class SeatingPlanDirective(SphinxDirective):
             "title": self.options.get("title", ""),
             "layout": layout,
             "fill": self.options.get("fill", "first"),
-            "sort": {"none": "DEFAULT", "az": "AZ", "za": "ZA", "random": "RANDOM"}[
-                self.options.get("sort", "none")
-            ],
+            "sort": {
+                "none": "DEFAULT", "az": "AZ", "za": "ZA",
+                "homeroom": "HOMEROOM", "random": "RANDOM",
+            }[self.options.get("sort", "none")],
+            "display": {
+                "oneLine": "one-line" in self.options,
+                "surnameInitial": "surname-initial" in self.options,
+                "homeroom": "hide-homeroom" not in self.options,
+                "hideBadges": "hide-badges" in self.options,
+                "ignoreRules": "ignore-rules" in self.options,
+            },
             "students": students,
             "rules": rules,
         }

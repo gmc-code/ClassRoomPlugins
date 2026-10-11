@@ -18,6 +18,8 @@ copyright = "2026-7, GMC"
 author = "GMC"
 
 # ------------------------------------------------------------
+from docutils import nodes
+from docutils.parsers.rst import roles
 
 
 # ------------------------------------------------------------
@@ -35,9 +37,14 @@ extensions = [
     "sphinx_design",
     "noisemonitor.noisemonitor",  # custom directive
     "seatingplan.seatingplan",  # custom directive
+    "studentgroups.studentgroups",  # custom directive
     "namepicker.namepicker",  # custom directive
-    "randomgroups.randomgroups",  # custom directive
- ]
+]
+
+
+# "namepicker.namepicker",  # custom directive
+#
+
 
 # "sphinx.ext.doctest",
 #     "sphinx.ext.napoleon",
@@ -82,7 +89,20 @@ pygments_style = "sphinx"
 
 # The theme to use for HTML and HTML Help pages.
 # See the documentation for a list of builtin themes.
-html_theme = "sphinx_rtd_theme"
+# html_theme = "sphinx_rtd_theme"
+
+html_theme = "shibuya"
+
+html_theme_options = {
+    "page_layout": "compact",
+}
+
+# Optional: Theme configurations for Shibuya
+# "accent_color": "blue",
+# "nav_links": [
+#     {"title": "Home", "url": "index"},
+# ],
+
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -101,6 +121,7 @@ html_static_path = ["_static"]
 # Use custom css  html_css_files = ["custom.css"]
 html_css_files = [
     "css/custom.css",
+    "css/shibuya.css",
 ]
 
 # Custom JS
@@ -121,19 +142,19 @@ html_domain_indices = False
 
 # -- sphinx-rtd-theme Theme Options ------------------------------------------
 # See: https://sphinx-rtd-theme.readthedocs.io/en/latest/configuring.html
-html_theme_options = {
-    "logo_only": False,  # False so text is shown
-    "prev_next_buttons_location": "both",  # Can be bottom, top, both , or None
-    "style_external_links": True,  # True to Add an icon next to external links
-    # 'style_nav_header_background': 'blue',
-    "style_nav_header_background": "linear-gradient(to right, blueviolet 15%, limegreen 50%, royalblue 80%)",
-    # Toc options
-    "collapse_navigation": False,  # False so nav entries have the [+] icons
-    "sticky_navigation": False,  # False so the nav does not scroll
-    "navigation_depth": 4,  # -1 for no limit
-    "includehidden": True,  # displays toctree that are hidden
-    "titles_only": False,  # False so page subheadings are in the nav.
-}
+# html_theme_options = {
+#     "logo_only": False,  # False so text is shown
+#     "prev_next_buttons_location": "both",  # Can be bottom, top, both , or None
+#     "style_external_links": True,  # True to Add an icon next to external links
+#     # 'style_nav_header_background': 'blue',
+#     "style_nav_header_background": "linear-gradient(to right, blueviolet 15%, limegreen 50%, royalblue 80%)",
+#     # Toc options
+#     "collapse_navigation": False,  # False so nav entries have the [+] icons
+#     "sticky_navigation": False,  # False so the nav does not scroll
+#     "navigation_depth": 4,  # -1 for no limit
+#     "includehidden": True,  # displays toctree that are hidden
+#     "titles_only": False,  # False so page subheadings are in the nav.
+# }
 
 # -- RTDs logos -------------------------------------------------
 html_favicon = "_static/favicon.ico"

@@ -16,32 +16,26 @@ def visit_noisemonitor_html(self, node):
     image_min = node.get("image_min", 0)
     image_max = node.get("image_max", 100)
 
-    # Default messages tailored for a junior science classroom
+    # Default messages (zoo theme)
     default_msgs = [
-        "Level 0 - Great focus! Keep up the quiet work.",
-        "Level 1 - Acceptable lab voices. Keep it down.",
-        "Level 2 - Warning: Too noisy! Lower your voices.",
-        "Level 3 - Consequence: List 3 types of variables.",
-        "Level 4 - Consequence: Define the 3 types of variables.",
-        "Level 5 - Consequence: Write out the patterns for an aim, hypothesis and trend.",
+        "Level 0 - Zoo Zen. Even the meerkats are meditating. Perfect silence!",
+        "Level 1 - Sneaky Safari. Whisper like a mouse sneaking past a sleeping lion!",
+        "Level 2 - Monkey Business! The monkeys are chattering. Bring the volume down!",
+        "Level 3 - Feeding Frenzy! The parrots are squawking and the monkeys are going bananas!",
+        "Level 4 - ROAR ALERT! The lions have joined the conversation. Quieten things down!",
+        "Level 5 - ZOO-MAGEDDON! The elephants are trumpeting, the monkeys are screaming, and the whole zoo is stampeding! SOUND THE ALARM!",
     ]
 
     # Retrieve and HTML-escape custom messages
-    custom_msgs = [
-        html.escape(node.get(f"msg{i}", default_msgs[i])) for i in range(6)
-    ]
+    custom_msgs = [html.escape(node.get(f"msg{i}", default_msgs[i])) for i in range(6)]
 
     # Resolve image paths relative to the current doc page
     docname = self.builder.current_docname
     base_uri = self.builder.get_target_uri(docname)
-    noise_images = [
-        relative_uri(base_uri, f"_static/noise{i}.png") for i in range(6)
-    ]
+    noise_images = [relative_uri(base_uri, f"_static/noise{i}.png") for i in range(6)]
 
-    image_data_attrs = " ".join(f'data-img{i}="{html.escape(src)}"'
-                                for i, src in enumerate(noise_images))
-    msg_data_attrs = " ".join(f'data-msg{i}="{msg}"'
-                              for i, msg in enumerate(custom_msgs))
+    image_data_attrs = " ".join(f'data-img{i}="{html.escape(src)}"' for i, src in enumerate(noise_images))
+    msg_data_attrs = " ".join(f'data-msg{i}="{msg}"' for i, msg in enumerate(custom_msgs))
 
     # Generate custom message input fields with explicit label/id associations
     msg_inputs_html = "\n".join(f"""
@@ -115,6 +109,14 @@ def visit_noisemonitor_html(self, node):
 
             <h4>Custom Level Messages</h4>
             {msg_inputs_html}
+
+            <h4>Save &amp; Load Settings</h4>
+            <div class="noise-io-row">
+                <button type="button" class="noise-btn-secondary noise-btn-export">Export Settings</button>
+                <button type="button" class="noise-btn-secondary noise-btn-import">Import Settings</button>
+                <input type="file" class="noise-file-import" accept=".json,application/json" hidden>
+            </div>
+            <p class="noise-io-feedback" role="status" aria-live="polite"></p>
         </div>
     </div>
     """
@@ -149,8 +151,7 @@ class NoiseMonitorDirective(SphinxDirective):
 
         if image_max <= image_min:
             self.state_machine.reporter.warning(
-                f"noisemonitor: image-max ({image_max}) must be greater "
-                f"than image-min ({image_min}); falling back to 0-100.",
+                f"noisemonitor: image-max ({image_max}) must be greater " f"than image-min ({image_min}); falling back to 0-100.",
                 line=self.lineno,
             )
             image_min, image_max = 0, 100

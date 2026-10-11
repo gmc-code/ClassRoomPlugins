@@ -209,3 +209,36 @@
 .noise-btn-toggle.active {
   background-color: #dc2626;
 }
+
+/* Import / export settings */
+.noise-io-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.noise-btn-secondary {
+  background-color: #475569;
+  color: #ffffff;
+  border: none;
+  padding: 0.4rem 0.85rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.noise-btn-secondary:hover {
+  background-color: #334155;
+}
+
+.noise-io-feedback {
+  min-height: 1.2em;
+  margin: 0.5rem 0 0 0;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.noise-io-feedback.noise-io-ok { color: #16a34a; }
+.noise-io-feedback.noise-io-error { color: #dc2626; }

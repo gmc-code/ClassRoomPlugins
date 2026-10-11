@@ -1,6 +1,6 @@
-============================
+===============================
 ClassRoomPlugins documentation
-============================
+===============================
 
 
 These docs provide details on sphinx extensions and how to use them. The extensions are useful for the classroom.
@@ -19,19 +19,20 @@ These docs provide details on sphinx extensions and how to use them. The extensi
     :maxdepth: 3
     :caption: Classroom Tools:
 
-    tools/noisemonitor.rst
     tools/seatingplan.rst
-    tools/seatingplan.rst
-    tools/seatingplan.rst
+    tools/studentgroups.rst
+    tools/namepicker.rst
 
+    tools/noisemonitor.rst
 
 
 .. toctree::
     :maxdepth: 3
     :caption: Directive information:
 
-    info/noisemonitor.rst
-    info/seatingplan.rst
-    info/seatingplan.rst
-    info/seatingplan.rst
 
+    info/seatingplan_info.rst
+    info/studentgroups_info.rst
+    info/namepicker_info.rst
+
+    info/noisemonitor_info.rst

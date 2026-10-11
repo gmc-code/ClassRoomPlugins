@@ -7,10 +7,8 @@ Introduction
 
 The directives covered in this documentation include:
 
-- noisemonitor
-- seatingplan
-- randomgroups
-- namepicker
-
-
+- :doc:`seatingplan`
+- :doc:`randomgroups`
+- :doc:`namepicker`
+- :doc:`noisemonitor`
 

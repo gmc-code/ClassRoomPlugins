@@ -1,3 +1,1 @@
-
-
 from .namepicker import setup

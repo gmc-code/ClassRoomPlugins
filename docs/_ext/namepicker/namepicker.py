@@ -1,16 +1,26 @@
-"""Sphinx extension: ``seatingplan`` directive.
+"""Sphinx extension: ``namepicker`` directive.
 
-Embeds an interactive classroom seating plan designer in a page.
+Embeds an animated random name picker in a page. A stack of coloured name cards cycles upwards
+and settles with the chosen students on top.
 
-    .. seatingplan::
-       :layout: 5x6
+    .. namepicker::
+       :count: 3
+       :duration: 6
+       :easing: ease-out
        :roster: students.csv
+       :title: Who's Up?
+       :no-repeat:
 
-       separate: Alex Smith | Sam Jones
-       front: Priya Patel
+       Alex Smith, 7A
+       Sam Jones, 7B
 
-The page is rendered client-side by seatingplan.js / seatingplan.css, which are
-copied into ``_static`` by Sphinx during an HTML build.
+Names can come from ``:roster:`` (CSV or Excel with Preferred / First Name, Surname and optional
+Homeroom columns), from the directive content (one ``First Surname, Homeroom`` per line), or both.
+Teachers can also import a roster in the page itself, mark students absent with the Class List
+button and change the number picked, the animation time and the easing on the fly.
+
+The page is rendered client-side by namepicker.js / namepicker.css, which are copied into
+``_static`` by Sphinx during an HTML build.
 """
 
 import codecs
@@ -18,7 +28,6 @@ import csv
 import html
 import io
 import json
-import re
 from pathlib import Path
 
 from docutils import nodes
@@ -30,15 +39,12 @@ from sphinx.util.fileutil import copy_asset_file
 logger = logging.getLogger(__name__)
 
 HERE = Path(__file__).parent
-ASSETS = ("seatingplan.css", "seatingplan.js")
+ASSETS = ("namepicker.css", "namepicker.js")
 
-RULE_RE = re.compile(r"^(separate|pair|front|back)\s*:\s*(.+)$", re.IGNORECASE)
-RULE_TYPES = {
-    "separate": "SEPARATE",
-    "pair": "PAIR",
-    "front": "FRONT_ROW",
-    "back": "BACK_ROW",
-}
+MIN_COUNT, MAX_COUNT, DEFAULT_COUNT = 1, 10, 1
+MIN_DURATION, MAX_DURATION, DEFAULT_DURATION = 1.0, 20.0, 6.0
+EASINGS = ("linear", "ease-out", "ease-in-out", "ease-out-strong", "back", "elastic", "bounce")
+DEFAULT_EASING = "ease-out"
 
 
 # ----------------------------------------------------------------------------
@@ -90,26 +96,42 @@ def _students_from_rows(rows):
         if not any(r.values()):
             continue
         first = r.get("preferred") or r.get("first name") or r.get("firstname") or "Student"
-        surname = (
-            r.get("surname") or r.get("last name") or r.get("lastname")
-            or str(len(students) + 1)
-        )
+        surname = r.get("surname") or r.get("last name") or r.get("lastname") or ""
         students.append(
             {"firstName": first, "surname": surname, "homeroom": r.get("homeroom", "")}
         )
     return students
 
 
-def _parse_layout(text):
-    text = text.strip().lower().replace("\u00d7", "x")
-    match = re.fullmatch(r"(\d+)\s*x\s*(\d+)", text)
-    if match:
-        rows = [int(match.group(2))] * int(match.group(1))  # 5x6 = 5 rows of 6
-    else:
-        rows = [int(p) for p in re.split(r"[,\s]+", text) if p]
-    if not rows or len(rows) > 12 or any(n < 1 or n > 20 for n in rows):
-        raise ValueError
-    return rows
+def _parse_int(text, low, high, default, name, warn=None):
+    """Return a whole number in ``low..high``, calling ``warn(message)`` if it had to be replaced."""
+    try:
+        val = int(str(text).strip())
+    except (ValueError, TypeError):
+        val = None
+    if val is None or val < low or val > high:
+        if warn:
+            warn(
+                "namepicker: :%s: %r is not a whole number from %d to %d; using %d."
+                % (name, text, low, high, default)
+            )
+        return default
+    return val
+
+
+def _parse_duration(text, warn=None):
+    try:
+        val = float(str(text).strip())
+    except (ValueError, TypeError):
+        val = None
+    if val is None or val < MIN_DURATION or val > MAX_DURATION:
+        if warn:
+            warn(
+                "namepicker: :duration: %r is not a number of seconds from %g to %g; using %g."
+                % (text, MIN_DURATION, MAX_DURATION, DEFAULT_DURATION)
+            )
+        return DEFAULT_DURATION
+    return val
 
 
 def _choice(*values):
@@ -120,20 +142,23 @@ def _choice(*values):
 # Node + directive
 # ----------------------------------------------------------------------------
 
-class seatingplan(nodes.General, nodes.Element):
+class namepicker(nodes.General, nodes.Element):
     pass
 
 
-class SeatingPlanDirective(SphinxDirective):
+class NamePickerDirective(SphinxDirective):
     has_content = True
     required_arguments = 0
     optional_arguments = 0
     option_spec = {
-        "layout": directives.unchanged,
+        "count": directives.unchanged,
+        "duration": directives.unchanged,
+        "easing": _choice(*EASINGS),
         "roster": directives.path,
         "title": directives.unchanged,
-        "fill": _choice("first", "last"),
-        "sort": _choice("none", "az", "za", "random"),
+        "no-repeat": directives.flag,
+        "surname-initial": directives.flag,
+        "hide-homeroom": directives.flag,
         "storage-key": directives.unchanged,
         "class": directives.class_option,
     }
@@ -141,17 +166,18 @@ class SeatingPlanDirective(SphinxDirective):
     def run(self):
         env = self.env
 
-        count = env.temp_data.get("seatingplan_count", 0)
-        env.temp_data["seatingplan_count"] = count + 1
-        storage_id = self.options.get("storage-key") or "%s#%d" % (env.docname, count)
+        counter = env.temp_data.get("namepicker_count", 0)
+        env.temp_data["namepicker_count"] = counter + 1
+        storage_id = self.options.get("storage-key") or "%s#%d" % (env.docname, counter)
 
-        try:
-            layout = _parse_layout(self.options.get("layout", "5x6"))
-        except ValueError:
-            raise self.error(
-                "seatingplan: invalid :layout: (use e.g. '5x6' for 5 rows of 6, "
-                "or '11,11,6' for rows of 11, 11 and 6)."
-            )
+        def warn(msg):
+            logger.warning(msg, location=(self.env.docname, self.lineno))
+
+        pick_count = _parse_int(
+            self.options.get("count", str(DEFAULT_COUNT)),
+            MIN_COUNT, MAX_COUNT, DEFAULT_COUNT, "count", warn,
+        )
+        duration = _parse_duration(self.options.get("duration", str(DEFAULT_DURATION)), warn)
 
         students = []
         roster = self.options.get("roster")
@@ -164,17 +190,18 @@ class SeatingPlanDirective(SphinxDirective):
                 else:
                     rows = _read_csv(abspath)
             except (OSError, ValueError) as exc:
-                raise self.error("seatingplan: cannot read roster %r: %s" % (roster, exc))
+                raise self.error("namepicker: cannot read roster %r: %s" % (roster, exc))
             students.extend(_students_from_rows(rows))
+            if not students:
+                warn(
+                    "namepicker: roster %r has no students. It needs a header row with "
+                    "Preferred (or First Name), Surname (or Last Name) and optionally Homeroom."
+                    % roster
+                )
 
-        rule_lines = []
         for line in self.content:
             line = line.strip()
             if not line or line.startswith("#"):
-                continue
-            match = RULE_RE.match(line)
-            if match:
-                rule_lines.append((match.group(1).lower(), match.group(2).strip()))
                 continue
             name, _, homeroom = line.partition(",")
             parts = name.split(None, 1)
@@ -183,44 +210,33 @@ class SeatingPlanDirective(SphinxDirective):
             students.append(
                 {
                     "firstName": parts[0],
-                    "surname": parts[1] if len(parts) > 1 else str(len(students) + 1),
+                    "surname": parts[1] if len(parts) > 1 else "",
                     "homeroom": homeroom.strip(),
                 }
             )
 
-        by_name = {}
-        for idx, s in enumerate(students):
-            by_name.setdefault(("%s %s" % (s["firstName"], s["surname"])).lower(), idx)
+        seen = set()
+        for s in students:
+            key = ("%s %s" % (s["firstName"], s["surname"])).lower()
+            if key in seen:
+                warn(
+                    "namepicker: more than one student is called %r. Give them different names "
+                    "(e.g. an initial) so the class can tell them apart."
+                    % ("%s %s" % (s["firstName"], s["surname"]))
+                )
+            seen.add(key)
 
-        def find(name):
-            idx = by_name.get(" ".join(name.split()).lower())
-            if idx is None:
-                raise self.error("seatingplan: no student called %r in this roster." % name)
-            return idx
-
-        rules = []
-        for kind, body in rule_lines:
-            if kind in ("front", "back"):
-                rules.append({"type": RULE_TYPES[kind], "a": find(body), "b": None})
-            else:
-                names = [n.strip() for n in body.split("|")]
-                if len(names) != 2 or not all(names):
-                    raise self.error(
-                        "seatingplan: '%s:' rules need two names separated by '|'." % kind
-                    )
-                rules.append({"type": RULE_TYPES[kind], "a": find(names[0]), "b": find(names[1])})
-
-        node = seatingplan()
+        node = namepicker()
         node["config"] = {
             "id": storage_id,
-            "title": self.options.get("title", ""),
-            "layout": layout,
-            "fill": self.options.get("fill", "first"),
-            "sort": {"none": "DEFAULT", "az": "AZ", "za": "ZA", "random": "RANDOM"}[
-                self.options.get("sort", "none")
-            ],
+            "title": self.options.get("title", "Name Picker"),
+            "count": pick_count,
+            "duration": duration,
+            "easing": self.options.get("easing", DEFAULT_EASING),
+            "noRepeat": "no-repeat" in self.options,
+            "surnameInitial": "surname-initial" in self.options,
+            "showHomeroom": "hide-homeroom" not in self.options,
             "students": students,
-            "rules": rules,
         }
         node["classes"] = self.options.get("class", [])
         return [node]
@@ -230,23 +246,22 @@ class SeatingPlanDirective(SphinxDirective):
 # Visitors
 # ----------------------------------------------------------------------------
 
-def visit_seatingplan_html(self, node):
+def visit_namepicker_html(self, node):
     payload = html.escape(json.dumps(node["config"], ensure_ascii=False), quote=True)
-    classes = " ".join(["seatingplan"] + list(node.get("classes", [])))
-    self.body.append('<div class="%s" data-seatingplan="%s">' % (classes, payload))
-    self.body.append("<noscript>JavaScript is required to show the seating plan.</noscript>")
+    classes = " ".join(["namepicker"] + list(node.get("classes", [])))
+    self.body.append('<div class="%s" data-namepicker="%s">' % (classes, payload))
+    self.body.append("<noscript>JavaScript is required to show the name picker.</noscript>")
 
 
-def depart_seatingplan_html(self, node):
+def depart_namepicker_html(self, node):
     self.body.append("</div>")
 
 
-def skip_seatingplan(self, node):
+def skip_namepicker(self, node):
     raise nodes.SkipNode
 
 
 def _find_asset(name):
-    """Look next to this file, then in a _static folder next to it (like noisemonitor)."""
     for base in (HERE, HERE / "_static"):
         candidate = base / name
         if candidate.is_file():
@@ -255,17 +270,16 @@ def _find_asset(name):
 
 
 def add_static_files(app):
-    """Hand the css/js to Sphinx's normal static-file copying (same route as html_static_path)."""
     if app.builder.format != "html":
         return
-    target = Path(app.doctreedir) / "seatingplan_static"
+    target = Path(app.doctreedir) / "namepicker_static"
     target.mkdir(parents=True, exist_ok=True)
     for name in ASSETS:
         source = _find_asset(name)
         if source is None:
             logger.warning(
-                "seatingplan: cannot find %s next to seatingplan.py or in its _static folder; "
-                "the seating plan will not display.", name
+                "namepicker: cannot find %s next to namepicker.py or in its _static folder; "
+                "the name picker will not display.", name
             )
             continue
         copy_asset_file(str(source), str(target))
@@ -274,15 +288,15 @@ def add_static_files(app):
 
 def setup(app):
     app.add_node(
-        seatingplan,
-        html=(visit_seatingplan_html, depart_seatingplan_html),
-        latex=(skip_seatingplan, None),
-        text=(skip_seatingplan, None),
-        man=(skip_seatingplan, None),
-        texinfo=(skip_seatingplan, None),
+        namepicker,
+        html=(visit_namepicker_html, depart_namepicker_html),
+        latex=(skip_namepicker, None),
+        text=(skip_namepicker, None),
+        man=(skip_namepicker, None),
+        texinfo=(skip_namepicker, None),
     )
-    app.add_directive("seatingplan", SeatingPlanDirective)
-    app.add_css_file("seatingplan.css")
-    app.add_js_file("seatingplan.js", defer="defer")
+    app.add_directive("namepicker", NamePickerDirective)
+    app.add_css_file("namepicker.css")
+    app.add_js_file("namepicker.js", defer="defer")
     app.connect("builder-inited", add_static_files)
     return {"version": "1.0", "parallel_read_safe": True, "parallel_write_safe": True}

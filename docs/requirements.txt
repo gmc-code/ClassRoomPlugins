@@ -3,3 +3,4 @@ sphinx-copybutton
 sphinx-rtd-theme
 sphinx-togglebutton
 sphinx_design
+shibuya

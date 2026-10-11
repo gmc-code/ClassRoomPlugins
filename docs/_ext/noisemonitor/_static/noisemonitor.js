@@ -98,6 +98,143 @@ function initNoiseMonitor(card) {
     });
   }
 
+  // ---- Import / export settings ----
+  const exportBtn = card.querySelector('.noise-btn-export');
+  const importBtn = card.querySelector('.noise-btn-import');
+  const fileInput = card.querySelector('.noise-file-import');
+  const ioFeedback = card.querySelector('.noise-io-feedback');
+
+  function showIoMessage(text, kind) {
+    if (!ioFeedback) return;
+    ioFeedback.textContent = text;
+    ioFeedback.className = 'noise-io-feedback' + (kind ? ' noise-io-' + kind : '');
+  }
+
+  function currentSettings() {
+    const messages = [];
+    for (let i = 0; i < 6; i++) {
+      const input = card.querySelector(`.noise-msg-input[data-level="${i}"]`);
+      messages.push(input ? input.value : '');
+    }
+    return {
+      type: 'noisemonitor-settings',
+      version: 1,
+      threshold: parseFloat(thresholdSlider.value),
+      imageMin: parseFloat(minSlider.value),
+      imageMax: parseFloat(maxSlider.value),
+      messages: messages,
+    };
+  }
+
+  function toLevel(value) {
+    const n = Number(value);
+    if (value === null || value === '' || typeof value === 'boolean' || !isFinite(n)) return null;
+    return Math.min(100, Math.max(0, Math.round(n)));
+  }
+
+  // Applies whatever valid settings the object contains. Returns how many were applied.
+  function applySettings(data) {
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+      throw new Error('This file is not a Noise Monitor settings file.');
+    }
+    let applied = 0;
+    const notes = [];
+
+    const threshold = toLevel(data.threshold);
+    if (threshold !== null) {
+      thresholdSlider.value = threshold;
+      thresholdValDisplay.textContent = threshold;
+      applied++;
+    } else if ('threshold' in data) {
+      notes.push('threshold');
+    }
+
+    let newMin = toLevel(data.imageMin);
+    let newMax = toLevel(data.imageMax);
+    if (newMin === null && 'imageMin' in data) notes.push('min level');
+    if (newMax === null && 'imageMax' in data) notes.push('max level');
+    if (newMin === null) newMin = parseFloat(minSlider.value);
+    else applied++;
+    if (newMax === null) newMax = parseFloat(maxSlider.value);
+    else applied++;
+    if (newMax <= newMin) {
+      // Same fallback the directive uses when image-max is not above image-min
+      newMin = 0;
+      newMax = 100;
+      notes.push('min/max range (max must be above min, so 0 to 100 was used)');
+    }
+    minSlider.value = newMin;
+    maxSlider.value = newMax;
+    minValDisplay.textContent = newMin;
+    maxValDisplay.textContent = newMax;
+
+    if (Array.isArray(data.messages)) {
+      for (let i = 0; i < 6; i++) {
+        const input = card.querySelector(`.noise-msg-input[data-level="${i}"]`);
+        if (input && typeof data.messages[i] === 'string') {
+          input.value = data.messages[i];
+          applied++;
+        }
+      }
+    } else if ('messages' in data) {
+      notes.push('messages');
+    }
+
+    if (applied === 0) {
+      throw new Error('No Noise Monitor settings were found in this file.');
+    }
+    refreshUI();
+    return notes;
+  }
+
+  if (exportBtn) {
+    exportBtn.addEventListener('click', () => {
+      const json = JSON.stringify(currentSettings(), null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'noise-monitor-settings.json';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      showIoMessage('Settings exported.', 'ok');
+    });
+  }
+
+  if (importBtn && fileInput) {
+    importBtn.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const notes = applySettings(JSON.parse(reader.result));
+          showIoMessage(
+            notes.length
+              ? 'Settings imported, but these were ignored: ' + notes.join(', ') + '.'
+              : 'Settings imported.',
+            notes.length ? '' : 'ok'
+          );
+        } catch (err) {
+          const message = err instanceof SyntaxError
+            ? 'This file is not valid JSON.'
+            : err.message;
+          showIoMessage('Could not import settings. ' + message, 'error');
+        } finally {
+          fileInput.value = '';
+        }
+      };
+      reader.onerror = () => {
+        showIoMessage('Could not read that file.', 'error');
+        fileInput.value = '';
+      };
+      reader.readAsText(file);
+    });
+  }
+
   function refreshUI() {
     const dbDisplay = card.querySelector('.noise-db-value');
     const currentDb = dbDisplay ? parseFloat(dbDisplay.textContent) || 0 : 0;

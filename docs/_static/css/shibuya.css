@@ -1,0 +1,30 @@
+
+/* ========================================== */
+/* sibuya customisation */
+/* .sy-content {
+    max-width: 100% !important;
+}
+*/
+/* ========================================== */
+
+/* Expand the main content grid area */
+.sy-content,
+.sy-body,
+.sy-container,
+main {
+    max-width: 100% !important;
+}
+
+/* Allow the article body to stretch fluidly across the screen */
+article.sy-article {
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+/* Optional: Hide the right-side Table of Contents (ToC) if you want
+   the content area to extend all the way to the right edge */
+.sy-sidebar-right,
+aside.sy-toc {
+    display: none !important;
+}
+
