@@ -16,18 +16,7 @@ These docs provide details on sphinx extensions and how to use them. The extensi
 
 
 .. toctree::
-    :maxdepth: 3
-    :caption: Classroom Tools:
-
-    tools/seatingplan.rst
-    tools/studentgroups.rst
-    tools/namepicker.rst
-
-    tools/noisemonitor.rst
-
-
-.. toctree::
-    :maxdepth: 3
+    :maxdepth: 2
     :caption: Directive information:
 
 
@@ -36,3 +25,16 @@ These docs provide details on sphinx extensions and how to use them. The extensi
     info/namepicker_info.rst
 
     info/noisemonitor_info.rst
+
+
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Classroom Tools:
+
+    tools/seatingplan.rst
+    tools/studentgroups.rst
+    tools/namepicker.rst
+
+    tools/noisemonitor.rst
+
