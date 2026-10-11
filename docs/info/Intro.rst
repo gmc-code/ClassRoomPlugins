@@ -23,3 +23,8 @@ Working examples are at:
 - `randomgroups </tools/randomgroups.html>`_
 - `namepicker </tools/namepicker.html>`_
 - `noisemonitor </tools/noisemonitor.html>`_
+
+- :doc:`seatingplan </tools/seatingplan_info>`
+- :doc:`randomgroups </tools/randomgroups_info>`
+- :doc:`namepicker </tools/namepicker_info>`
+- :doc:`noisemonitor </tools/noisemonitor_info>`
