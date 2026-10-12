@@ -5,8 +5,10 @@
     var PRESETS = [
         { label: '5×6', rows: [6, 6, 6, 6, 6] },
         { label: '4×7', rows: [7, 7, 7, 7] },
+        { label: '4×8', rows: [8, 8, 8, 8] },
         { label: '5,8,8,6', rows: [5, 8, 8, 6] },
         { label: '3x9', rows: [9, 9, 9] },
+        { label: '3x10', rows: [10, 10, 10] },
         { label: '7,10,10', rows: [7, 10, 10] },
         { label: '6,11,11', rows: [6, 11, 11] },
         { label: '4,12,12', rows: [4, 12, 12] },
@@ -42,6 +44,24 @@
         if (cls) n.className = cls;
         if (text != null) n.textContent = text;
         return n;
+    }
+
+    /* "7,8,9,6" -> [7,8,9,6]; "5x6" -> five rows of 6. Returns null if invalid. */
+    function parseLayout(text) {
+        var t = String(text || '').trim().toLowerCase().replace(/\u00d7/g, 'x');
+        var rows, m = t.match(/^(\d+)\s*x\s*(\d+)$/);
+        if (m) {
+            rows = [];
+            for (var i = 0; i < +m[1]; i++) rows.push(+m[2]);
+        } else {
+            if (!/^[\d,\s]+$/.test(t)) return null;
+            rows = t.split(/[,\s]+/).filter(Boolean).map(Number);
+        }
+        if (!rows.length || rows.length > 12) return null;
+        for (var j = 0; j < rows.length; j++) {
+            if (!(rows[j] >= 1 && rows[j] <= 20)) return null;
+        }
+        return rows;
     }
 
     function esc(v) {
@@ -374,7 +394,8 @@
             try {
                 var currentTitle = ui.title ? ui.title.textContent.trim() : state.title;
                 localStorage.setItem(storageKey, JSON.stringify({
-                    title: currentTitle, students: state.students, rules: state.rules, display: state.display
+                    title: currentTitle, students: state.students, rules: state.rules, display: state.display,
+                    layout: state.layout
                 }));
             } catch (e) { /* storage blocked */ }
         }
@@ -388,6 +409,7 @@
                     if (d.title) state.title = d.title;
                     state.students = d.students;
                     state.rules = Array.isArray(d.rules) ? d.rules : [];
+                    if (Array.isArray(d.layout) && parseLayout(d.layout.join(','))) state.layout = d.layout;
                     if (d.display && typeof d.display === 'object') {
                         Object.keys(state.display).forEach(function (k) {
                             if (typeof d.display[k] === 'boolean') state.display[k] = d.display[k];
@@ -421,6 +443,41 @@
         }
 
         /* ----- skeleton ----- */
+
+        function layoutButtonHtml(p) {
+            return '<button type="button" class="sp-btn sp-btn-layout" data-action="layout" data-layout="' +
+                p.rows.join(',') + '">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>' +
+                esc(p.label) + '</button>';
+        }
+
+        /* Make sure the current layout has a button (custom layouts, JSON imports). */
+        function ensureLayoutButton() {
+            var key = state.layout.join(',');
+            var exists = Array.prototype.some.call(ui.layouts.querySelectorAll('[data-layout]'), function (b) {
+                return b.getAttribute('data-layout') === key;
+            });
+            if (!exists) {
+                ui.layouts.insertAdjacentHTML('afterbegin', layoutButtonHtml({ label: key, rows: state.layout }));
+            }
+        }
+
+        function applyCustomLayout() {
+            var input = ui['custom-layout'];
+            var rows = parseLayout(input.value);
+            if (!rows) {
+                input.classList.add('sp-invalid');
+                setStatus('Custom layout not recognised. Type desks per row, front row first, e.g. 7,8,9,6 ' +
+                    '(or 5x6 for 5 rows of 6). Up to 12 rows of 1–20 desks.');
+                input.focus();
+                return;
+            }
+            input.classList.remove('sp-invalid');
+            input.value = '';
+            state.layout = rows;
+            autoArrange(state.sortMode);
+            save();
+        }
 
         function build() {
             var layoutBtns = PRESETS.slice();
@@ -488,6 +545,8 @@
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>' +
                 'Reverse</button>' +
 
+                '<button type="button" class="sp-btn sp-btn-purple" data-action="fill" data-role="fill"></button>' +
+
                 '<button type="button" class="sp-btn sp-btn-teal" data-action="rules">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><line x1="4" x2="20" y1="21" y2="21"/><line x1="4" x2="8" y1="14" y2="14"/><line x1="12" x2="20" y1="14" y2="14"/><line x1="16" x2="20" y1="7" y2="7"/><line x1="4" x2="12" y1="7" y2="7"/><circle cx="10" cy="14" r="2"/><circle cx="14" cy="7" r="2"/></svg>' +
                 'Rules</button>' +
@@ -495,14 +554,15 @@
 
                 /* Row 3: Layout presets and fill orientation */
                 '<div class="sp-toolbar-row">' +
-                '<button type="button" class="sp-btn sp-btn-purple" data-action="fill" data-role="fill"></button>' +
+
                 '<div class="sp-layouts" data-role="layouts">' +
-                layoutBtns.map(function (p) {
-                    return '<button type="button" class="sp-btn sp-btn-layout" data-action="layout" data-layout="' +
-                        p.rows.join(',') + '">' +
-                        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>' +
-                        esc(p.label) + '</button>';
-                }).join('') +
+                layoutBtns.map(layoutButtonHtml).join('') +
+                '</div>' +
+                '<div class="sp-custom-layout">' +
+                '<input type="text" class="sp-custom-input" data-role="custom-layout" ' +
+                'placeholder="Custom e.g. 7,8,9,6" aria-label="Custom layout: desks per row, front row first" ' +
+                'title="Desks per row, front row first, separated by commas (e.g. 7,8,9,6). 5x6 also works.">' +
+                '<button type="button" class="sp-btn sp-btn-purple" data-action="custom-layout">Apply</button>' +
                 '</div>' +
                 '</div>' +
 
@@ -539,7 +599,7 @@
                 '<div class="sp-grid" data-role="grid"></div></div>' +
                 '</div>';
 
-            ['title', 'layouts', 'fill', 'file', 'json-file', 'toggle-surname-initial', 'toggle-homeroom', 'toggle-ignore-rules', 'toggle-oneline', 'toggle-hide-badges', 'status', 'count', 'pool', 'grid'].forEach(function (r) {
+            ['title', 'layouts', 'custom-layout', 'fill', 'file', 'json-file', 'toggle-surname-initial', 'toggle-homeroom', 'toggle-ignore-rules', 'toggle-oneline', 'toggle-hide-badges', 'status', 'count', 'pool', 'grid'].forEach(function (r) {
                 ui[r] = root.querySelector('[data-role="' + r + '"]');
             });
 
@@ -585,6 +645,12 @@
             });
             ui.pool.addEventListener('dragover', function (e) { e.preventDefault(); });
             ui.pool.addEventListener('drop', onPoolDrop);
+            ui['custom-layout'].addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') { e.preventDefault(); applyCustomLayout(); }
+            });
+            ui['custom-layout'].addEventListener('input', function () {
+                ui['custom-layout'].classList.remove('sp-invalid');
+            });
         }
 
         function applyDisplayClasses() {
@@ -650,6 +716,7 @@
 
         function updateToolbar() {
             ui.fill.textContent = state.fillFromLast ? 'Fill: Last → First' : 'Fill: First → Last';
+            ensureLayoutButton();
             var key = state.layout.join(',');
             Array.prototype.forEach.call(ui.layouts.querySelectorAll('[data-layout]'), function (b) {
                 b.classList.toggle('sp-active', b.getAttribute('data-layout') === key);
@@ -663,7 +730,9 @@
                 case 'layout':
                     state.layout = t.getAttribute('data-layout').split(',').map(Number);
                     autoArrange(state.sortMode);
+                    save();
                     break;
+                case 'custom-layout': applyCustomLayout(); break;
                 case 'fill':
                     state.fillFromLast = !state.fillFromLast;
                     autoArrange(state.sortMode);
@@ -1205,6 +1274,7 @@
             if (!window.confirm('Reset this plan to the roster and rules written on the page? Your imported roster and rules will be removed.')) return;
             try { localStorage.removeItem(storageKey); } catch (e) { /* ignore */ }
             defaultsFromConfig();
+            state.layout = cfg.layout.slice();
             if (ui.title) ui.title.textContent = state.title;
             syncDisplayControls();
             autoArrange(cfg.sort || 'DEFAULT');

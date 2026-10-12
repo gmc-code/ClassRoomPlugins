@@ -82,6 +82,14 @@
     border-radius: 6px; border: 1px solid #334155;
 }
 .seatingplan .sp-file { display: none; }
+.seatingplan .sp-custom-layout { display: inline-flex; align-items: center; gap: 4px; }
+.seatingplan .sp-custom-input {
+    width: 150px; padding: 4px 8px; font: 500 12px/1.2 inherit; font-family: inherit;
+    background: #0f172a; color: #f8fafc; border: 1px solid #334155; border-radius: 4px;
+}
+.seatingplan .sp-custom-input::placeholder { color: #64748b; }
+.seatingplan .sp-custom-input:focus { outline: none; border-color: #3b82f6; }
+.seatingplan .sp-custom-input.sp-invalid { border-color: #dc2626; }
 
 .sp-btn {
     background: #3b82f6; color: #fff; border: none; border-radius: 4px;
