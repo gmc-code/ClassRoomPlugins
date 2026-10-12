@@ -17,11 +17,11 @@
     /* Table mode. A layout is rows of tables, front row first; each table is '4', '6w'
        (6 seats, 3 wide x 2 deep) or '6d' (2 wide x 3 deep). Written as e.g. "6,4,6 / 4,6,4". */
     var TABLE_PRESETS = [
-        { label: '6 tables of 4', text: '4,4,4 / 4,4,4' },
+        { label: '7 tables of 4', text: '4,4,4 / 4,4,4,4' },
         { label: '8 tables of 4', text: '4,4,4,4 / 4,4,4,4' },
-        { label: '5 tables of 6', text: '6,6,6 / 6,6' },
         { label: '6,4,6 / 4,6,4', text: '6,4,6 / 4,6,4' },
-        { label: '6 tables of 6 deep', text: '6d,6d,6d / 6d,6d,6d' }
+        { label: '5 tables of 6', text: '6,6,6 / 6,6' },
+        { label: '5 tables of 6 deep', text: '6,6 / 6d,6d,6d' }
     ];
     var TABLE_SHAPES = { '4': { cols: 2, rows: 2 }, '6w': { cols: 3, rows: 2 }, '6d': { cols: 2, rows: 3 } };
     var DEFAULT_TABLES = '4,4,4,4 / 4,4,4,4';
