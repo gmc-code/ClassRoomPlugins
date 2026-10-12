@@ -66,7 +66,8 @@ Directive options
 
 ``:title:``
    Sets the initial title displayed above the seating plan. The title can also
-   be edited in the browser.
+   be edited in the browser, and **Import Roster** replaces it with the
+   imported file's name.
 
 ``:fill:``
    Determines which end of the room fills first.
@@ -254,7 +255,10 @@ Toolbar controls
    * - Control
      - Function
    * - **Import Roster**
-     - Loads a CSV or Excel class list into the browser.
+     - Loads a CSV or Excel class list into the browser. The file name becomes
+       the plan's title, without the extension and with underscores shown as
+       spaces, so ``8_Science Period 3.xlsx`` gives "8 Science Period 3". Click
+       the title to change it.
    * - **Export JSON**
      - Saves the complete seating plan, including students, rules, layout and
        desk positions, as a ``.json`` file. In Chrome and Edge a Save As box

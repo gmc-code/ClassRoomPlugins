@@ -1466,7 +1466,12 @@
 
         /* ----- import roster ----- */
 
-        function applyRows(rows) {
+        /* "8_Science_Period_3.xlsx" -> "8 Science Period 3" (extension dropped, _ as spaces) */
+        function titleFromFileName(name) {
+            return String(name || '').replace(/\.[^.]+$/, '').replace(/_+/g, ' ').replace(/\s+/g, ' ').trim();
+        }
+
+        function applyRows(rows, fileName) {
             if (state.students.length && state.rules.length) {
                 if (!window.confirm('Importing a new class list will clear the existing seating rules. Continue?')) return;
             }
@@ -1477,6 +1482,11 @@
             }
             state.rules = [];
             state.students = students;
+            var newTitle = titleFromFileName(fileName);
+            if (newTitle) {
+                state.title = newTitle;
+                if (ui.title) ui.title.textContent = newTitle;
+            }
             save();
             autoArrange(state.sortMode);
         }
@@ -1489,12 +1499,12 @@
             reader.onerror = function () { setStatus('Could not read that file.'); input.value = ''; };
             reader.onload = function (evt) {
                 if (/\.csv$/i.test(file.name)) {
-                    applyRows(parseCSV(decodeBuffer(evt.target.result)));
+                    applyRows(parseCSV(decodeBuffer(evt.target.result)), file.name);
                     input.value = '';
                 } else {
                     loadXlsx().then(function (XLSX) {
                         var wb = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
-                        applyRows(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]));
+                        applyRows(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]), file.name);
                     }).catch(function (err) {
                         setStatus(err.message || 'Could not read that Excel file.');
                     }).then(function () { input.value = ''; });
