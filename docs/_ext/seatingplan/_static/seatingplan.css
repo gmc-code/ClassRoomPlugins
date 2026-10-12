@@ -165,6 +165,32 @@
     margin-inline-end: 6px;
 }
 
+/* ---- Rows / Tables switch ---- */
+.seatingplan .sp-mode {
+    margin-left: auto;   /* right-hand end of the toolbar row */
+    display: inline-flex; background: #0f172a; padding: 3px; border-radius: 6px; border: 1px solid #334155; gap: 2px;
+}
+.sp-btn-mode { background: transparent; color: #94a3b8; padding: 4px 10px; font-weight: 600; }
+.sp-btn-mode:hover { background: #1e293b; color: #f8fafc; }
+.sp-btn-mode.sp-active { background: #0d9488; color: #fff; }
+.seatingplan .sp-checkbox-off { opacity: .45; cursor: not-allowed; }
+
+/* ---- Table mode ---- */
+.seatingplan .sp-grid-tables { gap: 18px; }
+.seatingplan .sp-trow { display: flex; justify-content: center; gap: 22px; }
+.seatingplan .sp-table {
+    min-width: 0; background: #e2e8f0; border: 2px solid #94a3b8; border-radius: 12px;
+    padding: 4px 8px 8px; direction: ltr;
+}
+.seatingplan .sp-table-label {
+    font-size: 10px; font-weight: 700; color: #475569; text-align: center;
+    text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px;
+}
+.seatingplan .sp-table-seats { display: grid; gap: 6px; }
+.seatingplan .sp-table .sp-desk:nth-child(2n) { margin-inline-end: 0; }
+.seatingplan.sp-projector .sp-grid-tables { gap: 24px; }
+.seatingplan.sp-projector .sp-table-label { font-size: 13px; }
+
 /* ---- Teacher's View: the room seen from the front ----
    Whiteboard at the bottom, front row nearest it, and left/right swapped.
    Only the display is flipped; desk numbers, rules and saved seats are unchanged. */
@@ -175,6 +201,10 @@
 .seatingplan.sp-teacher-view .sp-grid { flex-direction: column-reverse; }
 .seatingplan.sp-teacher-view .sp-row { direction: rtl; }
 .seatingplan.sp-teacher-view .sp-desk > * { direction: ltr; }
+/* tables: rows of tables and tables in a row reversed; each table's seats turned round */
+.seatingplan.sp-teacher-view .sp-trow { direction: rtl; }
+.seatingplan.sp-teacher-view .sp-table-seats { transform: rotate(180deg); }
+.seatingplan.sp-teacher-view .sp-table-seats > .sp-desk { transform: rotate(180deg); }
 
 .seatingplan .sp-card {
     background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px;

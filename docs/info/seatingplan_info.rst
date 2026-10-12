@@ -50,6 +50,18 @@ Directive options
    The layout can also be changed in the browser with the layout buttons or
    the **Custom** box. See `Changing the layout`_.
 
+   With ``:mode: tables`` the layout lists tables instead, for example
+   ``6,4,6 / 4,6,4``. See `Table mode`_.
+
+``:mode:``
+   ``rows`` (default) for rows of desks, or ``tables`` for a room set out in
+   tables of 4 or 6. Can also be switched in the browser with **Rows** and
+   **Tables**. See `Table mode`_.
+
+``:tables-per-row:``
+   In table mode, how many tables go in each row when the layout is a single
+   list without ``/`` (default 3).
+
 ``:roster:``
    Loads a roster from a CSV file or Excel workbook (``.xlsx``), relative to
    the documentation page.
@@ -224,10 +236,16 @@ Rules are entered directly below the student list.
        each other: ``separate: Alex Smith | Sam Jones | Tom Brown``.
    * - Pair
      - ``pair: Mia Chen | Zoe Adams``
-     - Requires the students to sit side by side in the same row. The plan
-       prefers a 2-desk block (desks 1–2, 3–4, 5–6 …) but any two
-       neighbouring desks, such as 2–3, keep the rule. Up to three names can
-       be listed; three students sit in a line of neighbouring desks.
+     - Requires the students to sit side by side in the same row, in any
+       order. Up to four names can be listed:
+
+       * 2 students: the plan prefers a 2-desk block (desks 1–2, 3–4, 5–6 …)
+         but any two neighbouring desks, such as 2–3, keep the rule.
+       * 3 students: any three neighbouring desks.
+       * 4 students: two whole blocks, i.e. desks 1–4, 3–6, 5–8 ….
+
+       In table mode the students sit at the same table instead, up to the
+       size of the largest table.
    * - Front row
      - ``front: Priya Patel``
      - Requires the student to sit in the front row.
@@ -337,9 +355,10 @@ Keep together, Keep apart
    tick the students and press **Save group**. Each group is listed with
    **Edit** and a delete button.
 
-   * **Keep together** groups have 2 or 3 students. Two sit as a pair;
-     three sit in a line of neighbouring desks. A student can be in only one
-     keep-together group.
+   * **Keep together** groups have 2 to 4 students, who sit side by side in a
+     row in any order (see the Pair rule above for which desks count). In
+     table mode they sit at the same table and a group can be as big as the
+     largest table. A student can be in only one keep-together group.
    * **Keep apart** groups have 2 or more students, none of whom sit next to
      each other. A student can be in several keep-apart groups.
 
@@ -353,8 +372,10 @@ changed there; **Reset** brings back the directive's rules.
 Changing the layout
 ~~~~~~~~~~~~~~~~~~~
 
-The third toolbar row holds the layout buttons. Choosing one rearranges the
-students into that layout.
+**Rows** and **Tables**, at the right-hand end of the second toolbar row,
+switch between rows of desks and `Table mode`_. The third toolbar row holds
+the layout buttons for that mode. Choosing one rearranges the students into
+that layout. In rows mode the buttons are:
 
 .. list-table::
    :widths: 24 76
@@ -401,6 +422,69 @@ recognised, the box is outlined in red and a message explains the format.
 
 The custom layout is added as a new button so you can switch back to it, and
 the browser remembers it on later visits.
+
+Table mode
+~~~~~~~~~~
+
+For rooms set out in tables rather than rows of desks. Choose it with
+``:mode: tables`` in the directive or the **Tables** button in the browser.
+Each table is drawn as a box with its seats inside; seats are numbered table
+by table.
+
+**Table sizes**
+
+* ``4`` — 4 seats, 2 wide and 2 deep.
+* ``6`` or ``6w`` — 6 seats, 3 wide and 2 deep (long side facing the front).
+* ``6d`` — 6 seats, 2 wide and 3 deep.
+
+**Writing the layout**
+
+List the size of each table, with commas between tables and ``/`` between
+rows of tables, front row first:
+
+.. code-block:: rst
+
+   .. seatingplan::
+      :mode: tables
+      :layout: 6,4,6 / 4,6,4
+
+Shorter forms when every table is the same:
+
+* ``2x3`` — 2 rows of 3 tables of 4.
+* ``2x3 6`` — 2 rows of 3 tables of 6 (``2x3 6d`` for deep tables).
+
+A list without ``/``, such as ``6,4,6,4,6,4``, is split into rows of 3 tables,
+or the number set by ``:tables-per-row:``. A layout can have up to 8 rows of 8
+tables. The same text works in the **Custom** box when **Tables** is
+selected.
+
+**Table presets** in the browser: 6 tables of 4, 8 tables of 4, 5 tables of 6,
+6,4,6 / 4,6,4 and 6 tables of 6 deep.
+
+**Rules at tables**
+
+.. list-table::
+   :widths: 26 74
+   :header-rows: 1
+
+   * - Rule
+     - At tables
+   * - Keep together (``pair:``)
+     - Same table. A group can be as big as the largest table, and
+       ``pair:`` lines can list up to 6 names.
+   * - Keep apart (``separate:``)
+     - Different tables.
+   * - Front row / Back row
+     - A table in the front / back row of tables.
+   * - Left side / Right side
+     - The left-hand / right-hand table of a row of tables.
+   * - Empty seat beside
+     - An empty seat at the same table.
+
+Sorting, **Fill**, **Reverse**, dragging, **Teacher's View**,
+**Projector View**, **Print**, JSON export and import, **Revert** and
+**Reset** all work with tables. **Limit Desk Width** applies only to rows of
+desks and is greyed out in table mode.
 
 Display options
 ~~~~~~~~~~~~~~~
@@ -588,6 +672,31 @@ constraints.
    back: Tom Brown
    left: Jordan Lee
    empty: Ben Clark
+
+Tables
+~~~~~~
+
+A room with tables of 6 and 4. The rules apply to tables: the keep-together
+group shares a table and the keep-apart group is spread across three tables.
+
+.. seatingplan::
+   :mode: tables
+   :layout: 6,4,6 / 4,6,4
+   :title: Tables Example
+   :storage-key: tables-example
+
+   Alex Smith, Hughes 11
+   Sam Jones, Hughes 12
+   Priya Patel, N13
+   Jordan Lee, N13
+   Mia Chen, H11
+   Tom Brown, N13
+   Zoe Adams, H11
+   Ben Clark, N13
+
+   pair: Mia Chen | Zoe Adams | Ben Clark
+   separate: Alex Smith | Sam Jones | Tom Brown
+   front: Priya Patel
 
 Short front row
 ~~~~~~~~~~~~~~~

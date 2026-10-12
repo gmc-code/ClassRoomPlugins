@@ -14,6 +14,58 @@
         { label: '4,12,12', rows: [4, 12, 12] },
         { label: '14,14', rows: [14, 14] }
     ];
+    /* Table mode. A layout is rows of tables, front row first; each table is '4', '6w'
+       (6 seats, 3 wide x 2 deep) or '6d' (2 wide x 3 deep). Written as e.g. "6,4,6 / 4,6,4". */
+    var TABLE_PRESETS = [
+        { label: '6 tables of 4', text: '4,4,4 / 4,4,4' },
+        { label: '8 tables of 4', text: '4,4,4,4 / 4,4,4,4' },
+        { label: '5 tables of 6', text: '6,6,6 / 6,6' },
+        { label: '6,4,6 / 4,6,4', text: '6,4,6 / 4,6,4' },
+        { label: '6 tables of 6 deep', text: '6d,6d,6d / 6d,6d,6d' }
+    ];
+    var TABLE_SHAPES = { '4': { cols: 2, rows: 2 }, '6w': { cols: 3, rows: 2 }, '6d': { cols: 2, rows: 3 } };
+    var DEFAULT_TABLES = '4,4,4,4 / 4,4,4,4';
+
+    /* "6,4,6 / 4,6,4" or "2x3" (2 rows of 3 tables of 4) or "2x3 6d"; a list without "/"
+       wraps every perRow tables. Returns rows of table codes, or null if not valid. */
+    function parseTables(text, perRow) {
+        var t = String(text || '').trim().toLowerCase().replace(/\u00d7/g, 'x').replace(/^tables?\s*:?\s*/, '');
+        var rows = [];
+        var m = t.match(/^(\d+)\s*x\s*(\d+)(?:\s+(4|6|6w|6d))?$/);
+        if (m) {
+            var code = m[3] === '6' ? '6w' : (m[3] || '4');
+            for (var r = 0; r < +m[1]; r++) {
+                var row = [];
+                for (var c = 0; c < +m[2]; c++) row.push(code);
+                rows.push(row);
+            }
+        } else {
+            var parts = t.split('/');
+            var bad = false;
+            parts.forEach(function (part) {
+                var row = part.split(/[,\s]+/).filter(Boolean).map(function (x) {
+                    if (x === '6') return '6w';
+                    if (!TABLE_SHAPES[x]) bad = true;
+                    return x;
+                });
+                if (row.length) rows.push(row);
+            });
+            if (bad) return null;
+            if (parts.length === 1 && rows.length === 1 && perRow > 0) {
+                var all = rows[0];
+                rows = [];
+                for (var i = 0; i < all.length; i += perRow) rows.push(all.slice(i, i + perRow));
+            }
+        }
+        if (!rows.length || rows.length > 8) return null;
+        for (var k = 0; k < rows.length; k++) if (!rows[k].length || rows[k].length > 8) return null;
+        return rows;
+    }
+
+    function tablesKey(rows) { return rows.map(function (r) { return r.join(','); }).join(' / '); }
+    function tablesLabel(rows) { return tablesKey(rows).replace(/6w/g, '6'); }
+
+    var OPPOSITE_PLACES = { FRONT_ROW: 'BACK_ROW', BACK_ROW: 'FRONT_ROW', SIT_LEFT: 'SIT_RIGHT', SIT_RIGHT: 'SIT_LEFT' };
     var LIMIT_SEATS = 6; /* Limit Desk Width: short rows use the desk width of a 6-desk row */
     var XLSX_URL = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
     var xlsxPromise = null;
@@ -43,7 +95,17 @@
         '.sp-teacher-view .wb{margin:12px 0 0}' +
         '.sp-teacher-view .sp-grid{flex-direction:column-reverse}' +
         '.sp-teacher-view .sp-row{direction:rtl}' +
-        '.sp-teacher-view .sp-desk>*{direction:ltr}';
+        '.sp-teacher-view .sp-desk>*{direction:ltr}' +
+        /* Tables */
+        '.sp-grid-tables{gap:18px}' +
+        '.sp-trow{display:flex;justify-content:center;gap:22px}' +
+        '.sp-table{border:2px solid #000;border-radius:10px;padding:4px 6px 6px;min-width:0;direction:ltr}' +
+        '.sp-table-label{font-size:11px;font-weight:700;text-align:center;margin-bottom:3px}' +
+        '.sp-table-seats{display:grid;gap:6px}' +
+        '.sp-teacher-view .sp-grid-tables{flex-direction:column-reverse}' +
+        '.sp-teacher-view .sp-trow{direction:rtl}' +
+        '.sp-teacher-view .sp-table-seats{transform:rotate(180deg)}' +
+        '.sp-teacher-view .sp-table-seats>.sp-desk{transform:rotate(180deg)}';
 
     /* ---------------- helpers ---------------- */
 
@@ -104,11 +166,60 @@
         return Math.floor(a.col / 2) === Math.floor(b.col / 2);
     }
 
-    /* ---------------- seating solver (pure: no DOM) ---------------- */
-    /* strictPairs: a pair must share a 2-desk block (desks 1-2, 3-4, ...). Without it any two
-       side-by-side desks in the same row will do (e.g. 2-3). The arranger tries strict first. */
-    function solveSeating(desks, layout, rules, randomise, maxNodes, strictPairs) {
+    /* ---------------- room geometry ----------------
+       The solver and the red-highlight check ask the room these questions, so rows of
+       desks and tables use the same rules code.
+         place(type, d)       FRONT_ROW / BACK_ROW / SIT_LEFT / SIT_RIGHT satisfied at desk d?
+         near(a, b)           would two kept-apart students be too close?
+         emptyBeside(a, e)    does desk e count as the empty seat beside a?
+         together(n, a, b, s) may two members of a keep-together group of n sit at a and b?
+                              (s = strict: a pair must use a 2-desk block)                    */
+
+    /* Rows of desks. Desks: {row, col}. */
+    function rowsGeo(layout) {
         var lastRow = layout.length - 1;
+        return {
+            place: function (t, d) {
+                if (t === 'FRONT_ROW') return d.row === 0;
+                if (t === 'BACK_ROW') return d.row === lastRow;
+                if (t === 'SIT_LEFT') return d.col === 0;
+                if (t === 'SIT_RIGHT') return d.col === layout[d.row] - 1;
+                return true;
+            },
+            near: adjacent,
+            emptyBeside: function (a, e) { return a.row === e.row && Math.abs(a.col - e.col) === 1; },
+            together: function (n, a, b, strict) {
+                if (a.row !== b.row) return false;
+                var dc = Math.abs(a.col - b.col);
+                if (n <= 2) return strict ? isSideBySidePair(a, b) : dc === 1;
+                /* 4 must fill two whole 2-desk blocks (desks 1-4, 3-6, ...) */
+                if (n === 4) return Math.abs(Math.floor(a.col / 2) - Math.floor(b.col / 2)) <= 1;
+                return dc <= n - 1;   /* 3 (or more): a run of neighbouring desks */
+            }
+        };
+    }
+
+    /* Tables. Desks: {table, trow (row of tables), tpos (table's place in its row), tlast}. */
+    function tablesGeo(lastTrow) {
+        return {
+            place: function (t, d) {
+                if (t === 'FRONT_ROW') return d.trow === 0;
+                if (t === 'BACK_ROW') return d.trow === lastTrow;
+                if (t === 'SIT_LEFT') return d.tpos === 0;
+                if (t === 'SIT_RIGHT') return d.tpos === d.tlast;
+                return true;
+            },
+            near: function (a, b) { return a.table === b.table; },
+            emptyBeside: function (a, e) { return a.table === e.table; },
+            together: function (n, a, b) { return a.table === b.table; }
+        };
+    }
+
+    /* ---------------- seating solver (pure: no DOM) ---------------- */
+    /* Keep-together rules (PAIR) link students into groups; every two members of a group must
+       satisfy geo.together. strictPairs: a pair must share a 2-desk block (desks 1-2, 3-4, ...);
+       without it any two side-by-side desks will do. The arranger tries strict first. */
+    function solveSeating(desks, geo, rules, randomise, maxNodes, strictPairs) {
         var vars = [], varIndex = {};
 
         function addVar(id, owner) {
@@ -150,41 +261,38 @@
         });
         vars.forEach(function (v) { v.deg = Object.keys(v.rel).length; });
 
+        /* keep-together groups: every student linked by pair rules */
+        var groupCount = 0;
         vars.forEach(function (v) {
-            var seen = {}, stack = [v.id], n = 0;
-            seen[v.id] = true;
+            if (v.group != null) return;
+            var members = [], stack = [v];
+            v.group = ++groupCount;
             while (stack.length) {
-                var cur = vars[varIndex[stack.pop()]];
-                n++;
+                var cur = stack.pop();
+                members.push(cur);
                 Object.keys(cur.rel).forEach(function (oid) {
-                    if (cur.rel[oid].pair && !seen[oid]) { seen[oid] = true; stack.push(oid); }
+                    var o = vars[varIndex[oid]];
+                    if (cur.rel[oid].pair && o.group == null) { o.group = v.group; stack.push(o); }
                 });
             }
-            v.pairSize = n;
+            members.forEach(function (m) { m.pairSize = members.length; });
         });
 
         if (vars.length > desks.length) return null;
 
         function unaryOk(v, d) {
-            for (var i = 0; i < v.pos.length; i++) {
-                var t = v.pos[i];
-                if (t === 'FRONT_ROW' && d.row !== 0) return false;
-                if (t === 'BACK_ROW' && d.row !== lastRow) return false;
-                if (t === 'SIT_LEFT' && d.col !== 0) return false;
-                if (t === 'SIT_RIGHT' && d.col !== layout[d.row] - 1) return false;
-            }
+            for (var i = 0; i < v.pos.length; i++) if (!geo.place(v.pos[i], d)) return false;
             return true;
         }
 
         function compatible(va, da, vb, db) {
+            if (!va.owner && !vb.owner && va.pairSize > 1 && va.group === vb.group &&
+                !geo.together(va.pairSize, da, db, strictPairs)) return false;
             var rel = va.rel[vb.id];
             if (!rel) return true;
-            if (rel.empty) return da.row === db.row && Math.abs(da.col - db.col) === 1;
+            if (rel.empty) return geo.emptyBeside(va.owner ? db : da, va.owner ? da : db);
             if (rel.sep && rel.pair) return false;
-            if (rel.sep && adjacent(da, db)) return false;
-            if (rel.pair) {
-                if (strictPairs && va.pairSize <= 2 ? !isSideBySidePair(da, db) : !isNextTo(da, db)) return false;
-            }
+            if (rel.sep && geo.near(da, db)) return false;
             return true;
         }
 
@@ -205,7 +313,7 @@
         function freeNeighbours(d) {
             var n = 0;
             for (var i = 0; i < desks.length; i++) {
-                if (desks[i].index !== d.index && !used[desks[i].index] && adjacent(d, desks[i])) n++;
+                if (desks[i].index !== d.index && !used[desks[i].index] && geo.near(d, desks[i])) n++;
             }
             return n;
         }
@@ -257,10 +365,6 @@
             else assignment[v.id] = asg[i];
         });
         return { assignment: assignment, reservedDesks: reservedDesks };
-    }
-
-    function isNextTo(a, b) {
-        return a.row === b.row && Math.abs(a.col - b.col) === 1;
     }
 
     function loadXlsx() {
@@ -348,6 +452,8 @@
             students: [],
             rules: [],
             layout: cfg.layout.slice(),
+            mode: cfg.mode === 'tables' ? 'tables' : 'rows',
+            tables: configTables(),
             fillFromLast: cfg.fill === 'last',
             sortMode: cfg.sort || 'DEFAULT',
             display: {}
@@ -367,6 +473,10 @@
         var mui = {};
 
         /* ----- data ----- */
+
+        function configTables() {
+            return (cfg.tables && parseTables(tablesKey(cfg.tables))) || parseTables(DEFAULT_TABLES);
+        }
 
         function displayFromConfig() {
             var d = cfg.display || {};
@@ -412,7 +522,7 @@
                 var currentTitle = ui.title ? ui.title.textContent.trim() : state.title;
                 localStorage.setItem(storageKey, JSON.stringify({
                     title: currentTitle, students: state.students, rules: state.rules, display: state.display,
-                    layout: state.layout
+                    layout: state.layout, mode: state.mode, tables: state.tables
                 }));
             } catch (e) { /* storage blocked */ }
         }
@@ -427,6 +537,8 @@
                     state.students = d.students;
                     state.rules = Array.isArray(d.rules) ? d.rules : [];
                     if (Array.isArray(d.layout) && parseLayout(d.layout.join(','))) state.layout = d.layout;
+                    if (Array.isArray(d.tables) && parseTables(tablesKey(d.tables))) state.tables = parseTables(tablesKey(d.tables));
+                    if (d.mode === 'tables' || d.mode === 'rows') state.mode = d.mode;
                     if (d.display && typeof d.display === 'object') {
                         Object.keys(state.display).forEach(function (k) {
                             if (typeof d.display[k] === 'boolean') state.display[k] = d.display[k];
@@ -463,7 +575,7 @@
 
         function layoutButtonHtml(p) {
             return '<button type="button" class="sp-btn sp-btn-layout" data-action="layout" data-layout="' +
-                p.rows.join(',') + '">' +
+                esc(p.key || p.rows.join(',')) + '">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>' +
                 esc(p.label) + '</button>';
         }
@@ -471,6 +583,16 @@
         /* Presets, plus the page's own layout and the current (custom or imported) layout
            when they are not presets. */
         function layoutButtons() {
+            if (state.mode === 'tables') {
+                var tb = TABLE_PRESETS.map(function (p) {
+                    return { label: p.label, key: tablesKey(parseTables(p.text)) };
+                });
+                [state.tables, configTables()].forEach(function (rows) {
+                    var key = tablesKey(rows);
+                    if (!tb.some(function (p) { return p.key === key; })) tb.unshift({ label: tablesLabel(rows), key: key });
+                });
+                return tb;
+            }
             var btns = PRESETS.slice();
             [state.layout, cfg.layout].forEach(function (rows) {
                 var key = rows.join(',');
@@ -487,17 +609,29 @@
 
         function applyCustomLayout() {
             var input = ui['custom-layout'];
-            var rows = parseLayout(input.value);
+            var tables = state.mode === 'tables';
+            var rows = tables ? parseTables(input.value, cfg.tablesPerRow || 3) : parseLayout(input.value);
             if (!rows) {
                 input.classList.add('sp-invalid');
-                setStatus('Custom layout not recognised. Type desks per row, front row first, e.g. 7,8,9,6 ' +
-                    '(or 5x6 for 5 rows of 6). Up to 12 rows of 1–20 desks.');
+                setStatus(tables
+                    ? 'Tables layout not recognised. Type the seats at each table (4, 6 or 6d), commas between ' +
+                      'tables and / between rows, front row first, e.g. 6,4,6 / 4,6,4. 2x3 means 2 rows of 3 tables ' +
+                      'of 4; 2x3 6 uses tables of 6. Up to 8 rows of 8 tables.'
+                    : 'Custom layout not recognised. Type desks per row, front row first, e.g. 7,8,9,6 ' +
+                      '(or 5x6 for 5 rows of 6). Up to 12 rows of 1–20 desks.');
                 input.focus();
                 return;
             }
             input.classList.remove('sp-invalid');
             input.value = '';
-            state.layout = rows;
+            if (tables) state.tables = rows; else state.layout = rows;
+            autoArrange(state.sortMode);
+            save();
+        }
+
+        function setMode(mode) {
+            if (mode === state.mode) return;
+            state.mode = mode;
             autoArrange(state.sortMode);
             save();
         }
@@ -573,9 +707,13 @@
                 '<button type="button" class="sp-btn sp-btn-teal" data-action="rules">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><line x1="4" x2="20" y1="21" y2="21"/><line x1="4" x2="8" y1="14" y2="14"/><line x1="12" x2="20" y1="14" y2="14"/><line x1="16" x2="20" y1="7" y2="7"/><line x1="4" x2="12" y1="7" y2="7"/><circle cx="10" cy="14" r="2"/><circle cx="14" cy="7" r="2"/></svg>' +
                 'Rules</button>' +
+                '<div class="sp-mode" role="group" aria-label="Room type">' +
+                '<button type="button" class="sp-btn sp-btn-mode" data-action="mode" data-mode="rows">Rows</button>' +
+                '<button type="button" class="sp-btn sp-btn-mode" data-action="mode" data-mode="tables">Tables</button>' +
+                '</div>' +
                 '</div>' +
 
-                /* Row 3: Layout presets and fill orientation */
+                /* Row 3: Rows/Tables switch, layout presets and custom layout */
                 '<div class="sp-toolbar-row">' +
 
                 '<div class="sp-layouts" data-role="layouts">' +
@@ -749,8 +887,19 @@
 
         function updateToolbar() {
             ui.fill.textContent = state.fillFromLast ? 'Fill: Last → First' : 'Fill: First → Last';
+            var tables = state.mode === 'tables';
+            Array.prototype.forEach.call(root.querySelectorAll('[data-action="mode"]'), function (b) {
+                b.classList.toggle('sp-active', b.getAttribute('data-mode') === state.mode);
+            });
+            ui['custom-layout'].placeholder = tables ? 'Custom e.g. 6,4,6 / 4,6,4' : 'Custom e.g. 7,8,9,6';
+            ui['custom-layout'].title = tables
+                ? 'Seats per table (4, 6 or 6d), commas between tables, / between rows, front first. 2x3 = 2 rows of 3 tables of 4.'
+                : 'Desks per row, front row first, separated by commas (e.g. 7,8,9,6). 5x6 also works.';
+            var limitBox = ui['toggle-limit-width'];
+            limitBox.disabled = tables;
+            limitBox.parentNode.classList.toggle('sp-checkbox-off', tables);
             renderLayoutButtons();
-            var key = state.layout.join(',');
+            var key = tables ? tablesKey(state.tables) : state.layout.join(',');
             Array.prototype.forEach.call(ui.layouts.querySelectorAll('[data-layout]'), function (b) {
                 b.classList.toggle('sp-active', b.getAttribute('data-layout') === key);
             });
@@ -761,10 +910,12 @@
             if (!t || !root.contains(t)) return;
             switch (t.getAttribute('data-action')) {
                 case 'layout':
-                    state.layout = t.getAttribute('data-layout').split(',').map(Number);
+                    if (state.mode === 'tables') state.tables = parseTables(t.getAttribute('data-layout'));
+                    else state.layout = t.getAttribute('data-layout').split(',').map(Number);
                     autoArrange(state.sortMode);
                     save();
                     break;
+                case 'mode': setMode(t.getAttribute('data-mode')); break;
                 case 'custom-layout': applyCustomLayout(); break;
                 case 'fill':
                     state.fillFromLast = !state.fillFromLast;
@@ -836,7 +987,7 @@
 
             if (isDesk) {
                 var cols = colCount || 6;
-                if (state.display.limitWidth && cols < LIMIT_SEATS) cols = LIMIT_SEATS;
+                if (state.display.limitWidth && state.mode !== 'tables' && cols < LIMIT_SEATS) cols = LIMIT_SEATS;
                 var dynamicFontSize = Math.max(11, Math.min(20, Math.floor(110 / cols)));
                 if (root.classList.contains('sp-projector')) dynamicFontSize = Math.round(dynamicFontSize * 1.6);
 
@@ -912,24 +1063,70 @@
             return Array.prototype.slice.call(ui.grid.querySelectorAll('.sp-desk'));
         }
 
-        function initGrid() {
+        function newDesk(n) {
+            var desk = make('div', 'sp-desk');
+            desk.appendChild(make('span', 'sp-desk-num', String(n)));
+            desk.addEventListener('dragover', onDeskDragOver);
+            desk.addEventListener('dragleave', onDeskDragLeave);
+            desk.addEventListener('drop', onDeskDrop);
+            return desk;
+        }
+
+        /* Rows of tables, front row first; seats numbered table by table. */
+        function initTables() {
             ui.grid.innerHTML = '';
+            ui.grid.classList.add('sp-grid-tables');
+            var widest = 0;   /* seats ~56px wide, plus each table's padding and the gaps */
+            state.tables.forEach(function (row) {
+                var w = row.reduce(function (sum, code) { return sum + TABLE_SHAPES[code].cols * 56 + 40; }, 0);
+                widest = Math.max(widest, w);
+            });
+            ui.grid.style.minWidth = widest + 'px';
+            var n = 1, tableNo = 0;
+            state.tables.forEach(function (row, r) {
+                var trow = make('div', 'sp-trow');
+                var seatCols = row.reduce(function (sum, code) { return sum + TABLE_SHAPES[code].cols; }, 0);
+                row.forEach(function (code, i) {
+                    var shape = TABLE_SHAPES[code];
+                    var table = make('div', 'sp-table sp-table-' + code);
+                    table.style.flex = shape.cols + ' 1 0';
+                    table.appendChild(make('div', 'sp-table-label', 'Table ' + (tableNo + 1)));
+                    var seats = make('div', 'sp-table-seats');
+                    seats.style.gridTemplateColumns = 'repeat(' + shape.cols + ', minmax(0, 1fr))';
+                    for (var k = 0; k < shape.cols * shape.rows; k++) {
+                        var desk = newDesk(n++);
+                        desk.dataset.table = tableNo;
+                        desk.dataset.trow = r;
+                        desk.dataset.tpos = i;
+                        desk.dataset.tlast = row.length - 1;
+                        desk.dataset.row = r;
+                        desk.dataset.col = k % shape.cols;
+                        desk.dataset.cols = Math.max(seatCols, 6);   /* font size: like a row of this many desks */
+                        seats.appendChild(desk);
+                    }
+                    table.appendChild(seats);
+                    trow.appendChild(table);
+                    tableNo++;
+                });
+                ui.grid.appendChild(trow);
+            });
+        }
+
+        function initGrid() {
+            if (state.mode === 'tables') { initTables(); return; }
+            ui.grid.innerHTML = '';
+            ui.grid.classList.remove('sp-grid-tables');
             ui.grid.style.minWidth = (Math.max.apply(null, state.layout) * 72) + 'px';
             var n = 1;
             state.layout.forEach(function (cols, r) {
                 var row = make('div', 'sp-row');
                 row.dataset.cols = cols;
                 for (var c = 0; c < cols; c++) {
-                    var desk = make('div', 'sp-desk');
+                    var desk = newDesk(n++);
                     desk.dataset.row = r;
                     desk.dataset.col = c;
                     desk.dataset.cols = cols;
-                    desk.appendChild(make('span', 'sp-desk-num', String(n)));
-                    desk.addEventListener('dragover', onDeskDragOver);
-                    desk.addEventListener('dragleave', onDeskDragLeave);
-                    desk.addEventListener('drop', onDeskDrop);
                     row.appendChild(desk);
-                    n++;
                 }
                 ui.grid.appendChild(row);
             });
@@ -956,61 +1153,86 @@
             });
         }
 
+        /* Where a desk is, for the rules: row/col for rows of desks, table data for tables. */
+        function deskInfo(d, i) {
+            var ds = d.dataset;
+            return {
+                index: i, row: +ds.row, col: +ds.col,
+                table: ds.table != null ? +ds.table : null,
+                trow: +ds.trow, tpos: +ds.tpos, tlast: +ds.tlast
+            };
+        }
+
+        function roomGeo() {
+            return state.mode === 'tables' ? tablesGeo(state.tables.length - 1) : rowsGeo(state.layout);
+        }
+
+        /* Red highlight on desks whose student breaks a rule. */
         function validate() {
             var desks = getDesks();
-            var lastRow = state.layout.length - 1;
-            var seated = {};
-            desks.forEach(function (d) {
+            var geo = roomGeo();
+            var seated = {}, info = desks.map(deskInfo);
+            desks.forEach(function (d, i) {
                 d.classList.remove('sp-conflict');
                 var card = d.querySelector('.sp-card');
-                if (card) seated[card.dataset.sid] = { desk: d, row: +d.dataset.row, col: +d.dataset.col, cols: +d.dataset.cols };
+                if (card) seated[card.dataset.sid] = { desk: d, at: info[i] };
             });
+            function flag() { Array.prototype.forEach.call(arguments, function (x) { x.desk.classList.add('sp-conflict'); }); }
 
             state.rules.forEach(function (rule) {
                 var a = seated[rule.student1Id];
                 if (!a) return;
-
-                if (rule.type === 'FRONT_ROW' && a.row !== 0) {
-                    a.desk.classList.add('sp-conflict');
-                    return;
-                }
-                if (rule.type === 'BACK_ROW' && a.row !== lastRow) {
-                    a.desk.classList.add('sp-conflict');
-                    return;
-                }
-                if (rule.type === 'SIT_LEFT' && a.col !== 0) {
-                    a.desk.classList.add('sp-conflict');
-                    return;
-                }
-                if (rule.type === 'SIT_RIGHT' && a.col !== state.layout[a.row] - 1) {
-                    a.desk.classList.add('sp-conflict');
+                if (OPPOSITE_PLACES[rule.type]) {
+                    if (!geo.place(rule.type, a.at)) flag(a);
                     return;
                 }
                 if (rule.type === 'EMPTY_SEAT') {
-                    var hasEmptyAdjacent = desks.some(function (d) {
-                        var dRow = +d.dataset.row;
-                        var dCol = +d.dataset.col;
-                        var isAdjacentSameRow = (dRow === a.row && Math.abs(dCol - a.col) === 1);
-                        var isUnoccupied = !d.querySelector('.sp-card');
-                        return isAdjacentSameRow && isUnoccupied;
+                    var ok = desks.some(function (d, i) {
+                        return d !== a.desk && !d.querySelector('.sp-card') && geo.emptyBeside(a.at, info[i]);
                     });
-                    if (!hasEmptyAdjacent) {
-                        a.desk.classList.add('sp-conflict');
-                    }
+                    if (!ok) flag(a);
                     return;
                 }
-
                 var b = seated[rule.student2Id];
-                if (!b) return;
-
-                if (rule.type === 'SEPARATE' && adjacent(a, b)) {
-                    a.desk.classList.add('sp-conflict');
-                    b.desk.classList.add('sp-conflict');
-                } else if (rule.type === 'PAIR' && !isNextTo(a, b)) {
-                    a.desk.classList.add('sp-conflict');
-                    b.desk.classList.add('sp-conflict');
-                }
+                if (b && rule.type === 'SEPARATE' && geo.near(a.at, b.at)) flag(a, b);
             });
+
+            /* keep-together groups: checked as a whole once every member is seated */
+            keepTogetherGroups().forEach(function (ids) {
+                var members = ids.map(function (id) { return seated[id]; });
+                if (members.some(function (m) { return !m; })) return;
+                var ok = true;
+                for (var x = 0; x < members.length && ok; x++) {
+                    for (var y = x + 1; y < members.length && ok; y++) {
+                        if (!geo.together(members.length, members[x].at, members[y].at, false)) ok = false;
+                    }
+                }
+                if (!ok) flag.apply(null, members);
+            });
+        }
+
+        /* Students linked by keep-together rules, as arrays of ids. */
+        function keepTogetherGroups() {
+            var adj = {};
+            state.rules.forEach(function (r) {
+                if (r.type !== 'PAIR' || !r.student2Id) return;
+                if (!studentById(r.student1Id) || !studentById(r.student2Id)) return;
+                (adj[r.student1Id] = adj[r.student1Id] || []).push(r.student2Id);
+                (adj[r.student2Id] = adj[r.student2Id] || []).push(r.student1Id);
+            });
+            var seen = {}, groups = [];
+            Object.keys(adj).forEach(function (start) {
+                if (seen[start]) return;
+                var ids = [], stack = [start];
+                seen[start] = true;
+                while (stack.length) {
+                    var cur = stack.pop();
+                    ids.push(cur);
+                    adj[cur].forEach(function (o) { if (!seen[o]) { seen[o] = true; stack.push(o); } });
+                }
+                groups.push(ids);
+            });
+            return groups;
         }
 
         /* ----- drag and drop ----- */
@@ -1196,8 +1418,8 @@
         }
 
         function solve(deskSlots, randomise, rules, strictPairs) {
-            var desks = deskSlots.map(function (d, i) { return { index: i, row: +d.dataset.row, col: +d.dataset.col }; });
-            return solveSeating(desks, state.layout, rules, randomise, 60000, strictPairs);
+            var desks = deskSlots.map(deskInfo);
+            return solveSeating(desks, roomGeo(), rules, randomise, 60000, strictPairs);
         }
 
         /* Pairs in a 2-desk block if possible, otherwise any two neighbouring desks. */
@@ -1318,6 +1540,8 @@
             clearImportSnapshot();
             defaultsFromConfig();
             state.layout = cfg.layout.slice();
+            state.mode = cfg.mode === 'tables' ? 'tables' : 'rows';
+            state.tables = configTables();
             state.fillFromLast = cfg.fill === 'last';
             if (ui.title) ui.title.textContent = state.title;
             syncDisplayControls();
@@ -1355,7 +1579,9 @@
 
             var payload = {
                 title: currentTitle || 'Seating Plan',
+                mode: state.mode,
                 layout: state.layout,
+                tables: state.tables,
                 fillFromLast: state.fillFromLast,
                 sortMode: state.sortMode,
                 students: state.students,
@@ -1476,7 +1702,12 @@
                 if (ui.title) ui.title.textContent = data.title;
             }
 
+            var tables = Array.isArray(data.tables) ? parseTables(tablesKey(data.tables)) : null;
+            if (data.mode === 'tables' && !tables) throw new Error('the tables layout in that file is not valid.');
+
             state.layout = layout;
+            if (tables) state.tables = tables;
+            state.mode = data.mode === 'tables' ? 'tables' : 'rows';
             state.students = students;
             state.rules = Array.isArray(data.rules) ? data.rules : [];
             if (data.fillFromLast != null) state.fillFromLast = !!data.fillFromLast;
@@ -1567,7 +1798,8 @@
             autoArrange(state.sortMode);
             /* Revert puts the class back in the file's own order */
             storeImportSnapshot('roster', fileName, {
-                title: state.title, layout: state.layout.slice(), fillFromLast: state.fillFromLast,
+                title: state.title, layout: state.layout.slice(), mode: state.mode, tables: state.tables,
+                fillFromLast: state.fillFromLast,
                 sortMode: 'DEFAULT', students: students, rules: [], placement: []
             });
         }
@@ -1632,13 +1864,39 @@
             { type: 'SIT_LEFT', icon: '⬅', label: 'Left side', help: 'Ticked students must sit at the left end of a row (students\' left, facing the whiteboard).' },
             { type: 'SIT_RIGHT', icon: '➡', label: 'Right side', help: 'Ticked students must sit at the right end of a row (students\' right, facing the whiteboard).' },
             { type: 'EMPTY_SEAT', icon: '🪑', label: 'Empty seat beside', help: 'Ticked students get an empty desk next to them.' },
-            { type: 'PAIR', icon: '🔗', label: 'Keep together', group: true, max: 3,
-              help: 'Students in a group sit side by side: 2 as a pair, 3 in a line of neighbouring desks.' },
+            { type: 'PAIR', icon: '🔗', label: 'Keep together', group: true, max: 4,
+              help: 'Students in a group sit side by side in a row: 2 as a pair, 3 on neighbouring desks, 4 on desks 1–4, 3–6, 5–8 …' },
             { type: 'SEPARATE', icon: '⚠️', label: 'Keep apart', group: true,
               help: 'No two students in a group sit next to each other, including diagonally.' }
         ];
         var OPPOSITE = { FRONT_ROW: 'BACK_ROW', BACK_ROW: 'FRONT_ROW', SIT_LEFT: 'SIT_RIGHT', SIT_RIGHT: 'SIT_LEFT' };
         var panel = { kind: 'FRONT_ROW', search: '', onlyTicked: false, editing: null, picked: {} };
+
+        /* In table mode the rules mean tables rather than rows of desks. */
+        var TABLE_HELP = {
+            FRONT_ROW: 'Ticked students must sit at a table in the front row of tables.',
+            BACK_ROW: 'Ticked students must sit at a table in the back row of tables.',
+            SIT_LEFT: 'Ticked students must sit at the left-hand table of a row (students\' left, facing the whiteboard).',
+            SIT_RIGHT: 'Ticked students must sit at the right-hand table of a row (students\' right, facing the whiteboard).',
+            EMPTY_SEAT: 'Ticked students get an empty seat at their table.',
+            PAIR: 'Students in a group sit at the same table.',
+            SEPARATE: 'Students in a group sit at different tables.'
+        };
+
+        function helpFor(kind) {
+            return state.mode === 'tables' ? TABLE_HELP[kind.type] : kind.help;
+        }
+
+        /* Largest keep-together group: 4 in rows, the biggest table in table mode. */
+        function maxFor(kind) {
+            if (kind.type !== 'PAIR') return kind.max;
+            if (state.mode !== 'tables') return 4;
+            var most = 0;
+            state.tables.forEach(function (row) {
+                row.forEach(function (code) { most = Math.max(most, TABLE_SHAPES[code].cols * TABLE_SHAPES[code].rows); });
+            });
+            return most;
+        }
 
         function kindInfo(type) {
             for (var i = 0; i < RULE_KINDS.length; i++) if (RULE_KINDS[i].type === type) return RULE_KINDS[i];
@@ -1774,7 +2032,7 @@
         function renderPanel() {
             fillKinds();
             var kind = kindInfo(panel.kind);
-            mui.help.textContent = kind.help;
+            mui.help.textContent = helpFor(kind);
             mui.body.innerHTML = '';
             mui.foot.innerHTML = '';
             if (!state.students.length) {
@@ -1879,11 +2137,12 @@
             var own = editing.key ? groups.filter(function (g) { return g.key === editing.key; })[0] : null;
             var ownIds = own ? own.ids : [];
             var pickedIds = Object.keys(panel.picked).filter(function (id) { return panel.picked[id]; });
-            var full = kind.max && pickedIds.length >= kind.max;
+            var max = maxFor(kind);
+            var full = max && pickedIds.length >= max;
 
             mui.body.innerHTML =
                 '<div class="sp-rp-edit-title">' + (own ? 'Edit group' : 'New group') + ' — tick ' +
-                (kind.max ? '2 or 3 students' : '2 or more students') + '</div>' + searchRow(false);
+                (max ? '2 to ' + max + ' students' : '2 or more students') + '</div>' + searchRow(false);
             var list = make('div', 'sp-rp-list');
             list.setAttribute('data-m', 'list');
             list.setAttribute('data-group', kind.type);

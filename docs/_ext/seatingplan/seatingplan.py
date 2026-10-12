@@ -128,6 +128,35 @@ def _parse_layout(text):
     return rows
 
 
+TABLE_CODES = {"4": "4", "6": "6w", "6w": "6w", "6d": "6d"}
+
+
+def _parse_tables(text, per_row=3):
+    """'6,4,6 / 4,6,4' -> [['6w','4','6w'], ['4','6w','4']]; '2x3' -> 2 rows of 3 tables of 4;
+    '2x3 6d' -> tables of 6 (2 wide, 3 deep). A list without '/' wraps every per_row tables."""
+    text = text.strip().lower().replace("\u00d7", "x")
+    text = re.sub(r"^tables?\s*:?\s*", "", text)
+    match = re.fullmatch(r"(\d+)\s*x\s*(\d+)(?:\s+(4|6|6w|6d))?", text)
+    if match:
+        code = TABLE_CODES[match.group(3) or "4"]
+        rows = [[code] * int(match.group(2)) for _ in range(int(match.group(1)))]
+    else:
+        parts = text.split("/")
+        rows = []
+        for part in parts:
+            row = [p for p in re.split(r"[,\s]+", part) if p]
+            if any(p not in TABLE_CODES for p in row):
+                raise ValueError
+            if row:
+                rows.append([TABLE_CODES[p] for p in row])
+        if len(parts) == 1 and len(rows) == 1 and per_row:
+            flat = rows[0]
+            rows = [flat[i:i + per_row] for i in range(0, len(flat), per_row)]
+    if not rows or len(rows) > 8 or any(not r or len(r) > 8 for r in rows):
+        raise ValueError
+    return rows
+
+
 def _choice(*values):
     return lambda arg: directives.choice(arg, values)
 
@@ -146,6 +175,8 @@ class SeatingPlanDirective(SphinxDirective):
     optional_arguments = 0
     option_spec = {
         "layout": directives.unchanged,
+        "mode": _choice("rows", "tables"),
+        "tables-per-row": directives.positive_int,
         "roster": directives.path,
         "title": directives.unchanged,
         "fill": _choice("first", "last"),
@@ -171,15 +202,29 @@ class SeatingPlanDirective(SphinxDirective):
         env.temp_data["seatingplan_count"] = count + 1
         storage_id = self.options.get("storage-key") or "%s#%d" % (env.docname, count)
 
-        try:
-            layout = _parse_layout(self.options.get("layout", "5x6"))
-        except ValueError:
-            self._warn(
-                "invalid :layout: %r; using 5x6. Use e.g. '5x6' for 5 rows of 6 or "
-                "'7,8,9,6' for rows of 7, 8, 9 and 6 (up to 12 rows of 1-20 desks)."
-                % self.options.get("layout")
-            )
-            layout = [6] * 5
+        mode = self.options.get("mode", "rows")
+        per_row = self.options.get("tables-per-row", 3)
+        layout, tables = [6] * 5, None
+        if mode == "tables":
+            try:
+                tables = _parse_tables(self.options.get("layout", "4,4,4,4 / 4,4,4,4"), per_row)
+            except ValueError:
+                self._warn(
+                    "invalid tables :layout: %r; using 8 tables of 4. List the seats at each table "
+                    "(4, 6 or 6d) with commas between tables and '/' between rows, e.g. "
+                    "'6,4,6 / 4,6,4', or '2x3' for 2 rows of 3 tables of 4 (up to 8 rows of 8 tables)."
+                    % self.options.get("layout")
+                )
+                tables = _parse_tables("4,4,4,4 / 4,4,4,4")
+        else:
+            try:
+                layout = _parse_layout(self.options.get("layout", "5x6"))
+            except ValueError:
+                self._warn(
+                    "invalid :layout: %r; using 5x6. Use e.g. '5x6' for 5 rows of 6 or "
+                    "'7,8,9,6' for rows of 7, 8, 9 and 6 (up to 12 rows of 1-20 desks)."
+                    % self.options.get("layout")
+                )
 
         students = []
         roster = self.options.get("roster")
@@ -240,13 +285,13 @@ class SeatingPlanDirective(SphinxDirective):
                 if a is not None:
                     rules.append({"type": RULE_TYPES[kind], "a": a, "b": None})
                 continue
-            # pair: 2-3 names sit in a line; separate: any number, none next to each other
+            # pair: 2-4 names sit side by side; separate: any number, none next to each other
             names = [n.strip() for n in body.split("|")]
-            limit = 3 if kind == "pair" else None
+            limit = (6 if mode == "tables" else 4) if kind == "pair" else None
             if len(names) < 2 or not all(names) or (limit and len(names) > limit):
                 self._warn(
                     "'%s:' rule skipped: it needs %s names separated by '|'."
-                    % (kind, "2 or 3" if limit else "2 or more")
+                    % (kind, "2 to %d" % limit if limit else "2 or more")
                 )
                 continue
             ids = [find(n, kind) for n in names]
@@ -271,6 +316,9 @@ class SeatingPlanDirective(SphinxDirective):
             "id": storage_id,
             "title": self.options.get("title", ""),
             "layout": layout,
+            "mode": mode,
+            "tables": tables,
+            "tablesPerRow": per_row,
             "fill": self.options.get("fill", "first"),
             "sort": {
                 "none": "DEFAULT", "az": "AZ", "za": "ZA",
