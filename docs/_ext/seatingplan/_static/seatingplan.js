@@ -587,16 +587,16 @@
                 'Surname Initial Only' +
                 '</label>' +
                 '<label class="sp-checkbox-label">' +
+                '<input type="checkbox" data-role="toggle-oneline" class="sp-checkbox">' +
+                'One-line Names' +
+                '</label>' +
+                '<label class="sp-checkbox-label">' +
                 '<input type="checkbox" data-role="toggle-homeroom" class="sp-checkbox" checked>' +
                 'Show Homeroom' +
                 '</label>' +
                 '<label class="sp-checkbox-label">' +
                 '<input type="checkbox" data-role="toggle-ignore-rules" class="sp-checkbox">' +
                 'Ignore Rules' +
-                '</label>' +
-                '<label class="sp-checkbox-label">' +
-                '<input type="checkbox" data-role="toggle-oneline" class="sp-checkbox">' +
-                'One-line Names' +
                 '</label>' +
                 '<label class="sp-checkbox-label">' +
                 '<input type="checkbox" data-role="toggle-hide-badges" class="sp-checkbox">' +
