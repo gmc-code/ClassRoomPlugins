@@ -42,6 +42,13 @@ Directive options
    * ``5x6`` — 5 rows of 6 desks (default).
    * ``4x7`` — 4 rows of 7 desks.
    * ``11,11,6`` — rows containing 11, 11 and 6 desks.
+   * ``7,8,9,6`` — rows of 7, 8, 9 and 6 desks.
+
+   Rows are listed front row first. A layout can have up to 12 rows of 1–20
+   desks each.
+
+   The layout can also be changed in the browser with the layout buttons or
+   the **Custom** box. See `Changing the layout`_.
 
 ``:roster:``
    Loads a roster from a CSV file or Excel workbook (``.xlsx``), relative to
@@ -141,7 +148,9 @@ For example:
    Mia Chen, Hughes 11
 
 The first word becomes the student's first name, and the remaining text
-becomes the surname. Homerooms are abbreviated automatically where possible.
+becomes the surname. Short homeroom codes such as ``7A`` or ``N12`` are kept
+as they are; longer names are shortened to the first letter and last two
+digits, so ``Hughes 11`` becomes ``H11``.
 
 Seating rules
 ~~~~~~~~~~~~~
@@ -225,8 +234,63 @@ Toolbar controls
      - Randomly distributes students.
    * - **Reverse**
      - Reverses the current seating sequence.
+   * - **Fill: First → Last**
+     - Switches which end of the room fills first (**First → Last** or
+       **Last → First**) and rearranges the students.
    * - **Rules**
      - Opens the seating rules editor.
+
+Changing the layout
+~~~~~~~~~~~~~~~~~~~
+
+The third toolbar row holds the layout buttons. Choosing one rearranges the
+students into that layout.
+
+.. list-table::
+   :widths: 24 76
+   :header-rows: 1
+
+   * - Button
+     - Layout
+   * - **5x6**
+     - 5 rows of 6 desks.
+   * - **4x7**
+     - 4 rows of 7 desks.
+   * - **4x8**
+     - 4 rows of 8 desks.
+   * - **5,8,8,6**
+     - Rows of 5, 8, 8 and 6 desks.
+   * - **3x9**
+     - 3 rows of 9 desks.
+   * - **3x10**
+     - 3 rows of 10 desks.
+   * - **7,10,10**
+     - Rows of 7, 10 and 10 desks.
+   * - **6,11,11**
+     - Rows of 6, 11 and 11 desks.
+   * - **4,12,12**
+     - Rows of 4, 12 and 12 desks.
+   * - **14,14**
+     - 2 rows of 14 desks.
+
+If the directive's ``:layout:`` is not one of these, it gets its own button at
+the start of the row.
+
+Custom layouts
+^^^^^^^^^^^^^^
+
+To use any other room shape, type the number of desks in each row into the
+**Custom** box, front row first, separated by commas, then press
+:kbd:`Enter` or **Apply**. For example:
+
+* ``7,8,9,6`` — rows of 7, 8, 9 and 6 desks.
+* ``5x6`` — 5 rows of 6 desks (``5×6`` also works).
+
+A layout can have up to 12 rows of 1–20 desks each. If the entry is not
+recognised, the box is outlined in red and a message explains the format.
+
+The custom layout is added as a new button so you can switch back to it, and
+the browser remembers it on later visits.
 
 Display options
 ~~~~~~~~~~~~~~~
@@ -256,10 +320,11 @@ Display options
 What the browser remembers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The browser remembers the title, students, rules and display options for each
-directive. Remembered display options take priority over the directive's
-display options on later visits. **Reset** returns the page to the students,
-rules, sort order and display options written in the directive.
+The browser remembers the title, students, rules, layout and display options
+for each directive. The remembered layout and display options take priority
+over the directive's ``:layout:`` and display options on later visits.
+**Reset** returns the page to the students, rules, layout, sort order and
+display options written in the directive.
 
 Privacy and student data
 ------------------------

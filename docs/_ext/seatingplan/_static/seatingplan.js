@@ -1,5 +1,7 @@
 /* seatingplan directive: client-side behaviour. Each .seatingplan[data-seatingplan] gets its own instance. */
+(function () {
     'use strict';
+
     var PRESETS = [
         { label: '5x6', rows: [6, 6, 6, 6, 6] },
         { label: '4x7', rows: [7, 7, 7, 7] },
@@ -73,6 +75,7 @@
     function formatHomeroom(hr) {
         var str = clean(hr);
         if (!str) return '';
+        if (str.length <= 4 && !/\s/.test(str)) return str;
         var digits = str.replace(/\D/g, '');
         return str.charAt(0) + (digits.length >= 2 ? digits.slice(-2) : digits);
     }
@@ -449,15 +452,21 @@
                 esc(p.label) + '</button>';
         }
 
-        /* Make sure the current layout has a button (custom layouts, JSON imports). */
-        function ensureLayoutButton() {
-            var key = state.layout.join(',');
-            var exists = Array.prototype.some.call(ui.layouts.querySelectorAll('[data-layout]'), function (b) {
-                return b.getAttribute('data-layout') === key;
+        /* Presets, plus the page's own layout and the current (custom or imported) layout
+           when they are not presets. */
+        function layoutButtons() {
+            var btns = PRESETS.slice();
+            [state.layout, cfg.layout].forEach(function (rows) {
+                var key = rows.join(',');
+                if (!btns.some(function (p) { return p.rows.join(',') === key; })) {
+                    btns.unshift({ label: key, rows: rows.slice() });
+                }
             });
-            if (!exists) {
-                ui.layouts.insertAdjacentHTML('afterbegin', layoutButtonHtml({ label: key, rows: state.layout }));
-            }
+            return btns;
+        }
+
+        function renderLayoutButtons() {
+            ui.layouts.innerHTML = layoutButtons().map(layoutButtonHtml).join('');
         }
 
         function applyCustomLayout() {
@@ -478,11 +487,6 @@
         }
 
         function build() {
-            var layoutBtns = PRESETS.slice();
-            var key = state.layout.join(',');
-            var known = layoutBtns.some(function (p) { return p.rows.join(',') === key; });
-            if (!known) layoutBtns.unshift({ label: key, rows: state.layout.slice() });
-
             root.innerHTML =
                 '<div class="sp-title" data-role="title" title="Click to edit class title"></div>' +
                 '<button type="button" class="sp-projector-exit" data-action="projector-exit">✕ Exit projector view</button>' +
@@ -554,7 +558,7 @@
                 '<div class="sp-toolbar-row">' +
 
                 '<div class="sp-layouts" data-role="layouts">' +
-                layoutBtns.map(layoutButtonHtml).join('') +
+                layoutButtons().map(layoutButtonHtml).join('') +
                 '</div>' +
                 '<div class="sp-custom-layout">' +
                 '<input type="text" class="sp-custom-input" data-role="custom-layout" ' +
@@ -714,7 +718,7 @@
 
         function updateToolbar() {
             ui.fill.textContent = state.fillFromLast ? 'Fill: Last → First' : 'Fill: First → Last';
-            ensureLayoutButton();
+            renderLayoutButtons();
             var key = state.layout.join(',');
             Array.prototype.forEach.call(ui.layouts.querySelectorAll('[data-layout]'), function (b) {
                 b.classList.toggle('sp-active', b.getAttribute('data-layout') === key);
@@ -1273,6 +1277,7 @@
             try { localStorage.removeItem(storageKey); } catch (e) { /* ignore */ }
             defaultsFromConfig();
             state.layout = cfg.layout.slice();
+            state.fillFromLast = cfg.fill === 'last';
             if (ui.title) ui.title.textContent = state.title;
             syncDisplayControls();
             autoArrange(cfg.sort || 'DEFAULT');
@@ -1329,14 +1334,27 @@
                     if (!data || !Array.isArray(data.students) || !Array.isArray(data.layout)) {
                         throw new Error('Invalid seating plan JSON format.');
                     }
+                    var layout = parseLayout(data.layout.join(','));
+                    if (!layout) throw new Error('the layout in that file is not valid.');
+                    var seenIds = {};
+                    var students = data.students.filter(function (s) {
+                        if (!s || s.id == null || seenIds[s.id]) return false;
+                        seenIds[s.id] = true;
+                        return true;
+                    }).map(function (s, idx) {
+                        var first = clean(s.firstName) || 'Student';
+                        var surname = clean(s.surname) || String(idx + 1);
+                        return { id: String(s.id), firstName: first, surname: surname,
+                                 fullName: first + ' ' + surname, homeroom: clean(s.homeroom) };
+                    });
 
                     if (data.title) {
                         state.title = data.title;
                         if (ui.title) ui.title.textContent = data.title;
                     }
 
-                    state.layout = data.layout;
-                    state.students = data.students;
+                    state.layout = layout;
+                    state.students = students;
                     state.rules = Array.isArray(data.rules) ? data.rules : [];
                     if (data.fillFromLast != null) state.fillFromLast = !!data.fillFromLast;
                     if (data.sortMode != null) state.sortMode = data.sortMode;
@@ -1351,17 +1369,23 @@
                     state.students.forEach(function (s) { byId[s.id] = s; });
 
                     if (Array.isArray(data.placement) && data.placement.length) {
+                        var placed = {};
                         data.placement.forEach(function (item) {
-                            var s = byId[item.studentId];
-                            if (!s) return;
-                            if (item.deskIndex != null && desks[item.deskIndex]) {
-                                var d = desks[item.deskIndex];
+                            var s = item && byId[item.studentId];
+                            if (!s || placed[s.id]) return;
+                            placed[s.id] = true;
+                            var d = item.deskIndex != null ? desks[item.deskIndex] : null;
+                            if (d && !d.querySelector('.sp-card')) {
                                 d.classList.add('sp-occupied');
                                 var cols = parseInt(d.dataset.cols, 10) || 6;
                                 d.appendChild(createCard(s, true, cols));
                             } else {
                                 ui.pool.appendChild(createCard(s, false));
                             }
+                        });
+                        /* students missing from the placement list go to Unassigned */
+                        state.students.forEach(function (s) {
+                            if (!placed[s.id]) ui.pool.appendChild(createCard(s, false));
                         });
                     } else {
                         autoArrange(state.sortMode);
@@ -1670,7 +1694,6 @@
         });
     }
 
-    if (window.console) console.log('seatingplan.js loaded');
     init();
     document.addEventListener('DOMContentLoaded', init);
     window.addEventListener('load', init);

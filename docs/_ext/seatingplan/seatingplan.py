@@ -22,13 +22,13 @@ import html
 import io
 import json
 import re
+import shutil
 from pathlib import Path
 
 from docutils import nodes
 from docutils.parsers.rst import directives
 from sphinx.util import logging
 from sphinx.util.docutils import SphinxDirective
-from sphinx.util.fileutil import copy_asset_file
 
 logger = logging.getLogger(__name__)
 
@@ -82,9 +82,17 @@ def _read_xlsx(path):
     return [dict(zip(headers, row)) for row in rows[1:]]
 
 
+def _cell_text(v):
+    if v is None:
+        return ""
+    if isinstance(v, float) and v.is_integer():
+        v = int(v)  # Excel stores 11 as 11.0
+    return str(v).strip()
+
+
 def _normalise_row(row):
     return {
-        str(k).strip().lower(): ("" if v is None else str(v).strip())
+        str(k).strip().lower(): _cell_text(v)
         for k, v in row.items()
         if k is not None
     }
@@ -150,6 +158,9 @@ class SeatingPlanDirective(SphinxDirective):
         "class": directives.class_option,
     }
 
+    def _warn(self, message):
+        logger.warning("seatingplan: " + message, location=self.get_location())
+
     def run(self):
         env = self.env
 
@@ -160,10 +171,12 @@ class SeatingPlanDirective(SphinxDirective):
         try:
             layout = _parse_layout(self.options.get("layout", "5x6"))
         except ValueError:
-            raise self.error(
-                "seatingplan: invalid :layout: (use e.g. '5x6' for 5 rows of 6, "
-                "or '11,11,6' for rows of 11, 11 and 6)."
+            self._warn(
+                "invalid :layout: %r; using 5x6. Use e.g. '5x6' for 5 rows of 6 or "
+                "'7,8,9,6' for rows of 7, 8, 9 and 6 (up to 12 rows of 1-20 desks)."
+                % self.options.get("layout")
             )
+            layout = [6] * 5
 
         students = []
         roster = self.options.get("roster")
@@ -175,9 +188,10 @@ class SeatingPlanDirective(SphinxDirective):
                     rows = _read_xlsx(abspath)
                 else:
                     rows = _read_csv(abspath)
-            except (OSError, ValueError) as exc:
-                raise self.error("seatingplan: cannot read roster %r: %s" % (roster, exc))
-            students.extend(_students_from_rows(rows))
+            except (OSError, ValueError, UnicodeDecodeError) as exc:
+                self._warn("cannot read roster %r: %s" % (roster, exc))
+            else:
+                students.extend(_students_from_rows(rows))
 
         rule_lines = []
         for line in self.content:
@@ -202,25 +216,38 @@ class SeatingPlanDirective(SphinxDirective):
 
         by_name = {}
         for idx, s in enumerate(students):
-            by_name.setdefault(("%s %s" % (s["firstName"], s["surname"])).lower(), idx)
+            key = " ".join(("%s %s" % (s["firstName"], s["surname"])).split()).lower()
+            if key in by_name:
+                self._warn(
+                    "two students are called %r; rules naming them apply to the first."
+                    % ("%s %s" % (s["firstName"], s["surname"]))
+                )
+            by_name.setdefault(key, idx)
 
-        def find(name):
+        def find(name, kind):
             idx = by_name.get(" ".join(name.split()).lower())
             if idx is None:
-                raise self.error("seatingplan: no student called %r in this roster." % name)
+                self._warn("'%s:' rule skipped: no student called %r." % (kind, name))
             return idx
 
         rules = []
         for kind, body in rule_lines:
             if kind in SINGLE_STUDENT_RULES:
-                rules.append({"type": RULE_TYPES[kind], "a": find(body), "b": None})
-            else:
-                names = [n.strip() for n in body.split("|")]
-                if len(names) != 2 or not all(names):
-                    raise self.error(
-                        "seatingplan: '%s:' rules need two names separated by '|'." % kind
-                    )
-                rules.append({"type": RULE_TYPES[kind], "a": find(names[0]), "b": find(names[1])})
+                a = find(body, kind)
+                if a is not None:
+                    rules.append({"type": RULE_TYPES[kind], "a": a, "b": None})
+                continue
+            names = [n.strip() for n in body.split("|")]
+            if len(names) != 2 or not all(names):
+                self._warn("'%s:' rule skipped: it needs two names separated by '|'." % kind)
+                continue
+            a, b = find(names[0], kind), find(names[1], kind)
+            if a is None or b is None:
+                continue
+            if a == b:
+                self._warn("'%s:' rule skipped: both names are the same student." % kind)
+                continue
+            rules.append({"type": RULE_TYPES[kind], "a": a, "b": b})
 
         node = seatingplan()
         node["config"] = {
@@ -274,11 +301,15 @@ def _find_asset(name):
     return None
 
 
-def add_static_files(app):
-    """Hand the css/js to Sphinx's normal static-file copying (same route as html_static_path)."""
-    if app.builder.format != "html":
+def copy_static_files(app, exception):
+    """Copy the css/js into the built site's _static folder.
+
+    Done at the end of the build so conf.py's html_static_path is left untouched
+    (changing it made Sphinx report "configuration has changed" on every build).
+    """
+    if exception is not None or app.builder.format != "html":
         return
-    target = Path(app.doctreedir) / "seatingplan_static"
+    target = Path(app.outdir) / "_static"
     target.mkdir(parents=True, exist_ok=True)
     for name in ASSETS:
         source = _find_asset(name)
@@ -288,8 +319,7 @@ def add_static_files(app):
                 "the seating plan will not display.", name
             )
             continue
-        copy_asset_file(str(source), str(target))
-    app.config.html_static_path.append(str(target))
+        shutil.copyfile(str(source), str(target / name))
 
 
 def setup(app):
@@ -304,5 +334,5 @@ def setup(app):
     app.add_directive("seatingplan", SeatingPlanDirective)
     app.add_css_file("seatingplan.css")
     app.add_js_file("seatingplan.js", defer="defer")
-    app.connect("builder-inited", add_static_files)
+    app.connect("build-finished", copy_static_files)
     return {"version": "1.0", "parallel_read_safe": True, "parallel_write_safe": True}
