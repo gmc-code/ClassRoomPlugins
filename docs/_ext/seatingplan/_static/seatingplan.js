@@ -1,14 +1,12 @@
 /* seatingplan directive: client-side behaviour. Each .seatingplan[data-seatingplan] gets its own instance. */
-(function () {
     'use strict';
-
     var PRESETS = [
         { label: '5×6', rows: [6, 6, 6, 6, 6] },
         { label: '4×7', rows: [7, 7, 7, 7] },
         { label: '4×8', rows: [8, 8, 8, 8] },
         { label: '5,8,8,6', rows: [5, 8, 8, 6] },
-        { label: '3x9', rows: [9, 9, 9] },
-        { label: '3x10', rows: [10, 10, 10] },
+        { label: '3×9', rows: [9, 9, 9] },
+        { label: '3×10', rows: [10, 10, 10] },
         { label: '7,10,10', rows: [7, 10, 10] },
         { label: '6,11,11', rows: [6, 11, 11] },
         { label: '4,12,12', rows: [4, 12, 12] },

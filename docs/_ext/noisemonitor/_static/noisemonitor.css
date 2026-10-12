@@ -1,0 +1,211 @@
+.noise-monitor-card {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background-color: #ffffff;
+  max-width: 640px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  font-family: inherit;
+  margin: 1.5rem 0;
+  overflow: hidden;
+}
+
+/* Hero section */
+.noise-hero-section {
+  padding: 1.25rem;
+  background-color: #f8fafc;
+}
+
+.noise-hero-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.noise-monitor-controls {
+  width: 100%;
+}
+
+/* Foreground Image Container (60% width) */
+.noise-foreground-image-container {
+  width: 60%;
+  margin: 0.75rem auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.noise-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+.noise-monitor-header {
+  text-align: center;
+}
+
+.noise-monitor-header h3 {
+  margin: 0.5rem 0 0.75rem 0;
+  font-size: 1.15rem;
+  color: #1e293b;
+}
+
+.noise-monitor-body {
+  width: 100%;
+}
+
+/* Level message text */
+.noise-readout_message {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.noise-level-message {
+  font-size: 48px;
+  font-weight: 700;
+  color: #0f172a;
+  font-style: italic;
+  margin: 0;
+  line-height: 1.2;
+}
+
+/* Meter Container with Ticks Overlay */
+.noise-meter-container {
+  position: relative;
+  width: 100%;
+  height: 24px;
+  background-color: #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 0.75rem 0 0.5rem 0;
+}
+
+.noise-meter-bar {
+  height: 100%;
+  width: 0%;
+  background-color: #22c55e;
+  transition: width 0.1s linear, background-color 0.2s ease;
+}
+
+.noise-meter-bar.danger {
+  background-color: #ef4444;
+}
+
+/* Level Markings (L0 through L5) */
+.noise-meter-ticks {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  pointer-events: none;
+}
+
+.noise-tick {
+  flex: 1;
+  border-right: 2px solid rgba(255, 255, 255, 0.85);
+  position: relative;
+  box-sizing: border-box;
+}
+
+.noise-tick:last-child {
+  border-right: none;
+}
+
+.noise-tick-label {
+  position: absolute;
+  bottom: 2px;
+  right: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #1e293b;
+  opacity: 0.7;
+}
+
+/* dB level and status row */
+.noise-meter-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.noise-readout_level {
+  font-size: 0.9rem;
+  color: #334155;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.noise-readout {
+  font-size: 0.9rem;
+  color: #334155;
+  font-weight: 500;
+  text-align: right;
+}
+
+.noise-status-text {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.noise-status-text.text-safe { color: #16a34a; }
+.noise-status-text.text-danger { color: #dc2626; }
+
+/* Settings Panel */
+.noise-settings-panel {
+  padding: 1.25rem;
+  border-top: 1px solid #cbd5e1;
+  background-color: #ffffff;
+}
+
+.noise-settings-panel h4 {
+  margin: 0.5rem 0;
+  font-size: 0.95rem;
+  color: #334155;
+}
+
+.noise-control-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.5rem;
+}
+
+.noise-control-group label {
+  font-size: 0.8rem;
+  color: #475569;
+  margin-bottom: 0.2rem;
+  font-weight: 500;
+}
+
+.noise-control-group input[type="range"] {
+  width: 100%;
+  cursor: pointer;
+}
+
+.noise-msg-input {
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.85rem;
+  background-color: #ffffff;
+}
+
+.noise-btn-toggle {
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+  width: 100%;
+}
+
+.noise-btn-toggle.active {
+  background-color: #dc2626;
+}
