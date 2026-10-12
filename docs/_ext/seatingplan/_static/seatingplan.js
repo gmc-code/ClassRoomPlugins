@@ -105,7 +105,9 @@
     }
 
     /* ---------------- seating solver (pure: no DOM) ---------------- */
-    function solveSeating(desks, layout, rules, randomise, maxNodes) {
+    /* strictPairs: a pair must share a 2-desk block (desks 1-2, 3-4, ...). Without it any two
+       side-by-side desks in the same row will do (e.g. 2-3). The arranger tries strict first. */
+    function solveSeating(desks, layout, rules, randomise, maxNodes, strictPairs) {
         var lastRow = layout.length - 1;
         var vars = [], varIndex = {};
 
@@ -181,7 +183,7 @@
             if (rel.sep && rel.pair) return false;
             if (rel.sep && adjacent(da, db)) return false;
             if (rel.pair) {
-                if (va.pairSize > 2 ? !isNextTo(da, db) : !isSideBySidePair(da, db)) return false;
+                if (strictPairs && va.pairSize <= 2 ? !isSideBySidePair(da, db) : !isNextTo(da, db)) return false;
             }
             return true;
         }
@@ -394,12 +396,14 @@
                 };
             });
             state.rules = (cfg.rules || []).map(function (r, i) {
-                return {
+                var rule = {
                     id: 'rule-cfg-' + i,
                     student1Id: 'student-' + r.a,
                     student2Id: r.b == null ? null : 'student-' + r.b,
                     type: r.type
                 };
+                if (r.g) rule.group = 'cfg-' + r.g;
+                return rule;
             });
         }
 
@@ -952,21 +956,6 @@
             });
         }
 
-        function pairGroupSize(id) {
-            var seen = {}, stack = [id], n = 0;
-            seen[id] = true;
-            while (stack.length) {
-                var cur = stack.pop();
-                n++;
-                state.rules.forEach(function (r) {
-                    if (r.type !== 'PAIR') return;
-                    var other = r.student1Id === cur ? r.student2Id : (r.student2Id === cur ? r.student1Id : null);
-                    if (other && !seen[other]) { seen[other] = true; stack.push(other); }
-                });
-            }
-            return n;
-        }
-
         function validate() {
             var desks = getDesks();
             var lastRow = state.layout.length - 1;
@@ -1017,7 +1006,7 @@
                 if (rule.type === 'SEPARATE' && adjacent(a, b)) {
                     a.desk.classList.add('sp-conflict');
                     b.desk.classList.add('sp-conflict');
-                } else if (rule.type === 'PAIR' && !(pairGroupSize(rule.student1Id) > 2 ? isNextTo(a, b) : isSideBySidePair(a, b))) {
+                } else if (rule.type === 'PAIR' && !isNextTo(a, b)) {
                     a.desk.classList.add('sp-conflict');
                     b.desk.classList.add('sp-conflict');
                 }
@@ -1206,23 +1195,29 @@
             });
         }
 
-        function solve(deskSlots, randomise, rules) {
+        function solve(deskSlots, randomise, rules, strictPairs) {
             var desks = deskSlots.map(function (d, i) { return { index: i, row: +d.dataset.row, col: +d.dataset.col }; });
-            return solveSeating(desks, state.layout, rules, randomise, 60000);
+            return solveSeating(desks, state.layout, rules, randomise, 60000, strictPairs);
+        }
+
+        /* Pairs in a 2-desk block if possible, otherwise any two neighbouring desks. */
+        function solvePreferBlocks(deskSlots, randomise, rules) {
+            var hasPair = rules.some(function (r) { return r.type === 'PAIR'; });
+            return (hasPair && solve(deskSlots, randomise, rules, true)) || solve(deskSlots, randomise, rules, false);
         }
 
         function solveBest(deskSlots, randomise) {
             var all = validRules();
             if (!all.length) return { assignment: {}, reservedDesks: {}, dropped: [] };
 
-            var res = solve(deskSlots, randomise, all);
-            if (!res && randomise) res = solve(deskSlots, false, all);
+            var res = solvePreferBlocks(deskSlots, randomise, all);
+            if (!res && randomise) res = solvePreferBlocks(deskSlots, false, all);
             if (res) { res.dropped = []; return res; }
 
             var kept = [], dropped = [], best = { assignment: {}, reservedDesks: {} };
             all.forEach(function (rule) {
                 var trial = kept.concat([rule]);
-                var s = solve(deskSlots, false, trial);
+                var s = solvePreferBlocks(deskSlots, false, trial);
                 if (s) { kept = trial; best = s; } else dropped.push(rule);
             });
             best.dropped = dropped;
@@ -1623,107 +1618,405 @@
             setTimeout(function () { win.print(); }, 250);
         }
 
-        /* ----- rules dialog ----- */
+        /* ----- rules panel -----
+           Pick a rule from the dropdown, then tick the students it applies to.
+           One-student rules (front/back/left/right/empty) are plain ticks.
+           Keep together / Keep apart are groups: a keep-together group of 2-3 is stored as a
+           chain of PAIR rules, a keep-apart group of any size as SEPARATE rules between every
+           two members. Rules made here carry a `group` id so they show (and edit) as one group;
+           rules from the directive or older saves are grouped automatically. */
+
+        var RULE_KINDS = [
+            { type: 'FRONT_ROW', icon: '⬆', label: 'Front row', help: 'Ticked students must sit in the front row.' },
+            { type: 'BACK_ROW', icon: '⬇', label: 'Back row', help: 'Ticked students must sit in the back row.' },
+            { type: 'SIT_LEFT', icon: '⬅', label: 'Left side', help: 'Ticked students must sit at the left end of a row (students\' left, facing the whiteboard).' },
+            { type: 'SIT_RIGHT', icon: '➡', label: 'Right side', help: 'Ticked students must sit at the right end of a row (students\' right, facing the whiteboard).' },
+            { type: 'EMPTY_SEAT', icon: '🪑', label: 'Empty seat beside', help: 'Ticked students get an empty desk next to them.' },
+            { type: 'PAIR', icon: '🔗', label: 'Keep together', group: true, max: 3,
+              help: 'Students in a group sit side by side: 2 as a pair, 3 in a line of neighbouring desks.' },
+            { type: 'SEPARATE', icon: '⚠️', label: 'Keep apart', group: true,
+              help: 'No two students in a group sit next to each other, including diagonally.' }
+        ];
+        var OPPOSITE = { FRONT_ROW: 'BACK_ROW', BACK_ROW: 'FRONT_ROW', SIT_LEFT: 'SIT_RIGHT', SIT_RIGHT: 'SIT_LEFT' };
+        var panel = { kind: 'FRONT_ROW', search: '', onlyTicked: false, editing: null, picked: {} };
+
+        function kindInfo(type) {
+            for (var i = 0; i < RULE_KINDS.length; i++) if (RULE_KINDS[i].type === type) return RULE_KINDS[i];
+            return null;
+        }
+
+        function nameOf(id) { var s = studentById(id); return s ? s.fullName : '?'; }
+
+        function sortedStudents() {
+            return state.students.slice().sort(function (a, b) {
+                return String(a.surname).localeCompare(String(b.surname)) ||
+                       String(a.firstName).localeCompare(String(b.firstName));
+            });
+        }
+
+        function hasSingle(id, type) {
+            return state.rules.some(function (r) { return r.type === type && r.student1Id === id; });
+        }
+
+        function linked(a, b, type) {
+            return state.rules.some(function (r) {
+                return r.type === type && ((r.student1Id === a && r.student2Id === b) || (r.student1Id === b && r.student2Id === a));
+            });
+        }
+
+        /* Groups for a two-student rule type, as [{ key, ids, ruleIds }]. */
+        function groupsFor(type) {
+            var rules = state.rules.filter(function (r) {
+                return r.type === type && r.student2Id && studentById(r.student1Id) && studentById(r.student2Id);
+            });
+            var groups = [];
+            if (type === 'PAIR') {
+                /* keep together: students linked by pair rules form one group */
+                var seen = {};
+                rules.forEach(function (r) {
+                    if (seen[r.student1Id]) return;
+                    var ids = [], stack = [r.student1Id], ruleIds = {};
+                    seen[r.student1Id] = true;
+                    while (stack.length) {
+                        var cur = stack.pop();
+                        ids.push(cur);
+                        rules.forEach(function (x) {
+                            var other = x.student1Id === cur ? x.student2Id : (x.student2Id === cur ? x.student1Id : null);
+                            if (!other) return;
+                            ruleIds[x.id] = true;
+                            if (!seen[other]) { seen[other] = true; stack.push(other); }
+                        });
+                    }
+                    groups.push({ key: 'c-' + ids.slice().sort().join('|'), ids: ids, ruleIds: Object.keys(ruleIds) });
+                });
+            } else {
+                /* keep apart: rules sharing a group id are one group; others are pairs */
+                var byKey = {};
+                rules.forEach(function (r) {
+                    var key = r.group || ('r-' + r.id);
+                    if (!byKey[key]) { byKey[key] = { key: key, ids: [], ruleIds: [] }; groups.push(byKey[key]); }
+                    var g = byKey[key];
+                    g.ruleIds.push(r.id);
+                    [r.student1Id, r.student2Id].forEach(function (id) { if (g.ids.indexOf(id) === -1) g.ids.push(id); });
+                });
+            }
+            groups.forEach(function (g) {
+                g.ids.sort(function (a, b) { return nameOf(a).localeCompare(nameOf(b)); });
+            });
+            return groups;
+        }
+
+        /* Front-row and back-row students can never sit side by side. */
+        function rowsClash(a, b) {
+            return (hasSingle(a, 'FRONT_ROW') && hasSingle(b, 'BACK_ROW')) ||
+                   (hasSingle(a, 'BACK_ROW') && hasSingle(b, 'FRONT_ROW'));
+        }
+
+        function togetherWith(id) {
+            var g = groupsFor('PAIR').filter(function (x) { return x.ids.indexOf(id) !== -1; })[0];
+            return g ? g.ids.filter(function (x) { return x !== id; }) : [];
+        }
+
+        function countFor(kind) {
+            if (kind.group) return groupsFor(kind.type).length;
+            return state.students.filter(function (s) { return hasSingle(s.id, kind.type); }).length;
+        }
 
         function buildModal() {
             modal = make('div', 'sp-modal');
             modal.innerHTML =
-                '<div class="sp-modal-card" role="dialog" aria-modal="true" aria-label="Seating rules">' +
-                '<div class="sp-modal-head"><span>Student Seating Rules &amp; Constraints</span>' +
+                '<div class="sp-modal-card sp-rp" role="dialog" aria-modal="true" aria-label="Seating rules">' +
+                '<div class="sp-modal-head"><span>Seating Rules</span>' +
                 '<button type="button" class="sp-modal-close" data-m="close" aria-label="Close">✕</button></div>' +
-                '<div class="sp-modal-body">' +
-                '<div class="sp-rule-form">' +
-                '<div class="sp-c-s1"><select data-m="s1" aria-label="Select first student"></select></div>' +
-                '<div class="sp-c-type"><select data-m="type" aria-label="Choose seating rule"></select></div>' +
-                '<div class="sp-c-s2" data-m="s2wrap"><select data-m="s2" aria-label="Select second student"></select></div>' +
-                '<button type="button" class="sp-btn sp-c-add" data-m="add">Add Rule</button>' +
+                '<div class="sp-rp-top">' +
+                '<label class="sp-rp-label">Rule <select data-m="kind" aria-label="Rule"></select></label>' +
+                '<div class="sp-rp-help" data-m="help"></div>' +
                 '</div>' +
-                '<div class="sp-feedback" data-m="feedback" role="status" aria-live="polite"></div>' +
-                '<div class="sp-modal-sub">Active Rules</div>' +
-                '<div class="sp-rules-list" data-m="list"></div>' +
-                '</div></div>';
+                '<div class="sp-modal-body" data-m="body"></div>' +
+                '<div class="sp-rp-foot" data-m="foot"></div>' +
+                '</div>';
             document.body.appendChild(modal);
+            ['kind', 'help', 'body', 'foot'].forEach(function (k) { mui[k] = modal.querySelector('[data-m="' + k + '"]'); });
 
-            ['s1', 'type', 's2', 's2wrap', 'feedback', 'list'].forEach(function (k) {
-                mui[k] = modal.querySelector('[data-m="' + k + '"]');
+            modal.addEventListener('click', onPanelClick);
+            modal.addEventListener('change', onPanelChange);
+            modal.addEventListener('input', function (e) {
+                if (e.target.getAttribute('data-m') !== 'search') return;
+                panel.search = e.target.value;
+                filterList();
             });
-
-            modal.addEventListener('click', function (e) {
-                if (e.target === modal) { closeModal(); return; }
-                var del = e.target.closest('[data-del]');
-                if (del) { deleteRule(del.getAttribute('data-del')); return; }
-                var btn = e.target.closest('[data-m]');
-                if (!btn) return;
-                if (btn.getAttribute('data-m') === 'close') closeModal();
-                else if (btn.getAttribute('data-m') === 'add') addRule();
-            });
-            mui.s1.addEventListener('change', fillStudent2);
-            mui.type.addEventListener('change', updateTypeUI);
             document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape') closeModal();
+                if (e.key === 'Escape' && modal.classList.contains('sp-open')) closeModal();
             });
         }
 
         function openModal() {
-            fillTypes();
-            fillStudent1();
-            renderRules();
-            feedback('');
+            panel.editing = null;
+            panel.search = '';
+            panel.onlyTicked = false;
+            renderPanel();
             modal.classList.add('sp-open');
         }
 
         function closeModal() { if (modal) modal.classList.remove('sp-open'); }
 
-        function feedback(msg, kind) {
-            mui.feedback.textContent = msg || '';
-            mui.feedback.className = 'sp-feedback' + (kind ? ' sp-' + kind : '');
-        }
-
-        function updateTypeUI() {
-            mui.s2wrap.style.display = isSingleStudentRule(mui.type.value) ? 'none' : 'block';
-        }
-
-        function fillTypes() {
-            var current = mui.type.value;
-            mui.type.innerHTML = '';
-            [
-                ['SEPARATE', 'Must Separate From'],
-                ['PAIR', 'Keep Together With'],
-                ['FRONT_ROW', 'Must Sit In Front Row'],
-                ['BACK_ROW', 'Must Sit In Back Row'],
-                ['SIT_LEFT', 'Must Sit on Left Side'],
-                ['SIT_RIGHT', 'Must Sit on Right Side'],
-                ['EMPTY_SEAT', 'Must Have Empty Seat Next to Them']
-            ].forEach(function (o) {
-                var opt = make('option', null, o[1]);
-                opt.value = o[0];
-                mui.type.appendChild(opt);
+        function fillKinds() {
+            mui.kind.innerHTML = '';
+            RULE_KINDS.forEach(function (k) {
+                var n = countFor(k);
+                var opt = make('option', null, k.icon + ' ' + k.label + ' (' + n + (k.group ? (n === 1 ? ' group' : ' groups') : '') + ')');
+                opt.value = k.type;
+                mui.kind.appendChild(opt);
             });
-            if (current) mui.type.value = current;
-            updateTypeUI();
+            mui.kind.value = panel.kind;
         }
 
-        function studentOptions(select, placeholder, skipId) {
-            select.innerHTML = '';
-            var p = make('option', null, placeholder);
-            p.value = '';
-            select.appendChild(p);
-            state.students.forEach(function (s) {
-                if (s.id === skipId) return;
-                var o = make('option', null, s.fullName);
-                o.value = s.id;
-                select.appendChild(o);
+        function renderPanel() {
+            fillKinds();
+            var kind = kindInfo(panel.kind);
+            mui.help.textContent = kind.help;
+            mui.body.innerHTML = '';
+            mui.foot.innerHTML = '';
+            if (!state.students.length) {
+                mui.body.appendChild(make('div', 'sp-rp-empty', 'Import a class list first, then add rules here.'));
+                mui.foot.innerHTML = '<span></span><button type="button" class="sp-btn" data-m="close">Done</button>';
+                return;
+            }
+            if (kind.group) renderGroups(kind); else renderSingle(kind);
+        }
+
+        /* --- one-student rules --- */
+
+        function searchRow(showTickedFilter) {
+            return '<div class="sp-rp-tools">' +
+                '<input type="search" class="sp-rp-search" data-m="search" placeholder="Search students" aria-label="Search students" value="' + esc(panel.search) + '">' +
+                (showTickedFilter
+                    ? '<label class="sp-rp-filter"><input type="checkbox" data-m="only-ticked"' + (panel.onlyTicked ? ' checked' : '') + '> Ticked only</label>'
+                    : '') +
+                '</div>';
+        }
+
+        function studentRow(s, checked, note, disabled) {
+            var row = make('label', 'sp-rp-row' + (disabled ? ' sp-rp-disabled' : '') + (checked ? ' sp-rp-on' : ''));
+            row.dataset.name = (s.fullName + ' ' + (s.homeroom || '')).toLowerCase();
+            var box = make('input');
+            box.type = 'checkbox';
+            box.value = s.id;
+            box.checked = checked;
+            box.disabled = disabled;
+            row.appendChild(box);
+            row.appendChild(make('span', 'sp-rp-name', s.firstName + ' ' + s.surname));
+            if (s.homeroom) row.appendChild(make('span', 'sp-rp-hr', s.homeroom));
+            if (note) row.appendChild(make('span', 'sp-rp-note', note));
+            return row;
+        }
+
+        function renderSingle(kind) {
+            mui.body.innerHTML = searchRow(true);
+            var list = make('div', 'sp-rp-list');
+            list.setAttribute('data-m', 'list');
+            list.setAttribute('data-single', kind.type);
+            var opp = OPPOSITE[kind.type];
+            sortedStudents().forEach(function (s) {
+                var on = hasSingle(s.id, kind.type);
+                var note = '';
+                if (!on && opp && hasSingle(s.id, opp)) {
+                    note = kindInfo(opp).icon + ' in ' + kindInfo(opp).label;
+                } else if (!on && (kind.type === 'FRONT_ROW' || kind.type === 'BACK_ROW')) {
+                    var partner = togetherWith(s.id).filter(function (id) { return hasSingle(id, opp); })[0];
+                    if (partner) note = '🔗 kept with ' + studentById(partner).firstName + ' (' + kindInfo(opp).label.toLowerCase() + ')';
+                }
+                list.appendChild(studentRow(s, on, note, !!note));
+            });
+            mui.body.appendChild(list);
+            filterList();
+            var n = countFor(kind);
+            mui.foot.innerHTML =
+                '<span class="sp-rp-count">' + n + (n === 1 ? ' student' : ' students') + ' in ' + esc(kind.label) + '</span>' +
+                '<span><button type="button" class="sp-btn sp-btn-grey" data-m="clear-all"' + (n ? '' : ' disabled') + '>Clear all</button> ' +
+                '<button type="button" class="sp-btn" data-m="close">Done</button></span>';
+        }
+
+        function toggleSingle(id, type, on) {
+            state.rules = state.rules.filter(function (r) { return !(r.type === type && r.student1Id === id); });
+            if (on) state.rules.push(newRule(id, null, type));
+            afterRuleChange();
+        }
+
+        /* --- keep together / keep apart groups --- */
+
+        function renderGroups(kind) {
+            var groups = groupsFor(kind.type);
+            if (panel.editing) { renderGroupEditor(kind, groups); return; }
+            var wrap = make('div', 'sp-rp-groups');
+            if (!groups.length) {
+                wrap.appendChild(make('div', 'sp-rp-empty', 'No ' + kind.label.toLowerCase() + ' groups yet.'));
+            }
+            groups.forEach(function (g, i) {
+                var item = make('div', 'sp-rp-group ' + (kind.type === 'PAIR' ? 'sp-pair' : 'sp-sep'));
+                var label = make('div', 'sp-rp-group-names');
+                label.appendChild(make('strong', null, 'Group ' + (i + 1) + '  '));
+                label.appendChild(document.createTextNode(g.ids.map(nameOf).join(' · ')));
+                item.appendChild(label);
+                var btns = make('span', 'sp-rp-group-btns');
+                var ed = make('button', 'sp-btn sp-btn-grey sp-rp-small', 'Edit');
+                ed.type = 'button'; ed.setAttribute('data-m', 'edit-group'); ed.setAttribute('data-key', g.key);
+                var del = make('button', 'sp-del-rule', '🗑');
+                del.type = 'button'; del.setAttribute('data-m', 'delete-group'); del.setAttribute('data-key', g.key);
+                del.setAttribute('aria-label', 'Delete group ' + (i + 1));
+                btns.appendChild(ed); btns.appendChild(del);
+                item.appendChild(btns);
+                wrap.appendChild(item);
+            });
+            mui.body.appendChild(wrap);
+            mui.foot.innerHTML =
+                '<button type="button" class="sp-btn sp-btn-teal" data-m="new-group">+ New group</button>' +
+                '<button type="button" class="sp-btn" data-m="close">Done</button>';
+        }
+
+        function renderGroupEditor(kind, groups) {
+            var editing = panel.editing;
+            var own = editing.key ? groups.filter(function (g) { return g.key === editing.key; })[0] : null;
+            var ownIds = own ? own.ids : [];
+            var pickedIds = Object.keys(panel.picked).filter(function (id) { return panel.picked[id]; });
+            var full = kind.max && pickedIds.length >= kind.max;
+
+            mui.body.innerHTML =
+                '<div class="sp-rp-edit-title">' + (own ? 'Edit group' : 'New group') + ' — tick ' +
+                (kind.max ? '2 or 3 students' : '2 or more students') + '</div>' + searchRow(false);
+            var list = make('div', 'sp-rp-list');
+            list.setAttribute('data-m', 'list');
+            list.setAttribute('data-group', kind.type);
+            sortedStudents().forEach(function (s) {
+                var on = !!panel.picked[s.id];
+                var note = '', blocked = false;
+                if (!on) {
+                    var other = kind.type === 'PAIR' ? 'SEPARATE' : 'PAIR';
+                    var clashWith = pickedIds.filter(function (id) { return linked(s.id, id, other); })[0];
+                    var rowClash = kind.type === 'PAIR' && pickedIds.filter(function (id) { return rowsClash(s.id, id); })[0];
+                    if (clashWith) {
+                        blocked = true;
+                        note = (other === 'SEPARATE' ? '⚠️ kept apart from ' : '🔗 kept together with ') + studentById(clashWith).firstName;
+                    } else if (rowClash) {
+                        blocked = true;
+                        note = (hasSingle(s.id, 'FRONT_ROW') ? '⬆ front row, ' : '⬇ back row, ') +
+                               studentById(rowClash).firstName + (hasSingle(s.id, 'FRONT_ROW') ? ' back' : ' front');
+                    } else if (kind.type === 'PAIR') {
+                        var inGroup = groups.filter(function (g) {
+                            return g.ids.indexOf(s.id) !== -1 && g.ids.join() !== ownIds.join();
+                        })[0];
+                        if (inGroup) { blocked = true; note = '🔗 already in group ' + (groups.indexOf(inGroup) + 1); }
+                        else if (full) { blocked = true; }
+                    }
+                }
+                list.appendChild(studentRow(s, on, note, blocked));
+            });
+            mui.body.appendChild(list);
+            filterList();
+            var n = pickedIds.length;
+            mui.foot.innerHTML =
+                '<span class="sp-rp-count">' + n + ' ticked' + (full ? ' (most allowed)' : '') + '</span>' +
+                '<span><button type="button" class="sp-btn sp-btn-grey" data-m="cancel-group">Cancel</button> ' +
+                '<button type="button" class="sp-btn" data-m="save-group"' + (n >= 2 ? '' : ' disabled') + '>Save group</button></span>';
+        }
+
+        function startGroupEdit(key) {
+            panel.picked = {};
+            panel.search = '';
+            if (key) {
+                var g = groupsFor(panel.kind).filter(function (x) { return x.key === key; })[0];
+                if (!g) return;
+                g.ids.forEach(function (id) { panel.picked[id] = true; });
+                panel.editing = { key: key, ruleIds: g.ruleIds };
+            } else {
+                panel.editing = { key: null, ruleIds: [] };
+            }
+            renderPanel();
+        }
+
+        function saveGroup() {
+            var type = panel.kind;
+            var ids = sortedStudents().map(function (s) { return s.id; }).filter(function (id) { return panel.picked[id]; });
+            if (ids.length < 2) return;
+            var drop = {};
+            panel.editing.ruleIds.forEach(function (id) { drop[id] = true; });
+            state.rules = state.rules.filter(function (r) { return !drop[r.id]; });
+            var groupId = 'g-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+            function add(a, b) {
+                if (linked(a, b, type)) return;      // already covered by another group
+                var r = newRule(a, b, type);
+                r.group = groupId;
+                state.rules.push(r);
+            }
+            if (type === 'PAIR') {
+                for (var i = 1; i < ids.length; i++) add(ids[i - 1], ids[i]);   // a line: A-B, B-C
+            } else {
+                for (var a = 0; a < ids.length; a++) for (var b = a + 1; b < ids.length; b++) add(ids[a], ids[b]);
+            }
+            panel.editing = null;
+            afterRuleChange();
+        }
+
+        function deleteGroup(key) {
+            var g = groupsFor(panel.kind).filter(function (x) { return x.key === key; })[0];
+            if (!g) return;
+            var drop = {};
+            g.ruleIds.forEach(function (id) { drop[id] = true; });
+            state.rules = state.rules.filter(function (r) { return !drop[r.id]; });
+            afterRuleChange();
+        }
+
+        /* --- shared --- */
+
+        function filterList() {
+            var list = mui.body.querySelector('[data-m="list"]');
+            if (!list) return;
+            var q = panel.search.trim().toLowerCase();
+            Array.prototype.forEach.call(list.children, function (row) {
+                var box = row.querySelector('input');
+                var hide = (q && row.dataset.name.indexOf(q) === -1) ||
+                           (panel.onlyTicked && list.hasAttribute('data-single') && !box.checked);
+                row.style.display = hide ? 'none' : '';
             });
         }
 
-        function fillStudent1() {
-            studentOptions(mui.s1, state.students.length ? 'Select Student 1...' : 'Import a class list first...', null);
-            fillStudent2();
+        function onPanelClick(e) {
+            if (e.target === modal) { closeModal(); return; }
+            var btn = e.target.closest('[data-m]');
+            if (!btn || btn.tagName === 'SELECT' || btn.tagName === 'INPUT') return;
+            switch (btn.getAttribute('data-m')) {
+                case 'close': closeModal(); break;
+                case 'clear-all':
+                    state.rules = state.rules.filter(function (r) { return r.type !== panel.kind; });
+                    afterRuleChange();
+                    break;
+                case 'new-group': startGroupEdit(null); break;
+                case 'edit-group': startGroupEdit(btn.getAttribute('data-key')); break;
+                case 'delete-group': deleteGroup(btn.getAttribute('data-key')); break;
+                case 'cancel-group': panel.editing = null; renderPanel(); break;
+                case 'save-group': saveGroup(); break;
+            }
         }
 
-        function fillStudent2() {
-            var s1 = mui.s1.value;
-            studentOptions(mui.s2, s1 ? 'Select Student 2...' : 'Select Student 1 first...', s1);
+        function onPanelChange(e) {
+            var t = e.target;
+            var role = t.getAttribute('data-m');
+            if (role === 'kind') {
+                panel.kind = t.value; panel.editing = null; panel.search = ''; panel.onlyTicked = false;
+                renderPanel();
+                return;
+            }
+            if (role === 'only-ticked') { panel.onlyTicked = t.checked; filterList(); return; }
+            var list = t.closest('[data-m="list"]');
+            if (!list || t.type !== 'checkbox') return;
+            if (list.hasAttribute('data-single')) {
+                toggleSingle(t.value, list.getAttribute('data-single'), t.checked);
+            } else {
+                panel.picked[t.value] = t.checked;
+                var keepSearch = panel.search;
+                renderPanel();
+                panel.search = keepSearch;
+            }
         }
 
         function newRule(s1, s2, type) {
@@ -1733,98 +2026,15 @@
             };
         }
 
-        function afterRuleChange(msg) {
+        /* Rules changed in the panel: save, refresh badges and red highlights, redraw the panel. */
+        function afterRuleChange() {
             save();
-            renderRules();
             refreshCards();
             validate();
-            feedback(msg, 'success');
-        }
-
-        function addRule() {
-            var s1 = mui.s1.value, s2 = mui.s2.value, type = mui.type.value;
-
-            if (isSingleStudentRule(type)) {
-                if (!state.students.length) return feedback('Import a class list before adding rules.', 'error');
-                if (!s1) return feedback('Please select a student.', 'error');
-                if (state.rules.some(function (r) { return r.student1Id === s1 && r.type === type; }))
-                    return feedback('That rule already exists.', 'error');
-
-                var hasFront = state.rules.some(function (r) { return r.student1Id === s1 && r.type === 'FRONT_ROW'; });
-                var hasBack = state.rules.some(function (r) { return r.student1Id === s1 && r.type === 'BACK_ROW'; });
-                var hasLeft = state.rules.some(function (r) { return r.student1Id === s1 && r.type === 'SIT_LEFT'; });
-                var hasRight = state.rules.some(function (r) { return r.student1Id === s1 && r.type === 'SIT_RIGHT'; });
-
-                if ((type === 'FRONT_ROW' && hasBack) || (type === 'BACK_ROW' && hasFront)) {
-                    return feedback('A student cannot be assigned to both front and back rows simultaneously.', 'error');
-                }
-                if ((type === 'SIT_LEFT' && hasRight) || (type === 'SIT_RIGHT' && hasLeft)) {
-                    return feedback('A student cannot be assigned to both left and right sides simultaneously.', 'error');
-                }
-
-                state.rules.push(newRule(s1, null, type));
-                return afterRuleChange('Rule added.');
-            }
-
-            if (state.students.length < 2) return feedback('Import a class list with at least two students before adding rules.', 'error');
-            if (!s1 || !s2) return feedback('Please select both students.', 'error');
-            if (s1 === s2) return feedback('Choose two different students.', 'error');
-
-            var between = state.rules.filter(function (r) {
-                return (r.student1Id === s1 && r.student2Id === s2) || (r.student1Id === s2 && r.student2Id === s1);
-            });
-            if (between.some(function (r) { return r.type === type; })) return feedback('That rule already exists.', 'error');
-            if (between.length) return feedback('These students already have the opposite rule. Remove it first, then add the new rule.', 'error');
-
-            state.rules.push(newRule(s1, s2, type));
-            afterRuleChange('Rule added.');
-            mui.s2.value = '';
-        }
-
-        function deleteRule(id) {
-            state.rules = state.rules.filter(function (r) { return r.id !== id; });
-            afterRuleChange('Rule removed.');
-        }
-
-        function renderRules() {
-            mui.list.innerHTML = '';
-            var shown = 0;
-            state.rules.forEach(function (r) {
-                var s1 = studentById(r.student1Id);
-                if (!s1) return;
-                var item = make('div'), label = make('span');
-                function strong(t) { var s = make('strong', null, t); label.appendChild(s); }
-                function text(t) { label.appendChild(document.createTextNode(t)); }
-
-                if (isSingleStudentRule(r.type)) {
-                    item.className = 'sp-rule-item sp-pos';
-                    strong(s1.fullName);
-                    if (r.type === 'FRONT_ROW') text(' ⬆ must sit in the front row');
-                    else if (r.type === 'BACK_ROW') text(' ⬇ must sit in the back row');
-                    else if (r.type === 'SIT_LEFT') text(' ⬅ must sit on the left side');
-                    else if (r.type === 'SIT_RIGHT') text(' ➡ must sit on the right side');
-                    else if (r.type === 'EMPTY_SEAT') text(' 🪑 must have an empty seat next to them');
-                } else {
-                    var s2 = studentById(r.student2Id);
-                    if (!s2) return;
-                    var sep = r.type === 'SEPARATE';
-                    item.className = 'sp-rule-item ' + (sep ? 'sp-sep' : 'sp-pair');
-                    strong(s1.fullName);
-                    text(sep ? ' ⚠️ separate from ' : ' 🔗 keep with ');
-                    strong(s2.fullName);
-                }
-                var del = make('button', 'sp-del-rule', '✕');
-                del.type = 'button';
-                del.setAttribute('data-del', r.id);
-                del.setAttribute('aria-label', 'Remove rule');
-                item.appendChild(label);
-                item.appendChild(del);
-                mui.list.appendChild(item);
-                shown++;
-            });
-            if (!shown) {
-                mui.list.appendChild(make('div', 'sp-rules-empty',
-                    'No rules defined yet. Add a rule above to flag students who should sit apart, together, left, right, front/back, or leave an adjacent empty seat.'));
+            if (modal && modal.classList.contains('sp-open')) {
+                var body = mui.body, top = body.scrollTop;
+                renderPanel();
+                body.scrollTop = top;
             }
         }
 

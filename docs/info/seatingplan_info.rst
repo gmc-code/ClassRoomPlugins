@@ -219,10 +219,15 @@ Rules are entered directly below the student list.
      - Effect
    * - Separate
      - ``separate: Alex Smith | Sam Jones``
-     - Prevents the students from sitting beside each other, including diagonally.
+     - Prevents the students from sitting beside each other, including
+       diagonally. List more names to make a group, none of whom sit next to
+       each other: ``separate: Alex Smith | Sam Jones | Tom Brown``.
    * - Pair
      - ``pair: Mia Chen | Zoe Adams``
-     - Requires the students to sit together.
+     - Requires the students to sit side by side in the same row. The plan
+       prefers a 2-desk block (desks 1–2, 3–4, 5–6 …) but any two
+       neighbouring desks, such as 2–3, keep the rule. Up to three names can
+       be listed; three students sit in a line of neighbouring desks.
    * - Front row
      - ``front: Priya Patel``
      - Requires the student to sit in the front row.
@@ -247,7 +252,7 @@ whiteboard. In **Teacher's View** a ``left:`` student therefore appears on
 the right-hand side of the plan.
 
 All of these rules can also be added and removed in the browser with the
-**Rules** button.
+**Rules** button. See `The Rules panel`_.
 
 Using the seating plan
 ----------------------
@@ -312,7 +317,38 @@ Toolbar controls
      - Switches which end of the room fills first (**First → Last** or
        **Last → First**) and rearranges the students.
    * - **Rules**
-     - Opens the seating rules editor.
+     - Opens the Rules panel. See `The Rules panel`_.
+
+The Rules panel
+~~~~~~~~~~~~~~~
+
+**Rules** opens a panel with a **Rule** dropdown and a list of the class.
+Choose a rule, then tick the students it applies to. Changes are saved
+straight away; **Done** closes the panel. The dropdown shows how many
+students or groups each rule has, for example *Front row (3)*.
+
+Front row, Back row, Left side, Right side, Empty seat beside
+   Tick each student the rule applies to. **Search students** filters the
+   list, **Ticked only** shows just the students with the rule, and
+   **Clear all** removes the rule from everyone.
+
+Keep together, Keep apart
+   These rules are made of groups. **+ New group** shows the class list:
+   tick the students and press **Save group**. Each group is listed with
+   **Edit** and a delete button.
+
+   * **Keep together** groups have 2 or 3 students. Two sit as a pair;
+     three sit in a line of neighbouring desks. A student can be in only one
+     keep-together group.
+   * **Keep apart** groups have 2 or more students, none of whom sit next to
+     each other. A student can be in several keep-apart groups.
+
+Rules that can never work together are prevented: a student greyed out in the
+list shows why, for example *in Back row*, *kept apart from Sam* or *already
+in group 1*.
+
+Rules written in the directive appear in the panel in the same way and can be
+changed there; **Reset** brings back the directive's rules.
 
 Changing the layout
 ~~~~~~~~~~~~~~~~~~~

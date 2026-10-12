@@ -240,17 +240,31 @@ class SeatingPlanDirective(SphinxDirective):
                 if a is not None:
                     rules.append({"type": RULE_TYPES[kind], "a": a, "b": None})
                 continue
+            # pair: 2-3 names sit in a line; separate: any number, none next to each other
             names = [n.strip() for n in body.split("|")]
-            if len(names) != 2 or not all(names):
-                self._warn("'%s:' rule skipped: it needs two names separated by '|'." % kind)
+            limit = 3 if kind == "pair" else None
+            if len(names) < 2 or not all(names) or (limit and len(names) > limit):
+                self._warn(
+                    "'%s:' rule skipped: it needs %s names separated by '|'."
+                    % (kind, "2 or 3" if limit else "2 or more")
+                )
                 continue
-            a, b = find(names[0], kind), find(names[1], kind)
-            if a is None or b is None:
+            ids = [find(n, kind) for n in names]
+            if None in ids:
                 continue
-            if a == b:
-                self._warn("'%s:' rule skipped: both names are the same student." % kind)
+            if len(set(ids)) != len(ids):
+                self._warn("'%s:' rule skipped: the same student is named twice." % kind)
                 continue
-            rules.append({"type": RULE_TYPES[kind], "a": a, "b": b})
+            group = "d%d-%d" % (count, len(rules)) if len(ids) > 2 else None
+            if kind == "pair":
+                links = list(zip(ids, ids[1:]))
+            else:
+                links = [(x, y) for i, x in enumerate(ids) for y in ids[i + 1:]]
+            for x, y in links:
+                rule = {"type": RULE_TYPES[kind], "a": x, "b": y}
+                if group:
+                    rule["g"] = group
+                rules.append(rule)
 
         node = seatingplan()
         node["config"] = {
