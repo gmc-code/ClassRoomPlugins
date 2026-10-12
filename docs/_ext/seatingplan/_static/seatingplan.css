@@ -113,6 +113,7 @@
 .sp-btn-toggle { background: #0f172a; color: #38bdf8; border: 1px solid #0284c7; font-weight: 600; }
 .sp-btn-blue { background: #c430b0; }   .sp-btn-blue:hover { background: #b30077; }
 .sp-btn-grey { background: #475569; }   .sp-btn-grey:hover { background: #334155; }
+.sp-btn:disabled, .sp-btn:disabled:hover { opacity: .45; cursor: not-allowed; background: #475569; }
 .sp-btn-amber { background: #d97706; } .sp-btn-amber:hover { background: #b45309; }
 .sp-btn-purple { background: #7c3aed; } .sp-btn-purple:hover { background: #6d28d9; }
 .sp-btn-teal { background: #0d9488; }  .sp-btn-teal:hover { background: #0f766e; }

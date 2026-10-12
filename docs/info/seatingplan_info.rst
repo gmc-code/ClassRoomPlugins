@@ -120,12 +120,12 @@ For example, a page set up for showing the plan to the class:
 
 .. code-block:: rst
 
-    .. seatingplan::
-        :layout: 5x6
-        :title: Year 8 Science
-        :one-line:
-        :surname-initial:
-        :hide-badges:
+   .. seatingplan::
+      :layout: 5x6
+      :title: Year 8 Science
+      :one-line:
+      :surname-initial:
+      :hide-badges:
 
 A room with a short front row, where the front desks should stay the same
 size as the others:
@@ -286,6 +286,13 @@ Toolbar controls
      - Restores a previously exported seating plan.
    * - **Reset**
      - Restores the roster and rules originally defined in the directive.
+       Also clears what **Revert** would go back to.
+   * - **Revert**
+     - Goes back to the last file you imported, undoing every change since:
+       after **Import JSON**, the plan exactly as saved in that file (title,
+       layout, students, rules and seats); after **Import Roster**, the class
+       list in the file's own order, with no rules. Asks before reverting.
+       Greyed out until something has been imported.
    * - **Print**
      - Opens a print-friendly version of the seating plan.
    * - **Projector View**
@@ -401,7 +408,8 @@ What the browser remembers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The browser remembers the title, students, rules, layout and display options
-for each directive. The remembered layout and display options take priority
+for each directive. It also keeps a copy of the last imported file so
+**Revert** still works after the page is closed and reopened. The remembered layout and display options take priority
 over the directive's ``:layout:`` and display options on later visits.
 **Reset** returns the page to the students, rules, layout, sort order and
 display options written in the directive.

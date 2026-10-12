@@ -524,6 +524,11 @@
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>' +
                 'Reset</button>' +
 
+                '<button type="button" class="sp-btn sp-btn-grey" data-action="revert" data-role="revert" disabled ' +
+                'title="Nothing imported yet">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>' +
+                'Revert</button>' +
+
                 '<button type="button" class="sp-btn sp-btn-teal" data-action="print">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>' +
                 'Print</button>' +
@@ -621,7 +626,7 @@
                 '<div class="sp-grid" data-role="grid"></div></div>' +
                 '</div>';
 
-            ['title', 'layouts', 'custom-layout', 'fill', 'file', 'json-file', 'toggle-surname-initial', 'toggle-homeroom', 'toggle-ignore-rules', 'toggle-oneline', 'toggle-hide-badges', 'toggle-limit-width', 'toggle-teacher-view', 'status', 'count', 'pool', 'grid'].forEach(function (r) {
+            ['title', 'revert', 'layouts', 'custom-layout', 'fill', 'file', 'json-file', 'toggle-surname-initial', 'toggle-homeroom', 'toggle-ignore-rules', 'toggle-oneline', 'toggle-hide-badges', 'toggle-limit-width', 'toggle-teacher-view', 'status', 'count', 'pool', 'grid'].forEach(function (r) {
                 ui[r] = root.querySelector('[data-role="' + r + '"]');
             });
 
@@ -769,6 +774,7 @@
                 case 'reverse': reverseSeating(); break;
                 case 'clear': clearSeats(); break;
                 case 'reset': resetToPage(); break;
+                case 'revert': revertToImport(); break;
                 case 'print': printPlan(); break;
                 case 'projector': enterProjector(); break;
                 case 'projector-exit': exitProjector(); break;
@@ -1314,6 +1320,7 @@
         function resetToPage() {
             if (!window.confirm('Reset this plan to the roster and rules written on the page? Your imported roster and rules will be removed.')) return;
             try { localStorage.removeItem(storageKey); } catch (e) { /* ignore */ }
+            clearImportSnapshot();
             defaultsFromConfig();
             state.layout = cfg.layout.slice();
             state.fillFromLast = cfg.fill === 'last';
@@ -1325,6 +1332,15 @@
         /* ----- JSON export & import ----- */
 
         function exportJson() {
+            var payload = planData();
+            var json = JSON.stringify(payload, null, 2);
+            var suggested = (payload.title || 'seating_plan').toLowerCase().replace(/[^a-z0-9]+/g, '_')
+                .replace(/^_+|_+$/g, '') || 'seating_plan';
+            saveJsonFile(json, suggested + '.json');
+        }
+
+        /* The whole plan as plain data: used by Export JSON. */
+        function planData() {
             var desks = getDesks();
             var placement = [];
 
@@ -1351,11 +1367,55 @@
                 rules: state.rules,
                 placement: placement
             };
+            return payload;
+        }
 
-            var json = JSON.stringify(payload, null, 2);
-            var suggested = (currentTitle || 'seating_plan').toLowerCase().replace(/[^a-z0-9]+/g, '_')
-                .replace(/^_+|_+$/g, '') || 'seating_plan';
-            saveJsonFile(json, suggested + '.json');
+        /* ----- Revert: back to the last imported JSON or roster ----- */
+
+        var importKey = storageKey + ':imported';
+
+        function readImportSnapshot() {
+            try {
+                var raw = localStorage.getItem(importKey);
+                var snap = raw ? JSON.parse(raw) : null;
+                return snap && snap.data ? snap : null;
+            } catch (e) { return null; }
+        }
+
+        function storeImportSnapshot(kind, name, data) {
+            try {
+                localStorage.setItem(importKey, JSON.stringify({ kind: kind, name: name || '', data: data }));
+            } catch (e) { /* storage blocked: Revert stays unavailable */ }
+            updateRevertButton();
+        }
+
+        function clearImportSnapshot() {
+            try { localStorage.removeItem(importKey); } catch (e) { /* ignore */ }
+            updateRevertButton();
+        }
+
+        function updateRevertButton() {
+            if (!ui.revert) return;
+            var snap = readImportSnapshot();
+            ui.revert.disabled = !snap;
+            ui.revert.title = snap
+                ? 'Go back to ' + (snap.name || 'the imported file') + ' as it was imported'
+                : 'Nothing imported yet';
+        }
+
+        function revertToImport() {
+            var snap = readImportSnapshot();
+            if (!snap) return;
+            var what = snap.name || (snap.kind === 'json' ? 'the imported JSON file' : 'the imported class list');
+            if (!window.confirm('Revert to ' + what + ' as it was imported? Changes made since then will be lost.')) return;
+            try {
+                applyPlanData(snap.data);
+                save();
+                setStatus('Reverted to ' + what + (snap.kind === 'json'
+                    ? ' as imported.' : ' in its original order.'));
+            } catch (err) {
+                setStatus('Could not revert: ' + (err.message || err));
+            }
         }
 
         /* Chrome/Edge (https or localhost): a Save As box to choose the folder and name.
@@ -1396,6 +1456,73 @@
             setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
         }
 
+        /* Load a whole plan (from Import JSON or Revert). Throws before changing
+           anything if the data is unusable. */
+        function applyPlanData(data) {
+            if (!data || !Array.isArray(data.students) || !Array.isArray(data.layout)) {
+                throw new Error('Invalid seating plan JSON format.');
+            }
+            var layout = parseLayout(data.layout.join(','));
+            if (!layout) throw new Error('the layout in that file is not valid.');
+            var seenIds = {};
+            var students = data.students.filter(function (s) {
+                if (!s || s.id == null || seenIds[s.id]) return false;
+                seenIds[s.id] = true;
+                return true;
+            }).map(function (s, idx) {
+                var first = clean(s.firstName) || 'Student';
+                var surname = clean(s.surname) || String(idx + 1);
+                return { id: String(s.id), firstName: first, surname: surname,
+                         fullName: first + ' ' + surname, homeroom: clean(s.homeroom) };
+            });
+
+            if (data.title) {
+                state.title = data.title;
+                if (ui.title) ui.title.textContent = data.title;
+            }
+
+            state.layout = layout;
+            state.students = students;
+            state.rules = Array.isArray(data.rules) ? data.rules : [];
+            if (data.fillFromLast != null) state.fillFromLast = !!data.fillFromLast;
+            if (data.sortMode != null) state.sortMode = data.sortMode;
+
+            updateToolbar();
+            initGrid();
+            ui.pool.innerHTML = '';
+
+            var desks = getDesks();
+            var byId = {};
+            state.students.forEach(function (s) { byId[s.id] = s; });
+
+            if (Array.isArray(data.placement) && data.placement.length) {
+                var placed = {};
+                data.placement.forEach(function (item) {
+                    var s = item && byId[item.studentId];
+                    if (!s || placed[s.id]) return;
+                    placed[s.id] = true;
+                    var d = item.deskIndex != null ? desks[item.deskIndex] : null;
+                    if (d && !d.querySelector('.sp-card')) {
+                        d.classList.add('sp-occupied');
+                        var cols = parseInt(d.dataset.cols, 10) || 6;
+                        d.appendChild(createCard(s, true, cols));
+                    } else {
+                        ui.pool.appendChild(createCard(s, false));
+                    }
+                });
+                /* students missing from the placement list go to Unassigned */
+                state.students.forEach(function (s) {
+                    if (!placed[s.id]) ui.pool.appendChild(createCard(s, false));
+                });
+            } else {
+                autoArrange(state.sortMode);
+                return;
+            }
+
+            validate();
+            updateCount();
+        }
+
         function onJsonFileChosen(e) {
             var file = e.target.files[0];
             if (!file) return;
@@ -1405,69 +1532,9 @@
             reader.onload = function (evt) {
                 try {
                     var data = JSON.parse(evt.target.result);
-                    if (!data || !Array.isArray(data.students) || !Array.isArray(data.layout)) {
-                        throw new Error('Invalid seating plan JSON format.');
-                    }
-                    var layout = parseLayout(data.layout.join(','));
-                    if (!layout) throw new Error('the layout in that file is not valid.');
-                    var seenIds = {};
-                    var students = data.students.filter(function (s) {
-                        if (!s || s.id == null || seenIds[s.id]) return false;
-                        seenIds[s.id] = true;
-                        return true;
-                    }).map(function (s, idx) {
-                        var first = clean(s.firstName) || 'Student';
-                        var surname = clean(s.surname) || String(idx + 1);
-                        return { id: String(s.id), firstName: first, surname: surname,
-                                 fullName: first + ' ' + surname, homeroom: clean(s.homeroom) };
-                    });
-
-                    if (data.title) {
-                        state.title = data.title;
-                        if (ui.title) ui.title.textContent = data.title;
-                    }
-
-                    state.layout = layout;
-                    state.students = students;
-                    state.rules = Array.isArray(data.rules) ? data.rules : [];
-                    if (data.fillFromLast != null) state.fillFromLast = !!data.fillFromLast;
-                    if (data.sortMode != null) state.sortMode = data.sortMode;
-
+                    applyPlanData(data);
                     save();
-                    updateToolbar();
-                    initGrid();
-                    ui.pool.innerHTML = '';
-
-                    var desks = getDesks();
-                    var byId = {};
-                    state.students.forEach(function (s) { byId[s.id] = s; });
-
-                    if (Array.isArray(data.placement) && data.placement.length) {
-                        var placed = {};
-                        data.placement.forEach(function (item) {
-                            var s = item && byId[item.studentId];
-                            if (!s || placed[s.id]) return;
-                            placed[s.id] = true;
-                            var d = item.deskIndex != null ? desks[item.deskIndex] : null;
-                            if (d && !d.querySelector('.sp-card')) {
-                                d.classList.add('sp-occupied');
-                                var cols = parseInt(d.dataset.cols, 10) || 6;
-                                d.appendChild(createCard(s, true, cols));
-                            } else {
-                                ui.pool.appendChild(createCard(s, false));
-                            }
-                        });
-                        /* students missing from the placement list go to Unassigned */
-                        state.students.forEach(function (s) {
-                            if (!placed[s.id]) ui.pool.appendChild(createCard(s, false));
-                        });
-                    } else {
-                        autoArrange(state.sortMode);
-                        return;
-                    }
-
-                    validate();
-                    updateCount();
+                    storeImportSnapshot('json', file.name, data);
                     setStatus('Successfully reimported title, layout, roster, rules, and seating order.');
                 } catch (err) {
                     setStatus('Failed to import JSON: ' + (err.message || err));
@@ -1503,6 +1570,11 @@
             }
             save();
             autoArrange(state.sortMode);
+            /* Revert puts the class back in the file's own order */
+            storeImportSnapshot('roster', fileName, {
+                title: state.title, layout: state.layout.slice(), fillFromLast: state.fillFromLast,
+                sortMode: 'DEFAULT', students: students, rules: [], placement: []
+            });
         }
 
         function onFileChosen(e) {
@@ -1761,6 +1833,7 @@
         defaultsFromConfig();
         load();
         build();
+        updateRevertButton();
         buildModal();
         autoArrange(state.sortMode);
     }
