@@ -1338,13 +1338,48 @@
                 placement: placement
             };
 
-            var dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(payload, null, 2));
+            var json = JSON.stringify(payload, null, 2);
+            var suggested = (currentTitle || 'seating_plan').toLowerCase().replace(/[^a-z0-9]+/g, '_')
+                .replace(/^_+|_+$/g, '') || 'seating_plan';
+            saveJsonFile(json, suggested + '.json');
+        }
+
+        /* Chrome/Edge (https or localhost): a Save As box to choose the folder and name.
+           Other browsers: ask for a file name, then download it as usual. */
+        function saveJsonFile(json, suggestedName) {
+            if (window.showSaveFilePicker) {
+                window.showSaveFilePicker({
+                    suggestedName: suggestedName,
+                    types: [{ description: 'Seating plan (JSON)', accept: { 'application/json': ['.json'] } }]
+                }).then(function (handle) {
+                    return handle.createWritable().then(function (w) {
+                        return w.write(json).then(function () { return w.close(); });
+                    }).then(function () { setStatus('Saved ' + handle.name + '.'); });
+                }).catch(function (err) {
+                    if (err && err.name === 'AbortError') return;   // Cancel pressed
+                    downloadJson(json, suggestedName, true);        // picker blocked: fall back
+                });
+                return;
+            }
+            downloadJson(json, suggestedName, true);
+        }
+
+        function downloadJson(json, suggestedName, ask) {
+            var name = suggestedName;
+            if (ask) {
+                name = window.prompt('File name for the exported seating plan:', suggestedName);
+                if (name == null) return;                            // Cancel pressed
+                name = name.trim().replace(/[\\/:*?"<>|]+/g, '_') || suggestedName;
+                if (!/\.json$/i.test(name)) name += '.json';
+            }
+            var url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
             var anchor = document.createElement('a');
-            anchor.setAttribute('href', dataStr);
-            anchor.setAttribute('download', (currentTitle || 'seating_plan').toLowerCase().replace(/[^a-z0-9]+/g, '_') + '.json');
+            anchor.href = url;
+            anchor.download = name;
             document.body.appendChild(anchor);
             anchor.click();
             anchor.remove();
+            setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
         }
 
         function onJsonFileChosen(e) {

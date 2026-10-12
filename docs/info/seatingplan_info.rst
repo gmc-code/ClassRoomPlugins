@@ -131,8 +131,31 @@ size as the others:
       :limit-desk-width:
 
 ``:storage-key:``
-   Sets a custom key for storing seating plans in the browser. If omitted,
-   the page name and directive position are used automatically.
+   Names the slot the browser saves this plan in (see
+   `What the browser remembers`_). If omitted, the page name and the plan's
+   position on the page are used, for example ``classes/8sci#0`` for the
+   first plan on ``classes/8sci.rst``.
+
+   Set a key when:
+
+   * **The page may change.** Adding a plan above this one, reordering plans
+     or renaming the page changes the automatic key, and the browser no
+     longer finds the saved roster, rules and layout. A fixed key keeps them.
+   * **Two pages should share one plan.** Plans with the same key load the
+     same saved class, for example a planning page and a page for the
+     projector.
+
+   Use a short name that is unique on the site:
+
+   .. code-block:: rst
+
+      .. seatingplan::
+         :layout: 5x6
+         :title: 8 Science
+         :storage-key: 8sci-2026
+
+   Changing the key starts a fresh plan. The old saved plan stays in the
+   browser but is no longer shown; export it as JSON first if it is needed.
 
 ``:class:``
    Adds CSS classes to the seating plan container, so one plan can be styled
@@ -233,8 +256,10 @@ Toolbar controls
    * - **Import Roster**
      - Loads a CSV or Excel class list into the browser.
    * - **Export JSON**
-     - Downloads the complete seating plan, including students, rules, layout
-       and desk positions.
+     - Saves the complete seating plan, including students, rules, layout and
+       desk positions, as a ``.json`` file. In Chrome and Edge a Save As box
+       opens so you can choose the folder and file name. Other browsers ask
+       for a file name, then save it to the Downloads folder.
    * - **Import JSON**
      - Restores a previously exported seating plan.
    * - **Reset**
