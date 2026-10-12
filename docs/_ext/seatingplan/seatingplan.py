@@ -3,14 +3,15 @@
 Embeds an interactive classroom seating plan designer in a page.
 
     .. seatingplan::
-       :layout: 5x6
-       :roster: students.csv
-       :one-line:
+        :layout: 5x6
+        :title: Year 8 Science
 
-       separate: Alex Smith | Sam Jones
-       front: Priya Patel
-       left: Mia Chen
-       empty: Tom Brown
+        Alex Smith, H11
+        Sam Jones, B11
+        Priya Patel, N12
+
+        separate: Alex Smith | Sam Jones
+        front: Priya Patel
 
 The page is rendered client-side by seatingplan.js / seatingplan.css, which are
 copied into ``_static`` by Sphinx during an HTML build.
@@ -154,6 +155,7 @@ class SeatingPlanDirective(SphinxDirective):
         "hide-homeroom": directives.flag,
         "hide-badges": directives.flag,
         "ignore-rules": directives.flag,
+        "limit-desk-width": directives.flag,
         "storage-key": directives.unchanged,
         "class": directives.class_option,
     }
@@ -265,6 +267,7 @@ class SeatingPlanDirective(SphinxDirective):
                 "homeroom": "hide-homeroom" not in self.options,
                 "hideBadges": "hide-badges" in self.options,
                 "ignoreRules": "ignore-rules" in self.options,
+                "limitWidth": "limit-desk-width" in self.options,
             },
             "students": students,
             "rules": rules,

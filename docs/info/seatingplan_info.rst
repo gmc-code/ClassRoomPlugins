@@ -101,7 +101,12 @@ Directive options
    Starts with **Ignore Rules** ticked, so the first arrangement is made
    without the rules.
 
-These five options take no value. They set how the page first appears; the
+``:limit-desk-width:``
+   Starts with **Limit Desk Width** ticked, so rows with fewer than 6 desks
+   use the same desk width as a 6-desk row instead of stretching across the
+   room. See `Display options`_.
+
+These six options take no value. They set how the page first appears; the
 matching checkboxes can still be changed in the browser. See
 `What the browser remembers`_.
 
@@ -116,12 +121,22 @@ For example, a page set up for showing the plan to the class:
       :surname-initial:
       :hide-badges:
 
+A room with a short front row, where the front desks should stay the same
+size as the others:
+
+.. code-block:: rst
+
+   .. seatingplan::
+      :layout: 4,6,6,6
+      :limit-desk-width:
+
 ``:storage-key:``
    Sets a custom key for storing seating plans in the browser. If omitted,
    the page name and directive position are used automatically.
 
 ``:class:``
-   Adds CSS classes to the seating plan container.
+   Adds CSS classes to the seating plan container, so one plan can be styled
+   differently from the others. See `Customising with CSS`_.
 
 Student and rule definitions
 ----------------------------
@@ -201,6 +216,11 @@ Dropping a student onto an occupied desk swaps the two students.
 Desks that violate seating rules are highlighted in red, unless **Hide Rule
 Badges** is ticked.
 
+Each desk shows the student's first name and surname, with the homeroom and
+any rule badges on one line underneath. If a desk is too narrow for all of
+them, the badges wrap onto a second line and the desk grows taller, so names
+and badges are never cut off. Names too long for the desk end in "…".
+
 Toolbar controls
 ~~~~~~~~~~~~~~~~
 
@@ -258,14 +278,14 @@ students into that layout.
      - 4 rows of 7 desks.
    * - **4x8**
      - 4 rows of 8 desks.
-   * - **5,8,8,6**
-     - Rows of 5, 8, 8 and 6 desks.
+   * - **6,8,8,6**
+     - Rows of 6, 8, 8 and 6 desks.
    * - **3x9**
      - 3 rows of 9 desks.
    * - **3x10**
      - 3 rows of 10 desks.
-   * - **7,10,10**
-     - Rows of 7, 10 and 10 desks.
+   * - **8,10,10**
+     - Rows of 8, 10 and 10 desks.
    * - **6,11,11**
      - Rows of 6, 11 and 11 desks.
    * - **4,12,12**
@@ -316,6 +336,12 @@ Display options
        on), their card colours, the red highlight on desks breaking a rule and
        the message listing rules that were left out. The rules still apply
        when students are arranged. Untick it to check for broken rules.
+   * - **Limit Desk Width**
+     - Stops rows with fewer than 6 desks stretching across the room. Their
+       desks keep the width of a desk in a 6-desk row and the row is centred,
+       so a short front row of 2 or 4 desks looks like the rest of the room.
+       Names in those rows are also sized as in a 6-desk row. Rows with 6 or
+       more desks are not changed.
 
 What the browser remembers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -325,6 +351,72 @@ for each directive. The remembered layout and display options take priority
 over the directive's ``:layout:`` and display options on later visits.
 **Reset** returns the page to the students, rules, layout, sort order and
 display options written in the directive.
+
+Customising with CSS
+--------------------
+
+Desk sizes and spacing are set by CSS custom properties, so they can be
+changed without editing ``seatingplan.css``.
+
+.. list-table::
+   :widths: 36 14 50
+   :header-rows: 1
+
+   * - Property
+     - Default
+     - Controls
+   * - ``--sp-desk-height``
+     - ``75px``
+     - Minimum desk height. Desks still grow if their content needs more room.
+   * - ``--sp-desk-height-compact``
+     - ``48px``
+     - Minimum desk height when **One-line Names** is ticked.
+   * - ``--sp-desk-height-projector``
+     - ``112px``
+     - Minimum desk height in **Projector View**.
+   * - ``--sp-row-gap``
+     - ``8px``
+     - Space between desks in a row (``12px`` in **Projector View**).
+   * - ``--sp-limit-seats``
+     - ``6``
+     - With **Limit Desk Width** ticked, rows with fewer desks than this use
+       the desk width of a row with this many desks.
+
+To use them, add a CSS file to your documentation. For example, create
+``_static/custom.css`` next to ``conf.py``:
+
+.. code-block:: css
+
+   /* Every seating plan on the site: slightly taller desks. */
+   .seatingplan {
+       --sp-desk-height: 85px;
+   }
+
+   /* Only plans given :class: wide-room: short rows match an 8-desk row,
+      with more space between desks. */
+   .seatingplan.wide-room {
+       --sp-limit-seats: 8;
+       --sp-row-gap: 12px;
+   }
+
+Then load it in ``conf.py``:
+
+.. code-block:: python
+
+   html_static_path = ['_static']
+   html_css_files = ['custom.css']
+
+Use the class on any plan that should get the second set of styles:
+
+.. code-block:: rst
+
+   .. seatingplan::
+      :layout: 4,8,8,8
+      :class: wide-room
+      :limit-desk-width:
+
+``--sp-limit-seats`` only matters when **Limit Desk Width** is ticked, either
+by the ``:limit-desk-width:`` option or in the browser.
 
 Privacy and student data
 ------------------------
@@ -398,6 +490,25 @@ constraints.
    back: Tom Brown
    left: Jordan Lee
    empty: Ben Clark
+
+Short front row
+~~~~~~~~~~~~~~~
+
+A room with 4 desks at the front and 6 in each other row. **Limit Desk Width**
+is ticked, so the front desks match the others. Untick it to compare.
+
+.. seatingplan::
+   :layout: 4,6,6,6
+   :title: Short Front Row
+   :limit-desk-width:
+   :storage-key: short-front-row-example
+
+   Alex Smith, Hughes 11
+   Sam Jones, Hughes 12
+   Priya Patel, N13
+   Jordan Lee, N13
+
+   front: Priya Patel
 
 Empty class
 ~~~~~~~~~~~

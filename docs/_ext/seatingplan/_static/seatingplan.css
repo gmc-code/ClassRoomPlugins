@@ -78,7 +78,7 @@
 }
 
 .seatingplan .sp-layouts {
-    display: flex; gap: 3px; background: #0f172a; padding: 3px;
+    display: flex; flex-wrap: wrap; gap: 3px; background: #0f172a; padding: 3px;
     border-radius: 6px; border: 1px solid #334155;
 }
 .seatingplan .sp-file { display: none; }
@@ -138,10 +138,11 @@
     padding: 5px; font-size: 12px; font-weight: 600; color: #475569; letter-spacing: 1px; margin-bottom: 12px;
 }
 .seatingplan .sp-grid { display: flex; flex-direction: column; gap: 10px; }
-.seatingplan .sp-row { display: grid; gap: 8px; }
+.seatingplan .sp-row { display: grid; gap: var(--sp-row-gap, 8px); }
 
 .seatingplan .sp-desk {
-    background: #fff; border: 2px dashed #cbd5e1; border-radius: 6px; height: 75px;
+    background: #fff; border: 2px dashed #cbd5e1; border-radius: 6px;
+    min-height: var(--sp-desk-height, 75px); box-sizing: border-box; padding: 2px 0;
     display: flex; flex-direction: column; justify-content: center; align-items: center;
     position: relative; transition: background-color .2s, border-color .2s; min-width: 0;
 }
@@ -183,7 +184,8 @@
 .seatingplan .sp-side-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .seatingplan .sp-desk .sp-card {
-    width: 98%; height: 97%; padding: 2px 3px; background: #e0f2fe; border-color: #38bdf8;
+    width: 98%; flex: 1 1 auto; padding: 2px 3px; background: #e0f2fe; border-color: #38bdf8;
+    box-sizing: border-box;
     display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
 }
 .seatingplan .sp-desk .sp-card.sp-has-sep { background: #fff7ed; border-color: #ea580c; }
@@ -191,8 +193,11 @@
 .seatingplan .sp-desk .sp-card.sp-has-pos { background: #eff6ff; border-color: #2563eb; }
 .seatingplan .sp-first { font-weight: 600; font-size: 12px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .seatingplan .sp-last { font-size: 11px; color: #334155; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Names never get squeezed (that clipped the tails of g, y, p); the desk grows instead. */
+.seatingplan .sp-desk .sp-card > * { flex-shrink: 0; }
+.seatingplan .sp-desk .sp-first, .seatingplan .sp-desk .sp-last { line-height: 1.25; }
 
-.sp-badges { display: flex; gap: 2px; align-items: center; justify-content: center; margin-top: 1px; }
+.sp-badges { display: flex; flex-wrap: wrap; gap: 2px; align-items: center; justify-content: center; margin-top: 1px; }
 .sp-badge { font-size: 9.5px; font-weight: 700; padding: 0 3px; border-radius: 3px; white-space: nowrap; }
 .sp-badge-hr { background: #bae6fd; color: #0369a1; }
 .sp-badge-sep { background: #ffedd5; color: #c2410c; border: 1px solid #f97316; }
@@ -208,7 +213,7 @@
 }
 
 /* ---- One-line names (compact desks) ---- */
-.seatingplan.sp-compact .sp-desk { height: 48px; }
+.seatingplan.sp-compact .sp-desk { min-height: var(--sp-desk-height-compact, 48px); }
 .seatingplan.sp-compact .sp-grid { gap: 8px; }
 .seatingplan.sp-compact .sp-name-line {
     display: flex; align-items: baseline; justify-content: center; gap: 4px;
@@ -219,7 +224,7 @@
 .seatingplan.sp-compact .sp-badge-stack { flex-direction: row; flex-wrap: nowrap; margin-top: 1px; }
 
 /* ---- Hide rule badges ---- */
-.seatingplan.sp-hide-badges .sp-badges { display: none; }
+.seatingplan.sp-hide-badges .sp-badge-rule { display: none; }
 /* ...and the red highlight on desks that break a rule, so the class can't see who has one */
 .seatingplan.sp-hide-badges .sp-desk.sp-conflict {
     border: 2px solid #94a3b8 !important; background: #fff !important; animation: none;
@@ -246,11 +251,11 @@ html.sp-projector-open, html.sp-projector-open body { overflow: hidden; }
 .seatingplan.sp-projector .sp-canvas { padding: 18px 24px; }
 .seatingplan.sp-projector .sp-whiteboard { font-size: 18px; padding: 8px; margin-bottom: 18px; }
 .seatingplan.sp-projector .sp-grid { gap: 16px; }
-.seatingplan.sp-projector .sp-row { gap: 12px; }
-.seatingplan.sp-projector .sp-desk { height: 112px; border-width: 3px; }
+.seatingplan.sp-projector .sp-row { --sp-row-gap: 12px; }
+.seatingplan.sp-projector .sp-desk { min-height: var(--sp-desk-height-projector, 112px); border-width: 3px; }
 .seatingplan.sp-projector .sp-desk-num { font-size: 12px; }
 .seatingplan.sp-projector .sp-badge { font-size: 13px; padding: 1px 5px; }
-.seatingplan.sp-projector.sp-compact .sp-desk { height: 70px; }
+.seatingplan.sp-projector.sp-compact .sp-desk { min-height: 70px; }
 
 @media (max-width: 700px) {
     .seatingplan .sp-body { flex-direction: column; }

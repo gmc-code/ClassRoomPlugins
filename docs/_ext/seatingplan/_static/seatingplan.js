@@ -6,14 +6,15 @@
         { label: '5x6', rows: [6, 6, 6, 6, 6] },
         { label: '4x7', rows: [7, 7, 7, 7] },
         { label: '4x8', rows: [8, 8, 8, 8] },
-        { label: '5,8,8,6', rows: [5, 8, 8, 6] },
+        { label: '6,8,8,6', rows: [6, 8, 8, 6] },
         { label: '3x9', rows: [9, 9, 9] },
         { label: '3x10', rows: [10, 10, 10] },
-        { label: '7,10,10', rows: [7, 10, 10] },
+        { label: '8,10,10', rows: [8, 10, 10] },
         { label: '6,11,11', rows: [6, 11, 11] },
         { label: '4,12,12', rows: [4, 12, 12] },
         { label: '14,14', rows: [14, 14] }
     ];
+    var LIMIT_SEATS = 6; /* Limit Desk Width: short rows use the desk width of a 6-desk row */
     var XLSX_URL = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
     var xlsxPromise = null;
 
@@ -24,16 +25,16 @@
         '.wb{border:2px solid #000;text-align:center;padding:6px;font-weight:700;letter-spacing:1px;font-size:14px;margin-bottom:12px}' +
         '.sp-grid{display:flex;flex-direction:column;gap:12px}' +
         '.sp-row{display:grid;gap:10px}' +
-        '.sp-desk{border:1px solid #000;border-radius:5px;height:80px;position:relative;display:flex;align-items:center;justify-content:center;min-width:0;break-inside:avoid}' +
+        '.sp-desk{border:1px solid #000;border-radius:5px;min-height:80px;box-sizing:border-box;padding:2px 0;position:relative;display:flex;align-items:center;justify-content:center;min-width:0;break-inside:avoid}' +
         '.sp-desk-num{position:absolute;top:2px;left:6px;font-size:10px;color:#000}' +
         '.sp-card{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;width:96%}' +
         '.sp-first{font-weight:700}.sp-last{}' +
-        '.sp-badges{display:flex;gap:3px;align-items:center;justify-content:center;margin-top:2px}' +
+        '.sp-badges{display:flex;flex-wrap:wrap;gap:3px;align-items:center;justify-content:center;margin-top:2px}' +
         '.sp-badge{font-size:11px;font-weight:700;border:1px solid #000;border-radius:3px;padding:1px 4px}' +
         '.sp-badge-hr{border:none !important;background:transparent;padding:0 2px}' +
         '.sp-badge-stack{display:flex;flex-direction:column;align-items:center;gap:2px}' +
         '/* One-line names: shorter desks with first name and surname side by side */' +
-        '.sp-compact .sp-desk{height:46px}' +
+        '.sp-compact .sp-desk{min-height:46px}' +
         '.sp-compact .sp-name-line{display:flex;align-items:baseline;justify-content:center;gap:4px;max-width:100%;overflow:hidden;white-space:nowrap}' +
         '.sp-compact .sp-badge-stack{flex-direction:row;margin-top:1px}';
 
@@ -347,7 +348,8 @@
             homeroom: 'toggle-homeroom',
             ignoreRules: 'toggle-ignore-rules',
             oneLine: 'toggle-oneline',
-            hideBadges: 'toggle-hide-badges'
+            hideBadges: 'toggle-hide-badges',
+            limitWidth: 'toggle-limit-width'
         };
         var draggingId = null;
         var ui = {};
@@ -363,7 +365,8 @@
                 homeroom: d.homeroom !== false,
                 ignoreRules: d.ignoreRules === true,
                 oneLine: d.oneLine === true,
-                hideBadges: d.hideBadges === true
+                hideBadges: d.hideBadges === true,
+                limitWidth: d.limitWidth === true
             };
         }
 
@@ -590,6 +593,10 @@
                 '<input type="checkbox" data-role="toggle-hide-badges" class="sp-checkbox">' +
                 'Hide Rule Badges' +
                 '</label>' +
+                '<label class="sp-checkbox-label" title="Rows with fewer than 6 desks use the same desk width as a 6-desk row">' +
+                '<input type="checkbox" data-role="toggle-limit-width" class="sp-checkbox">' +
+                'Limit Desk Width' +
+                '</label>' +
                 '</div>' +
 
                 '</div>' +
@@ -601,7 +608,7 @@
                 '<div class="sp-grid" data-role="grid"></div></div>' +
                 '</div>';
 
-            ['title', 'layouts', 'custom-layout', 'fill', 'file', 'json-file', 'toggle-surname-initial', 'toggle-homeroom', 'toggle-ignore-rules', 'toggle-oneline', 'toggle-hide-badges', 'status', 'count', 'pool', 'grid'].forEach(function (r) {
+            ['title', 'layouts', 'custom-layout', 'fill', 'file', 'json-file', 'toggle-surname-initial', 'toggle-homeroom', 'toggle-ignore-rules', 'toggle-oneline', 'toggle-hide-badges', 'toggle-limit-width', 'status', 'count', 'pool', 'grid'].forEach(function (r) {
                 ui[r] = root.querySelector('[data-role="' + r + '"]');
             });
 
@@ -634,6 +641,7 @@
                     state.display[key] = box.checked;
                     applyDisplayClasses();
                     if (key === 'hideBadges' && box.checked) hideRuleStatus();
+                    if (key === 'limitWidth') applyRowWidths();
                     save();
                     if (key !== 'ignoreRules') refreshCards();
                 });
@@ -758,25 +766,20 @@
         function buildBadges(student, flags, showHomeroom) {
             var container = make('div', 'sp-badge-stack');
 
-            // 1. Homeroom badge on top (if shown and present)
+            // Homeroom first, then rule badges, all on one row that wraps only if it must.
+            var row = make('div', 'sp-badges');
             if (showHomeroom && student.homeroom) {
-                container.appendChild(make('span', 'sp-badge sp-badge-hr', student.homeroom));
+                row.appendChild(make('span', 'sp-badge sp-badge-hr', student.homeroom));
             }
+            if (flags.sep) row.appendChild(make('span', 'sp-badge sp-badge-sep sp-badge-rule', '⚠️ Sep'));
+            if (flags.pair) row.appendChild(make('span', 'sp-badge sp-badge-pair sp-badge-rule', '🔗 Pair'));
+            if (flags.front) row.appendChild(make('span', 'sp-badge sp-badge-pos sp-badge-rule', '⬆ Front'));
+            if (flags.back) row.appendChild(make('span', 'sp-badge sp-badge-pos sp-badge-rule', '⬇ Back'));
+            if (flags.empty) row.appendChild(make('span', 'sp-badge sp-badge-pos sp-badge-rule', '🪑 Empty'));
+            if (flags.left) row.appendChild(make('span', 'sp-badge sp-badge-pos sp-badge-rule', '⬅ Left'));
+            if (flags.right) row.appendChild(make('span', 'sp-badge sp-badge-pos sp-badge-rule', '➡ Right'));
 
-            // 2. Rule badges row below homeroom
-            var ruleRow = make('div', 'sp-badges');
-            if (flags.sep) ruleRow.appendChild(make('span', 'sp-badge sp-badge-sep sp-badge-rule', '⚠️ Sep'));
-            if (flags.pair) ruleRow.appendChild(make('span', 'sp-badge sp-badge-pair sp-badge-rule', '🔗 Pair'));
-            if (flags.front) ruleRow.appendChild(make('span', 'sp-badge sp-badge-pos sp-badge-rule', '⬆ Front'));
-            if (flags.back) ruleRow.appendChild(make('span', 'sp-badge sp-badge-pos sp-badge-rule', '⬇ Back'));
-            if (flags.empty) ruleRow.appendChild(make('span', 'sp-badge sp-badge-pos sp-badge-rule', '🪑 Empty'));
-            if (flags.left) ruleRow.appendChild(make('span', 'sp-badge sp-badge-pos sp-badge-rule', '⬅ Left'));
-            if (flags.right) ruleRow.appendChild(make('span', 'sp-badge sp-badge-pos sp-badge-rule', '➡ Right'));
-
-            if (ruleRow.children.length > 0) {
-                container.appendChild(ruleRow);
-            }
-
+            if (row.children.length > 0) container.appendChild(row);
             return container;
         }
 
@@ -809,6 +812,7 @@
 
             if (isDesk) {
                 var cols = colCount || 6;
+                if (state.display.limitWidth && cols < LIMIT_SEATS) cols = LIMIT_SEATS;
                 var dynamicFontSize = Math.max(11, Math.min(20, Math.floor(110 / cols)));
                 if (root.classList.contains('sp-projector')) dynamicFontSize = Math.round(dynamicFontSize * 1.6);
 
@@ -890,7 +894,7 @@
             var n = 1;
             state.layout.forEach(function (cols, r) {
                 var row = make('div', 'sp-row');
-                row.style.gridTemplateColumns = 'repeat(' + cols + ', minmax(0, 1fr))';
+                row.dataset.cols = cols;
                 for (var c = 0; c < cols; c++) {
                     var desk = make('div', 'sp-desk');
                     desk.dataset.row = r;
@@ -904,6 +908,27 @@
                     n++;
                 }
                 ui.grid.appendChild(row);
+            });
+            applyRowWidths();
+        }
+
+        /* Normally each row shares the full width. With Limit Desk Width, a row with
+           fewer than 6 desks keeps 6-desk-row widths and is centred. The reference
+           count can be changed in CSS with --sp-limit-seats. */
+        function applyRowWidths() {
+            Array.prototype.forEach.call(ui.grid.querySelectorAll('.sp-row'), function (row) {
+                var cols = parseInt(row.dataset.cols, 10) || 6;
+                if (state.display.limitWidth && cols < LIMIT_SEATS) {
+                    var n = 'var(--sp-limit-seats, ' + LIMIT_SEATS + ')';
+                    row.style.gridTemplateColumns = 'repeat(' + cols + ', calc((100% - (' + n +
+                        ' - 1) * var(--sp-row-gap, 8px)) / ' + n + '))';
+                    row.style.justifyContent = 'center';
+                    row.classList.add('sp-row-limited');
+                } else {
+                    row.style.gridTemplateColumns = 'repeat(' + cols + ', minmax(0, 1fr))';
+                    row.style.justifyContent = '';
+                    row.classList.remove('sp-row-limited');
+                }
             });
         }
 
