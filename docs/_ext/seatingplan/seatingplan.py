@@ -156,6 +156,7 @@ class SeatingPlanDirective(SphinxDirective):
         "hide-badges": directives.flag,
         "ignore-rules": directives.flag,
         "limit-desk-width": directives.flag,
+        "teacher-view": directives.flag,
         "storage-key": directives.unchanged,
         "class": directives.class_option,
     }
@@ -268,6 +269,7 @@ class SeatingPlanDirective(SphinxDirective):
                 "hideBadges": "hide-badges" in self.options,
                 "ignoreRules": "ignore-rules" in self.options,
                 "limitWidth": "limit-desk-width" in self.options,
+                "teacherView": "teacher-view" in self.options,
             },
             "students": students,
             "rules": rules,

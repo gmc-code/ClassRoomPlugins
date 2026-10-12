@@ -107,7 +107,12 @@ Directive options
    use the same desk width as a 6-desk row instead of stretching across the
    room. See `Display options`_.
 
-These six options take no value. They set how the page first appears; the
+``:teacher-view:``
+   Starts with **Teacher's View** ticked, so the room is shown as seen from
+   the front: whiteboard at the bottom and left and right swapped. See
+   `Display options`_.
+
+These seven options take no value. They set how the page first appears; the
 matching checkboxes can still be changed in the browser. See
 `What the browser remembers`_.
 
@@ -115,12 +120,12 @@ For example, a page set up for showing the plan to the class:
 
 .. code-block:: rst
 
-   .. seatingplan::
-      :layout: 5x6
-      :title: Year 8 Science
-      :one-line:
-      :surname-initial:
-      :hide-badges:
+    .. seatingplan::
+        :layout: 5x6
+        :title: Year 8 Science
+        :one-line:
+        :surname-initial:
+        :hide-badges:
 
 A room with a short front row, where the front desks should stay the same
 size as the others:
@@ -130,6 +135,15 @@ size as the others:
    .. seatingplan::
       :layout: 4,6,6,6
       :limit-desk-width:
+
+A plan to print for the teacher's desk:
+
+.. code-block:: rst
+
+   .. seatingplan::
+      :layout: 5x6
+      :title: 8 Science
+      :teacher-view:
 
 ``:storage-key:``
    Names the slot the browser saves this plan in (see
@@ -227,6 +241,10 @@ Rules are entered directly below the student list.
 
 ``front:``, ``back:``, ``left:``, ``right:`` and ``empty:`` each take one
 student. Use a separate line for each student.
+
+Left and right are always the students' left and right as they face the
+whiteboard. In **Teacher's View** a ``left:`` student therefore appears on
+the right-hand side of the plan.
 
 All of these rules can also be added and removed in the browser with the
 **Rules** button.
@@ -371,6 +389,13 @@ Display options
        so a short front row of 2 or 4 desks looks like the rest of the room.
        Names in those rows are also sized as in a 6-desk row. Rows with 6 or
        more desks are not changed.
+   * - **Teacher's View**
+     - Shows the room as the teacher sees it from the front: the whiteboard
+       at the bottom, the front row nearest it, and left and right swapped,
+       so desk 1 is at the bottom right. Only the display changes; desk
+       numbers, rules and where students sit stay the same, and students can
+       still be dragged between desks. **Print** and **Projector View** use
+       the same layout, and the printout's title says "(teacher's view)".
 
 What the browser remembers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

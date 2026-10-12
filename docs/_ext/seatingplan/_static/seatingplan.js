@@ -36,7 +36,14 @@
         '/* One-line names: shorter desks with first name and surname side by side */' +
         '.sp-compact .sp-desk{min-height:46px}' +
         '.sp-compact .sp-name-line{display:flex;align-items:baseline;justify-content:center;gap:4px;max-width:100%;overflow:hidden;white-space:nowrap}' +
-        '.sp-compact .sp-badge-stack{flex-direction:row;margin-top:1px}';
+        '.sp-compact .sp-badge-stack{flex-direction:row;margin-top:1px}' +
+        /* Teacher's view: whiteboard at the bottom, rows and sides reversed */
+        'h1 small{font-size:14px;font-weight:400;color:#444}' +
+        '.sp-teacher-view .sp-room{display:flex;flex-direction:column-reverse}' +
+        '.sp-teacher-view .wb{margin:12px 0 0}' +
+        '.sp-teacher-view .sp-grid{flex-direction:column-reverse}' +
+        '.sp-teacher-view .sp-row{direction:rtl}' +
+        '.sp-teacher-view .sp-desk>*{direction:ltr}';
 
     /* ---------------- helpers ---------------- */
 
@@ -349,7 +356,8 @@
             ignoreRules: 'toggle-ignore-rules',
             oneLine: 'toggle-oneline',
             hideBadges: 'toggle-hide-badges',
-            limitWidth: 'toggle-limit-width'
+            limitWidth: 'toggle-limit-width',
+            teacherView: 'toggle-teacher-view'
         };
         var draggingId = null;
         var ui = {};
@@ -366,7 +374,8 @@
                 ignoreRules: d.ignoreRules === true,
                 oneLine: d.oneLine === true,
                 hideBadges: d.hideBadges === true,
-                limitWidth: d.limitWidth === true
+                limitWidth: d.limitWidth === true,
+                teacherView: d.teacherView === true
             };
         }
 
@@ -597,6 +606,10 @@
                 '<input type="checkbox" data-role="toggle-limit-width" class="sp-checkbox">' +
                 'Limit Desk Width' +
                 '</label>' +
+                '<label class="sp-checkbox-label" title="Show the room from the front: whiteboard at the bottom, left and right swapped">' +
+                '<input type="checkbox" data-role="toggle-teacher-view" class="sp-checkbox">' +
+                'Teacher\'s View' +
+                '</label>' +
                 '</div>' +
 
                 '</div>' +
@@ -608,7 +621,7 @@
                 '<div class="sp-grid" data-role="grid"></div></div>' +
                 '</div>';
 
-            ['title', 'layouts', 'custom-layout', 'fill', 'file', 'json-file', 'toggle-surname-initial', 'toggle-homeroom', 'toggle-ignore-rules', 'toggle-oneline', 'toggle-hide-badges', 'toggle-limit-width', 'status', 'count', 'pool', 'grid'].forEach(function (r) {
+            ['title', 'layouts', 'custom-layout', 'fill', 'file', 'json-file', 'toggle-surname-initial', 'toggle-homeroom', 'toggle-ignore-rules', 'toggle-oneline', 'toggle-hide-badges', 'toggle-limit-width', 'toggle-teacher-view', 'status', 'count', 'pool', 'grid'].forEach(function (r) {
                 ui[r] = root.querySelector('[data-role="' + r + '"]');
             });
 
@@ -666,6 +679,7 @@
         function applyDisplayClasses() {
             root.classList.toggle('sp-compact', state.display.oneLine);
             root.classList.toggle('sp-hide-badges', state.display.hideBadges);
+            root.classList.toggle('sp-teacher-view', state.display.teacherView);
         }
 
         function syncDisplayControls() {
@@ -1527,9 +1541,11 @@
             var win = window.open('', '_blank');
             if (!win) { window.print(); return; }
             win.document.write('<!doctype html><html><head><meta charset="utf-8"><title>' + esc(title) +
-                '</title><style>' + PRINT_CSS + '</style></head><body' +
-                (state.display.oneLine ? ' class="sp-compact"' : '') + '><h1>' + esc(title) +
-                '</h1><div class="wb">FRONT OF CLASSROOM / WHITEBOARD</div>' + clone.outerHTML + '</body></html>');
+                '</title><style>' + PRINT_CSS + '</style></head><body class="' +
+                (state.display.oneLine ? 'sp-compact ' : '') + (state.display.teacherView ? 'sp-teacher-view' : '') +
+                '"><h1>' + esc(title) + (state.display.teacherView ? ' <small>(teacher\'s view)</small>' : '') +
+                '</h1><div class="sp-room"><div class="wb">FRONT OF CLASSROOM / WHITEBOARD</div>' +
+                clone.outerHTML + '</div></body></html>');
             win.document.close();
             win.focus();
             setTimeout(function () { win.print(); }, 250);
