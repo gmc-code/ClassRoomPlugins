@@ -351,6 +351,7 @@ class SeatingPlanDirective(SphinxDirective):
                     rule["g"] = group
                 rules.append(rule)
 
+        _note_doc(env)
         node = seatingplan()
         node["config"] = {
             "id": storage_id,
@@ -401,6 +402,7 @@ class SeatingPlanPrintDirective(SphinxDirective):
     }
 
     def run(self):
+        _note_doc(self.env)
         node = seatingplan_print()
         node["label"] = self.options.get("label") or "Print all seating plans"
         node["config"] = {
@@ -461,13 +463,8 @@ def _find_asset(name):
     return None
 
 
-def copy_static_files(app, exception):
-    """Copy the css/js into the built site's _static folder.
-
-    Done at the end of the build so conf.py's html_static_path is left untouched
-    (changing it made Sphinx report "configuration has changed" on every build).
-    """
-    if exception is not None or app.builder.format != "html":
+def _copy_assets(app):
+    if app.builder.format != "html":
         return
     target = Path(app.outdir) / "_static"
     target.mkdir(parents=True, exist_ok=True)
@@ -480,6 +477,62 @@ def copy_static_files(app, exception):
             )
             continue
         shutil.copyfile(str(source), str(target / name))
+
+
+# ----------------------------------------------------------------------------
+# Rebuild pages with seating plans when the css/js change, so their ?v= tags update
+# ----------------------------------------------------------------------------
+
+def _note_doc(env):
+    if not hasattr(env, "seatingplan_docs"):
+        env.seatingplan_docs = set()
+    env.seatingplan_docs.add(env.docname)
+
+
+def _assets_hash():
+    import hashlib
+    h = hashlib.sha1()
+    for name in ASSETS:
+        source = _find_asset(name)
+        if source is not None:
+            h.update(source.read_bytes())
+    return h.hexdigest()
+
+
+def purge_doc(app, env, docname):
+    getattr(env, "seatingplan_docs", set()).discard(docname)
+
+
+def merge_docs(app, env, docnames, other):
+    if not hasattr(env, "seatingplan_docs"):
+        env.seatingplan_docs = set()
+    env.seatingplan_docs |= getattr(other, "seatingplan_docs", set())
+
+
+def outdated_if_assets_changed(app, env, added, changed, removed):
+    new_hash = _assets_hash()
+    if getattr(env, "seatingplan_assets_hash", None) == new_hash:
+        return []
+    env.seatingplan_assets_hash = new_hash
+    return sorted(getattr(env, "seatingplan_docs", set()) - set(removed))
+
+
+def copy_static_files_early(app):
+    """Copy the css/js into the built site's _static folder before any page is written.
+
+    Sphinx adds ?v=<checksum> to the <script>/<link> tags from the file it finds in the
+    output _static folder while writing each page. Copying first means the checksum matches
+    the new file, so browsers fetch the new version instead of a cached old one.
+    Done here rather than via html_static_path so conf.py is left untouched (changing it
+    made Sphinx report "configuration has changed" on every build).
+    """
+    _copy_assets(app)
+
+
+def copy_static_files(app, exception):
+    """Copy again at the end in case anything replaced the files during the build."""
+    if exception is None:
+        _copy_assets(app)
 
 
 def setup(app):
@@ -503,5 +556,9 @@ def setup(app):
     app.add_directive("seatingplan-print", SeatingPlanPrintDirective)
     app.add_css_file("seatingplan.css")
     app.add_js_file("seatingplan.js", defer="defer")
+    app.connect("builder-inited", copy_static_files_early)
+    app.connect("env-purge-doc", purge_doc)
+    app.connect("env-merge-info", merge_docs)
+    app.connect("env-get-outdated", outdated_if_assets_changed)
     app.connect("build-finished", copy_static_files)
     return {"version": "1.0", "parallel_read_safe": True, "parallel_write_safe": True}
