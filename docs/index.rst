@@ -21,6 +21,8 @@ These docs provide details on sphinx extensions and how to use them. The extensi
 
 
     info/seatingplan_info.rst
+    info/seatingplans_info.rst
+
     info/studentgroups_info.rst
     info/namepicker_info.rst
 
@@ -34,6 +36,7 @@ These docs provide details on sphinx extensions and how to use them. The extensi
 
     tools/seatingplan.rst
     tools/seatingplans.rst
+
     tools/studentgroups.rst
     tools/namepicker.rst
 

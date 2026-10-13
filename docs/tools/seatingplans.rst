@@ -2,8 +2,33 @@
 Seating plans
 =======================
 
-| Import a student list from an excel file, from School Class Lists.
-| Enter a class name, and export a seating plan as a JSON file, which can be imported later to restore the seating plan.
+Twelve seating plans, one per class. Each one is remembered by this browser,
+so the page reopens exactly as you left it. See
+:doc:`seatingplans_info` for working with several classes, and
+:doc:`seatingplan_info` for full details of each plan.
+
+**Setting up a class**
+
+#. **Import Roster**: choose the class's Excel export from School Class Lists.
+#. Click the title and type the class name (importing sets the title to the
+   file's name).
+#. Pick a layout, or type one in the **Custom** box: ``5x6``, ``7,8,9,6``, or
+   with empty spaces in brackets, e.g. ``4[3]4, 1[9]1, 4[3]4, 1[9]1, 5[1]5``.
+#. Add any **Rules** (keep apart, keep together, front row ...), then press
+   **A → Z**, **Random** or drag students to seat them.
+#. **Export JSON** to keep a copy of the finished plan.
+
+**Good to know**
+
+* Changes save automatically, but only in this browser on this computer. Use
+  **Export JSON** / **Import JSON** to move a plan to another computer, or as
+  a backup.
+* **Revert** goes back to the last file you imported or exported;
+  **Reset** clears the class from this browser.
+* **Print all my classes** prints every class that has students, one per
+  page. Each plan also has its own **Print** and **Projector View**.
+* Use your own staff computer or profile: anyone using the same browser can
+  see the saved class lists.
 
 .. seatingplan-print::
     :label: Print all my classes
@@ -117,5 +142,3 @@ Class 12
 .. seatingplan::
    :layout: 5x6
    :title: Enter class 12 name here
-
-
