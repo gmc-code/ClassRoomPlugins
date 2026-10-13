@@ -420,10 +420,10 @@ that layout. In rows mode the buttons are:
      - ``4[3]4, 1[9]1, 4[3]4, 1[9]1, 5[1]5``: 5 rows, 11 places wide, 30
        desks. Rows of 4 either side of a central gap, with single desks
        against each side wall between them and a back row of 5 and 5.
-   * - **HS 5x9**
-     - ``1[1]5[1]1, 1[7]1, 1[1]5[1]1, 1[7]1, 9``: 5 rows, 9 places wide, 27
-       desks. Single desks down each side wall, two centre rows of 5 and a
-       full back row of 9.
+   * - **HS 5x10**
+     - ``1[1]5[1]1, 1[8]1, 1[1]6[1]1, 1[8]1, 10``: 5 rows, 10 places wide,
+       29 desks. Single desks down each side wall, centre rows of 5 and 6
+       and a full back row of 10.
 
 If the directive's ``:layout:`` is not one of these, it gets its own button at
 the start of the row.

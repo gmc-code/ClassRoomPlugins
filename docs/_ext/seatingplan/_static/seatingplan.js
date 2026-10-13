@@ -15,7 +15,7 @@
         { label: '14,14', rows: [14, 14] },
         /* [n] = n empty spaces, so desks line up into shapes */
         { label: 'HS 5x11', rows: ['4[3]4', '1[9]1', '4[3]4', '1[9]1', '5[1]5'] },
-        { label: 'HS 5x9', rows: ['1[1]5[1]1', '1[7]1', '1[1]5[1]1', '1[7]1', 9] }
+        { label: 'HS 5x10', rows: ['1[1]5[1]1', '1[8]1', '1[1]6[1]1', '1[8]1', 10] }
     ];
     /* Table mode. A layout is rows of tables, front row first; each table is '4', '6w'
        (6 seats, 3 wide x 2 deep) or '6d' (2 wide x 3 deep). Written as e.g. "6,4,6 / 4,6,4". */
