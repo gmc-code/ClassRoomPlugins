@@ -318,7 +318,8 @@ Toolbar controls
        **Fill** direction and the display options (**Teacher's View**,
        **One-line Names** and the other checkboxes). In Chrome and Edge a Save As box
        opens so you can choose the folder and file name. Other browsers ask
-       for a file name, then save it to the Downloads folder.
+       for a file name, then save it to the Downloads folder. The exported
+       plan is also what **Revert** goes back to.
    * - **Import JSON**
      - Restores a previously exported seating plan exactly as it was saved,
        with every student back on the same desk and the same checkboxes
@@ -328,11 +329,12 @@ Toolbar controls
      - Restores the roster and rules originally defined in the directive.
        Also clears what **Revert** would go back to.
    * - **Revert**
-     - Goes back to the last file you imported, undoing every change since:
-       after **Import JSON**, the plan exactly as saved in that file (title,
-       layout, students, rules, seats and display options); after **Import Roster**, the class
-       list in the file's own order, with no rules. Asks before reverting.
-       Greyed out until something has been imported.
+     - Goes back to the last file you imported or exported, undoing every
+       change since: after **Import JSON** or **Export JSON**, the plan
+       exactly as it was in that file (title, layout, students, rules, seats
+       and display options); after **Import Roster**, the class list in the
+       file's own order, with no rules. Asks before reverting. Greyed out
+       until something has been imported or exported.
    * - **Print**
      - Opens a print-friendly version of this seating plan, landscape, with
        rule badges removed. To print every plan on the page at once, see
@@ -620,28 +622,29 @@ plan is still there the next time the page is opened in the same browser.
 
 **What is saved**
 
-.. list-table::
-   :widths: 50 50
-   :header-rows: 1
+Everything that **Export JSON** writes is also kept in the browser, after
+every change:
 
-   * - Remembered between visits
-     - Not remembered
-   * - Title, students and homerooms, rules, layout (including custom
-       layouts and Rows/Tables), display options, and a copy of the last
-       imported file so **Revert** still works.
-     - Where each student is sitting. On the next visit the students are
-       arranged again from the saved class list and rules, in the
-       directive's ``:sort:`` order. Dragged students, **A → Z**,
-       **Random** and **Reverse** results are not kept.
+* the title, students and homerooms, and rules;
+* the layout (including custom layouts, empty spaces and Rows/Tables);
+* **where each student is sitting**, including students you dragged and the
+  results of **A → Z**, **Random**, **Reverse** and the other buttons;
+* the sort order and **Fill** direction;
+* the display options (**Teacher's View**, **One-line Names** and the other
+  checkboxes);
+* a copy of the last file you imported or exported, so **Revert** still
+  works after the page is closed.
 
-To keep an exact arrangement, including every dragged student, use
-**Export JSON**. **Import JSON** (and **Revert** after it) puts every student
-back on the same desk.
+So the page reopens exactly as you left it, with every student on the same
+desk.
 
-The saved layout and display options take priority over the directive's
-``:layout:`` and display options on later visits. **Reset** goes back to the
-students, rules, layout, sort order and display options written in the
-directive and replaces the saved copy.
+A plan nobody has changed is not saved at all, so it keeps following the
+directive: if the page's author changes the students or ``:layout:``, the
+change shows. Once you change a plan, your saved copy takes priority over
+the directive's students, rules, layout and display options on later visits.
+**Reset** goes back to the students, rules, layout, sort order and display
+options written in the directive and deletes the saved copy, so the plan
+follows the directive again until you next change it.
 
 **One saved plan per directive**
 

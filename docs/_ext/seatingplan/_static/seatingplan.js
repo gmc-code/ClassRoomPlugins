@@ -567,15 +567,26 @@
             });
         }
 
+        /* Everything Export JSON writes is also kept in the browser after every change,
+           including which desk each student sits at, so reopening the page shows the plan
+           exactly as it was left. */
+        var persistReady = false;   /* false while the page is starting up or resetting */
+        var savedPlacement = null;  /* seats read from storage at start-up */
+
         function save() {
             try {
                 var currentTitle = ui.title ? ui.title.textContent.trim() : state.title;
                 localStorage.setItem(storageKey, JSON.stringify({
                     title: currentTitle, students: state.students, rules: state.rules, display: state.display,
-                    layout: state.layout, mode: state.mode, tables: state.tables
+                    layout: state.layout, mode: state.mode, tables: state.tables,
+                    sortMode: state.sortMode, fillFromLast: state.fillFromLast,
+                    placement: ui.grid ? currentPlacement() : (savedPlacement || [])
                 }));
             } catch (e) { /* storage blocked */ }
         }
+
+        /* Seats changed (drag, sort, layout, import ...): keep them, unless still starting up. */
+        function persistSeats() { if (persistReady) save(); }
 
         function load() {
             try {
@@ -589,6 +600,9 @@
                     if (Array.isArray(d.layout) && parseLayout(d.layout.join(','))) state.layout = parseLayout(d.layout.join(','));
                     if (Array.isArray(d.tables) && parseTables(tablesKey(d.tables))) state.tables = parseTables(tablesKey(d.tables));
                     if (d.mode === 'tables' || d.mode === 'rows') state.mode = d.mode;
+                    if (typeof d.sortMode === 'string') state.sortMode = d.sortMode;
+                    if (typeof d.fillFromLast === 'boolean') state.fillFromLast = d.fillFromLast;
+                    if (Array.isArray(d.placement) && d.placement.length) savedPlacement = d.placement;
                     if (d.display && typeof d.display === 'object') {
                         Object.keys(state.display).forEach(function (k) {
                             if (typeof d.display[k] === 'boolean') state.display[k] = d.display[k];
@@ -1106,6 +1120,7 @@
         }
 
         function updateCount() {
+            persistSeats();
             var unassignedCount = ui.pool.querySelectorAll('.sp-card').length;
             ui.count.textContent = unassignedCount;
 
@@ -1623,7 +1638,9 @@
             state.fillFromLast = cfg.fill === 'last';
             if (ui.title) ui.title.textContent = state.title;
             syncDisplayControls();
+            persistReady = false;   /* the page's own plan: nothing to remember yet */
             autoArrange(cfg.sort || 'DEFAULT');
+            persistReady = true;
         }
 
         /* ----- JSON export & import ----- */
@@ -1633,25 +1650,29 @@
             var json = JSON.stringify(payload, null, 2);
             var suggested = (payload.title || 'seating_plan').toLowerCase().replace(/[^a-z0-9]+/g, '_')
                 .replace(/^_+|_+$/g, '') || 'seating_plan';
+            /* keep it in the browser too, as if it had just been imported: the page reopens
+               like this, and Revert comes back to it */
+            save();
+            storeImportSnapshot('export', suggested + '.json', JSON.parse(json));
             saveJsonFile(json, suggested + '.json');
         }
 
         /* The whole plan as plain data: used by Export JSON. */
-        function planData() {
-            var desks = getDesks();
+        /* Which desk each student is at (deskIndex null = Unassigned). */
+        function currentPlacement() {
             var placement = [];
-
-            desks.forEach(function (d, idx) {
+            getDesks().forEach(function (d, idx) {
                 var card = d.querySelector('.sp-card');
-                if (card) {
-                    placement.push({ deskIndex: idx, studentId: card.dataset.sid });
-                }
+                if (card) placement.push({ deskIndex: idx, studentId: card.dataset.sid });
             });
-
-            var poolCards = ui.pool.querySelectorAll('.sp-card');
-            Array.prototype.forEach.call(poolCards, function (card) {
+            Array.prototype.forEach.call(ui.pool.querySelectorAll('.sp-card'), function (card) {
                 placement.push({ deskIndex: null, studentId: card.dataset.sid });
             });
+            return placement;
+        }
+
+        function planData() {
+            var placement = currentPlacement();
 
             var currentTitle = ui.title ? ui.title.textContent.trim() : state.title;
 
@@ -1662,9 +1683,9 @@
                 tables: state.tables,
                 fillFromLast: state.fillFromLast,
                 sortMode: state.sortMode,
-                display: state.display,
                 students: state.students,
                 rules: state.rules,
+                display: state.display,
                 placement: placement
             };
             return payload;
@@ -1699,20 +1720,21 @@
             var snap = readImportSnapshot();
             ui.revert.disabled = !snap;
             ui.revert.title = snap
-                ? 'Go back to ' + (snap.name || 'the imported file') + ' as it was imported'
+                ? 'Go back to ' + (snap.name || 'the imported file') + ' as it was ' + (snap.kind === 'export' ? 'exported' : 'imported')
                 : 'Nothing imported yet';
         }
 
         function revertToImport() {
             var snap = readImportSnapshot();
             if (!snap) return;
-            var what = snap.name || (snap.kind === 'json' ? 'the imported JSON file' : 'the imported class list');
-            if (!window.confirm('Revert to ' + what + ' as it was imported? Changes made since then will be lost.')) return;
+            var how = snap.kind === 'export' ? 'exported' : 'imported';
+            var what = snap.name || (snap.kind === 'roster' ? 'the imported class list' : 'the ' + how + ' JSON file');
+            if (!window.confirm('Revert to ' + what + ' as it was ' + how + '? Changes made since then will be lost.')) return;
             try {
                 applyPlanData(snap.data);
                 save();
-                setStatus('Reverted to ' + what + (snap.kind === 'json'
-                    ? ' as imported.' : ' in its original order.'));
+                setStatus('Reverted to ' + what + (snap.kind === 'roster'
+                    ? ' in its original order.' : ' as ' + how + '.'));
             } catch (err) {
                 setStatus('Could not revert: ' + (err.message || err));
             }
@@ -1801,16 +1823,21 @@
             syncDisplayControls();
 
             updateToolbar();
+
+            if (!placeStudents(data.placement)) autoArrange(state.sortMode);
+        }
+
+        /* Put students on the desks listed in placement; false if there is no placement. */
+        function placeStudents(placement) {
             initGrid();
             ui.pool.innerHTML = '';
-
             var desks = getDesks();
             var byId = {};
             state.students.forEach(function (s) { byId[s.id] = s; });
 
-            if (Array.isArray(data.placement) && data.placement.length) {
+            if (Array.isArray(placement) && placement.length) {
                 var placed = {};
-                data.placement.forEach(function (item) {
+                placement.forEach(function (item) {
                     var s = item && byId[item.studentId];
                     if (!s || placed[s.id]) return;
                     placed[s.id] = true;
@@ -1828,12 +1855,12 @@
                     if (!placed[s.id]) ui.pool.appendChild(createCard(s, false));
                 });
             } else {
-                autoArrange(state.sortMode);
-                return;
+                return false;
             }
 
             validate();
             updateCount();
+            return true;
         }
 
         function onJsonFileChosen(e) {
@@ -2396,7 +2423,11 @@
         build();
         updateRevertButton();
         buildModal();
-        autoArrange(state.sortMode);
+        /* reopen exactly as left: saved seats if there are any, else arrange afresh */
+        updateToolbar();
+        if (!(savedPlacement && placeStudents(savedPlacement))) autoArrange(state.sortMode);
+        savedPlacement = null;
+        persistReady = true;
     }
 
     /* One print window; each plan on its own page. */
