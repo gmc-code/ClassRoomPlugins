@@ -312,19 +312,25 @@ Toolbar controls
        spaces, so ``8_Science Period 3.xlsx`` gives "8 Science Period 3". Click
        the title to change it.
    * - **Export JSON**
-     - Saves the complete seating plan, including students, rules, layout and
-       desk positions, as a ``.json`` file. In Chrome and Edge a Save As box
+     - Saves the complete seating plan as a ``.json`` file: title, students,
+       rules, layout (including Rows/Tables and any empty spaces, such as a
+       horseshoe), the desk each student is sitting at, the sort order,
+       **Fill** direction and the display options (**Teacher's View**,
+       **One-line Names** and the other checkboxes). In Chrome and Edge a Save As box
        opens so you can choose the folder and file name. Other browsers ask
        for a file name, then save it to the Downloads folder.
    * - **Import JSON**
-     - Restores a previously exported seating plan.
+     - Restores a previously exported seating plan exactly as it was saved,
+       with every student back on the same desk and the same checkboxes
+       ticked. Files exported before display options were saved keep the
+       checkboxes as they are.
    * - **Reset**
      - Restores the roster and rules originally defined in the directive.
        Also clears what **Revert** would go back to.
    * - **Revert**
      - Goes back to the last file you imported, undoing every change since:
        after **Import JSON**, the plan exactly as saved in that file (title,
-       layout, students, rules and seats); after **Import Roster**, the class
+       layout, students, rules, seats and display options); after **Import Roster**, the class
        list in the file's own order, with no rules. Asks before reverting.
        Greyed out until something has been imported.
    * - **Print**

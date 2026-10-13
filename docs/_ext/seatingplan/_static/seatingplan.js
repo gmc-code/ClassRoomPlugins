@@ -1662,6 +1662,7 @@
                 tables: state.tables,
                 fillFromLast: state.fillFromLast,
                 sortMode: state.sortMode,
+                display: state.display,
                 students: state.students,
                 rules: state.rules,
                 placement: placement
@@ -1790,6 +1791,14 @@
             state.rules = Array.isArray(data.rules) ? data.rules : [];
             if (data.fillFromLast != null) state.fillFromLast = !!data.fillFromLast;
             if (data.sortMode != null) state.sortMode = data.sortMode;
+            /* display options (Teacher's View, One-line Names ...); files from older
+               versions have none, so the current options are kept */
+            if (data.display && typeof data.display === 'object') {
+                Object.keys(state.display).forEach(function (k) {
+                    if (typeof data.display[k] === 'boolean') state.display[k] = data.display[k];
+                });
+            }
+            syncDisplayControls();
 
             updateToolbar();
             initGrid();
@@ -1839,7 +1848,7 @@
                     applyPlanData(data);
                     save();
                     storeImportSnapshot('json', file.name, data);
-                    setStatus('Successfully reimported title, layout, roster, rules, and seating order.');
+                    setStatus('Successfully reimported title, layout, roster, rules, display options and seating order.');
                 } catch (err) {
                     setStatus('Failed to import JSON: ' + (err.message || err));
                 } finally {
