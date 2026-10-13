@@ -84,7 +84,7 @@
 .seatingplan .sp-file { display: none; }
 .seatingplan .sp-custom-layout { display: inline-flex; align-items: center; gap: 4px; }
 .seatingplan .sp-custom-input {
-    width: 150px; padding: 4px 8px; font: 500 12px/1.2 inherit; font-family: inherit;
+    width: 340px; max-width: 100%; padding: 4px 8px; font: 500 12px/1.2 inherit; font-family: inherit;
     background: #0f172a; color: #f8fafc; border: 1px solid #334155; border-radius: 4px;
 }
 .seatingplan .sp-custom-input::placeholder { color: #64748b; }
@@ -140,6 +140,8 @@
 }
 .seatingplan .sp-grid { display: flex; flex-direction: column; gap: 10px; }
 .seatingplan .sp-row { display: grid; gap: var(--sp-row-gap, 8px); }
+/* Empty floor space in a row: written [n] in the layout, e.g. [2]3[2] */
+.seatingplan .sp-gap { min-width: 0; }
 
 .seatingplan .sp-desk {
     background: #fff; border: 2px dashed #cbd5e1; border-radius: 6px;
@@ -399,3 +401,7 @@ html.sp-projector-open, html.sp-projector-open body { overflow: hidden; }
     .seatingplan .sp-desk { break-inside: avoid; }
     .sp-badge-hr { border: none !important; background: transparent; padding: 0 2px; }
 }
+/* ".. seatingplan-print::" button: prints every seating plan on the page */
+.seatingplan-print { margin: 12px 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.seatingplan-print .sp-print-all-msg { font-size: 13px; color: #b91c1c; }
+@media print { .seatingplan-print { display: none; } }

@@ -33,6 +33,7 @@ These docs provide details on sphinx extensions and how to use them. The extensi
     :caption: Classroom Tools:
 
     tools/seatingplan.rst
+    tools/seatingplans.rst
     tools/studentgroups.rst
     tools/namepicker.rst
 

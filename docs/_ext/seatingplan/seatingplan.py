@@ -6,6 +6,9 @@ Embeds an interactive classroom seating plan designer in a page.
         :layout: 5x6
         :title: Year 8 Science
 
+    Rows can include empty spaces in brackets, so a horseshoe is e.g.
+    ``:layout: 2[6]2, 2[6]2, 2[6]2, 10``.
+
         Alex Smith, H11
         Sam Jones, B11
         Priya Patel, N12
@@ -116,14 +119,50 @@ def _students_from_rows(rows):
     return students
 
 
+MAX_ROW_WIDTH = 24
+ROW_RE = re.compile(r"(?:\[\d+\]|\d+)+")
+
+
+def _normalise_row(text):
+    """'[2]3[2]' -> '[2]3[2]' (2 empty spaces, 3 desks, 2 empty spaces); '6' -> 6.
+    Returns (row, desks, width)."""
+    text = re.sub(r"\s+", "", text)
+    if not ROW_RE.fullmatch(text):
+        raise ValueError
+    segs = []
+    for gap, desks in re.findall(r"\[(\d+)\]|(\d+)", text):
+        is_gap, n = bool(gap), int(gap or desks)
+        if not n:
+            continue
+        if segs and segs[-1][0] == is_gap:
+            segs[-1][1] += n
+        else:
+            segs.append([is_gap, n])
+    desks = sum(n for g, n in segs if not g)
+    width = sum(n for _, n in segs)
+    if len(segs) == 1 and not segs[0][0]:
+        return segs[0][1], desks, width
+    return "".join("[%d]" % n if g else str(n) for g, n in segs), desks, width
+
+
 def _parse_layout(text):
+    """'5x6' -> five rows of 6; '7,8,9,6' -> rows of 7, 8, 9, 6; '[2]3[2],7' -> a row of 3 desks
+    with 2 empty spaces each side, then a row of 7. Gaps let you build horseshoes, aisles etc."""
     text = text.strip().lower().replace("\u00d7", "x")
     match = re.fullmatch(r"(\d+)\s*x\s*(\d+)", text)
     if match:
-        rows = [int(match.group(2))] * int(match.group(1))  # 5x6 = 5 rows of 6
+        parts = [match.group(2)] * int(match.group(1))  # 5x6 = 5 rows of 6
+    elif "," in text or "[" in text:
+        parts = [p for p in text.split(",") if p.strip()]
     else:
-        rows = [int(p) for p in re.split(r"[,\s]+", text) if p]
-    if not rows or len(rows) > 12 or any(n < 1 or n > 20 for n in rows):
+        parts = text.split()
+    rows = []
+    for part in parts:
+        row, desks, width = _normalise_row(part)
+        if desks < 1 or desks > 20 or width > MAX_ROW_WIDTH:
+            raise ValueError
+        rows.append(row)
+    if not rows or len(rows) > 12:
         raise ValueError
     return rows
 
@@ -222,7 +261,8 @@ class SeatingPlanDirective(SphinxDirective):
             except ValueError:
                 self._warn(
                     "invalid :layout: %r; using 5x6. Use e.g. '5x6' for 5 rows of 6 or "
-                    "'7,8,9,6' for rows of 7, 8, 9 and 6 (up to 12 rows of 1-20 desks)."
+                    "'7,8,9,6' for rows of 7, 8, 9 and 6 (up to 12 rows of 1-20 desks). Put empty spaces "
+                    "in brackets: '[2]3[2],7' is 2 spaces, 3 desks, 2 spaces, then a row of 7."
                     % self.options.get("layout")
                 )
 
@@ -340,6 +380,37 @@ class SeatingPlanDirective(SphinxDirective):
         return [node]
 
 
+class seatingplan_print(nodes.General, nodes.Element):
+    pass
+
+
+class SeatingPlanPrintDirective(SphinxDirective):
+    """A button that prints every seating plan on the page, one plan per sheet.
+
+        .. seatingplan-print::
+           :label: Print all classes
+           :skip-empty:
+    """
+
+    has_content = False
+    option_spec = {
+        "label": directives.unchanged,
+        "title": directives.unchanged,
+        "skip-empty": directives.flag,
+        "class": directives.class_option,
+    }
+
+    def run(self):
+        node = seatingplan_print()
+        node["label"] = self.options.get("label") or "Print all seating plans"
+        node["config"] = {
+            "title": self.options.get("title", ""),
+            "skipEmpty": "skip-empty" in self.options,
+        }
+        node["classes"] = self.options.get("class", [])
+        return [node]
+
+
 # ----------------------------------------------------------------------------
 # Visitors
 # ----------------------------------------------------------------------------
@@ -352,6 +423,28 @@ def visit_seatingplan_html(self, node):
 
 
 def depart_seatingplan_html(self, node):
+    self.body.append("</div>")
+
+
+PRINTER_ICON = (
+    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" '
+    'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" '
+    'class="sp-btn-icon"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 '
+    '2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>'
+)
+
+
+def visit_seatingplan_print_html(self, node):
+    payload = html.escape(json.dumps(node["config"], ensure_ascii=False), quote=True)
+    classes = " ".join(["seatingplan-print"] + list(node.get("classes", [])))
+    self.body.append(
+        '<div class="%s"><button type="button" class="sp-btn" data-sp-print="%s">%s%s</button>'
+        '<span class="sp-print-all-msg" role="status"></span>'
+        % (classes, payload, PRINTER_ICON, html.escape(node["label"]))
+    )
+
+
+def depart_seatingplan_print_html(self, node):
     self.body.append("</div>")
 
 
@@ -398,7 +491,16 @@ def setup(app):
         man=(skip_seatingplan, None),
         texinfo=(skip_seatingplan, None),
     )
+    app.add_node(
+        seatingplan_print,
+        html=(visit_seatingplan_print_html, depart_seatingplan_print_html),
+        latex=(skip_seatingplan, None),
+        text=(skip_seatingplan, None),
+        man=(skip_seatingplan, None),
+        texinfo=(skip_seatingplan, None),
+    )
     app.add_directive("seatingplan", SeatingPlanDirective)
+    app.add_directive("seatingplan-print", SeatingPlanPrintDirective)
     app.add_css_file("seatingplan.css")
     app.add_js_file("seatingplan.js", defer="defer")
     app.connect("build-finished", copy_static_files)

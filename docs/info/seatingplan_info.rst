@@ -7,7 +7,12 @@ designer in a documentation page.
 
 Students can be automatically arranged, manually dragged between desks,
 imported from CSV or Excel files, exported as JSON, printed, and managed using
-seating rules and constraints.
+seating rules and constraints. Rows can include empty spaces, so horseshoes,
+aisles and other room shapes can be drawn.
+
+Each plan is remembered by the browser, so a page with several directives
+keeps several classes. A companion ``seatingplan-print`` directive adds one
+button that prints every plan on the page.
 
 .. contents::
    :local:
@@ -43,9 +48,13 @@ Directive options
    * ``4x7`` — 4 rows of 7 desks.
    * ``11,11,6`` — rows containing 11, 11 and 6 desks.
    * ``7,8,9,6`` — rows of 7, 8, 9 and 6 desks.
+   * ``[2]3[2],7`` — a row of 3 desks with 2 empty spaces each side, then a
+     row of 7. See `Empty spaces, aisles and horseshoes`_.
+   * ``2[6]2, 2[6]2, 2[6]2, 10`` — a horseshoe.
 
-   Rows are listed front row first. A layout can have up to 12 rows of 1–20
-   desks each.
+   Rows are listed front row first, separated by commas. A layout can have up
+   to 12 rows of 1–20 desks each, and a row can be up to 24 places wide
+   (desks plus empty spaces).
 
    The layout can also be changed in the browser with the layout buttons or
    the **Custom** box. See `Changing the layout`_.
@@ -161,7 +170,7 @@ A plan to print for the teacher's desk:
    Names the slot the browser saves this plan in (see
    `What the browser remembers`_). If omitted, the page name and the plan's
    position on the page are used, for example ``classes/8sci#0`` for the
-   first plan on ``classes/8sci.rst``.
+   first plan on ``classes/8sci.rst`` and ``classes/8sci#1`` for the second.
 
    Set a key when:
 
@@ -254,10 +263,12 @@ Rules are entered directly below the student list.
      - Requires the student to sit in the back row.
    * - Sit left
      - ``left: Mia Chen``
-     - Requires the student to sit on the left side of the classroom.
+     - Requires the student to sit at the left-hand end of a row (the first
+       desk in the row, not counting empty spaces).
    * - Sit right
      - ``right: Ben Clark``
-     - Requires the student to sit on the right side of the classroom.
+     - Requires the student to sit at the right-hand end of a row (the last
+       desk in the row, not counting empty spaces).
    * - Empty seat
      - ``empty: Tom Brown``
      - Requires the student to have an empty seat beside them.
@@ -317,7 +328,9 @@ Toolbar controls
        list in the file's own order, with no rules. Asks before reverting.
        Greyed out until something has been imported.
    * - **Print**
-     - Opens a print-friendly version of the seating plan.
+     - Opens a print-friendly version of this seating plan, landscape, with
+       rule badges removed. To print every plan on the page at once, see
+       `Printing every plan on a page`_.
    * - **Projector View**
      - Shows only the title, whiteboard and desks, in large text, filling the
        screen. Press **Exit projector view** or :kbd:`Esc` to return.
@@ -403,9 +416,21 @@ that layout. In rows mode the buttons are:
      - Rows of 4, 12 and 12 desks.
    * - **14,14**
      - 2 rows of 14 desks.
+   * - **Horseshoe (22)**
+     - ``2[6]2, 2[6]2, 2[6]2, 10``: two arms of 2 desks running down each
+       side and a back row of 10, open towards the whiteboard.
+   * - **Horseshoe + centre (30)**
+     - ``2[6]2, 2[1]4[1]2, 2[1]4[1]2, 10``: a horseshoe with two rows of 4
+       desks in the middle (a "modified horseshoe").
+   * - **Double horseshoe (28)**
+     - ``2[6]2, 2[1]1[2]1[1]2, 2[1]4[1]2, 10``: a smaller horseshoe inside
+       a larger one.
 
 If the directive's ``:layout:`` is not one of these, it gets its own button at
 the start of the row.
+
+Clicking any layout button also copies that layout into the **Custom** box,
+so it can be adjusted and applied straight away (see below).
 
 Custom layouts
 ^^^^^^^^^^^^^^
@@ -416,12 +441,67 @@ To use any other room shape, type the number of desks in each row into the
 
 * ``7,8,9,6`` — rows of 7, 8, 9 and 6 desks.
 * ``5x6`` — 5 rows of 6 desks (``5×6`` also works).
+* ``[2]3[2],7`` — 3 desks in the middle of the front row, then a row of 7.
 
 A layout can have up to 12 rows of 1–20 desks each. If the entry is not
 recognised, the box is outlined in red and a message explains the format.
 
+The quickest way to make a new shape is to click the closest layout button,
+edit the text it puts in the **Custom** box, and press :kbd:`Enter`. The box
+is wide enough for a five-row horseshoe, and after **Apply** the layout stays
+in the box for further changes.
+
 The custom layout is added as a new button so you can switch back to it, and
-the browser remembers it on later visits.
+the browser remembers it on later visits (see
+`What the browser remembers`_).
+
+Empty spaces, aisles and horseshoes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A number in square brackets is empty floor space, the width of that many
+desks. Plain numbers are desks. A row can mix them in any order:
+
+.. list-table::
+   :widths: 30 70
+   :header-rows: 1
+
+   * - Row
+     - Meaning
+   * - ``[2]3[2]``
+     - 2 spaces, 3 desks, 2 spaces: 3 desks centred in a 7-wide room.
+   * - ``4[1]4``
+     - 4 desks, an aisle 1 desk wide, 4 more desks.
+   * - ``2[6]2``
+     - A desk pair at each side wall with a 6-desk gap between: the arms of
+       a horseshoe.
+   * - ``[4]3``
+     - 3 desks pushed to the right-hand side.
+
+Desks line up from row to row only when every row is the same total width
+(desks plus spaces). ``[2]3[2]`` and ``7`` are both 7 wide, so they line up;
+the horseshoe presets are all 10 wide. Rows of different widths each stretch
+across the room, as plain rows do.
+
+Empty spaces are not seats: no student is put there, they are not counted in
+the number of desks and they have no desk number. They change how the rules
+work in that row:
+
+* Desks either side of a space are **not neighbours**, so a keep-together
+  group cannot be split across an aisle and keep-apart students on opposite
+  sides of it are fine.
+* **Pairs and groups of 4** use 2-desk blocks counted from the start of each
+  run of desks, so in ``[1]2[1]`` the two desks are a block.
+* **Left** and **Right** mean the first and last desk in the row. In a
+  horseshoe those are the desks against the side walls.
+* **Front row** and **Back row** are still the first and last rows written.
+
+For example, a horseshoe for a class of 22:
+
+.. code-block:: rst
+
+   .. seatingplan::
+      :layout: 2[6]2, 2[6]2, 2[6]2, 10
+      :title: 9 Science — horseshoe
 
 Table mode
 ~~~~~~~~~~
@@ -527,12 +607,152 @@ Display options
 What the browser remembers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The browser remembers the title, students, rules, layout and display options
-for each directive. It also keeps a copy of the last imported file so
-**Revert** still works after the page is closed and reopened. The remembered layout and display options take priority
-over the directive's ``:layout:`` and display options on later visits.
-**Reset** returns the page to the students, rules, layout, sort order and
-display options written in the directive.
+Every change you make (importing a class, adding a rule, changing the
+layout, ticking an option, editing the title) is saved straight away in the
+browser's own storage (``localStorage``). There is no **Save** button and
+nothing is sent to a server. Close the tab, shut down the computer, and the
+plan is still there the next time the page is opened in the same browser.
+
+**What is saved**
+
+.. list-table::
+   :widths: 50 50
+   :header-rows: 1
+
+   * - Remembered between visits
+     - Not remembered
+   * - Title, students and homerooms, rules, layout (including custom
+       layouts and Rows/Tables), display options, and a copy of the last
+       imported file so **Revert** still works.
+     - Where each student is sitting. On the next visit the students are
+       arranged again from the saved class list and rules, in the
+       directive's ``:sort:`` order. Dragged students, **A → Z**,
+       **Random** and **Reverse** results are not kept.
+
+To keep an exact arrangement, including every dragged student, use
+**Export JSON**. **Import JSON** (and **Revert** after it) puts every student
+back on the same desk.
+
+The saved layout and display options take priority over the directive's
+``:layout:`` and display options on later visits. **Reset** goes back to the
+students, rules, layout, sort order and display options written in the
+directive and replaces the saved copy.
+
+**One saved plan per directive**
+
+Each ``seatingplan`` directive saves into its own slot, named by its
+``:storage-key:`` or, if there is none, by the page name and its position on
+the page (``classes/mine#0``, ``classes/mine#1`` …). So a page with several
+directives remembers several separate classes. Each one can have its own
+roster, rules, layout and display options, and changing one never affects
+the others.
+
+This makes one page per teacher (or per faculty) a convenient "My classes"
+page:
+
+.. code-block:: rst
+
+   My classes
+   ==========
+
+   .. seatingplan-print::
+      :label: Print all my classes
+      :skip-empty:
+
+   7 Science
+   ---------
+
+   .. seatingplan::
+      :title: 7 Science
+      :storage-key: mine-7sci
+
+   8 Science
+   ---------
+
+   .. seatingplan::
+      :title: 8 Science
+      :layout: 2[6]2, 2[6]2, 2[6]2, 10
+      :storage-key: mine-8sci
+
+   9 Science
+   ---------
+
+   .. seatingplan::
+      :title: 9 Science
+      :mode: tables
+      :storage-key: mine-9sci
+
+Import each class once with **Import Roster**; from then on every plan opens
+as you left it. Give each plan a ``:storage-key:`` as shown, so adding,
+removing or reordering plans later does not mix up which saved class goes
+with which plan. Without keys, the plans are matched by position: if a new
+plan is added at the top, every plan below it would load the class saved for
+the one above.
+
+**Where the saved plans live**
+
+The saved plans belong to one browser on one computer:
+
+* **Another browser or computer** (Edge at school, Chrome at home, a
+  different classroom PC) does not see them. Use **Export JSON** and
+  **Import JSON** to move a plan.
+* **Each website address** has its own storage. The published Read the Docs
+  site, a preview build and a copy opened from your own disk do not share
+  saved plans.
+* **Private or incognito windows** forget everything when closed.
+* **Clearing browsing data** (cookies and site data) for the site deletes
+  the saved plans. Some schools clear this automatically when you sign out
+  of a shared computer.
+* **Shared computers**: anyone using the same browser profile sees the same
+  saved plans, including student names.
+
+Export JSON copies of important plans, for example at the start of each
+term, so they can be restored if the browser's storage is cleared.
+
+Printing every plan on a page
+-----------------------------
+
+Each plan's **Print** button prints just that plan. To print all the plans
+on a page in one go, add the ``seatingplan-print`` directive anywhere on the
+page, above, below or between the plans:
+
+.. code-block:: rst
+
+   .. seatingplan-print::
+
+It shows a single **Print all seating plans** button. Clicking it opens one
+print window with every seating plan on the page, each on its own landscape
+sheet, exactly as that plan's own **Print** button would print it: current
+seats, title, **One-line Names** and **Teacher's View** settings, with rule
+badges removed.
+
+Options:
+
+``:label:``
+   The button text (default "Print all seating plans").
+
+``:title:``
+   The name of the print job, used as the PDF file name when saving as PDF.
+   Defaults to the page title.
+
+``:skip-empty:``
+   Leaves out plans that have no students yet.
+
+``:class:``
+   Adds CSS classes to the button's container.
+
+For example:
+
+.. code-block:: rst
+
+   .. seatingplan-print::
+      :label: Print all my classes
+      :title: Term 4 seating plans
+      :skip-empty:
+
+The button prints the plans as they currently appear, so arrange each class
+first. It is hidden when the page itself is printed, and like the
+``seatingplan`` directive it produces no output in PDF or text builds.
 
 Customising with CSS
 --------------------
@@ -717,6 +937,27 @@ is ticked, so the front desks match the others. Untick it to compare.
 
    front: Priya Patel
 
+Horseshoe
+~~~~~~~~~
+
+A modified horseshoe: arms down each side, a back row, and two rows of 4 in
+the middle. **Left** puts Jordan on a desk against the left-hand wall.
+
+.. seatingplan::
+   :layout: 2[6]2, 2[1]4[1]2, 2[1]4[1]2, 10
+   :title: Horseshoe Example
+   :storage-key: horseshoe-example
+
+   Alex Smith, Hughes 11
+   Sam Jones, Hughes 12
+   Priya Patel, N13
+   Jordan Lee, N13
+   Mia Chen, H11
+   Tom Brown, N13
+
+   left: Jordan Lee
+   pair: Mia Chen | Tom Brown
+
 Empty class
 ~~~~~~~~~~~
 
@@ -725,3 +966,14 @@ Use an empty directive when you want users to import their own class list.
 .. seatingplan::
    :layout: 5x6
    :title: Empty Class
+
+Print all
+~~~~~~~~~
+
+This button prints every example plan above that has students, each on its
+own page.
+
+.. seatingplan-print::
+   :label: Print all example plans
+   :title: Seating plan examples
+   :skip-empty:

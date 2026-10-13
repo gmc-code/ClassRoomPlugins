@@ -12,7 +12,11 @@
         { label: '8,10,10', rows: [8, 10, 10] },
         { label: '6,11,11', rows: [6, 11, 11] },
         { label: '4,12,12', rows: [4, 12, 12] },
-        { label: '14,14', rows: [14, 14] }
+        { label: '14,14', rows: [14, 14] },
+        /* [n] = n empty spaces, so desks line up into shapes */
+        { label: 'Horseshoe (22)', rows: ['2[6]2', '2[6]2', '2[6]2', 10] },
+        { label: 'Horseshoe + centre (30)', rows: ['2[6]2', '2[1]4[1]2', '2[1]4[1]2', 10] },
+        { label: 'Double horseshoe (28)', rows: ['2[6]2', '2[1]1[2]1[1]2', '2[1]4[1]2', 10] }
     ];
     /* Table mode. A layout is rows of tables, front row first; each table is '4', '6w'
        (6 seats, 3 wide x 2 deep) or '6d' (2 wide x 3 deep). Written as e.g. "6,4,6 / 4,6,4". */
@@ -73,10 +77,12 @@
     var PRINT_CSS =
         '@page{size:landscape;margin:10mm}' +
         'body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#000}' +
+        '.sp-page{break-after:page}.sp-page:last-child{break-after:auto}' +
         'h1{font-size:22px;margin:0 0 8px}' +
         '.wb{border:2px solid #000;text-align:center;padding:6px;font-weight:700;letter-spacing:1px;font-size:14px;margin-bottom:12px}' +
         '.sp-grid{display:flex;flex-direction:column;gap:12px}' +
         '.sp-row{display:grid;gap:10px}' +
+        '.sp-gap{min-width:0}' +
         '.sp-desk{border:1px solid #000;border-radius:5px;min-height:80px;box-sizing:border-box;padding:2px 0;position:relative;display:flex;align-items:center;justify-content:center;min-width:0;break-inside:avoid}' +
         '.sp-desk-num{position:absolute;top:2px;left:6px;font-size:10px;color:#000}' +
         '.sp-card{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;width:96%}' +
@@ -116,7 +122,38 @@
         return n;
     }
 
-    /* "7,8,9,6" -> [7,8,9,6]; "5x6" -> five rows of 6. Returns null if invalid. */
+    /* A row is a number of desks (6) or desks and gaps: "[2]3[2]" = 2 empty spaces, 3 desks,
+       2 empty spaces; "3[1]3" = an aisle in the middle. Gaps are floor space, not seats.
+       Returns [{gap: bool, n}] or null. */
+    var MAX_ROW_WIDTH = 24;
+    function rowSegments(spec) {
+        var s = String(spec).replace(/\s+/g, '');
+        if (!/^(\[\d+\]|\d+)+$/.test(s)) return null;
+        var segs = [], re = /\[(\d+)\]|(\d+)/g, m;
+        while ((m = re.exec(s))) {
+            var gap = m[1] != null, n = +(gap ? m[1] : m[2]);
+            if (!n) continue;
+            var last = segs[segs.length - 1];
+            if (last && last.gap === gap) last.n += n; else segs.push({ gap: gap, n: n });
+        }
+        return segs;
+    }
+    function rowDesks(spec) {
+        return (rowSegments(spec) || []).reduce(function (t, g) { return t + (g.gap ? 0 : g.n); }, 0);
+    }
+    function rowWidth(spec) {
+        return (rowSegments(spec) || []).reduce(function (t, g) { return t + g.n; }, 0);
+    }
+    /* Canonical form: plain rows as numbers, rows with gaps as strings like "[2]3[2]". */
+    function normaliseRow(spec) {
+        var segs = rowSegments(spec);
+        if (!segs) return null;
+        if (segs.length === 1 && !segs[0].gap) return segs[0].n;
+        return segs.map(function (g) { return g.gap ? '[' + g.n + ']' : String(g.n); }).join('');
+    }
+
+    /* "7,8,9,6" -> [7,8,9,6]; "5x6" -> five rows of 6; "[2]3[2],7" -> ['[2]3[2]', 7].
+       Returns null if invalid. */
     function parseLayout(text) {
         var t = String(text || '').trim().toLowerCase().replace(/\u00d7/g, 'x');
         var rows, m = t.match(/^(\d+)\s*x\s*(\d+)$/);
@@ -124,12 +161,16 @@
             rows = [];
             for (var i = 0; i < +m[1]; i++) rows.push(+m[2]);
         } else {
-            if (!/^[\d,\s]+$/.test(t)) return null;
-            rows = t.split(/[,\s]+/).filter(Boolean).map(Number);
+            if (!/^[\d,\s\[\]]+$/.test(t)) return null;
+            /* rows are separated by commas; old layouts may use spaces ("7 8 9") */
+            var parts = t.indexOf(',') !== -1 || /[\[\]]/.test(t) ? t.split(',') : t.split(/\s+/);
+            rows = parts.map(function (p) { return p.trim(); }).filter(Boolean).map(normaliseRow);
         }
         if (!rows.length || rows.length > 12) return null;
         for (var j = 0; j < rows.length; j++) {
-            if (!(rows[j] >= 1 && rows[j] <= 20)) return null;
+            if (rows[j] == null) return null;
+            var d = rowDesks(rows[j]);
+            if (!(d >= 1 && d <= 20) || rowWidth(rows[j]) > MAX_ROW_WIDTH) return null;
         }
         return rows;
     }
@@ -159,11 +200,12 @@
         return r <= 1 && c <= 1 && !(r === 0 && c === 0);
     }
 
+    /* blk: 2-desk block within the desk's run of desks (desks 1-2, 3-4 ... counted from the
+       start of the run, so a gap restarts the count); seg: which run of desks in the row. */
     function isSideBySidePair(a, b) {
-        if (a.row !== b.row) return false;
-        var colDiff = Math.abs(a.col - b.col);
-        if (colDiff !== 1) return false;
-        return Math.floor(a.col / 2) === Math.floor(b.col / 2);
+        if (a.row !== b.row || a.seg !== b.seg) return false;
+        if (Math.abs(a.col - b.col) !== 1) return false;
+        return a.blk === b.blk;
     }
 
     /* ---------------- room geometry ----------------
@@ -175,25 +217,34 @@
          together(n, a, b, s) may two members of a keep-together group of n sit at a and b?
                               (s = strict: a pair must use a 2-desk block)                    */
 
-    /* Rows of desks. Desks: {row, col}. */
+    /* Rows of desks. Desks: {row, col, seg, blk}; col counts gaps too, so desks either side
+       of a gap are not neighbours. Left/right mean the row's first/last desk. */
     function rowsGeo(layout) {
         var lastRow = layout.length - 1;
+        var ends = layout.map(function (spec) {
+            var col = 0, first = null, last = null;
+            rowSegments(spec).forEach(function (g) {
+                if (!g.gap) { if (first == null) first = col; last = col + g.n - 1; }
+                col += g.n;
+            });
+            return { first: first, last: last };
+        });
         return {
             place: function (t, d) {
                 if (t === 'FRONT_ROW') return d.row === 0;
                 if (t === 'BACK_ROW') return d.row === lastRow;
-                if (t === 'SIT_LEFT') return d.col === 0;
-                if (t === 'SIT_RIGHT') return d.col === layout[d.row] - 1;
+                if (t === 'SIT_LEFT') return d.col === ends[d.row].first;
+                if (t === 'SIT_RIGHT') return d.col === ends[d.row].last;
                 return true;
             },
             near: adjacent,
             emptyBeside: function (a, e) { return a.row === e.row && Math.abs(a.col - e.col) === 1; },
             together: function (n, a, b, strict) {
-                if (a.row !== b.row) return false;
+                if (a.row !== b.row || a.seg !== b.seg) return false;
                 var dc = Math.abs(a.col - b.col);
                 if (n <= 2) return strict ? isSideBySidePair(a, b) : dc === 1;
                 /* 4 must fill two whole 2-desk blocks (desks 1-4, 3-6, ...) */
-                if (n === 4) return Math.abs(Math.floor(a.col / 2) - Math.floor(b.col / 2)) <= 1;
+                if (n === 4) return Math.abs(a.blk - b.blk) <= 1;
                 return dc <= n - 1;   /* 3 (or more): a run of neighbouring desks */
             }
         };
@@ -536,7 +587,7 @@
                     if (d.title) state.title = d.title;
                     state.students = d.students;
                     state.rules = Array.isArray(d.rules) ? d.rules : [];
-                    if (Array.isArray(d.layout) && parseLayout(d.layout.join(','))) state.layout = d.layout;
+                    if (Array.isArray(d.layout) && parseLayout(d.layout.join(','))) state.layout = parseLayout(d.layout.join(','));
                     if (Array.isArray(d.tables) && parseTables(tablesKey(d.tables))) state.tables = parseTables(tablesKey(d.tables));
                     if (d.mode === 'tables' || d.mode === 'rows') state.mode = d.mode;
                     if (d.display && typeof d.display === 'object') {
@@ -607,6 +658,15 @@
             ui.layouts.innerHTML = layoutButtons().map(layoutButtonHtml).join('');
         }
 
+        /* Put the current layout in the Custom box so it can be tweaked and re-applied. */
+        function layoutText() {
+            return state.mode === 'tables' ? tablesLabel(state.tables) : state.layout.join(', ');
+        }
+        function showLayoutInBox() {
+            ui['custom-layout'].value = layoutText();
+            ui['custom-layout'].classList.remove('sp-invalid');
+        }
+
         function applyCustomLayout() {
             var input = ui['custom-layout'];
             var tables = state.mode === 'tables';
@@ -618,13 +678,14 @@
                       'tables and / between rows, front row first, e.g. 6,4,6 / 4,6,4. 2x3 means 2 rows of 3 tables ' +
                       'of 4; 2x3 6 uses tables of 6. Up to 8 rows of 8 tables.'
                     : 'Custom layout not recognised. Type desks per row, front row first, e.g. 7,8,9,6 ' +
-                      '(or 5x6 for 5 rows of 6). Up to 12 rows of 1–20 desks.');
+                      '(or 5x6 for 5 rows of 6). Put empty spaces in brackets: [2]3[2] is 2 spaces, 3 desks, ' +
+                      '2 spaces; 3[1]3 has an aisle. Up to 12 rows of 1–20 desks (24 places wide).');
                 input.focus();
                 return;
             }
             input.classList.remove('sp-invalid');
-            input.value = '';
             if (tables) state.tables = rows; else state.layout = rows;
+            showLayoutInBox();
             autoArrange(state.sortMode);
             save();
         }
@@ -632,6 +693,7 @@
         function setMode(mode) {
             if (mode === state.mode) return;
             state.mode = mode;
+            showLayoutInBox();
             autoArrange(state.sortMode);
             save();
         }
@@ -721,8 +783,8 @@
                 '</div>' +
                 '<div class="sp-custom-layout">' +
                 '<input type="text" class="sp-custom-input" data-role="custom-layout" ' +
-                'placeholder="Custom e.g. 7,8,9,6" aria-label="Custom layout: desks per row, front row first" ' +
-                'title="Desks per row, front row first, separated by commas (e.g. 7,8,9,6). 5x6 also works.">' +
+                'placeholder="Custom e.g. 7,8,9,6 or [2]3[2],7" aria-label="Custom layout: desks per row, front row first" ' +
+                'title="Desks per row, front row first, separated by commas (e.g. 7,8,9,6). 5x6 also works. [n] = n empty spaces, e.g. [2]3[2] or 3[1]3.">' +
                 '<button type="button" class="sp-btn sp-btn-purple" data-action="custom-layout">Apply</button>' +
                 '</div>' +
                 '</div>' +
@@ -891,10 +953,10 @@
             Array.prototype.forEach.call(root.querySelectorAll('[data-action="mode"]'), function (b) {
                 b.classList.toggle('sp-active', b.getAttribute('data-mode') === state.mode);
             });
-            ui['custom-layout'].placeholder = tables ? 'Custom e.g. 6,4,6 / 4,6,4' : 'Custom e.g. 7,8,9,6';
+            ui['custom-layout'].placeholder = tables ? 'Custom e.g. 6,4,6 / 4,6,4' : 'Custom e.g. 7,8,9,6 or [2]3[2],7';
             ui['custom-layout'].title = tables
                 ? 'Seats per table (4, 6 or 6d), commas between tables, / between rows, front first. 2x3 = 2 rows of 3 tables of 4.'
-                : 'Desks per row, front row first, separated by commas (e.g. 7,8,9,6). 5x6 also works.';
+                : 'Desks per row, front row first, separated by commas (e.g. 7,8,9,6). 5x6 also works. [n] = n empty spaces, e.g. [2]3[2] or 3[1]3.';
             var limitBox = ui['toggle-limit-width'];
             limitBox.disabled = tables;
             limitBox.parentNode.classList.toggle('sp-checkbox-off', tables);
@@ -911,7 +973,8 @@
             switch (t.getAttribute('data-action')) {
                 case 'layout':
                     if (state.mode === 'tables') state.tables = parseTables(t.getAttribute('data-layout'));
-                    else state.layout = t.getAttribute('data-layout').split(',').map(Number);
+                    else state.layout = parseLayout(t.getAttribute('data-layout')) || state.layout;
+                    showLayoutInBox();
                     autoArrange(state.sortMode);
                     save();
                     break;
@@ -1116,18 +1179,34 @@
             if (state.mode === 'tables') { initTables(); return; }
             ui.grid.innerHTML = '';
             ui.grid.classList.remove('sp-grid-tables');
-            ui.grid.style.minWidth = (Math.max.apply(null, state.layout) * 72) + 'px';
+            ui.grid.style.minWidth = (Math.max.apply(null, state.layout.map(rowWidth)) * 72) + 'px';
             var n = 1;
-            state.layout.forEach(function (cols, r) {
+            state.layout.forEach(function (spec, r) {
                 var row = make('div', 'sp-row');
+                var cols = rowWidth(spec);   /* desks + empty spaces */
                 row.dataset.cols = cols;
-                for (var c = 0; c < cols; c++) {
-                    var desk = newDesk(n++);
-                    desk.dataset.row = r;
-                    desk.dataset.col = c;
-                    desk.dataset.cols = cols;
-                    row.appendChild(desk);
-                }
+                if (cols !== rowDesks(spec)) row.classList.add('sp-row-gaps');
+                var c = 0, seg = 0;
+                rowSegments(spec).forEach(function (g) {
+                    if (g.gap) {
+                        var gap = make('div', 'sp-gap');
+                        gap.style.gridColumn = 'span ' + g.n;
+                        gap.setAttribute('aria-hidden', 'true');
+                        row.appendChild(gap);
+                        c += g.n;
+                        return;
+                    }
+                    for (var k = 0; k < g.n; k++, c++) {
+                        var desk = newDesk(n++);
+                        desk.dataset.row = r;
+                        desk.dataset.col = c;
+                        desk.dataset.seg = seg;
+                        desk.dataset.blk = Math.floor(k / 2);
+                        desk.dataset.cols = cols;
+                        row.appendChild(desk);
+                    }
+                    seg++;
+                });
                 ui.grid.appendChild(row);
             });
             applyRowWidths();
@@ -1157,7 +1236,7 @@
         function deskInfo(d, i) {
             var ds = d.dataset;
             return {
-                index: i, row: +ds.row, col: +ds.col,
+                index: i, row: +ds.row, col: +ds.col, seg: +ds.seg || 0, blk: +ds.blk || 0,
                 table: ds.table != null ? +ds.table : null,
                 trow: +ds.trow, tpos: +ds.tpos, tlast: +ds.tlast
             };
@@ -1828,7 +1907,8 @@
 
         /* ----- print ----- */
 
-        function printPlan() {
+        /* The printable copy of this plan: title, CSS classes and the desk grid. */
+        function printSection() {
             var title = (ui.title ? ui.title.textContent.trim() : state.title) || 'Seating Plan';
             var clone = ui.grid.cloneNode(true);
             Array.prototype.forEach.call(clone.querySelectorAll('.sp-badge-rule'), function (n) { n.parentNode.removeChild(n); });
@@ -1837,17 +1917,21 @@
                 n.removeAttribute('draggable');
             });
             clone.style.minWidth = '0';
-            var win = window.open('', '_blank');
-            if (!win) { window.print(); return; }
-            win.document.write('<!doctype html><html><head><meta charset="utf-8"><title>' + esc(title) +
-                '</title><style>' + PRINT_CSS + '</style></head><body class="' +
-                (state.display.oneLine ? 'sp-compact ' : '') + (state.display.teacherView ? 'sp-teacher-view' : '') +
-                '"><h1>' + esc(title) + (state.display.teacherView ? ' <small>(teacher\'s view)</small>' : '') +
-                '</h1><div class="sp-room"><div class="wb">FRONT OF CLASSROOM / WHITEBOARD</div>' +
-                clone.outerHTML + '</div></body></html>');
-            win.document.close();
-            win.focus();
-            setTimeout(function () { win.print(); }, 250);
+            return {
+                title: title,
+                empty: !state.students.length,
+                classes: (state.display.oneLine ? 'sp-compact ' : '') + (state.display.teacherView ? 'sp-teacher-view' : ''),
+                html: '<h1>' + esc(title) + (state.display.teacherView ? ' <small>(teacher\'s view)</small>' : '') +
+                    '</h1><div class="sp-room"><div class="wb">FRONT OF CLASSROOM / WHITEBOARD</div>' +
+                    clone.outerHTML + '</div>'
+            };
+        }
+        /* used by the seatingplan-print button to print every plan on the page */
+        root.spPrintSection = printSection;
+
+        function printPlan() {
+            var sec = printSection();
+            openPrintWindow(sec.title, [sec]);
         }
 
         /* ----- rules panel -----
@@ -2307,6 +2391,48 @@
         autoArrange(state.sortMode);
     }
 
+    /* One print window; each plan on its own page. */
+    function openPrintWindow(title, sections) {
+        var body = sections.map(function (sec) {
+            return '<section class="sp-page ' + sec.classes + '">' + sec.html + '</section>';
+        }).join('');
+        var win = window.open('', '_blank');
+        if (!win) { window.print(); return; }
+        win.document.write('<!doctype html><html><head><meta charset="utf-8"><title>' + esc(title) +
+            '</title><style>' + PRINT_CSS + '</style></head><body>' + body + '</body></html>');
+        win.document.close();
+        win.focus();
+        setTimeout(function () { win.print(); }, 250);
+    }
+
+    /* ".. seatingplan-print::" button: prints every seating plan on the page. */
+    function printAll(btn) {
+        var opts = {};
+        try { opts = JSON.parse(btn.getAttribute('data-sp-print') || '{}'); } catch (e) { /* defaults */ }
+        var sections = [];
+        Array.prototype.forEach.call(document.querySelectorAll('.seatingplan[data-seatingplan]'), function (el) {
+            if (typeof el.spPrintSection !== 'function') return;
+            var sec = el.spPrintSection();
+            if (opts.skipEmpty && sec.empty) return;
+            sections.push(sec);
+        });
+        var msg = btn.parentNode.querySelector('.sp-print-all-msg');
+        if (!sections.length) {
+            if (msg) msg.textContent = 'There are no seating plans to print on this page.';
+            return;
+        }
+        if (msg) msg.textContent = '';
+        openPrintWindow(opts.title || document.title || 'Seating Plans', sections);
+    }
+
+    function initPrintButtons() {
+        Array.prototype.forEach.call(document.querySelectorAll('[data-sp-print]'), function (btn) {
+            if (btn.getAttribute('data-sp-ready')) return;
+            btn.setAttribute('data-sp-ready', '1');
+            btn.addEventListener('click', function () { printAll(btn); });
+        });
+    }
+
     function init() {
         Array.prototype.forEach.call(document.querySelectorAll('.seatingplan[data-seatingplan]'), function (el) {
             if (el.getAttribute('data-sp-ready')) return;
@@ -2322,7 +2448,8 @@
         });
     }
 
-    init();
-    document.addEventListener('DOMContentLoaded', init);
-    window.addEventListener('load', init);
+    function initAll() { init(); initPrintButtons(); }
+    initAll();
+    document.addEventListener('DOMContentLoaded', initAll);
+    window.addEventListener('load', initAll);
 })();
