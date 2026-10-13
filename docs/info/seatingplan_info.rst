@@ -50,7 +50,7 @@ Directive options
    * ``7,8,9,6`` — rows of 7, 8, 9 and 6 desks.
    * ``[2]3[2],7`` — a row of 3 desks with 2 empty spaces each side, then a
      row of 7. See `Empty spaces, aisles and horseshoes`_.
-   * ``2[6]2, 2[6]2, 2[6]2, 10`` — a horseshoe.
+   * ``4[3]4, 1[9]1, 4[3]4, 1[9]1, 5[1]5`` — a horseshoe (the **HS 5x11** preset).
 
    Rows are listed front row first, separated by commas. A layout can have up
    to 12 rows of 1–20 desks each, and a row can be up to 24 places wide
@@ -416,15 +416,14 @@ that layout. In rows mode the buttons are:
      - Rows of 4, 12 and 12 desks.
    * - **14,14**
      - 2 rows of 14 desks.
-   * - **Horseshoe (22)**
-     - ``2[6]2, 2[6]2, 2[6]2, 10``: two arms of 2 desks running down each
-       side and a back row of 10, open towards the whiteboard.
-   * - **Horseshoe + centre (30)**
-     - ``2[6]2, 2[1]4[1]2, 2[1]4[1]2, 10``: a horseshoe with two rows of 4
-       desks in the middle (a "modified horseshoe").
-   * - **Double horseshoe (28)**
-     - ``2[6]2, 2[1]1[2]1[1]2, 2[1]4[1]2, 10``: a smaller horseshoe inside
-       a larger one.
+   * - **HS 5x11**
+     - ``4[3]4, 1[9]1, 4[3]4, 1[9]1, 5[1]5``: 5 rows, 11 places wide, 30
+       desks. Rows of 4 either side of a central gap, with single desks
+       against each side wall between them and a back row of 5 and 5.
+   * - **HS 5x9**
+     - ``1[1]5[1]1, 1[7]1, 1[1]5[1]1, 1[7]1, 9``: 5 rows, 9 places wide, 27
+       desks. Single desks down each side wall, two centre rows of 5 and a
+       full back row of 9.
 
 If the directive's ``:layout:`` is not one of these, it gets its own button at
 the start of the row.
@@ -471,15 +470,15 @@ desks. Plain numbers are desks. A row can mix them in any order:
      - 2 spaces, 3 desks, 2 spaces: 3 desks centred in a 7-wide room.
    * - ``4[1]4``
      - 4 desks, an aisle 1 desk wide, 4 more desks.
-   * - ``2[6]2``
-     - A desk pair at each side wall with a 6-desk gap between: the arms of
-       a horseshoe.
+   * - ``1[9]1``
+     - A single desk against each side wall with a 9-desk gap between: the
+       arms of a horseshoe.
    * - ``[4]3``
      - 3 desks pushed to the right-hand side.
 
 Desks line up from row to row only when every row is the same total width
 (desks plus spaces). ``[2]3[2]`` and ``7`` are both 7 wide, so they line up;
-the horseshoe presets are all 10 wide. Rows of different widths each stretch
+every row of the **HS 5x11** preset is 11 wide. Rows of different widths each stretch
 across the room, as plain rows do.
 
 Empty spaces are not seats: no student is put there, they are not counted in
@@ -495,12 +494,12 @@ work in that row:
   horseshoe those are the desks against the side walls.
 * **Front row** and **Back row** are still the first and last rows written.
 
-For example, a horseshoe for a class of 22:
+For example, a horseshoe for a class of 30 (the **HS 5x11** preset):
 
 .. code-block:: rst
 
    .. seatingplan::
-      :layout: 2[6]2, 2[6]2, 2[6]2, 10
+      :layout: 4[3]4, 1[9]1, 4[3]4, 1[9]1, 5[1]5
       :title: 9 Science — horseshoe
 
 Table mode
@@ -671,7 +670,7 @@ page:
 
    .. seatingplan::
       :title: 8 Science
-      :layout: 2[6]2, 2[6]2, 2[6]2, 10
+      :layout: 4[3]4, 1[9]1, 4[3]4, 1[9]1, 5[1]5
       :storage-key: mine-8sci
 
    9 Science
@@ -940,11 +939,12 @@ is ticked, so the front desks match the others. Untick it to compare.
 Horseshoe
 ~~~~~~~~~
 
-A modified horseshoe: arms down each side, a back row, and two rows of 4 in
-the middle. **Left** puts Jordan on a desk against the left-hand wall.
+The **HS 5x11** horseshoe: rows of 4 either side of a central gap, single
+desks against each side wall between them, and a back row of 5 and 5.
+**Left** puts Jordan on a desk against the left-hand wall.
 
 .. seatingplan::
-   :layout: 2[6]2, 2[1]4[1]2, 2[1]4[1]2, 10
+   :layout: 4[3]4, 1[9]1, 4[3]4, 1[9]1, 5[1]5
    :title: Horseshoe Example
    :storage-key: horseshoe-example
 

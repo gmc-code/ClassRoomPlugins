@@ -14,9 +14,8 @@
         { label: '4,12,12', rows: [4, 12, 12] },
         { label: '14,14', rows: [14, 14] },
         /* [n] = n empty spaces, so desks line up into shapes */
-        { label: 'Horseshoe (22)', rows: ['2[6]2', '2[6]2', '2[6]2', 10] },
-        { label: 'Horseshoe + centre (30)', rows: ['2[6]2', '2[1]4[1]2', '2[1]4[1]2', 10] },
-        { label: 'Double horseshoe (28)', rows: ['2[6]2', '2[1]1[2]1[1]2', '2[1]4[1]2', 10] }
+        { label: 'HS 5x11', rows: ['4[3]4', '1[9]1', '4[3]4', '1[9]1', '5[1]5'] },
+        { label: 'HS 5x9', rows: ['1[1]5[1]1', '1[7]1', '1[1]5[1]1', '1[7]1', 9] }
     ];
     /* Table mode. A layout is rows of tables, front row first; each table is '4', '6w'
        (6 seats, 3 wide x 2 deep) or '6d' (2 wide x 3 deep). Written as e.g. "6,4,6 / 4,6,4". */
