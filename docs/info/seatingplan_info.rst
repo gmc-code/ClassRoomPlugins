@@ -841,6 +841,88 @@ Privacy and student data
    For public sites, leave the directive empty and use **Import Roster** in
    the browser instead, or host the documentation privately.
 
+Where the data is kept
+~~~~~~~~~~~~~~~~~~~~~~
+
+Plans you import or change are kept only in your browser, in its
+``localStorage`` (see `What the browser remembers`_). Nothing is sent to a
+server. The only thing the seating plan downloads is the Excel-reading
+library, the first time an ``.xlsx`` file is imported, and no student data
+is sent with that request.
+
+The browser stores this data in your profile folder on the computer's own
+drive. You never need to open these files, but they are usually here:
+
+.. list-table::
+   :widths: 30 70
+   :header-rows: 1
+
+   * - Browser
+     - Folder
+   * - Chrome (Windows)
+     - ``%LOCALAPPDATA%\Google\Chrome\User Data\Default\Local Storage\leveldb``
+   * - Edge (Windows)
+     - ``%LOCALAPPDATA%\Microsoft\Edge\User Data\Default\Local Storage\leveldb``
+   * - Chrome (Mac)
+     - ``~/Library/Application Support/Google/Chrome/Default/Local Storage/leveldb``
+   * - Firefox
+     - Your profile folder, under ``storage/default/<site name>/ls/``
+
+With more than one browser profile, ``Default`` may be ``Profile 1`` or
+similar.
+
+**Seeing and deleting saved plans.** The easy way is in the browser itself:
+press :kbd:`F12` to open the developer tools, choose **Application**
+(**Storage** in Firefox), then **Local Storage** and the site's address.
+Each plan is an entry named ``seatingplan:`` followed by its storage key,
+for example ``seatingplan:classes/8sci#0``. An entry ending in ``:imported``
+is the copy that **Revert** goes back to. Deleting an entry, or pressing
+**Reset** on the plan, removes it.
+
+Saved plans are kept separately for each website address and are not copied
+by Chrome or Edge sync, so they stay on the one computer.
+
+Security
+~~~~~~~~
+
+A seating plan holds names, homerooms and seating rules. That is personal
+information about students, though not as sensitive as grades or contact
+details. Keep these points in mind:
+
+* **The browser does not encrypt it.** Anyone who can sign in to your
+  computer account, or use your browser profile, can open the page or the
+  developer tools and read the class lists. Full-disk encryption (BitLocker
+  or FileVault), which many school laptops have, protects the data if the
+  device is lost or stolen, but not while you are signed in.
+* **Shared and classroom computers.** On a computer that students or other
+  staff use under the same sign-in, they will see your saved plans. Use the
+  seating plan on your own staff laptop or profile. If you must use a shared
+  computer, press **Reset** on each plan, or clear the site's data, before
+  you leave.
+* **Other code on the same site can read it.** Any script running on the
+  same website address can read its ``localStorage``. That includes your own
+  other pages and any third-party scripts the host adds; free Read the Docs
+  sites can add their own scripts, such as ads and analytics. Each project's
+  ``yourproject.readthedocs.io`` address is kept separate from other
+  projects. A private or paid site, or the school's own server, reduces this
+  risk.
+* **Rules can say more than names.** **Keep apart**, **Front row** or
+  **Empty seat beside** can hint at behaviour, learning or health needs.
+  Keep the reasons out of the plan, and never put rosters or rules in the
+  directive on a public site.
+* **Exported JSON files** are plain text with the same information. Store
+  them where you keep other class lists, such as school OneDrive or Google
+  Drive, rather than emailing them around or leaving them in Downloads on a
+  shared computer.
+* **School policy.** Student names are personal information under privacy
+  law and most school ICT policies. Keeping them only in your own browser is
+  generally lower risk than a cloud service, but check with your school's
+  ICT or privacy contact about what is expected.
+
+Names and other imported text are always inserted into the page as plain
+text, so a student name or an imported file cannot inject code into the
+page.
+
 Installation
 ------------
 
