@@ -4,8 +4,8 @@ Seating plans
 
 Twelve seating plans, one per class. Each one is remembered by this browser,
 so the page reopens exactly as you left it. See
-:doc:`seatingplans_info` for working with several classes, and
-:doc:`seatingplan_info` for full details of each plan.
+:doc:`/info/seatingplans_info` for working with several classes, and
+:doc:`/info/seatingplan_info` for full details of each plan.
 
 .. seatingplan-print::
     :label: Print all my classes

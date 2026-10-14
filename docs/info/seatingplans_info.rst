@@ -2,12 +2,12 @@
 Using My Class Seating Plans
 =====================================
 
-The :doc:`seatingplans` page holds twelve separate seating plans on one page.
+The :doc:`/tools/seatingplans` page holds twelve separate seating plans on one page.
 Use them for all your classes, or keep several plans for the same class, for
 example one for each room you teach it in.
 
 This page explains how the plans work together and how they are stored. For
-the buttons, layouts and rules inside a plan, see :doc:`seatingplan_info`.
+the buttons, layouts and rules inside a plan, see :doc:`/info/seatingplan_info`.
 
 ----
 
