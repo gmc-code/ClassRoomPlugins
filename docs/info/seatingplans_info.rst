@@ -114,7 +114,7 @@ Because your plans exist only in this browser, back them up:
 
 * **Back up:** press **Export JSON** in each plan you use. Keep the files
   together, e.g. in a *Seating plans* folder in your school OneDrive. Export
-  again after big changes, and at the start of each term.
+  again after changes, and when your classes change.
 * **Move to another computer or browser:** open this page there and press
   **Import JSON** in an empty plan, one file per plan. Everything comes back:
   title, class list, rules, layout, seats and display options.
