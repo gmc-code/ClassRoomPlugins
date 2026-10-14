@@ -14,7 +14,7 @@ so the page reopens exactly as you left it. See
 
 ----
 
-Class 1
+Plan 1
 ---------------
 
 .. seatingplan::
@@ -23,7 +23,7 @@ Class 1
 
 ----
 
-Class 2
+Plan 2
 ---------------
 
 .. seatingplan::
@@ -32,7 +32,7 @@ Class 2
 
 ----
 
-Class 3
+Plan 3
 ---------------
 
 .. seatingplan::
@@ -41,7 +41,7 @@ Class 3
 
 ----
 
-Class 4
+Plan 4
 ---------------
 
 .. seatingplan::
@@ -50,7 +50,7 @@ Class 4
 
 ----
 
-Class 5
+Plan 5
 ---------------
 
 .. seatingplan::
@@ -59,7 +59,7 @@ Class 5
 
 ----
 
-Class 6
+Plan 6
 ---------------
 
 .. seatingplan::
@@ -68,7 +68,7 @@ Class 6
 
 ----
 
-Class 7
+Plan 7
 ---------------
 
 .. seatingplan::
@@ -77,7 +77,7 @@ Class 7
 
 ----
 
-Class 8
+Plan 8
 ---------------
 
 .. seatingplan::
@@ -86,7 +86,7 @@ Class 8
 
 ----
 
-Class 9
+Plan 9
 ---------------
 
 .. seatingplan::
@@ -95,7 +95,7 @@ Class 9
 
 ----
 
-Class 10
+Plan 10
 ---------------
 
 .. seatingplan::
@@ -104,7 +104,7 @@ Class 10
 
 ----
 
-Class 11
+Plan 11
 ---------------
 
 .. seatingplan::
@@ -113,7 +113,7 @@ Class 11
 
 ----
 
-Class 12
+Plan 12
 ---------------
 
 .. seatingplan::

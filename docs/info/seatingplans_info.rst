@@ -28,15 +28,11 @@ What this means in practice:
   page, and every plan reopens exactly as you left it, with each student on
   the same desk.
 * **Each computer and browser is separate.** Plans made in Chrome on your
-  laptop won't appear in Edge, on your desktop, or on the classroom
-  computer. Use **Export JSON** and **Import JSON** to move them (see
+  laptop won't appear in Edge. Use **Export JSON** and **Import JSON** to move them (see
   `Backing up and moving your plans`_).
 * **Plans can be lost.** They disappear if the browser's site data or
   history is cleared, if you use a private or incognito window, or if the
   computer is reset or replaced. **Export JSON** is your only backup.
-* **Shared computers:** anyone using the same computer sign-in and browser
-  can open this page and see your plans. Use your own staff computer or
-  profile. On a shared computer, **Reset** each plan before you leave.
 
 One page, twelve plans
 ----------------------
