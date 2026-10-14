@@ -1,5 +1,5 @@
 ===================================
-Name Picker Directive info
+Using the Name Picker Directive
 ===================================
 
 The ``namepicker`` directive embeds an animated random name picker in a
@@ -10,10 +10,6 @@ chosen students on top. Students can be imported from CSV or Excel files or
 entered directly in the directive, marked absent, picked one or several at a
 time, kept from being picked twice, shown full screen on a projector, saved as
 JSON and printed as a list.
-
-.. contents::
-   :local:
-   :depth: 1
 
 ----
 

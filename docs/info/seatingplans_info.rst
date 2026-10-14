@@ -1,30 +1,90 @@
-=============================
-Using the Seating plans page
-=============================
+=====================================
+Using My Class Seating Plans
+=====================================
 
-The :doc:`seatingplans` page holds a separate seating plan for each of your
-classes, all on one page. Each plan has its own class list, rules, layout and
-seats, and the browser remembers every one of them independently. This page
-explains how to work with them together. For the buttons, rules and layouts
-inside a plan, see :doc:`seatingplan_info`.
+The :doc:`seatingplans` page holds twelve separate seating plans on one page.
+Use them for all your classes, or keep several plans for the same class, for
+example one for each room you teach it in.
 
-.. contents::
-   :local:
-   :depth: 1
+This page explains how the plans work together and how they are stored. For
+the buttons, layouts and rules inside a plan, see :doc:`seatingplan_info`.
 
 ----
 
-One page, many classes
+Everything is stored on this computer
+-------------------------------------
+
+.. important::
+
+   Your seating plans are saved **only in this browser, on this computer**.
+   They are not stored on the website, not sent to the school, and not
+   synced to your other devices.
+
+What this means in practice:
+
+* **Nothing leaves your computer.** Class lists, rules and seats stay in the
+  browser. Anyone else opening the page sees their own plans, not yours.
+* **Saved automatically.** Every change is saved straight away. Close the
+  page, and every plan reopens exactly as you left it, with each student on
+  the same desk.
+* **Each computer and browser is separate.** Plans made in Chrome on your
+  laptop won't appear in Edge, on your desktop, or on the classroom
+  computer. Use **Export JSON** and **Import JSON** to move them (see
+  `Backing up and moving your plans`_).
+* **Plans can be lost.** They disappear if the browser's site data or
+  history is cleared, if you use a private or incognito window, or if the
+  computer is reset or replaced. **Export JSON** is your only backup.
+* **Shared computers:** anyone using the same computer sign-in and browser
+  can open this page and see your plans. Use your own staff computer or
+  profile. On a shared computer, **Reset** each plan before you leave.
+
+One page, twelve plans
 ----------------------
 
-* **Each plan is separate.** Importing, sorting or changing the layout in
-  *Class 3* never touches *Class 4*. Each has its own **Reset**, **Revert**,
-  **Print** and **Projector View**.
-* **Each plan is remembered separately.** Every change is saved straight away
-  in this browser. Close the page, and every class reopens exactly as you
-  left it, with each student on the same desk.
-* **Plans you have not used stay empty** and are left out when printing.
-  Use as many of the twelve as you need.
+* **Each plan is independent.** Importing, sorting, adding rules or changing
+  the layout in *Plan 3* never touches *Plan 4*. Each has its own **Reset**,
+  **Revert**, **Print** and **Projector View**.
+* **Each plan is saved separately**, with its own class list, rules, layout,
+  seats and display options.
+* **Plans you haven't used stay empty** and are left out when printing. Use
+  as many as you need.
+* **The title identifies the plan.** The heading above each plan (*Class 1*,
+  *Class 2* …) is fixed; click the plan's dark title bar to name it.
+
+More than one plan for the same class
+-------------------------------------
+
+Because every plan is independent, the same class can have as many plans as
+you like. This is useful when:
+
+* **You teach the class in different rooms.** A lab with benches in rows and
+  a classroom with tables need different layouts, and probably different
+  seats.
+* **Different lessons need different seating.** Rows facing the front for
+  tests, tables for group work, a randomised plan for a fresh start.
+* **You want to try an idea without losing the plan that works.**
+
+Give each plan a clear title so you can tell them apart, e.g.
+*8 Science 3 – Lab B* and *8 Science 3 – Room 12*.
+
+Copying a class into a second plan
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To reuse a class you have already set up, rules and all:
+
+#. In the finished plan, press **Export JSON** and save the file.
+#. In an empty plan, press **Import JSON** and choose that file. You now have
+   an exact copy.
+#. Change the title, e.g. add the room name.
+#. Choose the layout for the other room (or switch to **Tables**). The
+   students are re-seated to fit, keeping the rules.
+#. Sort, shuffle or drag students until the new room looks right.
+
+The two plans are now separate: changes to one never affect the other. If
+you later add a rule or a new student, add it in each plan for that class.
+
+To start a second plan from scratch instead, press **Import Roster** in an
+empty plan and choose the class list again (this brings no rules across).
 
 Setting up your classes
 -----------------------
@@ -34,87 +94,52 @@ Do this once per class, at the start of the year or term:
 #. Find the next empty plan and press **Import Roster**. Choose the class's
    Excel export from School Class Lists.
 #. Click the plan's title and type the class name, e.g. *8 Science 3*
-   (importing sets the title to the file's name).
-#. Choose a layout to match the room. Different classes can use different
-   rooms and layouts.
-#. Add any **Rules**, then sort or drag the students into place.
-#. Press **Export JSON** to keep a copy (see `Backing up and moving your
-   classes`_).
+   (importing sets the title to the file's name). Add the room if the class
+   has more than one plan.
+#. Choose a layout to match the room.
+#. Add any **Rules**, then sort, shuffle rows or drag students into place.
+#. Press **Export JSON** to keep a backup.
 
-The heading above each plan (*Class 1*, *Class 2* …) is part of the page and
-does not change; the plan's title is what identifies the class.
-
-Printing all your classes
--------------------------
+Printing all your plans
+-----------------------
 
 **Print all my classes**, near the top of the page, prints every plan that has
 students, each on its own landscape page, exactly as it is shown: current
-seats, title, **One-line Names** and **Teacher's View**. Rule badges are left
-off. Choose **Save as PDF** in the print box to keep a PDF of every class in
-one file.
+seats, title, **One-line Names** and **Teacher's View**. Rule badges, group
+colours and row buttons are left off. Choose **Save as PDF** in the print box
+to keep one PDF of every plan.
 
-To print a single class, use the **Print** button in that plan.
+To print a single plan, use the **Print** button in that plan.
 
-Backing up and moving your classes
-----------------------------------
+Backing up and moving your plans
+--------------------------------
 
-The saved plans live only in **this browser on this computer**. They are not
-copied to your other computers or browsers, and they are lost if the
-browser's site data is cleared.
+Because your plans exist only in this browser, back them up:
 
 * **Back up:** press **Export JSON** in each plan you use. Keep the files
   together, e.g. in a *Seating plans* folder in your school OneDrive. Export
   again after big changes, and at the start of each term.
-* **Move to another computer:** open this page there and press **Import JSON**
-  in any empty plan, one file per class. Everything comes back: class list,
-  rules, layout, seats and display options.
-* **Undo changes to a class:** **Revert** goes back to the last file
-  imported or exported in that plan.
+* **Move to another computer or browser:** open this page there and press
+  **Import JSON** in an empty plan, one file per plan. Everything comes back:
+  title, class list, rules, layout, seats and display options.
+* **Undo changes to a plan:** **Revert** goes back to the last file imported
+  or exported in that plan.
 
-Changing classes
-----------------
+Changing plans
+--------------
 
 * **Replace a class** (new semester, new class list): in that plan, press
   **Import Roster** with the new file. This removes the old rules. Export the
   old class first if you may want it again.
-* **Clear a class:** press **Reset** in that plan. The plan is emptied in this
+* **Empty a plan:** press **Reset** in that plan. The plan is emptied in this
   browser only; any exported JSON file is unaffected.
-* **Swap a class into a different slot:** **Export JSON** from one plan,
+* **Move a plan to a different slot:** **Export JSON** from one plan,
   **Import JSON** into the other, then **Reset** the first.
 
 Good to know
 ------------
 
-* **Each plan is saved under a fixed name** (``myclasses-1`` to
-  ``myclasses-12``), set by ``:storage-key:`` on the page. This keeps each
-  saved class with the right plan even if the page is edited later. If the
-  page's author changes those names, the plans start empty again: export your
-  classes before the page is updated, and import them afterwards.
-* **Private by browser:** anyone who uses the same computer sign-in and
-  browser can open this page and see your saved classes. Use your own staff
-  computer or profile. On a shared computer, **Reset** each class before you
-  leave.
 * **Exported files contain student names.** Store them where you keep other
   class lists, not on shared or public drives.
-
-For the author: adding more classes
------------------------------------
-
-To add a thirteenth class, copy the last section of ``seatingplans.rst`` and
-give it a new heading, title and **new** storage key:
-
-.. code-block:: rst
-
-   ----
-
-   Class 13
-   ---------------
-
-   .. seatingplan::
-      :layout: 5x6
-      :title: Enter class 13 name here
-      :storage-key: myclasses-13
-
-Keep the existing storage keys as they are, so everyone's saved classes stay
-in place. Plans can be reordered or retitled freely as long as each keeps its
-own key. **Print all my classes** includes new plans automatically.
+* **Each plan has its own display options**, so one can use **Teacher's
+  View** or hide the row buttons while the others don't.

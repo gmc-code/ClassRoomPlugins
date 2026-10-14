@@ -140,6 +140,26 @@
 }
 .seatingplan .sp-grid { display: flex; flex-direction: column; gap: 10px; }
 .seatingplan .sp-row { display: grid; gap: var(--sp-row-gap, 8px); }
+/* Row controls: Flip (⇄) and Swap (⇅) to the left of each row */
+.seatingplan .sp-rowline { display: flex; align-items: center; gap: 6px; }
+.seatingplan .sp-rowline > .sp-row { flex: 1; min-width: 0; }
+.seatingplan .sp-row-ctrl {
+    flex: 0 0 86px; display: flex; flex-direction: column; align-items: center; gap: 3px;
+}
+.seatingplan .sp-row-label { font-size: 11px; font-weight: 700; color: #64748b; white-space: nowrap; }
+.seatingplan .sp-row-btns { display: flex; gap: 3px; }
+.seatingplan .sp-row-btn {
+    width: 24px; height: 24px; padding: 0; border: 1px solid #cbd5e1; border-radius: 4px;
+    background: #fff; color: #334155; font-size: 14px; line-height: 1; cursor: pointer;
+}
+.seatingplan .sp-row-btn svg { display: block; margin: auto; }
+.seatingplan .sp-row-btn:hover { background: #ede9fe; border-color: #7c3aed; color: #5b21b6; }
+.seatingplan .sp-row-btn:focus-visible { outline: 2px solid #7c3aed; outline-offset: 1px; }
+.seatingplan.sp-swapping .sp-row-swap { background: #fef3c7; border-color: #f59e0b; }
+.seatingplan .sp-rowline.sp-swap-from .sp-row-swap { background: #f59e0b; border-color: #d97706; color: #fff; }
+.seatingplan .sp-rowline.sp-swap-from .sp-row { outline: 2px dashed #f59e0b; outline-offset: 3px; border-radius: 6px; }
+.seatingplan.sp-projector .sp-row-ctrl,
+.seatingplan.sp-hide-row-ctrl .sp-row-ctrl { display: none; }
 /* Empty floor space in a row: written [n] in the layout, e.g. [2]3[2] */
 .seatingplan .sp-gap { min-width: 0; }
 
@@ -236,6 +256,9 @@
 .seatingplan .sp-desk .sp-card.sp-has-sep { background: #fff7ed; border-color: #ea580c; }
 .seatingplan .sp-desk .sp-card.sp-has-pair { background: #ecfdf5; border-color: #059669; }
 .seatingplan .sp-desk .sp-card.sp-has-pos { background: #eff6ff; border-color: #2563eb; }
+/* Keep-together group: the card takes its group's colour (set per card as --sp-grp-fg / -bg) */
+.seatingplan .sp-card.sp-has-grp,
+.seatingplan .sp-desk .sp-card.sp-has-grp { border: 2px solid var(--sp-grp-fg); background: var(--sp-grp-bg); }
 .seatingplan .sp-first { font-weight: 600; font-size: 12px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .seatingplan .sp-last { font-size: 11px; color: #334155; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* Names never get squeezed (that clipped the tails of g, y, p); the desk grows instead. */
@@ -248,6 +271,9 @@
 .sp-badge-sep { background: #ffedd5; color: #c2410c; border: 1px solid #f97316; }
 .sp-badge-pair { background: #d1fae5; color: #047857; border: 1px solid #10b981; }
 .sp-badge-pos { background: #dbeafe; color: #1d4ed8; border: 1px solid #3b82f6; }
+/* Numbered group badges: keep together = filled in the group colour, keep apart = dashed outline */
+.sp-badge-grp.sp-badge-pair { background: var(--sp-grp-fg); color: #fff; border: 1px solid var(--sp-grp-fg); }
+.sp-badge-grp.sp-badge-sep { background: #fff; color: var(--sp-grp-fg); border: 1px dashed var(--sp-grp-fg); }
 
 .sp-badge-stack {
     display: flex;
@@ -379,7 +405,9 @@ html.sp-projector-open, html.sp-projector-open body { overflow: hidden; }
 }
 .sp-rp-group.sp-sep { border-left: 4px solid #ea580c; }
 .sp-rp-group.sp-pair { border-left: 4px solid #059669; }
-.sp-rp-group-names { min-width: 0; }
+.sp-rp-group[style] { border-left-color: var(--sp-grp-fg); }
+.sp-rp-group > .sp-badge-grp { flex: none; font-size: 11px; padding: 1px 5px; }
+.sp-rp-group-names { min-width: 0; flex: 1; text-align: left; }
 .sp-rp-group-btns { display: flex; align-items: center; gap: 4px; flex: none; }
 .sp-rp-small { padding: 3px 8px; }
 .sp-rp-edit-title { font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; }
@@ -397,7 +425,7 @@ html.sp-projector-open, html.sp-projector-open body { overflow: hidden; }
 /* Printing the docs page normally: show just the plan, hide the controls. */
 @media print {
     .seatingplan { border: none; background: #fff; }
-    .seatingplan .sp-toolbar, .seatingplan .sp-sidebar, .seatingplan .sp-status, .sp-modal { display: none !important; }
+    .seatingplan .sp-toolbar, .seatingplan .sp-sidebar, .seatingplan .sp-status, .seatingplan .sp-row-ctrl, .sp-modal { display: none !important; }
     .seatingplan .sp-desk { break-inside: avoid; }
     .sp-badge-hr { border: none !important; background: transparent; padding: 0 2px; }
 }

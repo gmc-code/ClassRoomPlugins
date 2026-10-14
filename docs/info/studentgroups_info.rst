@@ -1,5 +1,5 @@
 ===================================
-Student Groups Directive info
+Using the Student Groups Directive
 ===================================
 
 The ``studentgroups`` directive embeds an interactive student group planner
@@ -9,10 +9,6 @@ Students can be imported from CSV or Excel files or entered directly in the
 directive, then sorted or randomised into groups, kept together or apart with
 rules, rearranged by dragging, shown full screen on a projector, saved as JSON
 and printed as compact group cards.
-
-.. contents::
-   :local:
-   :depth: 1
 
 ----
 

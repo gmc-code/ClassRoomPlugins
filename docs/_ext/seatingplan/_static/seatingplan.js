@@ -69,6 +69,22 @@
     function tablesLabel(rows) { return tablesKey(rows).replace(/6w/g, '6'); }
 
     var OPPOSITE_PLACES = { FRONT_ROW: 'BACK_ROW', BACK_ROW: 'FRONT_ROW', SIT_LEFT: 'SIT_RIGHT', SIT_RIGHT: 'SIT_LEFT' };
+    /* One colour per group (keep together and keep apart are numbered separately, as in the
+       Rules panel). Avoids sky blue (plain desks), orange (keep apart) and red (rule broken). */
+    var GROUP_COLOURS = [
+        { fg: '#059669', bg: '#d1fae5' },   /* green */
+        { fg: '#7c3aed', bg: '#ede9fe' },   /* purple */
+        { fg: '#db2777', bg: '#fce7f3' },   /* pink */
+        { fg: '#0e7490', bg: '#cffafe' },   /* teal */
+        { fg: '#a16207', bg: '#fef9c3' },   /* gold */
+        { fg: '#4338ca', bg: '#e0e7ff' },   /* indigo */
+        { fg: '#4d7c0f', bg: '#ecfccb' },   /* lime */
+        { fg: '#a21caf', bg: '#fae8ff' },   /* magenta */
+        { fg: '#475569', bg: '#e2e8f0' },   /* slate */
+        { fg: '#9f1239', bg: '#ffe4e6' }    /* rose */
+    ];
+    /* keep-apart groups start part-way along the list, so 🔗 1 and ⚠️ 1 differ */
+    function groupColour(i, apart) { return GROUP_COLOURS[(i + (apart ? 5 : 0)) % GROUP_COLOURS.length]; }
     var LIMIT_SEATS = 6; /* Limit Desk Width: short rows use the desk width of a 6-desk row */
     var XLSX_URL = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
     var xlsxPromise = null;
@@ -515,7 +531,8 @@
             oneLine: 'toggle-oneline',
             hideBadges: 'toggle-hide-badges',
             limitWidth: 'toggle-limit-width',
-            teacherView: 'toggle-teacher-view'
+            teacherView: 'toggle-teacher-view',
+            rowControls: 'toggle-row-controls'
         };
         var draggingId = null;
         var ui = {};
@@ -537,7 +554,8 @@
                 oneLine: d.oneLine === true,
                 hideBadges: d.hideBadges === true,
                 limitWidth: d.limitWidth === true,
-                teacherView: d.teacherView === true
+                teacherView: d.teacherView === true,
+                rowControls: d.rowControls !== false
             };
         }
 
@@ -832,6 +850,10 @@
                 '<input type="checkbox" data-role="toggle-teacher-view" class="sp-checkbox">' +
                 'Teacher\'s View' +
                 '</label>' +
+                '<label class="sp-checkbox-label" title="Show the Flip (⇄) and Swap (⇅) buttons beside each row">' +
+                '<input type="checkbox" data-role="toggle-row-controls" class="sp-checkbox" checked>' +
+                'Row Controls' +
+                '</label>' +
                 '</div>' +
 
                 '</div>' +
@@ -843,7 +865,7 @@
                 '<div class="sp-grid" data-role="grid"></div></div>' +
                 '</div>';
 
-            ['title', 'revert', 'layouts', 'custom-layout', 'fill', 'file', 'json-file', 'toggle-surname-initial', 'toggle-homeroom', 'toggle-ignore-rules', 'toggle-oneline', 'toggle-hide-badges', 'toggle-limit-width', 'toggle-teacher-view', 'status', 'count', 'pool', 'grid'].forEach(function (r) {
+            ['title', 'revert', 'layouts', 'custom-layout', 'fill', 'file', 'json-file', 'toggle-surname-initial', 'toggle-homeroom', 'toggle-ignore-rules', 'toggle-oneline', 'toggle-hide-badges', 'toggle-limit-width', 'toggle-teacher-view', 'toggle-row-controls', 'status', 'count', 'pool', 'grid'].forEach(function (r) {
                 ui[r] = root.querySelector('[data-role="' + r + '"]');
             });
 
@@ -877,6 +899,7 @@
                     applyDisplayClasses();
                     if (key === 'hideBadges' && box.checked) hideRuleStatus();
                     if (key === 'limitWidth') applyRowWidths();
+                    if (key === 'rowControls' && !box.checked) cancelSwap();
                     save();
                     if (key !== 'ignoreRules') refreshCards();
                 });
@@ -887,6 +910,7 @@
             });
             document.addEventListener('keydown', function (e) {
                 if (e.key === 'Escape' && root.classList.contains('sp-projector')) exitProjector();
+                if (e.key === 'Escape') cancelSwap();
             });
             ui.pool.addEventListener('dragover', function (e) { e.preventDefault(); });
             ui.pool.addEventListener('drop', onPoolDrop);
@@ -902,6 +926,7 @@
             root.classList.toggle('sp-compact', state.display.oneLine);
             root.classList.toggle('sp-hide-badges', state.display.hideBadges);
             root.classList.toggle('sp-teacher-view', state.display.teacherView);
+            root.classList.toggle('sp-hide-row-ctrl', !state.display.rowControls);
         }
 
         function syncDisplayControls() {
@@ -973,6 +998,9 @@
             var limitBox = ui['toggle-limit-width'];
             limitBox.disabled = tables;
             limitBox.parentNode.classList.toggle('sp-checkbox-off', tables);
+            var rowCtrlBox = ui['toggle-row-controls'];
+            rowCtrlBox.disabled = tables;
+            rowCtrlBox.parentNode.classList.toggle('sp-checkbox-off', tables);
             renderLayoutButtons();
             var key = tables ? tablesKey(state.tables) : state.layout.join(',');
             Array.prototype.forEach.call(ui.layouts.querySelectorAll('[data-layout]'), function (b) {
@@ -1009,6 +1037,9 @@
                 case 'print': printPlan(); break;
                 case 'projector': enterProjector(); break;
                 case 'projector-exit': exitProjector(); break;
+                case 'row-flip': cancelSwap(); flipRow(+t.getAttribute('data-row')); break;
+                case 'row-swap': onRowSwap(+t.getAttribute('data-row')); break;
+                case 'row-shuffle': cancelSwap(); shuffleRow(+t.getAttribute('data-row')); break;
             }
         }
 
@@ -1022,8 +1053,13 @@
             if (showHomeroom && student.homeroom) {
                 row.appendChild(make('span', 'sp-badge sp-badge-hr', student.homeroom));
             }
-            if (flags.sep) row.appendChild(make('span', 'sp-badge sp-badge-sep sp-badge-rule', '⚠️ Sep'));
-            if (flags.pair) row.appendChild(make('span', 'sp-badge sp-badge-pair sp-badge-rule', '🔗 Pair'));
+            /* keep together / keep apart: one badge per group, numbered and coloured as in Rules */
+            (flags.pairGroups || []).forEach(function (g) {
+                row.appendChild(groupBadge('sp-badge-pair', '🔗', g, 'Kept together: group '));
+            });
+            (flags.sepGroups || []).forEach(function (g) {
+                row.appendChild(groupBadge('sp-badge-sep', '⚠️', g, 'Kept apart: group '));
+            });
             if (flags.front) row.appendChild(make('span', 'sp-badge sp-badge-pos sp-badge-rule', '⬆ Front'));
             if (flags.back) row.appendChild(make('span', 'sp-badge sp-badge-pos sp-badge-rule', '⬇ Back'));
             if (flags.empty) row.appendChild(make('span', 'sp-badge sp-badge-pos sp-badge-rule', '🪑 Empty'));
@@ -1034,7 +1070,28 @@
             return container;
         }
 
-        function renderCard(card, student, isDesk, colCount) {
+        function groupBadge(cls, icon, g, tip) {
+            var c = groupColour(g, cls === 'sp-badge-sep');
+            var b = make('span', 'sp-badge sp-badge-grp ' + cls + ' sp-badge-rule', icon + ' ' + (g + 1));
+            b.title = tip + (g + 1);
+            b.style.setProperty('--sp-grp-fg', c.fg);
+            b.style.setProperty('--sp-grp-bg', c.bg);
+            return b;
+        }
+
+        /* Which keep-together / keep-apart groups each student is in (group index as in Rules). */
+        function groupMarks() {
+            var marks = { pair: {}, sep: {} };
+            ['PAIR', 'SEPARATE'].forEach(function (type) {
+                var into = type === 'PAIR' ? marks.pair : marks.sep;
+                groupsFor(type).forEach(function (g, i) {
+                    g.ids.forEach(function (id) { (into[id] = into[id] || []).push(i); });
+                });
+            });
+            return marks;
+        }
+
+        function renderCard(card, student, isDesk, colCount, marks) {
             var rs = rulesFor(student.id);
             var flags = {
                 sep: rs.some(function (r) { return r.type === 'SEPARATE'; }),
@@ -1047,9 +1104,21 @@
             };
             if (state.display.hideBadges) {
                 flags = { sep: false, pair: false, front: false, back: false, empty: false, left: false, right: false };
+            } else {
+                marks = marks || groupMarks();
+                flags.pairGroups = marks.pair[student.id] || [];
+                flags.sepGroups = marks.sep[student.id] || [];
             }
-            card.classList.remove('sp-has-sep', 'sp-has-pair', 'sp-has-pos');
-            if (flags.sep) card.classList.add('sp-has-sep');
+            card.classList.remove('sp-has-sep', 'sp-has-pair', 'sp-has-pos', 'sp-has-grp');
+            card.style.removeProperty('--sp-grp-fg');
+            card.style.removeProperty('--sp-grp-bg');
+            /* a keep-together group colours the whole card, so the group stands out on the plan */
+            if (flags.pairGroups && flags.pairGroups.length) {
+                var gc = groupColour(flags.pairGroups[0]);
+                card.classList.add('sp-has-grp');
+                card.style.setProperty('--sp-grp-fg', gc.fg);
+                card.style.setProperty('--sp-grp-bg', gc.bg);
+            } else if (flags.sep) card.classList.add('sp-has-sep');
             else if (flags.pair) card.classList.add('sp-has-pair');
             else if (flags.front || flags.back || flags.empty || flags.left || flags.right) card.classList.add('sp-has-pos');
 
@@ -1109,12 +1178,13 @@
         }
 
         function refreshCards() {
+            var marks = groupMarks();
             Array.prototype.forEach.call(root.querySelectorAll('.sp-card'), function (card) {
                 var s = studentById(card.dataset.sid);
                 if (s) {
                     var desk = card.closest('.sp-desk');
                     var cols = desk ? parseInt(desk.dataset.cols, 10) : 6;
-                    renderCard(card, s, !!desk, cols);
+                    renderCard(card, s, !!desk, cols, marks);
                 }
             });
         }
@@ -1193,9 +1263,15 @@
             if (state.mode === 'tables') { initTables(); return; }
             ui.grid.innerHTML = '';
             ui.grid.classList.remove('sp-grid-tables');
-            ui.grid.style.minWidth = (Math.max.apply(null, state.layout.map(rowWidth)) * 72) + 'px';
+            ui.grid.style.minWidth = (Math.max.apply(null, state.layout.map(rowWidth)) * 72 + ROW_CTRL_WIDTH) + 'px';
+            swapFrom = null;
+            root.classList.remove('sp-swapping');
             var n = 1;
             state.layout.forEach(function (spec, r) {
+                /* each row sits in a line with its Flip / Swap buttons on the left */
+                var line = make('div', 'sp-rowline');
+                line.dataset.row = r;
+                line.appendChild(rowControls(r));
                 var row = make('div', 'sp-row');
                 var cols = rowWidth(spec);   /* desks + empty spaces */
                 row.dataset.cols = cols;
@@ -1221,9 +1297,155 @@
                     }
                     seg++;
                 });
-                ui.grid.appendChild(row);
+                line.appendChild(row);
+                ui.grid.appendChild(line);
             });
             applyRowWidths();
+        }
+
+        /* ----- row controls: flip a row end to end, swap two rows -----
+           These move students only; the desks and layout stay as they are. */
+
+        var ROW_CTRL_WIDTH = 92;   /* px beside each row for its buttons */
+        var swapFrom = null;       /* row picked for a swap, waiting for the second row */
+
+        function rowControls(r) {
+            var ctrl = make('div', 'sp-row-ctrl');
+            ctrl.innerHTML =
+                '<span class="sp-row-label">Row ' + (r + 1) + '</span>' +
+                '<span class="sp-row-btns">' +
+                '<button type="button" class="sp-row-btn" data-action="row-flip" data-row="' + r + '" ' +
+                'title="Flip row ' + (r + 1) + ' end to end" aria-label="Flip row ' + (r + 1) + ' end to end">⇄</button>' +
+                '<button type="button" class="sp-row-btn sp-row-swap" data-action="row-swap" data-row="' + r + '" ' +
+                'title="Swap row ' + (r + 1) + ' with another row" aria-label="Swap row ' + (r + 1) + ' with another row">⇅</button>' +
+                '<button type="button" class="sp-row-btn" data-action="row-shuffle" data-row="' + r + '" ' +
+                'title="Shuffle the students in row ' + (r + 1) + '" aria-label="Shuffle the students in row ' + (r + 1) + '">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"/><path d="m18 2 4 4-4 4"/><path d="M2 6h1.4c1.3 0 2.5.6 3.3 1.7l6.1 8.6c.7 1.1 2 1.7 3.3 1.7H22"/><path d="m18 14 4 4-4 4"/></svg>' +
+                '</button>' +
+                '</span>';
+            return ctrl;
+        }
+
+        /* Desks in row r, left to right (students' view). */
+        function desksInRow(r) {
+            return Array.prototype.slice.call(ui.grid.querySelectorAll('.sp-desk[data-row="' + r + '"]'));
+        }
+
+        function cardsIn(desks) {
+            return desks.map(function (d) { return d.querySelector('.sp-card'); });
+        }
+
+        /* Put cards (or null for an empty desk) onto desks, one each, in order. */
+        function seatCards(desks, cards) {
+            desks.forEach(function (d, i) {
+                var c = cards[i] || null;
+                d.classList.toggle('sp-occupied', !!c);
+                if (!c) return;
+                var s = studentById(c.dataset.sid);
+                if (s) renderCard(c, s, true, parseInt(d.dataset.cols, 10) || 6);
+                d.appendChild(c);
+            });
+        }
+
+        function flipRow(r) {
+            var desks = desksInRow(r);
+            var cards = cardsIn(desks);
+            if (!cards.some(Boolean)) return;
+            cards.forEach(function (c) { if (c) c.remove(); });
+            seatCards(desks, cards.reverse());
+            setStatus('');
+            validate();
+            updateCount();
+        }
+
+        /* Shuffle the students in row r among the desks they already use (empty desks stay
+           empty). Tries a number of random orders and keeps one that breaks the fewest rules,
+           and never gives back the same order when another is possible. */
+        function shuffleRow(r) {
+            var desks = desksInRow(r).filter(function (d) { return d.querySelector('.sp-card'); });
+            var cards = cardsIn(desks);
+            if (cards.length < 2) return;
+            function place(order) { order.forEach(function (c, i) { desks[i].appendChild(c); }); }
+            function brokenRules() { validate(); return ui.grid.querySelectorAll('.sp-conflict').length; }
+            var best = null, bestScore = Infinity;
+            for (var t = 0; t < 80; t++) {
+                var order = cards.slice();
+                for (var i = order.length - 1; i > 0; i--) {
+                    var j = Math.floor(Math.random() * (i + 1));
+                    var tmp = order[i]; order[i] = order[j]; order[j] = tmp;
+                }
+                if (order.every(function (c, k) { return c === cards[k]; })) continue;
+                place(order);
+                var score = brokenRules();
+                if (score < bestScore) { best = order; bestScore = score; }
+                if (score === 0) break;
+            }
+            place(best || cards);
+            setStatus('');
+            validate();
+            updateCount();
+        }
+
+        /* Each student moves to the same desk position in the other row, so an empty desk
+           stays where it was. If the rows have different numbers of desks, students who do
+           not fit go to a free desk (in the row they were moving to first), then Unassigned. */
+        function swapRows(a, b) {
+            var da = desksInRow(a), db = desksInRow(b);
+            var ca = cardsIn(da), cb = cardsIn(db);
+            ca.concat(cb).forEach(function (c) { if (c) c.remove(); });
+            var newA = da.map(function (_, i) { return cb[i] || null; });
+            var newB = db.map(function (_, i) { return ca[i] || null; });
+            var extraFromA = ca.slice(db.length).filter(Boolean);
+            var extraFromB = cb.slice(da.length).filter(Boolean);
+            function fillGaps(list, extras) {
+                for (var i = 0; i < list.length && extras.length; i++) if (!list[i]) list[i] = extras.shift();
+            }
+            fillGaps(newB, extraFromA); fillGaps(newA, extraFromA);
+            fillGaps(newA, extraFromB); fillGaps(newB, extraFromB);
+            seatCards(da, newA);
+            seatCards(db, newB);
+            var left = extraFromA.concat(extraFromB);
+            left.forEach(function (c) {
+                var s = studentById(c.dataset.sid);
+                if (s) renderCard(c, s, false);
+                ui.pool.appendChild(c);
+            });
+            validate();
+            updateCount();
+            setStatus(left.length
+                ? 'Swapped rows ' + (a + 1) + ' and ' + (b + 1) + '. ' + left.length +
+                  (left.length === 1 ? ' student did' : ' students did') + ' not fit and moved to Unassigned.'
+                : '');
+        }
+
+        function markSwap() {
+            root.classList.toggle('sp-swapping', swapFrom != null);
+            Array.prototype.forEach.call(ui.grid.querySelectorAll('.sp-rowline'), function (line) {
+                line.classList.toggle('sp-swap-from', swapFrom != null && +line.dataset.row === swapFrom);
+            });
+        }
+
+        function cancelSwap() {
+            if (swapFrom == null) return;
+            swapFrom = null;
+            markSwap();
+            setStatus('');
+        }
+
+        /* First ⇅ picks a row, second ⇅ (on another row) swaps; ⇅ on the same row or Esc cancels. */
+        function onRowSwap(r) {
+            if (swapFrom == null) {
+                swapFrom = r;
+                markSwap();
+                setStatus('Swapping row ' + (r + 1) + ': press ⇅ on the row to swap it with ' +
+                    '(or ⇅ on row ' + (r + 1) + ' again to cancel).');
+                return;
+            }
+            if (swapFrom === r) { cancelSwap(); return; }
+            var from = swapFrom;
+            swapFrom = null;
+            markSwap();
+            swapRows(from, r);
         }
 
         /* Normally each row shares the full width. With Limit Desk Width, a row with
@@ -1947,8 +2169,13 @@
             var title = (ui.title ? ui.title.textContent.trim() : state.title) || 'Seating Plan';
             var clone = ui.grid.cloneNode(true);
             Array.prototype.forEach.call(clone.querySelectorAll('.sp-badge-rule'), function (n) { n.parentNode.removeChild(n); });
+            /* no row buttons on paper: each row goes back to being a direct child of the grid */
+            Array.prototype.forEach.call(clone.querySelectorAll('.sp-rowline'), function (line) {
+                var row = line.querySelector('.sp-row');
+                if (row) line.parentNode.replaceChild(row, line); else line.parentNode.removeChild(line);
+            });
             Array.prototype.forEach.call(clone.querySelectorAll('[class]'), function (n) {
-                n.classList.remove('sp-conflict', 'sp-has-sep', 'sp-has-pair', 'sp-has-pos', 'sp-occupied', 'sp-drag-over');
+                n.classList.remove('sp-conflict', 'sp-has-sep', 'sp-has-pair', 'sp-has-pos', 'sp-has-grp', 'sp-occupied', 'sp-drag-over');
                 n.removeAttribute('draggable');
             });
             clone.style.minWidth = '0';
@@ -2231,6 +2458,11 @@
             }
             groups.forEach(function (g, i) {
                 var item = make('div', 'sp-rp-group ' + (kind.type === 'PAIR' ? 'sp-pair' : 'sp-sep'));
+                var gc = groupColour(i, kind.type !== 'PAIR');
+                item.style.setProperty('--sp-grp-fg', gc.fg);
+                item.style.setProperty('--sp-grp-bg', gc.bg);
+                item.appendChild(make('span', 'sp-badge sp-badge-grp ' + (kind.type === 'PAIR' ? 'sp-badge-pair' : 'sp-badge-sep'),
+                    (kind.type === 'PAIR' ? '🔗 ' : '⚠️ ') + (i + 1)));
                 var label = make('div', 'sp-rp-group-names');
                 label.appendChild(make('strong', null, 'Group ' + (i + 1) + '  '));
                 label.appendChild(document.createTextNode(g.ids.map(nameOf).join(' · ')));

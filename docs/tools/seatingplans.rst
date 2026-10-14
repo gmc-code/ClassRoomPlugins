@@ -10,8 +10,7 @@ so the page reopens exactly as you left it. See
 **Setting up a class**
 
 #. **Import Roster**: choose the class's Excel export from School Class Lists.
-#. Click the title and type the class name (importing sets the title to the
-   file's name).
+#. Click the title and type the class name.
 #. Pick a layout, or type one in the **Custom** box: ``5x6``, ``7,8,9,6``, or
    with empty spaces in brackets, e.g. ``4[3]4, 1[9]1, 4[3]4, 1[9]1, 5[1]5``.
 #. Add any **Rules** (keep apart, keep together, front row ...), then press

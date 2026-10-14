@@ -1,6 +1,6 @@
-===============================
-Noise Monitor directive info
-===============================
+==================================
+Using the Noise Monitor directive
+==================================
 
 The ``noisemonitor`` directive adds a live classroom noise meter to a page. It listens through the
 computer's microphone, shows the current sound level on a meter bar, and swaps a large picture and

@@ -1,122 +1,391 @@
-=============================
-Using the Seating plans page
-=============================
+=====================================
+Using the Seating Plan
+=====================================
 
-The :doc:`seatingplans` page holds a separate seating plan for each of your
-classes, all on one page. Each plan has its own class list, rules, layout and
-seats, and the browser remembers every one of them independently. This page
-explains how to work with them together. For the buttons, rules and layouts
-inside a plan, see :doc:`seatingplan_info`.
-
-.. contents::
-   :local:
-   :depth: 1
+The seating plan lets you load a class list, set up the room, add seating
+rules and arrange students on desks, then print it or show it on the
+projector. Everything happens in your browser: student names are never sent
+anywhere, and the plan is saved on this computer as you work.
 
 ----
 
-One page, many classes
+Quick start
+-----------
+
+#. Press **Import Roster** and choose your class's Excel or CSV export.
+#. Click the title and type the class name, e.g. *8 Science W9*.
+#. Pick a layout that matches the room, or type your own.
+#. Press **Rules** to add any seating rules.
+#. Press **A → Z**, **Random** or another sort, then drag students to fine-tune.
+#. **Print**, or press **Projector View** to show it to the class.
+#. Press **Export JSON** to keep a backup copy.
+
+Importing a class list
 ----------------------
 
-* **Each plan is separate.** Importing, sorting or changing the layout in
-  *Class 3* never touches *Class 4*. Each has its own **Reset**, **Revert**,
-  **Print** and **Projector View**.
-* **Each plan is remembered separately.** Every change is saved straight away
-  in this browser. Close the page, and every class reopens exactly as you
-  left it, with each student on the same desk.
-* **Plans you have not used stay empty** and are left out when printing.
-  Use as many of the twelve as you need.
+**Import Roster** reads an Excel file (``.xlsx`` or ``.xls``) or a CSV file.
+The first row must be a header row with these columns (in any order, any
+capitals):
 
-Setting up your classes
+* **Preferred** or **First Name**: the name shown on the desk
+* **Surname** or **Last Name**
+* **Homeroom** (optional): shown as a small badge, e.g. *H11*
+
+Other columns are ignored, so an export from School Class Lists works as it
+is. The plan's title is taken from the file name (``8_Science_W9.xlsx``
+becomes *8 Science W9*), and you can click it to change it.
+
+Importing a new class list **removes the existing rules**, because they
+belonged to the old students; you are asked to confirm first.
+
+The title
+---------
+
+Click the dark title bar to type a new title, then press **Enter** or click
+away. The title is saved, printed at the top of the page and used as the
+suggested file name for **Export JSON**.
+
+The toolbar
+-----------
+
+Top row: files and output
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Import Roster**
+   Load a class list (see `Importing a class list`_).
+
+**Import JSON**
+   Load a plan saved with **Export JSON**: title, class list, rules, layout,
+   seats and display options all come back exactly as they were.
+
+**Export JSON**
+   Save the whole plan as a file. In Chrome and Edge you choose the folder
+   and name; other browsers ask for a name and save to Downloads.
+
+**Reset**
+   Go back to the plan as written on the page, removing your class list,
+   rules and changes from this browser. You are asked to confirm.
+
+**Revert**
+   Go back to the last file you imported or exported, undoing everything
+   since. Greyed out until you have imported or exported something. After an
+   **Import Roster**, it returns the class to the file's original order.
+
+**Print**
+   Print this plan on one landscape page (see `Printing`_).
+
+**Projector View**
+   Show only the whiteboard and desks, full screen, in large text. Press
+   **Esc** or **✕ Exit projector view** to return.
+
+Second row: arranging students
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Clear**
+   Move every student off the desks into the **Unassigned** list, ready to
+   drag them into place by hand.
+
+**A → Z** / **Z → A**
+   Seat students in surname order.
+
+**Homeroom A → Z**
+   Group students by homeroom, then by surname within each homeroom.
+
+**Random**
+   Seat students in a random order. Press again for a new arrangement.
+
+**Reverse**
+   Reverse the current order, so the student at the first desk moves to the
+   last desk and so on.
+
+**Fill: First → Last** / **Fill: Last → First**
+   Choose whether seating starts at desk 1 (front left) or at the last desk
+   (back right). Fill from the back when the class is smaller than the room
+   and you want the front rows empty.
+
+**Rules**
+   Open the seating rules (see `Seating rules`_).
+
+**Rows** / **Tables**
+   Switch between rows of desks and groups of tables (see `Layouts`_).
+
+Every sort follows the rules first, then fills the remaining desks in the
+chosen order. Desks are numbered in the order they are filled.
+
+Third row: layouts
+~~~~~~~~~~~~~~~~~~
+
+Press a preset button, or type a layout in the **Custom** box and press
+**Apply** (or **Enter**). The current layout is always shown in the box, so
+you can tweak it. Changing the layout re-seats everyone using the last sort.
+
+Fourth row: display options
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Surname Initial Only**
+   Show *Alex S.* instead of *Alex Smith*.
+
+**One-line Names**
+   First name and surname side by side, with shorter desks. Useful for large
+   classes.
+
+**Show Homeroom**
+   Show or hide the homeroom badge.
+
+**Ignore Rules**
+   Arrange students without applying any rules (the rules are kept, just not
+   used).
+
+**Hide Rule Badges**
+   Hide the rule badges and group colours, e.g. when the plan is on the
+   projector and students shouldn't see who has a rule.
+
+**Limit Desk Width**
+   Rows with fewer than 6 desks keep the width of a 6-desk row instead of
+   stretching across the room. Rows mode only.
+
+**Teacher's View**
+   Show the room from the front: whiteboard at the bottom, rows reversed and
+   left and right swapped. It is also used when printing.
+
+**Row Controls**
+   Show or hide the buttons beside each row (see `Moving whole rows`_). Rows
+   mode only.
+
+All display options are saved with the plan.
+
+Layouts
+-------
+
+Rows of desks
+~~~~~~~~~~~~~
+
+Type the number of desks in each row, **front row first**, separated by
+commas:
+
+* ``7,8,9,6``: rows of 7, 8, 9 and 6 desks
+* ``5x6``: 5 rows of 6 desks
+
+Put empty floor space in square brackets, counted in desk widths:
+
+* ``3[1]3``: 3 desks, an aisle, 3 desks
+* ``[2]3[2]``: a row of 3 desks centred, with 2 spaces each side
+* ``2[6]2, 2[6]2, 10``: a horseshoe
+
+Up to 12 rows, each with 1–20 desks and at most 24 places wide (desks plus
+spaces). Desks either side of a space are not counted as next to each other.
+
+Tables
+~~~~~~
+
+In **Tables** mode, type the seats at each table, commas between tables and
+``/`` between rows of tables, front row first:
+
+* ``4``: a table of 4 (2 × 2)
+* ``6``: a table of 6, 3 wide and 2 deep
+* ``6d``: a table of 6, 2 wide and 3 deep
+
+For example ``6,4,6 / 4,6,4``. ``2x3`` means 2 rows of 3 tables of 4, and
+``2x3 6`` uses tables of 6. Up to 8 rows of 8 tables.
+
+Rows and tables each keep their own layout, so you can switch between them
+without losing either.
+
+Moving students by hand
 -----------------------
 
-Do this once per class, at the start of the year or term:
+* **Drag** a student onto an empty desk to move them there.
+* Drag onto a desk that already has a student to **swap** the two.
+* When the **Unassigned** list is showing (students without a desk), drag
+  students into it or out of it.
 
-#. Find the next empty plan and press **Import Roster**. Choose the class's
-   Excel export from School Class Lists.
-#. Click the plan's title and type the class name, e.g. *8 Science 3*
-   (importing sets the title to the file's name).
-#. Choose a layout to match the room. Different classes can use different
-   rooms and layouts.
-#. Add any **Rules**, then sort or drag the students into place.
-#. Press **Export JSON** to keep a copy (see `Backing up and moving your
-   classes`_).
+Dragging is not limited by the rules, but a desk turns **red** if the student
+there breaks one, so you can see at a glance what needs fixing.
 
-The heading above each plan (*Class 1*, *Class 2* …) is part of the page and
-does not change; the plan's title is what identifies the class.
+Moving whole rows
+-----------------
 
-Printing all your classes
--------------------------
+In **Rows** mode, each row has a label (*Row 1* is the front row) and three
+buttons on its left:
 
-**Print all my classes**, near the top of the page, prints every plan that has
-students, each on its own landscape page, exactly as it is shown: current
-seats, title, **One-line Names** and **Teacher's View**. Rule badges are left
-off. Choose **Save as PDF** in the print box to keep a PDF of every class in
-one file.
+* **⇄ Flip** reverses the students in that row, so the student at one end
+  moves to the other end.
+* **⇅ Swap** exchanges two rows. Press **⇅** on the first row (it gets an
+  orange dashed outline), then **⇅** on the row to swap it with, e.g. row 1
+  then row 3. To cancel, press **⇅** on the same row again, or press **Esc**.
+* **Shuffle** (the crossed-arrows button) mixes up the students in that row
+  only. They swap among the desks they already use, so empty desks stay
+  empty, and the rest of the room is untouched. It looks for an order that
+  breaks no rules, so keep-together groups stay side by side. Press it again
+  for a different order.
 
-To print a single class, use the **Print** button in that plan.
+Only the students move; the desks and the layout stay the same. When
+swapping, each student takes the same desk position in the other row, so an
+empty desk stays where it was. If the two rows have different numbers of
+desks, students who don't fit go to a free desk in the longer row, or to
+**Unassigned** if there is none (a message says so).
 
-Backing up and moving your classes
-----------------------------------
+Flipping and swapping do not check the rules: a desk turns red if a student
+there now breaks one (e.g. a *Left side* student who is now on the right).
 
-The saved plans live only in **this browser on this computer**. They are not
-copied to your other computers or browsers, and they are lost if the
-browser's site data is cleared.
+Untick **Row Controls** to hide all three buttons. They never appear in
+**Projector View**, in **Tables** mode or on printouts.
 
-* **Back up:** press **Export JSON** in each plan you use. Keep the files
-  together, e.g. in a *Seating plans* folder in your school OneDrive. Export
-  again after big changes, and at the start of each term.
-* **Move to another computer:** open this page there and press **Import JSON**
-  in any empty plan, one file per class. Everything comes back: class list,
-  rules, layout, seats and display options.
-* **Undo changes to a class:** **Revert** goes back to the last file
-  imported or exported in that plan.
+Seating rules
+-------------
 
-Changing classes
-----------------
+Press **Rules**, choose a rule from the drop-down, then tick the students it
+applies to. Changes are saved straight away; press **Done** to close.
 
-* **Replace a class** (new semester, new class list): in that plan, press
-  **Import Roster** with the new file. This removes the old rules. Export the
-  old class first if you may want it again.
-* **Clear a class:** press **Reset** in that plan. The plan is emptied in this
-  browser only; any exported JSON file is unaffected.
-* **Swap a class into a different slot:** **Export JSON** from one plan,
-  **Import JSON** into the other, then **Reset** the first.
+**⬆ Front row** / **⬇ Back row**
+   Ticked students sit in the front (or back) row.
 
-Good to know
-------------
+**⬅ Left side** / **➡ Right side**
+   Ticked students sit at the left (or right) end of a row. Left and right
+   are the *students'* left and right, facing the whiteboard.
 
-* **Each plan is saved by its position on the page:** the first plan is
-  ``seatingplans#0``, the second ``seatingplans#1`` and so on. If the page is
-  edited so that plans move (one inserted above, removed or reordered), the
-  saved classes stay in their old positions and appear in the wrong plans.
-  Export your classes before the page is updated, and import them afterwards
-  if they end up in the wrong place.
-* **Private by browser:** anyone who uses the same computer sign-in and
-  browser can open this page and see your saved classes. Use your own staff
-  computer or profile. On a shared computer, **Reset** each class before you
-  leave.
+**🪑 Empty seat beside**
+   Ticked students get an empty desk next to them. That desk is kept free, so
+   it counts towards the room's capacity.
+
+**🔗 Keep together**
+   Press **+ New group** and tick 2–4 students who should sit side by side.
+   A pair is placed on a shared pair of desks (desks 1–2, 3–4 …) where
+   possible; 3 sit on neighbouring desks; 4 fill two pairs of desks. A
+   student can only be in one keep-together group.
+
+**⚠️ Keep apart**
+   Press **+ New group** and tick 2 or more students. No two of them sit
+   next to each other, including diagonally. A student can be in several
+   keep-apart groups.
+
+Use **Edit** or the bin to change or delete a group, and **Clear all** to
+remove a one-student rule from everyone. Students who can't be added (e.g.
+someone in the front row being put with someone in the back row) are greyed
+out with the reason beside their name.
+
+In **Tables** mode, the rules apply to tables instead: *front row* means a
+table in the front row of tables, *keep together* means the same table (up
+to the size of the largest table), and *keep apart* means different tables.
+
+When not every rule can be met
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If the room can't satisfy every rule at once (too many front-row students,
+say), the plan keeps as many as it can, giving priority to rules added
+earlier. A message lists the rules that were left out, and the desks
+breaking them are shown in red.
+
+Badges and colours
+------------------
+
+Each student card shows small badges:
+
+* **H11**: homeroom (hide with **Show Homeroom**)
+* **⬆ Front**, **⬇ Back**, **⬅ Left**, **➡ Right**, **🪑 Empty**: the
+  student has that rule; the card is blue
+* **🔗 1**, **🔗 2** …: the student's keep-together group. The card is tinted
+  in the group's colour, so everyone in a group shares a colour.
+* **⚠️ 1**, **⚠️ 2** …: a keep-apart group, shown as a dashed badge in the
+  group's colour on an orange card. Students with the same badge must not
+  sit next to each other.
+
+Group numbers and colours match the groups listed in **Rules**.
+Keep-together and keep-apart groups use different colours, so **🔗 1** and
+**⚠️ 1** never look alike. A **red** desk means the student there is
+breaking a rule.
+
+**Hide Rule Badges** hides all rule badges and group colours but keeps the
+homeroom badge.
+
+Printing
+--------
+
+**Print** opens a print-ready copy on one landscape page: the title,
+whiteboard and desks with students' names (and homerooms, if shown), exactly
+as they are seated. Rule badges, group colours, red highlights and row buttons are always
+left off. **One-line Names** and **Teacher's View** are used if they are on.
+Choose **Save as PDF** in the print box to keep a PDF.
+
+Saving and privacy
+------------------
+
+* **Saved automatically.** Every change is saved straight away in this
+  browser. Close the page and it reopens exactly as you left it, with every
+  student on the same desk.
+* **Only in this browser on this computer.** The plan is not sent to any
+  server and is not copied to your other computers or browsers. It is lost
+  if the browser's site data is cleared, and isn't kept at all in a private
+  or incognito window.
+* **Back up with Export JSON**, and use **Import JSON** to move the plan to
+  another computer or browser.
+* **Shared computers:** anyone using the same computer sign-in and browser
+  can open the page and see the plan. Press **Reset** before you leave a
+  shared computer.
 * **Exported files contain student names.** Store them where you keep other
   class lists, not on shared or public drives.
 
-For the author: adding more classes
------------------------------------
+----
 
-To add a thirteenth class, copy the last section of ``seatingplans.rst`` to
-the **end** of the page and give it a new heading and title:
+For the author: the directive
+-----------------------------
+
+A plan is added to a page with the ``seatingplan`` directive. All options are
+optional:
 
 .. code-block:: rst
 
-   ----
-
-   Class 13
-   ---------------
-
    .. seatingplan::
       :layout: 5x6
-      :title: Enter class 13 name here
+      :title: Year 8 Science
+      :sort: az
 
-Add new plans only at the end. Because each plan is saved by its position,
-inserting, deleting or reordering plans shifts everyone's saved classes into
-the wrong plans; if you must, ask users to export their classes first.
-Renaming the headings is safe, but renaming ``seatingplans.rst`` itself starts
-every plan empty. **Print all my classes** includes new plans automatically.
+      Alex Smith, H11
+      Sam Jones, B11
+      Priya Patel, N12
+
+      separate: Alex Smith | Sam Jones
+      pair: Priya Patel | Sam Jones
+      front: Priya Patel
+
+Content
+~~~~~~~
+
+* **Students**, one per line: ``First Surname, Homeroom`` (homeroom
+  optional).
+* **Rules**, one per line, naming students exactly as listed:
+  ``front:``, ``back:``, ``left:``, ``right:`` and ``empty:`` take one name;
+  ``pair:`` takes 2–4 names (up to 6 in tables mode) and ``separate:`` takes
+  2 or more, separated by ``|``.
+* Lines starting with ``#`` are ignored.
+
+Teachers can replace the page's class list by importing their own; **Reset**
+brings back what is written here.
+
+Options
+~~~~~~~
+
+``:layout:``
+   Desks per row (``5x6``, ``7,8,9,6``, ``3[1]3``), or tables in tables mode
+   (``6,4,6 / 4,6,4``). Default ``5x6``, or 8 tables of 4.
+``:mode:``
+   ``rows`` (default) or ``tables``.
+``:tables-per-row:``
+   In tables mode, how many tables per row when the layout has no ``/``.
+   Default 3.
+``:roster:``
+   An ``.xlsx`` or ``.csv`` class list to load, relative to the page. Reading
+   ``.xlsx`` at build time needs ``openpyxl``.
+``:title:``
+   The plan's starting title.
+``:fill:``
+   ``first`` (default) or ``last``.
+``:sort:``
+   ``none`` (default), ``az``, ``za``, ``homeroom`` or ``random``.
+``:one-line:``, ``:surname-initial:``, ``:hide-homeroom:``, ``:hide-badges:``, ``:ignore-rules:``, ``:limit-desk-width:``, ``:teacher-view:``
+   Start with that display option on (or, for ``:hide-homeroom:``, off).
+``:hide-row-controls:``
+   Start with the row buttons hidden. Teachers can still turn them on with
+   the **Row Controls** checkbox.
+``:class:``
+   Extra CSS classes for the plan.
