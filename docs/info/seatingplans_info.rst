@@ -44,8 +44,8 @@ One page, twelve plans
   seats and display options.
 * **Plans you haven't used stay empty** and are left out when printing. Use
   as many as you need.
-* **The title identifies the plan.** The heading above each plan (*Class 1*,
-  *Class 2* …) is fixed; click the plan's dark title bar to name it.
+* **The title identifies the plan.** The heading above each plan (*Plan 1*,
+  *Plan 2* …) is fixed; click the plan's dark title bar to name it.
 
 More than one plan for the same class
 -------------------------------------
@@ -61,7 +61,7 @@ you like. This is useful when:
 * **You want to try an idea without losing the plan that works.**
 
 Give each plan a clear title so you can tell them apart, e.g.
-*8 Science 3 – Lab B* and *8 Science 3 – Room 12*.
+*8 Science W9* and *8 Science W5*.
 
 Copying a class into a second plan
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -89,7 +89,7 @@ Do this once per class, at the start of the year or term:
 
 #. Find the next empty plan and press **Import Roster**. Choose the class's
    Excel export from School Class Lists.
-#. Click the plan's title and type the class name, e.g. *8 Science 3*
+#. Click the plan's title and type the class name, e.g. *8 Science W9*
    (importing sets the title to the file's name). Add the room if the class
    has more than one plan.
 #. Choose a layout to match the room.
