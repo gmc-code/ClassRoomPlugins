@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
+.anim{transform-box:view-box}
+</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"><g transform="translate(600 812) scale(0.8)"><g>
+    <path d="M60 -10 Q110 -20 100 -60 Q96 -80 80 -76" fill="none" stroke="#fb923c" stroke-width="14"/>
+    <ellipse cx="0" cy="-30" rx="80" ry="34" fill="#fb923c"/>
+    <path d="M-40 -60 Q-30 -40 -44 -6 M-6 -64 Q4 -40 -6 -2 M30 -60 Q40 -40 30 -4" fill="none" stroke="#ea580c" stroke-width="7"/>
+    <circle cx="-70" cy="-40" r="32" fill="#fb923c"/>
+    <polygon points="-96,-58 -98,-92 -74,-68" fill="#fb923c"/><polygon points="-60,-68 -48,-96 -42,-62" fill="#fb923c"/>
+    <path d="M-86 -40 q6 6 12 0 M-62 -40 q6 6 12 0" fill="none" stroke-width="4"/>
+    <ellipse cx="-68" cy="-28" rx="5" ry="3" fill="#f472b6" stroke="none"/>
+    <path d="M-106 -26 l-24 -4 M-106 -20 l-24 4 M-36 -26 l20 -6 M-36 -20 l20 2" stroke-width="2.5"/>
+    <g><animateTransform attributeName="transform" type="scale" values="1 1;1.03 1.06;1 1" dur="3s" begin="0s" repeatCount="indefinite"/></g><animateTransform attributeName="transform" type="scale" values="1 1;1.02 1.05;1 1" dur="3s" repeatCount="indefinite"/></g></g><text x="500" y="720" font-family="'Arial Black','Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif" font-size="26" fill="#64748b" stroke="none" opacity="0">Z<animate attributeName="opacity" values="0;1;0" dur="3s" begin="-0s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="translate" values="0 0;20 -70" dur="3s" begin="-0s" repeatCount="indefinite"/></text><text x="500" y="720" font-family="'Arial Black','Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif" font-size="34" fill="#64748b" stroke="none" opacity="0">Z<animate attributeName="opacity" values="0;1;0" dur="3s" begin="-1s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="translate" values="0 0;30 -70" dur="3s" begin="-1s" repeatCount="indefinite"/></text><text x="500" y="720" font-family="'Arial Black','Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif" font-size="42" fill="#64748b" stroke="none" opacity="0">Z<animate attributeName="opacity" values="0;1;0" dur="3s" begin="-2s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="translate" values="0 0;40 -70" dur="3s" begin="-2s" repeatCount="indefinite"/></text></g></svg>

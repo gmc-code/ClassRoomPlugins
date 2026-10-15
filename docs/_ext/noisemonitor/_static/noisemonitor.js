@@ -19,7 +19,7 @@
   const SCHEMA = {
     title:           { type: 'string', max: 120 },
     scene:           { type: 'enum', values: ['classroom', 'lab', 'groups'] },
-    finale:          { type: 'enum', values: ['room', 'tornado', 'foam', 'dino'] },
+    finale:          { type: 'enum', values: ['room', 'tornado', 'foam', 'rocket', 'dino'] },
     threshold:       { type: 'int',   min: 0,   max: 100 },
     imageMin:        { type: 'int',   min: 0,   max: 99 },
     imageMax:        { type: 'int',   min: 1,   max: 100 },
@@ -186,6 +186,8 @@
       wakeLock: null,
       calibrating: null,
       bg: null,            // background currently shown (changes when cycling)
+      teaser: null,        // Level 4 gag peeking in at Level 3
+      nextTeaser: 0,
       startedAt: 0,
       lastCycleAt: 0,
       ticker: null,
@@ -246,84 +248,125 @@
     const finaleFor = (room) => (settings.finale && settings.finale !== 'room'
       ? settings.finale : (scenes.roomFinale || {})[room]);
 
-    // One container per level; each holds that level's gags for the current room.
-    let levelBoxes = [];
+    // The scene is a stack: room base (walls + floor), then depth slots with the
+    // furniture rows between them (back row first), so a gag placed in a slot
+    // is hidden by every row of desks in front of it. Flying things use the top slot.
+    let gags = [];          // [{ img, level, random }]
+    const levelWasOn = {};
 
     function buildScene() {
       if (sceneEl) return;
       sceneEl = document.createElement('div');
       sceneEl.className = 'noise-scene';
-      const bg = document.createElement('img');
-      bg.className = 'noise-scene-bg';
-      bg.alt = '';
-      sceneEl.appendChild(bg);
-      levelBoxes = [];
-      for (let i = 1; i < NUM_LEVELS; i++) {
-        const box = document.createElement('div');
-        box.className = 'noise-scene-layer';
-        box.setAttribute('data-layer', String(i));
-        sceneEl.appendChild(box);
-        levelBoxes.push(box);
-      }
-      const finaleBox = document.createElement('div');
-      finaleBox.className = 'noise-scene-layer noise-scene-finale';
-      finaleBox.setAttribute('data-layer', String(NUM_LEVELS - 1));
-      sceneEl.appendChild(finaleBox);
-      levelBoxes.push(finaleBox);
-      sceneLayers = levelBoxes;
       imageWrap.appendChild(sceneEl);
     }
 
-    function addGag(box, src, random) {
+    function makeImg(cls, src) {
       const im = document.createElement('img');
-      im.className = 'noise-gag';
+      im.className = cls;
       im.alt = '';
       im.src = src;
-      if (random) im.setAttribute('data-random', '');
-      box.appendChild(im);
+      return im;
     }
 
-    // Show a fresh random selection of the level's pool.
-    function pickGags(box) {
-      const n = +box.getAttribute('data-pick') || 0;
-      const pool = Array.from(box.querySelectorAll('.noise-gag[data-random]'));
-      pool.forEach((im) => im.classList.remove('is-picked'));
+    // Show a fresh random selection of one level's pool.
+    function pickGags(level) {
+      const spec = (((scenes.layers || {})[state.bg]) || [])[level - 1] || {};
+      const pool = gags.filter((gg) => gg.level === level && gg.random);
+      pool.forEach((gg) => { gg.picked = false; });
       for (let i = pool.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [pool[i], pool[j]] = [pool[j], pool[i]];
       }
-      pool.slice(0, n).forEach((im) => im.classList.add('is-picked'));
+      pool.slice(0, spec.pick || 0).forEach((gg) => { gg.picked = true; });
     }
 
-    // Point the background, level gags and finale at one room's pictures.
+    // Build the layered picture for one room (background, rows, gags, finale).
     function setRoomImages(room) {
       const finale = finaleFor(room);
       const key = `${room}|${finale}`;
       if (sceneEl.getAttribute('data-room') === key) return;
       sceneEl.setAttribute('data-room', key);
-      sceneEl.querySelector('.noise-scene-bg').src = scenes.backgrounds[room];
+      sceneEl.textContent = '';
+      gags = [];
+
+      const rows = (scenes.rows || {})[room] || [];
+      sceneEl.appendChild(makeImg('noise-scene-bg', scenes.backgrounds[room]));
+      const slots = [];
+      for (let d = 0; d <= rows.length; d++) {
+        const slot = document.createElement('div');
+        slot.className = 'noise-depth';
+        slot.setAttribute('data-depth', String(d));
+        sceneEl.appendChild(slot);
+        slots.push(slot);
+        if (d < rows.length) sceneEl.appendChild(makeImg('noise-scene-row', rows[d]));
+      }
+      const slotFor = (depth) => slots[depth === 'top' || depth == null ? rows.length : Math.min(+depth, rows.length)];
+
+      const add = (item, level, random) => {
+        const img = makeImg('noise-gag', item.src);
+        slotFor(item.depth).appendChild(img);
+        gags.push({ img, level, random, picked: false, src: item.src, quiet: item.quiet || null });
+      };
       const layers = (scenes.layers || {})[room] || [];
-      levelBoxes.forEach((box, i) => {
-        box.textContent = '';
-        if (i < NUM_LEVELS - 1) {
-          const spec = layers[i] || { always: [], random: [], pick: 0 };
-          spec.always.forEach((src) => addGag(box, src, false));
-          spec.random.forEach((src) => addGag(box, src, true));
-          box.setAttribute('data-pick', String(spec.pick || 0));
-          pickGags(box);
-        } else if (scenes.finales[finale]) {
-          addGag(box, scenes.finales[finale], false);
+      layers.forEach((spec, i) => {
+        (spec.always || []).forEach((item) => add(item, i + 1, false));
+        (spec.random || []).forEach((item) => add(item, i + 1, true));
+      });
+      const fin = scenes.finales[finale];
+      if (fin) add(fin, NUM_LEVELS - 1, false);
+      for (let L = 1; L < NUM_LEVELS; L++) { pickGags(L); levelWasOn[L] = L <= state.level; }
+      updateSceneLayers(true);
+    }
+
+    function updateSceneLayers(force) {
+      for (let L = 1; L < NUM_LEVELS; L++) {
+        const on = L <= state.level;
+        // A level that is switching on gets a new random mix of its gags.
+        if (on && !levelWasOn[L] && !force) pickGags(L);
+        levelWasOn[L] = on;
+      }
+      // From Level 4 up the room gets busy, so each lower level keeps just one gag.
+      const busy = state.level >= 4;
+      const keptPerLevel = {};
+      gags.forEach((gg) => {
+        let on = gg.level <= state.level && (!gg.random || gg.picked);
+        if (on && busy && gg.level < 4 && gg.level !== NUM_LEVELS - 1) {
+          keptPerLevel[gg.level] = (keptPerLevel[gg.level] || 0) + 1;
+          if (keptPerLevel[gg.level] > 1) on = false;
         }
+        // Level 3 teaser: one Level 4 gag pops in now and then.
+        if (state.teaser && state.teaser.gg === gg) on = true;
+        // No speech bubbles once the room is busy.
+        if (gg.quiet) {
+          const want = busy ? gg.quiet : gg.src;
+          if (gg.img.getAttribute('src') !== want) gg.img.setAttribute('src', want);
+        }
+        gg.img.classList.toggle('is-on', on);
       });
     }
 
-    function updateSceneLayers() {
-      sceneLayers.forEach((layer) => {
-        const on = +layer.getAttribute('data-layer') <= state.level;
-        // A level that is switching on gets a new random mix of its gags.
-        if (on && !layer.classList.contains('is-on')) pickGags(layer);
-        layer.classList.toggle('is-on', on);
-      });
+    // At Level 3, every 15-25 s show one random Level 4 gag for about 6 s.
+    function updateTeaser(now) {
+      const t = state.teaser;
+      if (t && (now > t.until || state.level !== 3)) {
+        state.teaser = null;
+        state.nextTeaser = now + 15000 + Math.random() * 10000;
+        updateSceneLayers();
+        return;
+      }
+      if (!t && state.level === 3 && isScene()) {
+        if (!state.nextTeaser) state.nextTeaser = now + 8000 + Math.random() * 7000;
+        if (now >= state.nextTeaser) {
+          const pool = gags.filter((gg) => gg.level === 4);
+          if (pool.length) {
+            state.teaser = { gg: pool[Math.floor(Math.random() * pool.length)], until: now + 6000 };
+            updateSceneLayers();
+          }
+        }
+      } else if (state.level !== 3) {
+        state.nextTeaser = 0;
+      }
     }
 
     // Untouched default messages follow the room on screen; custom ones always win.
@@ -348,7 +391,8 @@
         updateSceneLayers();
         if (!preloadedScenes) {
           preloadedScenes = true;
-          Object.values(scenes.backgrounds).forEach((u) => { const im = new Image(); im.src = u; });
+          Object.values(scenes.backgrounds).concat(...Object.values(scenes.rows || {}))
+            .forEach((u) => { const im = new Image(); im.src = u; });
         }
       }
       els.message.textContent = messageFor(state.level);
@@ -359,12 +403,17 @@
       if (!isScene()) return;
       const room = settings.scene;
       const layers = (scenes.layers || {})[room] || [];
+      const full = (scenes.full || {})[room] || scenes.backgrounds[room];
       $$('.noise-msg-thumb').forEach((thumb, i) => {
-        let src = scenes.backgrounds[room];
-        if (i === NUM_LEVELS - 1) src = scenes.finales[finaleFor(room)] || src;
-        else if (i > 0 && layers[i - 1]) src = layers[i - 1].always[0] || layers[i - 1].random[0] || src;
+        let src = full;
+        const fin = scenes.finales[finaleFor(room)];
+        if (i === NUM_LEVELS - 1 && fin) src = fin.src;
+        else if (i > 0 && layers[i - 1]) {
+          const first = (layers[i - 1].always || [])[0] || (layers[i - 1].random || [])[0];
+          if (first) src = first.src;
+        }
         thumb.src = src;
-        thumb.style.backgroundImage = i === 0 ? '' : `url("${scenes.backgrounds[room]}")`;
+        thumb.style.backgroundImage = i === 0 ? '' : `url("${full}")`;
         thumb.classList.add('is-scene-thumb');
       });
     }
@@ -428,6 +477,7 @@
         els.timer.title = 'Time monitoring';
         els.timer.setAttribute('aria-label', `Monitoring for ${formatClock(elapsed)}`);
       }
+      updateTeaser(now);
       if (isScene() && settings.sceneCycleMinutes > 0 &&
           now - state.lastCycleAt >= settings.sceneCycleMinutes * 60000) {
         state.lastCycleAt = now;

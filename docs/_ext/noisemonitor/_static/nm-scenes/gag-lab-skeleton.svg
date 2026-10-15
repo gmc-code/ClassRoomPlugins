@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
 .anim{transform-box:view-box}
-.boogie{animation:boogie .6s ease-in-out infinite alternate;transform-origin:1508px 850px}@keyframes boogie{from{transform:translateY(0)}to{transform:translateY(-12px)}}.popk{animation:popk 2s ease-out infinite 0s;transform-origin:1330px 380px}@keyframes popk{0%,30%{transform:scale(0);opacity:0}40%{transform:scale(1.15);opacity:1}50%,85%{transform:scale(1);opacity:1}100%{opacity:0}}</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"><g class="anim boogie"><g transform="translate(1508 850) scale(0.6)">
+.boogie{animation:boogie .6s ease-in-out infinite alternate;transform-origin:1500px 700px}@keyframes boogie{from{transform:translateY(0)}to{transform:translateY(-12px)}}.popk{animation:popk 2s ease-out infinite 0s;transform-origin:1330px 380px}@keyframes popk{0%,30%{transform:scale(0);opacity:0}40%{transform:scale(1.15);opacity:1}50%,85%{transform:scale(1);opacity:1}100%{opacity:0}}</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"><g class="anim boogie"><g transform="translate(1500 700) scale(0.5)">
     <ellipse cx="0" cy="0" rx="90" ry="16" fill="#64748b"/>
     <line x1="0" y1="0" x2="0" y2="-300" stroke="#94a3b8" stroke-width="10"/>
     <g>
@@ -36,7 +36,4 @@
         <animateTransform attributeName="transform" type="translate" values="0 0;0 8;0 0" dur="0.3s" repeatCount="indefinite"/>
       </g>
       <animateTransform attributeName="transform" type="rotate" values="-7 0 -300;7 0 -300;-7 0 -300" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="1s" begin="0s" repeatCount="indefinite" additive="sum"/>
-    </g></g></g><g class="anim popk"><g transform="translate(1330 380) rotate(-6) scale(0.6)">
-    <polygon points="150,0 110,21 115,50 59,53 26,77 -20,60 -75,68 -90,39 -141,27 -117,0 -141,-27 -90,-39 -75,-68 -20,-60 26,-77 58,-53 115,-50 110,-21" fill="#fff"/>
-    <text x="0" y="19" text-anchor="middle" font-family="'Arial Black','Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif" font-weight="900" font-size="52" fill="#7c3aed" stroke="none">RATTLE!</text>
-    </g></g></g></svg>
+    </g></g></g><g class="anim popk"><g transform="translate(1330 380) rotate(-6) scale(0.6)"></g></g></g></svg>

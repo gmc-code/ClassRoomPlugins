@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
 .anim{transform-box:view-box}
 
-    .bounce{animation:dbounce .8s cubic-bezier(.3,0,.7,1) infinite;transform-origin:760px 985px}
+    .bounce{animation:dbounce .8s cubic-bezier(.3,0,.7,1) infinite;transform-origin:760px 900px}
     @keyframes dbounce{0%,100%{transform:translateY(0) scale(1.08,.9)}15%{transform:translateY(0) scale(1)}50%{transform:translateY(-150px) scale(.96,1.05)}85%{transform:translateY(0) scale(1)}}
-    .dshadow{animation:dsh .8s cubic-bezier(.3,0,.7,1) infinite;transform-origin:760px 990px}
+    .dshadow{animation:dsh .8s cubic-bezier(.3,0,.7,1) infinite;transform-origin:760px 905px}
     @keyframes dsh{0%,100%{transform:scale(1.1)}50%{transform:scale(.6)}}
     .popd{animation:popd 1.6s ease-out infinite;transform-origin:1170px 300px}
     @keyframes popd{0%,25%{transform:scale(0);opacity:0}35%{transform:scale(1.15);opacity:1}45%,85%{transform:scale(1);opacity:1}100%{opacity:0}}</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
-    <ellipse class="anim dshadow" cx="760" cy="990" rx="280" ry="22" fill="#000" fill-opacity="0.15" stroke="none"/>
-    <g class="anim bounce"><g transform="translate(760 985) scale(1.05)">
+    <ellipse class="anim dshadow" cx="760" cy="905" rx="280" ry="22" fill="#000" fill-opacity="0.15" stroke="none"/>
+    <g class="anim bounce"><g transform="translate(760 900) scale(0.9)">
     <!-- tail -->
     <path d="M-150 -140 Q-300 -120 -380 -40 Q-300 -60 -160 -70 Z" fill="#4ade80"/>
     <polygon points="-192,-244 -170,-284 -148,-244" fill="#fb923c"/><polygon points="-142,-294 -120,-334 -98,-294" fill="#fb923c"/><polygon points="-82,-334 -60,-374 -38,-334" fill="#fb923c"/><polygon points="-12,-374 10,-414 32,-374" fill="#fb923c"/><polygon points="48,-424 70,-464 92,-424" fill="#fb923c"/>
@@ -39,7 +39,4 @@
       dur="0.45s" repeatCount="indefinite"/></g>
     <!-- air valve: it's inflatable! -->
     <circle cx="-172" cy="-150" r="10" fill="#fde047"/></g></g>
-    <g class="anim popd"><g transform="translate(1170 300) rotate(8) scale(0.85)">
-    <polygon points="150,0 110,21 115,50 59,53 26,77 -20,60 -75,68 -90,39 -141,27 -117,0 -141,-27 -90,-39 -75,-68 -20,-60 26,-77 58,-53 115,-50 110,-21" fill="#fff"/>
-    <text x="0" y="23" text-anchor="middle" font-family="'Arial Black','Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif" font-weight="900" font-size="64" fill="#15803d" stroke="none">RAWR!</text>
-    </g></g></g></svg>
+    <g class="anim popd"><g transform="translate(1170 300) rotate(8) scale(0.85)"></g></g></g></svg>

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
+.anim{transform-box:view-box}
+.popq{animation:popq 2.5s ease-out infinite 0s;transform-origin:900px 600px}@keyframes popq{0%,30%{transform:scale(0);opacity:0}40%{transform:scale(1.15);opacity:1}50%,85%{transform:scale(1);opacity:1}100%{opacity:0}}</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"><g><g transform="translate(0 770)"><g><g transform="translate(0 0)"><g transform="scale(0.9)">
+    <path d="M-50 -10 Q-56 -50 -20 -46 Q-4 -44 6 -34 Q16 -76 44 -70 Q72 -64 66 -34 Q62 -20 50 -16 Q60 8 32 18 L-24 18 Q-54 14 -50 -10 Z" fill="#facc15"/>
+    <path d="M64 -44 L94 -40 Q96 -32 82 -30 L62 -32 Z" fill="#fb923c"/>
+    
+    <circle cx="44" cy="-50" r="8" fill="#fff"/>
+    <g><circle cx="44" cy="-47.6" r="3.6" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.8 -1.6;-2.4 -2.8;0 0"
+      dur="0.5s" repeatCount="indefinite"/></g></g></g><g transform="translate(-90 10)"><g transform="scale(0.55)">
+    <path d="M-50 -10 Q-56 -50 -20 -46 Q-4 -44 6 -34 Q16 -76 44 -70 Q72 -64 66 -34 Q62 -20 50 -16 Q60 8 32 18 L-24 18 Q-54 14 -50 -10 Z" fill="#facc15"/>
+    <path d="M64 -44 L94 -40 Q96 -32 82 -30 L62 -32 Z" fill="#fb923c"/>
+    
+    <circle cx="44" cy="-50" r="8" fill="#fff"/>
+    <g><circle cx="44" cy="-47.6" r="3.6" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.8 -1.6;-2.4 -2.8;0 0"
+      dur="0.5s" repeatCount="indefinite"/></g></g></g><g transform="translate(-160 10)"><g transform="scale(0.55)">
+    <path d="M-50 -10 Q-56 -50 -20 -46 Q-4 -44 6 -34 Q16 -76 44 -70 Q72 -64 66 -34 Q62 -20 50 -16 Q60 8 32 18 L-24 18 Q-54 14 -50 -10 Z" fill="#facc15"/>
+    <path d="M64 -44 L94 -40 Q96 -32 82 -30 L62 -32 Z" fill="#fb923c"/>
+    
+    <circle cx="44" cy="-50" r="8" fill="#fff"/>
+    <g><circle cx="44" cy="-47.6" r="3.6" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.8 -1.6;-2.4 -2.8;0 0"
+      dur="0.5s" repeatCount="indefinite"/></g></g></g><g transform="translate(-230 10)"><g transform="scale(0.55)">
+    <path d="M-50 -10 Q-56 -50 -20 -46 Q-4 -44 6 -34 Q16 -76 44 -70 Q72 -64 66 -34 Q62 -20 50 -16 Q60 8 32 18 L-24 18 Q-54 14 -50 -10 Z" fill="#facc15"/>
+    <path d="M64 -44 L94 -40 Q96 -32 82 -30 L62 -32 Z" fill="#fb923c"/>
+    
+    <circle cx="44" cy="-50" r="8" fill="#fff"/>
+    <g><circle cx="44" cy="-47.6" r="3.6" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.8 -1.6;-2.4 -2.8;0 0"
+      dur="0.5s" repeatCount="indefinite"/></g></g></g><animateTransform attributeName="transform" type="rotate" values="-6;6;-6" dur="0.6s" repeatCount="indefinite"/></g></g><animateTransform attributeName="transform" type="translate" from="-300 0" to="1900 0" dur="20s" begin="-7s" repeatCount="indefinite"/></g><g class="anim popq"><g transform="translate(900 600) rotate(-6) scale(0.55)"></g></g></g></svg>

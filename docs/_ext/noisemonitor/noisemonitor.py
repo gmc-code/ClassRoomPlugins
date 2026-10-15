@@ -15,10 +15,10 @@ Usage::
        :msg0: Silent and focused.
 
 ``:scene:`` is ``classroom`` (default), ``lab`` or ``groups``: an empty room that
-fills with silly animated things as the noise rises. In the lab, each level
-picks a random mix from a pool of science gags every time it switches on.
+fills with silly animated things as the noise rises. Each level picks a random
+mix from its pool of gags every time it switches on.
 ``:finale:`` picks the Level 5 finale: ``room`` (default: classroom tornado,
-lab foam volcano, group-tables inflatable dinosaur), ``tornado``, ``foam`` or ``dino``.
+lab rocket launch, group-tables inflatable dinosaur), ``tornado``, ``foam``, ``rocket`` or ``dino``.
 ``:scene-cycle:`` rotates the scene background every N minutes while monitoring.
 ``:session:`` sets how many minutes the monitor runs before stopping itself
 (0 = no limit; the toolbar timer then counts up).
@@ -61,27 +61,27 @@ LEGACY_ZOO_MESSAGES = [
 ROOM_MESSAGES = {
     "classroom": [
         "Level 0 - Library Mode. You could hear a pin drop. Magnificent!",
-        "Level 1 - Snail Parade. The snails are out for a stroll. Keep it this calm!",
-        "Level 2 - Chicken Alert! Someone woke the rubber chicken. Bring it down a notch!",
-        "Level 3 - Flying Books! The textbooks are trying to escape. Volume down!",
-        "Level 4 - Goat on the Loose! It's eating the homework and the disco has started. QUIETEN DOWN!",
-        "Level 5 - TOTAL CHAOS! The llama is swinging from the light! SOUND THE ALARM!",
+        "Level 1 - Quiet Visitors. Something small just wandered in. Keep it this calm!",
+        "Level 2 - Things Are Stirring! The classroom is waking up. Bring it down a notch!",
+        "Level 3 - On the Loose! Animals are roaming the room. Volume down!",
+        "Level 4 - Up in the Air! Things are flying everywhere. QUIETEN DOWN!",
+        "Level 5 - TOTAL CHAOS! The whole classroom has gone bonkers! SOUND THE ALARM!",
     ],
     "lab": [
         "Level 0 - Lab Silence. Even the atoms are holding still. Brilliant!",
         "Level 1 - Calm Chemistry. Things are bubbling gently. Keep it this calm!",
         "Level 2 - The Lab Is Waking Up! Something just moved. Bring it down a notch!",
-        "Level 3 - Atoms on the Loose! Molecules are zooming everywhere. Volume down!",
-        "Level 4 - High Voltage! Sparks are flying in the lab. QUIETEN DOWN!",
+        "Level 3 - Sparks and Fizz! The experiments are going off. Volume down!",
+        "Level 4 - Atoms on the Loose! Molecules are zooming everywhere. QUIETEN DOWN!",
         "Level 5 - LAB MELTDOWN! Everything is blasting off! SOUND THE ALARM!",
     ],
     "groups": [
         "Level 0 - Cosy Corner. Calm as a sleeping kitten. Lovely!",
-        "Level 1 - Snail Party. The party snails are on the move. Keep it this calm!",
-        "Level 2 - Teddy Is Awake! The beach ball is bouncing. Bring it down a notch!",
-        "Level 3 - Pillow Fight! There are feathers everywhere. Volume down!",
-        "Level 4 - Toy Box Riot! The toys have come alive. QUIETEN DOWN!",
-        "Level 5 - PARTY PANDEMONIUM! Confetti and balloons everywhere! SOUND THE ALARM!",
+        "Level 1 - Gentle Visitors. Someone small is wandering by. Keep it this calm!",
+        "Level 2 - Playtime Is Starting! The toys are waking up. Bring it down a notch!",
+        "Level 3 - Zoom Zoom! Things are speeding around. Volume down!",
+        "Level 4 - Things Are Flying! Catch them if you can. QUIETEN DOWN!",
+        "Level 5 - PARTY PANDEMONIUM! It's a full-on party! SOUND THE ALARM!",
     ],
 }
 
@@ -94,19 +94,98 @@ LEGACY_LAB_MESSAGES = [
     "Level 5 - LAB MELTDOWN! Beakers are flying everywhere! SOUND THE ALARM!",
 ]
 
+LEGACY_CLASSROOM_MESSAGES = [
+    "Level 0 - Library Mode. You could hear a pin drop. Magnificent!",
+    "Level 1 - Snail Parade. The snails are out for a stroll. Keep it this calm!",
+    "Level 2 - Chicken Alert! Someone woke the rubber chicken. Bring it down a notch!",
+    "Level 3 - Flying Books! The textbooks are trying to escape. Volume down!",
+    "Level 4 - Goat on the Loose! It's eating the homework and the disco has started. QUIETEN DOWN!",
+    "Level 5 - TOTAL CHAOS! The llama is swinging from the light! SOUND THE ALARM!",
+]
+LEGACY_GROUPS_MESSAGES = [
+    "Level 0 - Cosy Corner. Calm as a sleeping kitten. Lovely!",
+    "Level 1 - Snail Party. The party snails are on the move. Keep it this calm!",
+    "Level 2 - Teddy Is Awake! The beach ball is bouncing. Bring it down a notch!",
+    "Level 3 - Pillow Fight! There are feathers everywhere. Volume down!",
+    "Level 4 - Toy Box Riot! The toys have come alive. QUIETEN DOWN!",
+    "Level 5 - PARTY PANDEMONIUM! Confetti and balloons everywhere! SOUND THE ALARM!",
+]
+
+# Room messages from the previous version (recognised as untouched defaults).
+LEGACY_ROOM_MESSAGES_2 = {
+    "classroom": [
+        "Level 0 - Library Mode. You could hear a pin drop. Magnificent!",
+        "Level 1 - Quiet Visitors. Something small just wandered in. Keep it this calm!",
+        "Level 2 - Things Are Stirring! The classroom is waking up. Bring it down a notch!",
+        "Level 3 - Flying Objects! Stuff is taking off. Volume down!",
+        "Level 4 - Wild Animals Inside! The zoo has arrived. QUIETEN DOWN!",
+        "Level 5 - TOTAL CHAOS! The whole classroom has gone bonkers! SOUND THE ALARM!",
+    ],
+    "lab": [
+        "Level 0 - Lab Silence. Even the atoms are holding still. Brilliant!",
+        "Level 1 - Calm Chemistry. Things are bubbling gently. Keep it this calm!",
+        "Level 2 - The Lab Is Waking Up! Something just moved. Bring it down a notch!",
+        "Level 3 - Atoms on the Loose! Molecules are zooming everywhere. Volume down!",
+        "Level 4 - High Voltage! Sparks are flying in the lab. QUIETEN DOWN!",
+        "Level 5 - LAB MELTDOWN! Everything is blasting off! SOUND THE ALARM!",
+    ],
+    "groups": [
+        "Level 0 - Cosy Corner. Calm as a sleeping kitten. Lovely!",
+        "Level 1 - Gentle Visitors. Something soft is floating by. Keep it this calm!",
+        "Level 2 - Playtime Is Starting! The toys are waking up. Bring it down a notch!",
+        "Level 3 - Things Are Flying! Catch them if you can. Volume down!",
+        "Level 4 - Toy Box Riot! The toys have come alive. QUIETEN DOWN!",
+        "Level 5 - PARTY PANDEMONIUM! It's a full-on party! SOUND THE ALARM!",
+    ],
+}
+
 # What appears at each level in each room: (always shown, random pool, how many
 # to pick from the pool). A fresh random pick is made each time a level switches on.
 LAB_POOLS = [
-    ([], ["lavalamp", "tardigrade", "solar", "prism"], 2),
-    ([], ["skeleton", "cradle", "mouse", "bubbles"], 2),
-    (["molecules"], ["dna", "periodic", "beakers"], 1),
-    ([], ["tesla", "plasma", "flame", "hamster"], 2),
-    (["alarm"], ["rocket", "mentos", "flung"], 2),
+    ([], ["lavalamp", "tardigrade", "cradle", "prism", "mouse"], 2),       # on the benches / floor
+    ([], ["skeleton", "plasma", "flame", "bubbles", "hamster"], 2),
+    ([], ["tesla", "mentos", "solar", "periodic"], 2),                     # first things take off
+    ([], ["molecules", "dna", "beakers"], 1),                              # flying
+    (["alarm"], ["rocket", "flung"], 1),
 ]
+CLASSROOM_POOLS = [
+    ([], ["snails", "cat", "pencils", "flower", "clock", "doodle"], 2),    # floor, desks, walls
+    ([], ["chicken", "backpacks", "basketball", "octopus", "spider"], 2),
+    ([], ["goat", "kangaroo", "paperballs", "plane"], 2),                  # first things take off
+    ([], ["books", "stickynotes", "pigeon", "disco"], 1),                  # flying
+    (["alarm"], ["llama", "ufo", "sprinklers"], 1),
+]
+GROUPS_POOLS = [
+    ([], ["tortoises", "puppy", "teddy", "top", "ducks"], 2),             # floor, tables, beanbags
+    ([], ["train", "robot", "blocks", "jack", "balloondog"], 2),
+    ([], ["rccar", "beachball", "plane", "butterflies", "soapbubbles"], 2),  # first things take off
+    ([], ["pillows", "kites", "frisbees", "yoyo"], 1),                     # flying
+    (["alarm"], ["party", "pinata", "bubbleflood"], 1),
+]
+
+
+def _layers(room, pools):
+    return [([f"gag-{room}-{g}" for g in a], [f"gag-{room}-{g}" for g in r], n) for a, r, n in pools]
+
+
+# How far back each walking/standing gag is. 0 = behind the back row of
+# furniture, 1 = behind the middle row, ... Anything not listed (flying things,
+# things on desk tops at the front) is drawn on top of all the furniture.
+ROOM_ROWS = {"classroom": 3, "lab": 3, "groups": 2}
+GAG_DEPTH = {
+    "gag-classroom-snails": 2, "gag-classroom-backpacks": 1, "gag-classroom-basketball": 1,
+    "gag-classroom-goat": 1, "gag-classroom-kangaroo": 1,
+    "gag-lab-tardigrade": 2, "gag-lab-prism": 1, "gag-lab-skeleton": 1, "gag-lab-tesla": 2,
+    "gag-lab-plasma": 2, "gag-lab-flame": 2, "gag-lab-rocket": 1, "gag-lab-mentos": 1,
+    "gag-groups-tortoises": 1, "gag-groups-teddy": 1, "gag-groups-beachball": 1, "gag-groups-ducks": 1,
+    "gag-groups-top": 1, "gag-groups-balloondog": 1, "gag-groups-train": 0, "gag-groups-robot": 1,
+    "gag-groups-jack": 1, "gag-groups-blocks": 1, "gag-groups-rccar": 1,
+}
+
 SCENE_LAYERS = {
-    "classroom": [([f"overlay-classroom-{i}"], [], 0) for i in range(1, 6)],
-    "lab": [([f"gag-lab-{g}" for g in a], [f"gag-lab-{g}" for g in r], n) for a, r, n in LAB_POOLS],
-    "groups": [([f"overlay-groups-{i}"], [], 0) for i in range(1, 6)],
+    "classroom": _layers("classroom", CLASSROOM_POOLS),
+    "lab": _layers("lab", LAB_POOLS),
+    "groups": _layers("groups", GROUPS_POOLS),
 }
 
 # Level 5 "finale" drawn on top of the room's own Level 5 gags.
@@ -114,9 +193,10 @@ FINALES = {
     "room": "Match the room",
     "tornado": "Tornado",
     "foam": "Foam volcano",
+    "rocket": "Rocket launch",
     "dino": "Inflatable dinosaur",
 }
-ROOM_FINALE = {"classroom": "tornado", "lab": "foam", "groups": "dino"}
+ROOM_FINALE = {"classroom": "tornado", "lab": "rocket", "groups": "dino"}
 
 # Each scene is an empty-room background with silly animated overlays that
 # pile up as the level rises.
@@ -219,7 +299,8 @@ def _merge_settings(base, raw):
 def _messages_for_scene(settings):
     """Swap untouched default messages to match the chosen picture style / room."""
     target = ROOM_MESSAGES.get(settings["scene"], ROOM_MESSAGES["classroom"])
-    known = [LEGACY_ZOO_MESSAGES, LEGACY_LAB_MESSAGES, *ROOM_MESSAGES.values()]
+    known = [LEGACY_ZOO_MESSAGES, LEGACY_LAB_MESSAGES, LEGACY_CLASSROOM_MESSAGES, LEGACY_GROUPS_MESSAGES,
+             *LEGACY_ROOM_MESSAGES_2.values(), *ROOM_MESSAGES.values()]
     settings["messages"] = [
         target[i] if any(m == k[i] for k in known) else m for i, m in enumerate(settings["messages"])
     ]
@@ -310,23 +391,31 @@ def visit_noisemonitor_html(self, node):
     base_uri = self.builder.get_target_uri(docname)
     rooms = list(SCENES)
     asset = lambda name: relative_uri(base_uri, f"_static/nm-scenes/{name}.svg")
+    def gag(name):
+        item = {"src": asset(name), "depth": GAG_DEPTH.get(name, "top")}
+        # A copy without speech bubbles, swapped in once the room gets busy (Level 4+).
+        if (STATIC_DIR / "nm-scenes" / f"{name}-quiet.svg").exists():
+            item["quiet"] = asset(f"{name}-quiet")
+        return item
     scenes = {
-        "backgrounds": {r: relative_uri(base_uri, f"_static/nm-scenes/scene-{r}.svg") for r in rooms},
+        "backgrounds": {r: asset(f"scene-{r}-base") for r in rooms},
+        "full": {r: asset(f"scene-{r}") for r in rooms},
+        "rows": {r: [asset(f"scene-{r}-row{i}") for i in range(1, ROOM_ROWS[r] + 1)] for r in rooms},
         "layers": {
-            r: [{"always": [asset(x) for x in a], "random": [asset(x) for x in rnd], "pick": n}
+            r: [{"always": [gag(x) for x in a], "random": [gag(x) for x in rnd], "pick": n}
                 for a, rnd, n in SCENE_LAYERS[r]]
             for r in rooms
         },
-        "finales": {
-            f: relative_uri(base_uri, f"_static/nm-scenes/finale-{f}.svg") for f in FINALES if f != "room"
-        },
+        "finales": {f: {"src": asset(f"finale-{f}"), "depth": "top"} for f in FINALES if f != "room"},
         "roomFinale": ROOM_FINALE,
-        "messages": {**ROOM_MESSAGES, "legacyZoo": LEGACY_ZOO_MESSAGES, "legacyLab": LEGACY_LAB_MESSAGES},
+        "messages": {**ROOM_MESSAGES, "legacyZoo": LEGACY_ZOO_MESSAGES, "legacyLab": LEGACY_LAB_MESSAGES,
+                     "legacyClassroom": LEGACY_CLASSROOM_MESSAGES, "legacyGroups": LEGACY_GROUPS_MESSAGES,
+                     **{f"legacy2{k.title()}": v for k, v in LEGACY_ROOM_MESSAGES_2.items()}},
     }
 
     esc = html.escape
     config_attr = esc(json.dumps(settings, ensure_ascii=False))
-    first_bg = esc(scenes["backgrounds"][settings["scene"]])
+    first_bg = esc(scenes["full"][settings["scene"]])
     scenes_attr = esc(json.dumps(scenes, ensure_ascii=False))
     scene_options = "".join(f'<option value="{k}">{esc(v)}</option>' for k, v in SCENES.items())
     storage_key = esc(node["storage_key"]) if node["storage_key"] else ""

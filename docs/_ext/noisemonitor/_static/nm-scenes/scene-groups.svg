@@ -42,9 +42,6 @@
     </g>
     <ellipse cx="800" cy="840" rx="640" ry="140" fill="#fcd34d"/>
     <ellipse cx="800" cy="840" rx="580" ry="118" fill="none" stroke="#f59e0b" stroke-width="8" stroke-dasharray="26 18"/>
-    
-    <path d="M70 900 q-30 -110 70 -130 q100 -10 110 90 q10 50 -60 60 q-90 10 -120 -20 z" fill="#f472b6"/>
-    <path d="M1360 920 q-20 -120 90 -130 q110 0 110 100 q0 50 -80 56 q-100 6 -120 -26 z" fill="#38bdf8"/>
     <g transform="translate(398.0 678.0) scale(0.600)" >
     <rect x="-52" y="-178" width="104" height="60" rx="16" fill="#38bdf8"/>
     <line x1="-36" y1="-120" x2="-36" y2="-92" stroke-width="7" stroke="#475569"/>
@@ -119,7 +116,10 @@
     <line x1="36" y1="-112" x2="36" y2="-80" stroke-width="7" stroke="#475569"/>
     <rect x="-58" y="-170" width="116" height="62" rx="16" fill="#f472b6"/>
     <path d="M-44 -150 Q0 -160 44 -150" fill="none" stroke="#fff" stroke-opacity="0.55" stroke-width="6"/>
-    </g><g transform="translate(686.0 883.5) scale(0.950)" >
+    </g>
+    <path d="M70 900 q-30 -110 70 -130 q100 -10 110 90 q10 50 -60 60 q-90 10 -120 -20 z" fill="#f472b6"/>
+    <path d="M1360 920 q-20 -120 90 -130 q110 0 110 100 q0 50 -80 56 q-100 6 -120 -26 z" fill="#38bdf8"/>
+    <g transform="translate(686.0 883.5) scale(0.950)" >
     <rect x="-52" y="-178" width="104" height="60" rx="16" fill="#facc15"/>
     <line x1="-36" y1="-120" x2="-36" y2="-92" stroke-width="7" stroke="#475569"/>
     <line x1="36" y1="-120" x2="36" y2="-92" stroke-width="7" stroke="#475569"/>

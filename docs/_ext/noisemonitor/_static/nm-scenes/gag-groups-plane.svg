@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
+.anim{transform-box:view-box}
+</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"><g>
+    <polygon points="64,0 -52,-36 -28,0" fill="#fff"/>
+    <polygon points="64,0 -28,0 -46,28" fill="#e2e8f0"/>
+    <line x1="-28" y1="0" x2="64" y2="0" stroke-width="4"/>
+    <animateMotion path="M -200 340 C 250 160, 470 460, 820 290 S 1350 110, 1850 330" dur="24s" begin="0s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.5;1" calcMode="linear"/></g><g>
+    <polygon points="64,0 -52,-36 -28,0" fill="#e0f2fe"/>
+    <polygon points="64,0 -28,0 -46,28" fill="#bae6fd"/>
+    <line x1="-28" y1="0" x2="64" y2="0" stroke-width="4"/>
+    <animateMotion path="M 1850 230 C 1400 400, 1100 80, 760 250 S 200 440, -220 190" dur="24s" begin="-12s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;1" keyTimes="0;0.5;1" calcMode="linear"/></g></g></svg>

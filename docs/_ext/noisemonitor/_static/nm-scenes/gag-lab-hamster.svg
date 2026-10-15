@@ -25,7 +25,4 @@
       <path d="M43 -12 L28 -8" stroke="#22c55e" stroke-width="5"/>
       <circle cx="74" cy="6" r="5" fill="#f472b6" stroke="none"/>
       <animateTransform attributeName="transform" type="translate" values="0 0;0 -5;0 0" dur="0.18s" repeatCount="indefinite"/>
-    </g></g></g><g class="anim popz2"><g transform="translate(240 640) rotate(6) scale(0.5)">
-    <polygon points="150,0 110,21 115,50 59,53 26,77 -20,60 -75,68 -90,39 -141,27 -117,0 -141,-27 -90,-39 -75,-68 -20,-60 26,-77 58,-53 115,-50 110,-21" fill="#fff"/>
-    <text x="0" y="20" text-anchor="middle" font-family="'Arial Black','Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif" font-weight="900" font-size="56" fill="#ea580c" stroke="none">ZOOM!</text>
-    </g></g></g></svg>
+    </g></g></g><g class="anim popz2"><g transform="translate(240 640) rotate(6) scale(0.5)"></g></g></g></svg>

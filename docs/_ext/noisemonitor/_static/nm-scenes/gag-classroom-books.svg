@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
+.anim{transform-box:view-box}
+</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"><g><g transform="scale(1.45)">
+    <g>
+      <polygon points="0,-22 -96,-58 -96,-14 0,22" fill="#ef4444"/>
+      <polygon points="0,-14 -84,-46 -84,-14 0,14" fill="#fff"/>
+      <line x1="-20" y1="-14" x2="-70" y2="-34" stroke-width="3" stroke="#94a3b8"/>
+      <line x1="-20" y1="-2" x2="-70" y2="-22" stroke-width="3" stroke="#94a3b8"/><animateTransform attributeName="transform" type="scale" values="1 1;1 -0.55;1 1" dur="0.42s" repeatCount="indefinite"/></g>
+    <g transform="scale(-1 1)"><g>
+      <polygon points="0,-22 -96,-58 -96,-14 0,22" fill="#ef4444"/>
+      <polygon points="0,-14 -84,-46 -84,-14 0,14" fill="#fff"/>
+      <line x1="-20" y1="-14" x2="-70" y2="-34" stroke-width="3" stroke="#94a3b8"/>
+      <line x1="-20" y1="-2" x2="-70" y2="-22" stroke-width="3" stroke="#94a3b8"/><animateTransform attributeName="transform" type="scale" values="1 1;1 -0.55;1 1" dur="0.42s" repeatCount="indefinite"/></g></g>
+    <rect x="-7" y="-26" width="14" height="52" rx="5" fill="#ef4444" style="filter:brightness(0.75)"/>
+    
+    <circle cx="-12" cy="-30" r="9" fill="#fff"/>
+    <g><circle cx="-12" cy="-27.3" r="4.05" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;3.15 -1.8;-2.6999999999999997 -3.15;0 0"
+      dur="0.6s" repeatCount="indefinite"/></g>
+    <circle cx="12" cy="-30" r="9" fill="#fff"/>
+    <g><circle cx="12" cy="-27.3" r="4.05" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;3.15 -1.8;-2.6999999999999997 -3.15;0 0"
+      dur="0.6s" repeatCount="indefinite"/></g>
+    </g><animateMotion path="M -200 250 C 300 80, 600 420, 1000 200 S 1500 320, 1850 140" dur="8s" begin="0s" repeatCount="indefinite" rotate="0" /></g><g><g transform="scale(1.45)">
+    <g>
+      <polygon points="0,-22 -96,-58 -96,-14 0,22" fill="#3b82f6"/>
+      <polygon points="0,-14 -84,-46 -84,-14 0,14" fill="#fff"/>
+      <line x1="-20" y1="-14" x2="-70" y2="-34" stroke-width="3" stroke="#94a3b8"/>
+      <line x1="-20" y1="-2" x2="-70" y2="-22" stroke-width="3" stroke="#94a3b8"/><animateTransform attributeName="transform" type="scale" values="1 1;1 -0.55;1 1" dur="0.42s" repeatCount="indefinite"/></g>
+    <g transform="scale(-1 1)"><g>
+      <polygon points="0,-22 -96,-58 -96,-14 0,22" fill="#3b82f6"/>
+      <polygon points="0,-14 -84,-46 -84,-14 0,14" fill="#fff"/>
+      <line x1="-20" y1="-14" x2="-70" y2="-34" stroke-width="3" stroke="#94a3b8"/>
+      <line x1="-20" y1="-2" x2="-70" y2="-22" stroke-width="3" stroke="#94a3b8"/><animateTransform attributeName="transform" type="scale" values="1 1;1 -0.55;1 1" dur="0.42s" repeatCount="indefinite"/></g></g>
+    <rect x="-7" y="-26" width="14" height="52" rx="5" fill="#3b82f6" style="filter:brightness(0.75)"/>
+    
+    <circle cx="-12" cy="-30" r="9" fill="#fff"/>
+    <g><circle cx="-12" cy="-27.3" r="4.05" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;3.15 -1.8;-2.6999999999999997 -3.15;0 0"
+      dur="0.6s" repeatCount="indefinite"/></g>
+    <circle cx="12" cy="-30" r="9" fill="#fff"/>
+    <g><circle cx="12" cy="-27.3" r="4.05" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;3.15 -1.8;-2.6999999999999997 -3.15;0 0"
+      dur="0.6s" repeatCount="indefinite"/></g>
+    </g><animateMotion path="M 1820 420 C 1300 230, 900 520, 500 300 S 120 200, -220 360" dur="9.5s" begin="-1s" repeatCount="indefinite" rotate="0" /></g><g><g transform="scale(1.45)">
+    <g>
+      <polygon points="0,-22 -96,-58 -96,-14 0,22" fill="#22c55e"/>
+      <polygon points="0,-14 -84,-46 -84,-14 0,14" fill="#fff"/>
+      <line x1="-20" y1="-14" x2="-70" y2="-34" stroke-width="3" stroke="#94a3b8"/>
+      <line x1="-20" y1="-2" x2="-70" y2="-22" stroke-width="3" stroke="#94a3b8"/><animateTransform attributeName="transform" type="scale" values="1 1;1 -0.55;1 1" dur="0.42s" repeatCount="indefinite"/></g>
+    <g transform="scale(-1 1)"><g>
+      <polygon points="0,-22 -96,-58 -96,-14 0,22" fill="#22c55e"/>
+      <polygon points="0,-14 -84,-46 -84,-14 0,14" fill="#fff"/>
+      <line x1="-20" y1="-14" x2="-70" y2="-34" stroke-width="3" stroke="#94a3b8"/>
+      <line x1="-20" y1="-2" x2="-70" y2="-22" stroke-width="3" stroke="#94a3b8"/><animateTransform attributeName="transform" type="scale" values="1 1;1 -0.55;1 1" dur="0.42s" repeatCount="indefinite"/></g></g>
+    <rect x="-7" y="-26" width="14" height="52" rx="5" fill="#22c55e" style="filter:brightness(0.75)"/>
+    
+    <circle cx="-12" cy="-30" r="9" fill="#fff"/>
+    <g><circle cx="-12" cy="-27.3" r="4.05" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;3.15 -1.8;-2.6999999999999997 -3.15;0 0"
+      dur="0.6s" repeatCount="indefinite"/></g>
+    <circle cx="12" cy="-30" r="9" fill="#fff"/>
+    <g><circle cx="12" cy="-27.3" r="4.05" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;3.15 -1.8;-2.6999999999999997 -3.15;0 0"
+      dur="0.6s" repeatCount="indefinite"/></g>
+    </g><animateMotion path="M 800 190 C 1120 80, 1240 420, 900 440 C 560 460, 470 240, 800 190 Z" dur="6.5s" begin="0s" repeatCount="indefinite" rotate="0" /></g></g></svg>

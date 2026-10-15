@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
+.anim{transform-box:view-box}
+.puff{animation:puff 1.2s ease-in-out infinite alternate}@keyframes puff{from{transform:scale(.85)}to{transform:scale(1.15)}}.rflame{animation:rflame .12s steps(2) infinite;transform-origin:800px 810px}@keyframes rflame{50%{transform:scaleY(1.3)}}.popl{animation:popl 6s ease-out infinite -3.5s;transform-origin:1200px 300px}@keyframes popl{0%,30%{transform:scale(0);opacity:0}40%{transform:scale(1.15);opacity:1}50%,85%{transform:scale(1);opacity:1}100%{opacity:0}}</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"><rect x="640" y="900" width="320" height="30" rx="6" fill="#475569"/><rect x="660" y="830" width="20" height="70" fill="#94a3b8"/><rect x="920" y="830" width="20" height="70" fill="#94a3b8"/><g><g transform="translate(800 620) scale(0.95)">
+    <!-- flames -->
+    <g class="anim rflame">
+      <path d="M-50 200 Q0 400 50 200 Z" fill="#f97316"/>
+      <path d="M-28 200 Q0 320 28 200 Z" fill="#fde047" stroke="none"/>
+    </g>
+    <!-- fins -->
+    <path d="M-70 80 L-140 200 L-70 180 Z" fill="#ef4444"/>
+    <path d="M70 80 L140 200 L70 180 Z" fill="#ef4444"/>
+    <!-- body -->
+    <path d="M-70 200 L-70 -60 Q-70 -200 0 -280 Q70 -200 70 -60 L70 200 Z" fill="#f8fafc"/>
+    <path d="M-70 -60 Q-70 -200 0 -280 Q70 -200 70 -60 Z" fill="#ef4444"/>
+    <rect x="-70" y="120" width="140" height="24" fill="#3b82f6"/>
+    <!-- porthole with a dog astronaut -->
+    <circle cx="0" cy="10" r="46" fill="#94a3b8"/>
+    <circle cx="0" cy="10" r="36" fill="#bae6fd"/>
+    <circle cx="0" cy="16" r="22" fill="#fde68a"/>
+    <path d="M-22 6 Q-34 20 -26 34 Q-18 26 -16 12 Z M22 6 Q34 20 26 34 Q18 26 16 12 Z" fill="#b45309"/>
+    <ellipse cx="0" cy="24" rx="6" ry="4" fill="#1e293b" stroke="none"/>
+    
+    <circle cx="-8" cy="10" r="6" fill="#fff"/>
+    <g><circle cx="-8" cy="11.8" r="2.7" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.0999999999999996 -1.2000000000000002;-1.7999999999999998 -2.0999999999999996;0 0"
+      dur="0.4s" repeatCount="indefinite"/></g>
+    <circle cx="8" cy="10" r="6" fill="#fff"/>
+    <g><circle cx="8" cy="11.8" r="2.7" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.0999999999999996 -1.2000000000000002;-1.7999999999999998 -2.0999999999999996;0 0"
+      dur="0.45s" repeatCount="indefinite"/></g>
+    <g><path d="M24 30 q20 -10 18 -34" fill="none" stroke="#fde68a" stroke-width="10"/><animateTransform attributeName="transform" type="rotate" values="-25 24 30;25 24 30;-25 24 30" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="0.4s" begin="0s" repeatCount="indefinite" additive="sum"/></g>
+    <path d="M-30 -10 q-10 -20 6 -30" fill="none" stroke="#fff" stroke-width="5" stroke-opacity="0.8"/></g><animateTransform attributeName="transform" type="translate" values="0 0;-4 2;4 -2;-4 2;4 -2;0 0;0 -1400;0 -1400;0 0" keyTimes="0;0.08;0.16;0.24;0.32;0.4;0.75;0.85;1" dur="6s" repeatCount="indefinite"/></g><circle class="anim puff" cx="958" cy="948" r="71" fill="#cbd5e1" style="animation-delay:-0.80s;transform-origin:958px 948px"/><circle class="anim puff" cx="930" cy="892" r="60" fill="#f1f5f9" style="animation-delay:-0.68s;transform-origin:930px 892px"/><circle class="anim puff" cx="1060" cy="890" r="70" fill="#e2e8f0" style="animation-delay:-1.08s;transform-origin:1060px 890px"/><circle class="anim puff" cx="666" cy="929" r="93" fill="#f1f5f9" style="animation-delay:-0.90s;transform-origin:666px 929px"/><circle class="anim puff" cx="656" cy="955" r="98" fill="#e2e8f0" style="animation-delay:-1.31s;transform-origin:656px 955px"/><circle class="anim puff" cx="1012" cy="913" r="99" fill="#cbd5e1" style="animation-delay:-0.50s;transform-origin:1012px 913px"/><circle class="anim puff" cx="833" cy="919" r="91" fill="#e2e8f0" style="animation-delay:-0.37s;transform-origin:833px 919px"/><circle class="anim puff" cx="898" cy="892" r="85" fill="#cbd5e1" style="animation-delay:-1.10s;transform-origin:898px 892px"/><circle class="anim puff" cx="883" cy="934" r="68" fill="#e2e8f0" style="animation-delay:-1.11s;transform-origin:883px 934px"/><circle class="anim puff" cx="720" cy="964" r="72" fill="#cbd5e1" style="animation-delay:-1.17s;transform-origin:720px 964px"/><circle class="anim puff" cx="607" cy="897" r="77" fill="#cbd5e1" style="animation-delay:-0.46s;transform-origin:607px 897px"/><circle class="anim puff" cx="712" cy="913" r="64" fill="#e2e8f0" style="animation-delay:-0.15s;transform-origin:712px 913px"/><circle class="anim puff" cx="633" cy="904" r="61" fill="#cbd5e1" style="animation-delay:-1.09s;transform-origin:633px 904px"/><circle class="anim puff" cx="830" cy="894" r="51" fill="#e2e8f0" style="animation-delay:-0.80s;transform-origin:830px 894px"/><g transform="translate(430 420)"><circle r="60" fill="#fff" opacity="0"><animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.39;0.4;1" dur="6s" repeatCount="indefinite"/></circle><text y="22" text-anchor="middle" font-family="'Arial Black','Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif" font-size="64" fill="#dc2626" stroke="none" opacity="0">3<animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.01;0.12;0.13;1" dur="6s" begin="0.0s" repeatCount="indefinite"/></text><text y="22" text-anchor="middle" font-family="'Arial Black','Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif" font-size="64" fill="#dc2626" stroke="none" opacity="0">2<animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.01;0.12;0.13;1" dur="6s" begin="0.8s" repeatCount="indefinite"/></text><text y="22" text-anchor="middle" font-family="'Arial Black','Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif" font-size="64" fill="#dc2626" stroke="none" opacity="0">1<animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.01;0.12;0.13;1" dur="6s" begin="1.6s" repeatCount="indefinite"/></text></g><g class="anim popl"><g transform="translate(1200 300) rotate(8) scale(0.8)"></g></g></g></svg>

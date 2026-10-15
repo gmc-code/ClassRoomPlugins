@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
+.anim{transform-box:view-box}
+.popk{animation:popk 3s ease-out infinite 0s;transform-origin:1260px 440px}@keyframes popk{0%,30%{transform:scale(0);opacity:0}40%{transform:scale(1.15);opacity:1}50%,85%{transform:scale(1);opacity:1}100%{opacity:0}}</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"><g><animateMotion path="M -200 765 Q -60 560 80 765 Q 220 560 360 765 Q 500 560 640 765 Q 780 560 920 765 Q 1060 560 1200 765 Q 1340 560 1480 765 Q 1620 560 1800 765" dur="9s" begin="-3s" repeatCount="indefinite" rotate="0" /><g transform="scale(0.72) translate(0 -70)">
+    <path d="M-40 10 Q-140 20 -170 60 Q-120 50 -40 40 Z" fill="#c2410c"/>
+    <ellipse cx="0" cy="-20" rx="56" ry="70" fill="#ea580c"/>
+    <ellipse cx="12" cy="0" rx="32" ry="44" fill="#fed7aa"/>
+    <path d="M-6 6 Q12 26 30 6" fill="#fdba74"/>
+    <circle cx="14" cy="-2" r="10" fill="#c2410c"/>
+    <circle cx="10" cy="-6" r="4" fill="#fff"/>
+    <g><circle cx="10" cy="-4.8" r="1.8" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;1.4 -0.8;-1.2 -1.4;0 0"
+      dur="0.4s" repeatCount="indefinite"/></g>
+    <circle cx="18" cy="-6" r="4" fill="#fff"/>
+    <g><circle cx="18" cy="-4.8" r="1.8" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;1.4 -0.8;-1.2 -1.4;0 0"
+      dur="0.45s" repeatCount="indefinite"/></g>
+    <path d="M-40 40 Q-50 70 -10 74 L60 74 Q66 64 40 60 L0 56" fill="#ea580c"/>
+    <path d="M30 -70 Q40 -110 70 -120 Q110 -122 116 -100 Q112 -80 80 -76 Q60 -70 40 -50 Z" fill="#ea580c"/>
+    <path d="M60 -120 Q56 -160 74 -168 Q78 -140 72 -118 Z" fill="#ea580c"/>
+    <path d="M80 -118 Q86 -156 102 -158 Q100 -132 90 -114 Z" fill="#ea580c"/>
+    <circle cx="116" cy="-102" r="6" fill="#1e293b" stroke="none"/>
+    
+    <circle cx="84" cy="-104" r="9" fill="#fff"/>
+    <g><circle cx="84" cy="-101.3" r="4.05" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;3.15 -1.8;-2.6999999999999997 -3.15;0 0"
+      dur="0.4s" repeatCount="indefinite"/></g>
+    <path d="M40 -40 q20 10 22 30" fill="none" stroke-width="8" stroke="#1e293b"/><path d="M40 -40 q20 10 22 30" fill="none" stroke-width="4" stroke="#ea580c"/></g></g><g class="anim popk"><g transform="translate(1260 440) rotate(6) scale(0.55)"></g></g></g></svg>

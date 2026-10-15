@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
+.anim{transform-box:view-box}
+.popp{animation:popp 1.6s ease-out infinite 0s;transform-origin:1150px 600px}@keyframes popp{0%,30%{transform:scale(0);opacity:0}40%{transform:scale(1.15);opacity:1}50%,85%{transform:scale(1);opacity:1}100%{opacity:0}}</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"><g transform="translate(960 804)"><g><rect x="-11" y="-120" width="22" height="100" fill="#facc15"/>
+    <polygon points="-11,-20 11,-20 0,6" fill="#fde68a"/><polygon points="-4,-4 4,-4 0,6" fill="#1e293b"/>
+    <rect x="-11" y="-134" width="22" height="16" rx="4" fill="#f9a8d4"/>
+    
+    <circle cx="-5" cy="-90" r="6" fill="#fff"/>
+    <g><circle cx="-5" cy="-88.2" r="2.7" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.0999999999999996 -1.2000000000000002;-1.7999999999999998 -2.0999999999999996;0 0"
+      dur="0.5s" repeatCount="indefinite"/></g>
+    <circle cx="5" cy="-90" r="6" fill="#fff"/>
+    <g><circle cx="5" cy="-88.2" r="2.7" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.0999999999999996 -1.2000000000000002;-1.7999999999999998 -2.0999999999999996;0 0"
+      dur="0.55s" repeatCount="indefinite"/></g><animateTransform attributeName="transform" type="translate" values="0 0;0 -40;0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" dur="0.55s" begin="-0.00s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="rotate" values="-10 0 0;10 0 0;-10 0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="0.55s" begin="-0.00s" repeatCount="indefinite" additive="sum"/></g></g><g transform="translate(1010 804)"><g><rect x="-11" y="-120" width="22" height="100" fill="#3b82f6"/>
+    <polygon points="-11,-20 11,-20 0,6" fill="#fde68a"/><polygon points="-4,-4 4,-4 0,6" fill="#1e293b"/>
+    <rect x="-11" y="-134" width="22" height="16" rx="4" fill="#f9a8d4"/>
+    
+    <circle cx="-5" cy="-90" r="6" fill="#fff"/>
+    <g><circle cx="-5" cy="-88.2" r="2.7" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.0999999999999996 -1.2000000000000002;-1.7999999999999998 -2.0999999999999996;0 0"
+      dur="0.5s" repeatCount="indefinite"/></g>
+    <circle cx="5" cy="-90" r="6" fill="#fff"/>
+    <g><circle cx="5" cy="-88.2" r="2.7" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.0999999999999996 -1.2000000000000002;-1.7999999999999998 -2.0999999999999996;0 0"
+      dur="0.55s" repeatCount="indefinite"/></g><animateTransform attributeName="transform" type="translate" values="0 0;0 -40;0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" dur="0.55s" begin="-0.18s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="rotate" values="-10 0 0;10 0 0;-10 0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="0.55s" begin="-0.18s" repeatCount="indefinite" additive="sum"/></g></g><g transform="translate(1060 804)"><g><rect x="-11" y="-120" width="22" height="100" fill="#ef4444"/>
+    <polygon points="-11,-20 11,-20 0,6" fill="#fde68a"/><polygon points="-4,-4 4,-4 0,6" fill="#1e293b"/>
+    <rect x="-11" y="-134" width="22" height="16" rx="4" fill="#f9a8d4"/>
+    
+    <circle cx="-5" cy="-90" r="6" fill="#fff"/>
+    <g><circle cx="-5" cy="-88.2" r="2.7" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.0999999999999996 -1.2000000000000002;-1.7999999999999998 -2.0999999999999996;0 0"
+      dur="0.5s" repeatCount="indefinite"/></g>
+    <circle cx="5" cy="-90" r="6" fill="#fff"/>
+    <g><circle cx="5" cy="-88.2" r="2.7" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.0999999999999996 -1.2000000000000002;-1.7999999999999998 -2.0999999999999996;0 0"
+      dur="0.55s" repeatCount="indefinite"/></g><animateTransform attributeName="transform" type="translate" values="0 0;0 -40;0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" dur="0.55s" begin="-0.36s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="rotate" values="-10 0 0;10 0 0;-10 0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="0.55s" begin="-0.36s" repeatCount="indefinite" additive="sum"/></g></g><g class="anim popp"><g transform="translate(1150 600) rotate(6) scale(0.5)"></g></g></g></svg>

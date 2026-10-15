@@ -34,7 +34,7 @@
     <circle cx="9" cy="-20" r="7" fill="#fff"/>
     <g><circle cx="9" cy="-17.9" r="3.15" fill="#1e293b" stroke="none"/>
     <animateTransform attributeName="transform" type="translate" values="0 0;2.4499999999999997 -1.4000000000000001;-2.1 -2.4499999999999997;0 0"
-      dur="0.45s" repeatCount="indefinite"/></g><animateTransform attributeName="transform" type="rotate" values="-8 0 0;8 0 0;-8 0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="0.7s" begin="0s" repeatCount="indefinite" additive="sum"/></g></g><g><animateMotion path="M 900 -150 C 700 200, 1100 300, 900 500 S 600 700, 700 1150" dur="12s" begin="-7s" repeatCount="indefinite" rotate="0" /><g>
+      dur="0.45s" repeatCount="indefinite"/></g><animateTransform attributeName="transform" type="rotate" values="-8 0 0;8 0 0;-8 0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="0.7s" begin="0s" repeatCount="indefinite" additive="sum"/></g></g><g><animateMotion path="M -150 150 C 400 300, 900 60, 1200 240 S 1600 120, 1750 260" dur="12s" begin="-7s" repeatCount="indefinite" rotate="0" /><g>
     <g transform="translate(-16 -40)"><g><ellipse cx="-38" cy="-8" rx="38" ry="16" fill="#fff" transform="rotate(-18 -38 -8)"/><animateTransform attributeName="transform" type="scale" values="1 1;1 0.25;1 1" dur="0.38s" begin="0s" repeatCount="indefinite"/></g></g>
     <g transform="translate(16 -40) scale(-1 1)"><g><ellipse cx="-38" cy="-8" rx="38" ry="16" fill="#fff" transform="rotate(-18 -38 -8)"/><animateTransform attributeName="transform" type="scale" values="1 1;1 0.25;1 1" dur="0.38s" begin="0s" repeatCount="indefinite"/></g></g>
     <g transform="translate(0.0 30.0) scale(1.300)" >

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
+.anim{transform-box:view-box}
+</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"><g><animateMotion path="M -150 250 C 300 80, 600 380, 1000 180 S 1500 300, 1800 120" dur="12s" begin="0s" repeatCount="indefinite" rotate="0" /><g>
+    <path d="M0 50 q-20 30 0 60 q20 30 0 60 q-20 30 0 50" fill="none" stroke-width="2.5"/><path d="M-8 70 l8 -8 l8 8 l-8 8 z" fill="#38bdf8" stroke-width="2"/><path d="M-8 100 l8 -8 l8 8 l-8 8 z" fill="#38bdf8" stroke-width="2"/><path d="M-8 130 l8 -8 l8 8 l-8 8 z" fill="#38bdf8" stroke-width="2"/><path d="M-8 160 l8 -8 l8 8 l-8 8 z" fill="#38bdf8" stroke-width="2"/>
+    <polygon points="0,-70 46,0 0,50 -46,0" fill="#f97316"/>
+    <path d="M0 -70 L0 50 M-46 0 L46 0" stroke-width="3"/>
+    <polygon points="0,-70 46,0 0,0" fill="#38bdf8" stroke="none" opacity="0.7"/>
+    
+    <circle cx="-14" cy="-10" r="8" fill="#fff"/>
+    <g><circle cx="-14" cy="-7.6" r="3.6" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.8 -1.6;-2.4 -2.8;0 0"
+      dur="0.5s" repeatCount="indefinite"/></g>
+    <circle cx="14" cy="-10" r="8" fill="#fff"/>
+    <g><circle cx="14" cy="-7.6" r="3.6" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.8 -1.6;-2.4 -2.8;0 0"
+      dur="0.55s" repeatCount="indefinite"/></g><animateTransform attributeName="transform" type="rotate" values="-14 0 0;14 0 0;-14 0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="1.4s" begin="0s" repeatCount="indefinite" additive="sum"/></g></g><g><animateMotion path="M 1800 420 C 1300 260, 900 480, 500 300 S 100 220, -200 380" dur="15s" begin="-6s" repeatCount="indefinite" rotate="0" /><g transform="scale(0.8)">
+    <path d="M0 50 q-20 30 0 60 q20 30 0 60 q-20 30 0 50" fill="none" stroke-width="2.5"/><path d="M-8 70 l8 -8 l8 8 l-8 8 z" fill="#facc15" stroke-width="2"/><path d="M-8 100 l8 -8 l8 8 l-8 8 z" fill="#facc15" stroke-width="2"/><path d="M-8 130 l8 -8 l8 8 l-8 8 z" fill="#facc15" stroke-width="2"/><path d="M-8 160 l8 -8 l8 8 l-8 8 z" fill="#facc15" stroke-width="2"/>
+    <polygon points="0,-70 46,0 0,50 -46,0" fill="#a855f7"/>
+    <path d="M0 -70 L0 50 M-46 0 L46 0" stroke-width="3"/>
+    <polygon points="0,-70 46,0 0,0" fill="#facc15" stroke="none" opacity="0.7"/>
+    
+    <circle cx="-14" cy="-10" r="8" fill="#fff"/>
+    <g><circle cx="-14" cy="-7.6" r="3.6" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.8 -1.6;-2.4 -2.8;0 0"
+      dur="0.5s" repeatCount="indefinite"/></g>
+    <circle cx="14" cy="-10" r="8" fill="#fff"/>
+    <g><circle cx="14" cy="-7.6" r="3.6" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.8 -1.6;-2.4 -2.8;0 0"
+      dur="0.55s" repeatCount="indefinite"/></g><animateTransform attributeName="transform" type="rotate" values="-14 0 0;14 0 0;-14 0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="1.2s" begin="0s" repeatCount="indefinite" additive="sum"/></g></g></g></svg>

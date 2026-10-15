@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
+.anim{transform-box:view-box}
+.popw{animation:popw 2.2s ease-out infinite 0s;transform-origin:600px 470px}@keyframes popw{0%,30%{transform:scale(0);opacity:0}40%{transform:scale(1.15);opacity:1}50%,85%{transform:scale(1);opacity:1}100%{opacity:0}}</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+    <g transform="translate(470 650)"><g>
+      <ellipse cx="0" cy="22" rx="30" ry="6" fill="#000" fill-opacity="0.15" stroke="none"/>
+      <path d="M-50 -40 Q0 -64 50 -40 L0 20 Z" fill="#f472b6"/>
+      <g><path d="M-40 -40 L-30 -40 L0 20 Z" fill="#ef4444" stroke="none"/><path d="M-20 -40 L-10 -40 L0 20 Z" fill="#facc15" stroke="none"/><path d="M0 -40 L10 -40 L0 20 Z" fill="#22c55e" stroke="none"/><path d="M20 -40 L30 -40 L0 20 Z" fill="#3b82f6" stroke="none"/><animateTransform attributeName="transform" type="scale" values="1 1;-1 1;1 1" dur="0.25s" repeatCount="indefinite"/></g>
+      <path d="M-50 -40 Q0 -64 50 -40 L0 20 Z" fill="none"/>
+      <rect x="-6" y="-80" width="12" height="30" rx="4" fill="#a16207"/>
+      <animateTransform attributeName="transform" type="rotate" values="-8 0 20;8 0 20;-8 0 20" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="0.8s" begin="0s" repeatCount="indefinite" additive="sum"/>
+      <animateTransform attributeName="transform" type="translate" values="-40 0;40 0;-40 0" dur="4s" repeatCount="indefinite" additive="sum"/>
+    </g></g><g class="anim popw"><g transform="translate(600 470) rotate(6) scale(0.5)"></g></g></g></svg>

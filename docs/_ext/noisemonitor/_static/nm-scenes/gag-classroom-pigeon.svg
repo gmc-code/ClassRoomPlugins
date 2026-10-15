@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
+.anim{transform-box:view-box}
+.popc{animation:popc 4s ease-out infinite 0s;transform-origin:560px 200px}@keyframes popc{0%,30%{transform:scale(0);opacity:0}40%{transform:scale(1.15);opacity:1}50%,85%{transform:scale(1);opacity:1}100%{opacity:0}}</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"><g><animateMotion path="M 1385 260 C 1100 100, 700 420, 400 260 S 100 100, 300 400 S 1000 440, 1250 300 S 1500 200, 1385 260" dur="12s" begin="0s" repeatCount="indefinite" rotate="auto" /><g transform="scale(0.85)">
+    <g><path d="M0 0 Q-30 -60 -80 -50 Q-50 -10 0 0 Z" fill="#94a3b8"/><animateTransform attributeName="transform" type="scale" values="1 1;1 -0.6;1 1" dur="0.35s" begin="0s" repeatCount="indefinite"/></g>
+    <ellipse cx="0" cy="0" rx="50" ry="26" fill="#cbd5e1"/>
+    <path d="M-50 -4 L-82 -16 L-78 10 Z" fill="#64748b"/>
+    <circle cx="44" cy="-20" r="20" fill="#cbd5e1"/>
+    <path d="M40 -6 Q50 4 30 10" fill="none" stroke="#22c55e" stroke-width="6"/>
+    <polygon points="62,-24 80,-18 62,-14" fill="#f59e0b"/>
+    
+    <circle cx="50" cy="-26" r="7" fill="#fff"/>
+    <g><circle cx="50" cy="-23.9" r="3.15" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.4499999999999997 -1.4000000000000001;-2.1 -2.4499999999999997;0 0"
+      dur="0.5s" repeatCount="indefinite"/></g>
+    <g transform="scale(1 -1)"><path d="M0 0 Q-30 -60 -80 -50 Q-50 -10 0 0 Z" fill="#94a3b8"/><animateTransform attributeName="transform" type="scale" values="1 1;1 -0.6;1 1" dur="0.35s" begin="0s" repeatCount="indefinite"/></g></g></g><g class="anim popc"><g transform="translate(560 200) rotate(-6) scale(0.5)"></g></g></g></svg>

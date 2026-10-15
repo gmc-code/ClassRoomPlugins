@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
+.anim{transform-box:view-box}
+</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+    <g>
+      <line x1="1000" y1="80" x2="1000" y2="200" stroke-width="3">
+        <animate attributeName="y2" values="120;420;120" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1" dur="1.4s" repeatCount="indefinite"/></line>
+      <g><g transform="translate(1000 0)">
+        <circle r="34" fill="#ef4444"/><circle r="12" fill="#fde047"/>
+        <g><path d="M-26 -10 L26 10 M-10 26 L10 -26" stroke="#fff" stroke-width="4"/><animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="0.4s" begin="0s" repeatCount="indefinite" additive="sum"/></g></g>
+        <animateTransform attributeName="transform" type="translate" values="0 140;0 440;0 140" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1" dur="1.4s" repeatCount="indefinite"/></g>
+    </g></g></svg>

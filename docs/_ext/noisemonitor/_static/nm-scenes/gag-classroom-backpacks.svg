@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
+.anim{transform-box:view-box}
+.popb{animation:popb 2.4s ease-out infinite 0s;transform-origin:820px 560px}@keyframes popb{0%,30%{transform:scale(0);opacity:0}40%{transform:scale(1.15);opacity:1}50%,85%{transform:scale(1);opacity:1}100%{opacity:0}}</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"><g><g transform="translate(0 760) scale(0.75)"><g>
+    <path d="M-30 -110 Q-30 -130 0 -130 Q30 -130 30 -110" fill="none" stroke-width="8"/>
+    <rect x="-46" y="-112" width="92" height="112" rx="22" fill="#3b82f6"/>
+    <rect x="-34" y="-50" width="68" height="40" rx="10" fill="#fff" fill-opacity="0.35"/>
+    <path d="M-24 -30 q24 16 48 0" fill="#7f1d1d"/>
+    
+    <circle cx="-16" cy="-80" r="11" fill="#fff"/>
+    <g><circle cx="-16" cy="-76.7" r="4.95" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;3.8499999999999996 -2.2;-3.3 -3.8499999999999996;0 0"
+      dur="0.5s" repeatCount="indefinite"/></g>
+    <circle cx="16" cy="-80" r="11" fill="#fff"/>
+    <g><circle cx="16" cy="-76.7" r="4.95" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;3.8499999999999996 -2.2;-3.3 -3.8499999999999996;0 0"
+      dur="0.55s" repeatCount="indefinite"/></g><animateTransform attributeName="transform" type="translate" values="0 0;0 -40;0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" dur="0.5s" begin="-0.0s" repeatCount="indefinite"/></g></g><animateTransform attributeName="transform" type="translate" from="-200 0" to="1800 0" dur="16s" begin="-3s" repeatCount="indefinite"/></g><g><g transform="translate(0 745) scale(0.75)"><g>
+    <path d="M-30 -110 Q-30 -130 0 -130 Q30 -130 30 -110" fill="none" stroke-width="8"/>
+    <rect x="-46" y="-112" width="92" height="112" rx="22" fill="#ec4899"/>
+    <rect x="-34" y="-50" width="68" height="40" rx="10" fill="#fff" fill-opacity="0.35"/>
+    <path d="M-24 -30 q24 16 48 0" fill="#7f1d1d"/>
+    
+    <circle cx="-16" cy="-80" r="11" fill="#fff"/>
+    <g><circle cx="-16" cy="-76.7" r="4.95" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;3.8499999999999996 -2.2;-3.3 -3.8499999999999996;0 0"
+      dur="0.5s" repeatCount="indefinite"/></g>
+    <circle cx="16" cy="-80" r="11" fill="#fff"/>
+    <g><circle cx="16" cy="-76.7" r="4.95" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;3.8499999999999996 -2.2;-3.3 -3.8499999999999996;0 0"
+      dur="0.55s" repeatCount="indefinite"/></g><animateTransform attributeName="transform" type="translate" values="0 0;0 -40;0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" dur="0.5s" begin="-0.2s" repeatCount="indefinite"/></g></g><animateTransform attributeName="transform" type="translate" from="1800 0" to="-200 0" dur="19s" begin="-11s" repeatCount="indefinite"/></g><g class="anim popb"><g transform="translate(820 560) rotate(-4) scale(0.5)"></g></g></g></svg>

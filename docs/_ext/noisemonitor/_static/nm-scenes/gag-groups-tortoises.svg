@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
+.anim{transform-box:view-box}
+</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+    <g><g transform="translate(0 772) scale(-0.5 0.5)">
+    <path d="M-80 -24 Q-100 -20 -104 -8" fill="none" stroke="#86efac" stroke-width="10"/>
+    <g><rect x="-64" y="-30" width="24" height="34" rx="10" fill="#86efac"/><animateTransform attributeName="transform" type="translate" values="0 0;0 -8;0 0;0 0" dur="1.2s" begin="-0.0s" repeatCount="indefinite"/></g><g><rect x="-30" y="-30" width="24" height="34" rx="10" fill="#86efac"/><animateTransform attributeName="transform" type="translate" values="0 0;0 -8;0 0;0 0" dur="1.2s" begin="-0.3s" repeatCount="indefinite"/></g><g><rect x="18" y="-30" width="24" height="34" rx="10" fill="#86efac"/><animateTransform attributeName="transform" type="translate" values="0 0;0 -8;0 0;0 0" dur="1.2s" begin="-0.6s" repeatCount="indefinite"/></g><g><rect x="44" y="-30" width="24" height="34" rx="10" fill="#86efac"/><animateTransform attributeName="transform" type="translate" values="0 0;0 -8;0 0;0 0" dur="1.2s" begin="-0.9s" repeatCount="indefinite"/></g>
+    <g>
+      <path d="M58 -34 Q66 -66 96 -70 Q124 -70 128 -48 Q130 -26 104 -24 L66 -20 Z" fill="#86efac"/>
+      
+    <circle cx="104" cy="-52" r="10" fill="#fff"/>
+    <g><circle cx="104" cy="-49.0" r="4.5" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;3.5 -2.0;-3.0 -3.5;0 0"
+      dur="0.6s" repeatCount="indefinite"/></g>
+      <path d="M108 -34 q8 6 16 0" fill="none" stroke-width="4"/>
+      <circle cx="96" cy="-38" r="5" fill="#f9a8d4" stroke="none"/>
+      <g transform="translate(96 -66)">
+        <polygon points="-16,0 16,0 0,-46" fill="#38bdf8"/>
+        <path d="M-10 -12 L10 -12 M-6 -26 L6 -26" stroke="#fde047" stroke-width="5"/>
+        <polygon points="-16,0 16,0 0,-46" fill="none"/>
+        <circle cy="-50" r="7" fill="#fde047"/>
+      </g>
+      <animateTransform attributeName="transform" type="translate" values="0 0;4 -3;0 0" dur="2.4s" repeatCount="indefinite"/>
+    </g>
+    <path d="M-86 -20 Q-86 -108 0 -112 Q86 -108 86 -20 Z" fill="#22c55e"/>
+    <path d="M-52 -60 l14 -12 l16 0 l14 12 l-14 12 l-16 0 z" fill="none" stroke="#fef3c7" stroke-width="4"/><path d="M-8 -60 l14 -12 l16 0 l14 12 l-14 12 l-16 0 z" fill="none" stroke="#fef3c7" stroke-width="4"/>
+    <path d="M-30 -96 l14 -12 l16 0 l14 12 l-14 12 l-16 0 z" fill="none" stroke="#fef3c7" stroke-width="4"/>
+    <rect x="-92" y="-26" width="184" height="12" rx="6" fill="#a16207"/></g><animateTransform attributeName="transform" type="translate" from="1880 0" to="-260 0" dur="80s" begin="-44s" repeatCount="indefinite"/></g>
+    <g><g transform="translate(0 842) scale(0.85)">
+    <path d="M-80 -24 Q-100 -20 -104 -8" fill="none" stroke="#86efac" stroke-width="10"/>
+    <g><rect x="-64" y="-30" width="24" height="34" rx="10" fill="#86efac"/><animateTransform attributeName="transform" type="translate" values="0 0;0 -8;0 0;0 0" dur="1.2s" begin="-0.0s" repeatCount="indefinite"/></g><g><rect x="-30" y="-30" width="24" height="34" rx="10" fill="#86efac"/><animateTransform attributeName="transform" type="translate" values="0 0;0 -8;0 0;0 0" dur="1.2s" begin="-0.3s" repeatCount="indefinite"/></g><g><rect x="18" y="-30" width="24" height="34" rx="10" fill="#86efac"/><animateTransform attributeName="transform" type="translate" values="0 0;0 -8;0 0;0 0" dur="1.2s" begin="-0.6s" repeatCount="indefinite"/></g><g><rect x="44" y="-30" width="24" height="34" rx="10" fill="#86efac"/><animateTransform attributeName="transform" type="translate" values="0 0;0 -8;0 0;0 0" dur="1.2s" begin="-0.9s" repeatCount="indefinite"/></g>
+    <g>
+      <path d="M58 -34 Q66 -66 96 -70 Q124 -70 128 -48 Q130 -26 104 -24 L66 -20 Z" fill="#86efac"/>
+      
+    <circle cx="104" cy="-52" r="10" fill="#fff"/>
+    <g><circle cx="104" cy="-49.0" r="4.5" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;3.5 -2.0;-3.0 -3.5;0 0"
+      dur="0.6s" repeatCount="indefinite"/></g>
+      <path d="M108 -34 q8 6 16 0" fill="none" stroke-width="4"/>
+      <circle cx="96" cy="-38" r="5" fill="#f9a8d4" stroke="none"/>
+      <g transform="translate(96 -66)">
+        <polygon points="-16,0 16,0 0,-46" fill="#f472b6"/>
+        <path d="M-10 -12 L10 -12 M-6 -26 L6 -26" stroke="#fde047" stroke-width="5"/>
+        <polygon points="-16,0 16,0 0,-46" fill="none"/>
+        <circle cy="-50" r="7" fill="#fde047"/>
+      </g>
+      <animateTransform attributeName="transform" type="translate" values="0 0;4 -3;0 0" dur="2.4s" repeatCount="indefinite"/>
+    </g>
+    <path d="M-86 -20 Q-86 -108 0 -112 Q86 -108 86 -20 Z" fill="#16a34a"/>
+    <path d="M-52 -60 l14 -12 l16 0 l14 12 l-14 12 l-16 0 z" fill="none" stroke="#fef3c7" stroke-width="4"/><path d="M-8 -60 l14 -12 l16 0 l14 12 l-14 12 l-16 0 z" fill="none" stroke="#fef3c7" stroke-width="4"/>
+    <path d="M-30 -96 l14 -12 l16 0 l14 12 l-14 12 l-16 0 z" fill="none" stroke="#fef3c7" stroke-width="4"/>
+    <rect x="-92" y="-26" width="184" height="12" rx="6" fill="#a16207"/></g><animateTransform attributeName="transform" type="translate" from="-260 0" to="1880 0" dur="64s" begin="-16s" repeatCount="indefinite"/></g></g></svg>

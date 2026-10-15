@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
+.anim{transform-box:view-box}
+</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M1050 320 L1050 190 Q1050 140 1070 120 Q1090 140 1090 190 L1090 320 Z M1050 290 L1030 320 L1050 320 M1090 290 L1110 320 L1090 320" fill="none" stroke="#7c3aed" stroke-width="5" stroke-dasharray="900" stroke-dashoffset="900">
+      <animate attributeName="stroke-dashoffset" values="900;0;0;900" keyTimes="0;0.4;0.9;1" dur="5s" repeatCount="indefinite"/></path>
+    <circle cx="1070" cy="200" r="10" fill="none" stroke="#7c3aed" stroke-width="5" stroke-dasharray="70" stroke-dashoffset="70">
+      <animate attributeName="stroke-dashoffset" values="70;70;0;0;70" keyTimes="0;0.35;0.45;0.9;1" dur="5s" repeatCount="indefinite"/></circle>
+    <path d="M1000 150 l6 14 l14 2 l-10 10 l2 14 l-12 -8 l-12 8 l2 -14 l-10 -10 l14 -2 z" fill="none" stroke="#f59e0b" stroke-width="4" stroke-dasharray="140" stroke-dashoffset="140">
+      <animate attributeName="stroke-dashoffset" values="140;140;0;0;140" keyTimes="0;0.45;0.6;0.9;1" dur="5s" repeatCount="indefinite"/></path>
+    <path d="M1060 330 q10 30 0 60 M1080 330 q-10 30 0 60" fill="none" stroke="#f97316" stroke-width="5" stroke-dasharray="80" stroke-dashoffset="80">
+      <animate attributeName="stroke-dashoffset" values="80;80;0;0;80" keyTimes="0;0.6;0.75;0.9;1" dur="5s" repeatCount="indefinite"/></path>
+    <g transform="translate(0 0)">
+      <rect x="-8" y="-60" width="16" height="60" rx="4" fill="#7c3aed"/><polygon points="-8,0 8,0 0,14" fill="#fde68a"/>
+      <animateMotion path="M 1050 320 L 1050 190 Q 1050 140 1070 120 Q 1090 140 1090 190 L 1090 320 L 1050 320" dur="5s" begin="0s" repeatCount="indefinite" rotate="0" keyPoints="0;1;1;0" keyTimes="0;0.4;0.9;1" calcMode="linear"/>
+    </g></g></svg>
