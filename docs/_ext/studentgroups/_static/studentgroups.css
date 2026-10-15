@@ -46,6 +46,14 @@
     display: flex; gap: 3px; background: #0f172a; padding: 3px; border-radius: 6px; border: 1px solid #334155;
 }
 .studentgroups .sg-file { display: none; }
+.studentgroups .sg-custom-sizes { display: inline-flex; align-items: center; gap: 4px; flex: 1 1 260px; max-width: 420px; }
+.studentgroups .sg-custom-input {
+    flex: 1; min-width: 0; padding: 4px 8px; font: 500 12px/1.2 inherit; font-family: inherit;
+    background: #0f172a; color: #f8fafc; border: 1px solid #334155; border-radius: 4px;
+}
+.studentgroups .sg-custom-input::placeholder { color: #64748b; }
+.studentgroups .sg-custom-input:focus { outline: none; border-color: #3b82f6; }
+.studentgroups .sg-custom-input.sg-invalid { border-color: #dc2626; }
 
 .sg-btn {
     background: #3b82f6; color: #fff; border: none; border-radius: 4px;
@@ -158,7 +166,7 @@
     position: relative; transition: all .2s;
 }
 
-.studentgroups .sg-slot.sg-occupied { border-style: solid; border-color: #94a3b8; }
+.studentgroups .sg-slot.sg-occupied { border-style: solid; border-color: #d5dde8; }
 .studentgroups .sg-slot.sg-drag-over { border-color: #3b82f6; background: #eff6ff; }
 .studentgroups .sg-slot.sg-conflict {
     border: 3px solid #ef4444 !important; background: #fef2f2 !important; animation: sg-pulse 1.5s infinite;
@@ -184,7 +192,7 @@
 .studentgroups .sg-side-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .studentgroups .sg-slot .sg-card {
-    width: 98%; height: 97%; overflow: hidden; padding: 1px 4px; background: #e0f2fe; border-color: #38bdf8;
+    width: 98%; height: 97%; overflow: hidden; padding: 1px 4px; background: #f3faff; border-color: #c7e6fb;
     display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
 }
 .studentgroups .sg-slot .sg-card.sg-has-sep { background: #fff7ed; border-color: #ea580c; }
@@ -276,34 +284,207 @@ html.sg-projector-open, html.sg-projector-open body { overflow: hidden; }
 .sg-modal-close { background: transparent; border: none; color: #94a3b8; font-size: 18px; cursor: pointer; }
 .sg-modal-close:hover { color: #fff; }
 .sg-modal-body { padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
-.sg-rule-form {
-    display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr);
-    grid-template-areas: "s1 type" "s2 add"; gap: 10px; align-items: center;
-    background: #f8fafc; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px;
-}
-.sg-c-s1 { grid-area: s1; } .sg-c-type { grid-area: type; } .sg-c-s2 { grid-area: s2; }
-.sg-rule-form select {
-    display: block; width: 100%; min-width: 0; height: 38px; margin: 0; padding: 6px 10px;
-    border: 1px solid #cbd5e1; border-radius: 5px; background: #fff; color: #0f172a; font: inherit; font-size: 13px; line-height: 1.3;
-}
-.sg-rule-form .sg-c-add { grid-area: add; justify-self: start; min-height: 38px; }
-.sg-feedback { font-size: 13px; color: #64748b; min-height: 1em; }
-.sg-feedback.sg-error { color: #b91c1c; }
-.sg-feedback.sg-success { color: #047857; }
-.sg-modal-sub { font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: -6px; }
-.sg-rules-list { display: flex; flex-direction: column; gap: 6px; }
-.sg-rules-empty { font-size: 13px; color: #64748b; }
-.sg-rule-item {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 6px 10px; background: #f1f5f9; border-radius: 4px; font-size: 13px;
-}
-.sg-rule-item.sg-sep { border-left: 4px solid #ea580c; }
-.sg-rule-item.sg-pair { border-left: 4px solid #059669; }
 .sg-del-rule { background: transparent; border: none; color: #ef4444; font-size: 16px; cursor: pointer; padding: 0 4px; }
+
+/* ---- Rules panel: rule dropdown + student checklist (same style as the seating plan) ---- */
+/* wide enough for the class in two columns; grows to fit, scrolls only past 94% of the screen */
+.sg-rp { width: 920px; max-width: 96vw; height: auto; max-height: 94vh; }
+.sg-rp-top { padding: 12px 16px 10px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; }
+.sg-rp-label { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 13px; color: #334155; }
+.sg-rp-label select {
+    flex: 1; min-width: 0; height: 38px; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 5px;
+    background: #fff; color: #0f172a; font: 500 14px/1.3 inherit; font-family: inherit;
+}
+.sg-rp-help { margin-top: 6px; font-size: 12.5px; color: #64748b; }
+.sg-rp .sg-modal-body { flex: 1 1 auto; min-height: 0; gap: 8px; padding: 10px 16px; }
+.sg-rp-tools { display: flex; gap: 10px; align-items: center; position: sticky; top: -10px; background: #fff; padding: 2px 0 6px; z-index: 1; }
+.sg-rp-search {
+    flex: 1; min-width: 0; height: 34px; padding: 4px 10px; border: 1px solid #cbd5e1; border-radius: 5px;
+    font: 400 13px/1.3 inherit; font-family: inherit;
+}
+.sg-rp-list { column-count: 2; column-gap: 28px; column-rule: 1px solid #e2e8f0; }
+.sg-rp-row {
+    display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-bottom: 1px solid #f1f5f9;
+    cursor: pointer; font-size: 13.5px; border-radius: 4px; break-inside: avoid;
+}
+.sg-rp-row:hover { background: #f8fafc; }
+.sg-rp-row.sg-rp-on { background: #eff6ff; }
+.sg-rp-row input { width: 16px; height: 16px; margin: 0; flex: none; cursor: pointer; }
+.sg-rp-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sg-rp-hr { font-size: 11px; font-weight: 700; color: #0369a1; background: #e0f2fe; border-radius: 3px; padding: 0 4px; }
+.sg-rp-note { font-size: 11.5px; color: #94a3b8; white-space: nowrap; }
+.sg-rp-disabled { cursor: not-allowed; color: #94a3b8; }
+.sg-rp-disabled input { cursor: not-allowed; }
+.sg-rp-empty { font-size: 13px; color: #64748b; padding: 14px 0; text-align: center; grid-column: 1 / -1; }
+.sg-rp-foot {
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    padding: 10px 16px; border-top: 1px solid #e2e8f0; background: #f8fafc;
+}
+.sg-rp-count { font-size: 12.5px; color: #475569; }
+.sg-rp-groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 16px; }
+.sg-rp-group {
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    padding: 8px 10px; background: #f1f5f9; border-radius: 4px; font-size: 13px;
+}
+.sg-rp-group.sg-sep { border-left: 4px solid #ea580c; }
+.sg-rp-group.sg-pair { border-left: 4px solid #059669; }
+.sg-rp-group[style] { border-left-color: var(--sg-grp-fg); }
+.sg-rp-group > .sg-badge-grp { flex: none; font-size: 11px; padding: 1px 5px; }
+.sg-rp-group-names { min-width: 0; flex: 1; text-align: left; }
+.sg-rp-warn { display: block; font-size: 11.5px; color: #b91c1c; }
+.sg-rp-group-btns { display: flex; align-items: center; gap: 4px; flex: none; }
+.sg-rp-small { padding: 3px 8px; }
+.sg-rp-edit-title { font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; }
+@media (max-width: 640px) {
+    .sg-rp-list { column-count: 1; }
+    .sg-rp-groups { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 480px) {
+    .sg-rp { max-width: 98%; }
+    .sg-rp-note { display: none; }
+}
+
+/* ---- Numbered group badges: keep together = filled in the group colour, keep apart = dashed ---- */
+.sg-badge-grp.sg-badge-pair { background: var(--sg-grp-fg); color: #fff; border: 1px solid var(--sg-grp-fg); }
+.sg-badge-grp.sg-badge-sep { background: #fff; color: var(--sg-grp-fg); border: 1px dashed var(--sg-grp-fg); }
+/* Keep-together group: the card takes its group's colour */
+.studentgroups .sg-card.sg-has-grp,
+.studentgroups .sg-slot .sg-card.sg-has-grp { border: 2px solid var(--sg-grp-fg); background: var(--sg-grp-bg); }
+
+.sg-btn:disabled, .sg-btn:disabled:hover { opacity: .45; cursor: not-allowed; background: #475569; }
+.studentgroups .sg-status.sg-show { cursor: default; }
+
+/* ---- Group header row: editable name + lock-the-group button ---- */
+.studentgroups .sg-group-head { display: flex; align-items: center; gap: 4px; border-bottom: 1px solid #f1f5f9; margin-bottom: 4px; }
+.studentgroups .sg-group-head .sg-group-header { flex: 1; min-width: 0; border-bottom: 0; }
+.studentgroups .sg-group-lock {
+    flex: none; background: transparent; border: 0; cursor: pointer; font-size: 12px; line-height: 1;
+    padding: 1px 2px; opacity: .3; border-radius: 3px;
+}
+.studentgroups .sg-group-box:hover .sg-group-lock, .studentgroups .sg-group-lock:focus-visible { opacity: .75; }
+.studentgroups .sg-group-lock.sg-part { opacity: .6; }
+.studentgroups .sg-group-lock.sg-on { opacity: 1; background: #fef3c7; }
+
+/* ---- Lock in place: small padlock on each card in a group ---- */
+.studentgroups .sg-slot .sg-card { position: relative; }
+.studentgroups .sg-lock {
+    position: absolute; top: 1px; right: 1px; z-index: 1; background: transparent; border: 0; cursor: pointer;
+    font-size: 11px; line-height: 1; padding: 1px; opacity: 0; border-radius: 3px;
+}
+.studentgroups .sg-slot .sg-card:hover .sg-lock, .studentgroups .sg-lock:focus-visible { opacity: .55; }
+.studentgroups .sg-card.sg-locked .sg-lock { opacity: 1; background: #fef3c7; }
+.studentgroups .sg-slot .sg-card.sg-locked { box-shadow: inset 0 0 0 2px #f59e0b; }
+@media (hover: none) { .studentgroups .sg-lock { opacity: .45; } }
+
+/* ---- Away today (sidebar) ---- */
+.studentgroups .sg-away-wrap { margin-top: 8px; border-top: 1px solid #e2e8f0; padding-top: 6px; }
+.studentgroups .sg-pool.sg-away { min-height: 28px; }
+.studentgroups .sg-sidebar .sg-card.sg-away-card { background: #f1f5f9; color: #94a3b8; text-decoration: line-through; border-style: dashed; }
+.studentgroups .sg-btn-count { font-weight: 700; }
+
+/* ---- Roles ---- */
+.studentgroups .sg-roles-only { display: none; }
+.studentgroups.sg-show-roles .sg-roles-only { display: inline-flex; }
+/* role icon sits just left of the first name; unknown roles get a lettered dot */
+.studentgroups .sg-role-icon { display: inline-block; margin-right: .3em; font-weight: 400; font-style: normal; }
+.studentgroups .sg-role-letter, .sg-role-key .sg-role-letter {
+    width: 1.25em; height: 1.25em; line-height: 1.25em; border-radius: 50%; text-align: center;
+    background: #f59e0b; color: #fff; font-size: .72em; font-weight: 700; vertical-align: .18em;
+}
+.studentgroups .sg-role-legend {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; margin: 0 0 10px; padding: 5px 10px;
+    background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; font-size: 12.5px; color: #78350f;
+}
+.studentgroups .sg-role-key { display: inline-flex; align-items: center; white-space: nowrap; }
+.studentgroups .sg-role-key .sg-role-icon { font-size: 15px; }
+.studentgroups .sg-role-key-title { font-weight: 700; }
+.studentgroups.sg-projector .sg-role-legend { font-size: 20px; padding: 8px 14px; }
+.studentgroups.sg-projector .sg-role-key .sg-role-icon { font-size: 24px; }
+/* Number Students: 1, 2, 3 … before each name */
+.studentgroups .sg-num {
+    display: inline-block; min-width: 1.3em; height: 1.3em; line-height: 1.3em; margin-right: .3em; padding: 0 .2em;
+    border-radius: 999px; background: #475569; color: #fff; text-align: center;
+    font-size: .68em; font-weight: 700; font-style: normal; vertical-align: .18em;
+}
+/* Left-align Names */
+.studentgroups.sg-align-left .sg-slot .sg-card { align-items: flex-start; text-align: left; padding-left: 8px; }
+.studentgroups.sg-align-left .sg-badge-stack { justify-content: flex-start; }
+.studentgroups.sg-align-left.sg-compact .sg-slot .sg-card { justify-content: flex-start; }
+/* Large Icons: role icons and numbers at twice the size, in a column at the left of the card */
+.studentgroups .sg-slot .sg-card.sg-with-icons { position: relative; }
+.studentgroups .sg-icons {
+    position: absolute; left: 5px; top: 50%; transform: translateY(-50%);
+    display: flex; align-items: center; gap: 4px; pointer-events: none;
+}
+.studentgroups .sg-icons .sg-role-icon { font-size: 34px; line-height: 1; margin: 0; }
+.studentgroups .sg-icons .sg-role-letter { font-size: 18px; width: 34px; height: 34px; line-height: 34px; vertical-align: 0; }
+.studentgroups .sg-icons .sg-num { font-size: 15px; min-width: 26px; height: 26px; line-height: 26px; margin: 0; vertical-align: 0; }
+.studentgroups .sg-slot .sg-card.sg-icons-1 { padding-left: 46px; }
+.studentgroups .sg-slot .sg-card.sg-icons-2 { padding-left: 76px; }
+.studentgroups.sg-compact .sg-icons .sg-role-icon { font-size: 24px; }
+.studentgroups.sg-compact .sg-icons .sg-role-letter { font-size: 13px; width: 24px; height: 24px; line-height: 24px; }
+.studentgroups.sg-compact .sg-icons .sg-num { font-size: 12px; min-width: 20px; height: 20px; line-height: 20px; }
+.studentgroups.sg-compact .sg-slot .sg-card.sg-icons-1 { padding-left: 34px; }
+.studentgroups.sg-compact .sg-slot .sg-card.sg-icons-2 { padding-left: 58px; }
+/* one-line names with large icons: badges give way before the name does */
+.studentgroups.sg-compact .sg-card.sg-with-icons .sg-name-line { flex: 1 1 auto; }
+.studentgroups.sg-compact .sg-card.sg-with-icons .sg-badge-stack { flex: 0 1 auto; min-width: 0; overflow: hidden; }
+.studentgroups.sg-projector .sg-icons .sg-role-icon { font-size: 52px; }
+.studentgroups.sg-projector .sg-icons .sg-num { font-size: 22px; min-width: 38px; height: 38px; line-height: 38px; }
+.studentgroups.sg-projector .sg-slot .sg-card.sg-icons-1 { padding-left: 66px; }
+.studentgroups.sg-projector .sg-slot .sg-card.sg-icons-2 { padding-left: 110px; }
+/* Group Options editor rows */
+.sg-op { width: 640px; }
+.sg-op-roles, .sg-op-names { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; }
+.sg-op-names { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px 14px; }
+.sg-op-role, .sg-op-name { display: flex; align-items: center; gap: 6px; }
+.sg-op-role .sg-rp-search, .sg-op-name .sg-rp-search { height: 32px; }
+.sg-op-pos { flex: none; width: 1.4em; text-align: right; font-size: 12px; font-weight: 700; color: #94a3b8; }
+.sg-op-icon {
+    flex: none; width: 92px; height: 32px; padding: 2px 4px; border: 1px solid #cbd5e1; border-radius: 5px;
+    background: #fff; font-size: 16px; font-family: inherit;
+}
+.sg-op-mini {
+    flex: none; width: 28px; height: 28px; border: 1px solid #cbd5e1; border-radius: 5px; background: #fff;
+    color: #475569; cursor: pointer; font-size: 13px; line-height: 1;
+}
+.sg-op-mini:hover:not(:disabled) { background: #f1f5f9; color: #0f172a; }
+.sg-op-mini:disabled { opacity: .35; cursor: default; }
+.sg-op-del:hover:not(:disabled) { color: #b91c1c; border-color: #fca5a5; }
+.sg-op-row { flex-wrap: wrap; }
+@media (max-width: 560px) { .sg-op-names { grid-template-columns: minmax(0, 1fr); } }
+.sg-op-hint { margin-top: 6px; font-size: 12px; color: #64748b; }
+.studentgroups.sg-projector .sg-lock, .studentgroups.sg-projector .sg-group-lock { display: none; }
+
+/* ---- Group Options panel ---- */
+.sg-op { width: 560px; }
+.sg-op .sg-modal-body { gap: 4px; }
+.sg-op-section { padding: 8px 0 10px; border-bottom: 1px solid #e2e8f0; }
+.sg-op-section:last-of-type { border-bottom: 0; }
+.sg-op-section h5 {
+    margin: 0 0 6px; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #64748b;
+}
+.sg-op-row { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+.sg-op-check { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #334155; cursor: pointer; }
+.sg-op-check input { width: 16px; height: 16px; margin: 0; }
+.sg-op-select {
+    flex: 1; min-width: 0; height: 34px; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 5px;
+    background: #fff; color: #0f172a; font: 400 13px/1.3 inherit; font-family: inherit;
+}
+.sg-op-feedback { margin: 4px 0 0; min-height: 1.2em; font-size: 12.5px; color: #64748b; }
+.sg-op-feedback.sg-ok { color: #047857; }
+.sg-op-feedback.sg-error { color: #b91c1c; }
+
+/* ---- studentgroups-print button ---- */
+.studentgroups-print { margin: 1em 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.studentgroups-print .sg-btn { font-size: 13px; padding: 7px 14px; }
+.sg-print-all-msg { font-size: 13px; color: #b91c1c; }
 
 @media print {
     .studentgroups { border: none; background: #fff; }
-    .studentgroups .sg-toolbar, .studentgroups .sg-sidebar, .studentgroups .sg-status, .sg-modal { display: none !important; }
+    .studentgroups .sg-toolbar, .studentgroups .sg-sidebar, .studentgroups .sg-status, .sg-modal,
+    .studentgroups .sg-lock, .studentgroups .sg-group-lock, .studentgroups-print { display: none !important; }
     .studentgroups .sg-group-box { break-inside: avoid; }
     .sg-badge-hr { border: none !important; background: transparent; padding: 0 2px; }
 }
+.sg-btn[hidden] { display: none !important; }

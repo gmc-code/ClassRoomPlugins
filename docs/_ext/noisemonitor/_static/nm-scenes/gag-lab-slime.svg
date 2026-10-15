@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
+.anim{transform-box:view-box}
+</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+    <g>
+      <g transform="translate(0 982) scale(1.05)">
+        <ellipse cx="-90" cy="2" rx="80" ry="8" fill="#86efac" fill-opacity="0.5" stroke="none"/>
+        <g>
+          <path d="M-22 0 Q-24 -26 0 -28 Q24 -26 22 0 Z" fill="#4ade80"/>
+          
+    <circle cx="0" cy="-14" r="6" fill="#fff"/>
+    <g><circle cx="0" cy="-12.2" r="2.7" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.0999999999999996 -1.2000000000000002;-1.7999999999999998 -2.0999999999999996;0 0"
+      dur="0.4s" repeatCount="indefinite"/></g>
+          <animateTransform attributeName="transform" type="translate" values="0 0;-110 0;-110 0;0 0;0 0" keyTimes="0;0.3;0.6;0.85;1" dur="7s" repeatCount="indefinite"/>
+        </g>
+        <path fill="#4ade80">
+          <animate attributeName="d" values="M-70 0 Q-80 -50 -30 -70 Q0 -84 30 -68 Q76 -50 70 0 Z;M-80 0 Q-86 -36 -40 -56 Q0 -70 40 -58 Q90 -36 80 0 Z;M-64 0 Q-70 -60 -26 -80 Q0 -92 28 -78 Q70 -58 64 0 Z;M-70 0 Q-80 -50 -30 -70 Q0 -84 30 -68 Q76 -50 70 0 Z" dur="1.6s" repeatCount="indefinite"/></path>
+        <path d="M-40 -46 q14 -12 34 -12" fill="none" stroke="#fff" stroke-width="7" stroke-opacity="0.7"/>
+        
+    <circle cx="-16" cy="-40" r="13" fill="#fff"/>
+    <g><circle cx="-16" cy="-36.1" r="5.8500000000000005" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;4.55 -2.6;-3.9 -4.55;0 0"
+      dur="0.5s" repeatCount="indefinite"/></g>
+    <circle cx="18" cy="-42" r="13" fill="#fff"/>
+    <g><circle cx="18" cy="-38.1" r="5.8500000000000005" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;4.55 -2.6;-3.9 -4.55;0 0"
+      dur="0.55s" repeatCount="indefinite"/></g>
+        <path d="M-12 -18 q12 10 24 0" fill="none" stroke-width="4"/>
+      </g>
+      <animateTransform attributeName="transform" type="translate" from="1880 0" to="-260 0" dur="50s" begin="-20s" repeatCount="indefinite"/>
+    </g></g></svg>

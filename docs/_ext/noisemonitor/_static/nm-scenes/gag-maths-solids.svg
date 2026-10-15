@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
+.anim{transform-box:view-box}
+</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"><g><animateMotion path="M -150 220 C 300 80, 700 380, 1100 180 S 1500 280, 1750 140" dur="8s" begin="-0.0s" repeatCount="indefinite" rotate="0" /><g transform="scale(1.4)"><polygon points="-30,-10 10,-10 10,30 -30,30" fill="#93c5fd"/><polygon points="-30,-10 -10,-30 30,-30 10,-10" fill="#bfdbfe"/><polygon points="10,-10 30,-30 30,10 10,30" fill="#60a5fa"/>
+    <circle cx="-8" cy="4" r="6" fill="#fff"/>
+    <g><circle cx="-8" cy="5.8" r="2.7" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.0999999999999996 -1.2000000000000002;-1.7999999999999998 -2.0999999999999996;0 0"
+      dur="0.5s" repeatCount="indefinite"/></g>
+    <circle cx="8" cy="4" r="6" fill="#fff"/>
+    <g><circle cx="8" cy="5.8" r="2.7" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.0999999999999996 -1.2000000000000002;-1.7999999999999998 -2.0999999999999996;0 0"
+      dur="0.55s" repeatCount="indefinite"/></g><animateTransform attributeName="transform" type="rotate" values="-20 0 0;20 0 0;-20 0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="1.4s" begin="0s" repeatCount="indefinite" additive="sum"/></g></g><g><animateMotion path="M 1750 360 C 1300 220, 900 440, 500 260 S 100 180, -150 300" dur="9s" begin="-1.5s" repeatCount="indefinite" rotate="0" /><g transform="scale(1.4)"><ellipse cx="0" cy="30" rx="34" ry="10" fill="#fca5a5"/><polygon points="0,-40 34,30 -34,30" fill="#fecaca"/><path d="M-34 30 A34 10 0 0 0 34 30" fill="none" stroke-width="5"/>
+    <circle cx="-8" cy="4" r="6" fill="#fff"/>
+    <g><circle cx="-8" cy="5.8" r="2.7" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.0999999999999996 -1.2000000000000002;-1.7999999999999998 -2.0999999999999996;0 0"
+      dur="0.5s" repeatCount="indefinite"/></g>
+    <circle cx="8" cy="4" r="6" fill="#fff"/>
+    <g><circle cx="8" cy="5.8" r="2.7" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.0999999999999996 -1.2000000000000002;-1.7999999999999998 -2.0999999999999996;0 0"
+      dur="0.55s" repeatCount="indefinite"/></g><animateTransform attributeName="transform" type="rotate" values="-20 0 0;20 0 0;-20 0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="1.4s" begin="0s" repeatCount="indefinite" additive="sum"/></g></g><g><animateMotion path="M 800 140 C 1100 60, 1220 360, 900 380 C 580 400, 480 200, 800 140 Z" dur="10s" begin="-3.0s" repeatCount="indefinite" rotate="0" /><g transform="scale(1.4)"><polygon points="0,-40 -36,24 4,34" fill="#fde68a"/><polygon points="0,-40 4,34 36,20" fill="#fbbf24"/>
+    <circle cx="-8" cy="4" r="6" fill="#fff"/>
+    <g><circle cx="-8" cy="5.8" r="2.7" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.0999999999999996 -1.2000000000000002;-1.7999999999999998 -2.0999999999999996;0 0"
+      dur="0.5s" repeatCount="indefinite"/></g>
+    <circle cx="8" cy="4" r="6" fill="#fff"/>
+    <g><circle cx="8" cy="5.8" r="2.7" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.0999999999999996 -1.2000000000000002;-1.7999999999999998 -2.0999999999999996;0 0"
+      dur="0.55s" repeatCount="indefinite"/></g><animateTransform attributeName="transform" type="rotate" values="-20 0 0;20 0 0;-20 0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="1.4s" begin="0s" repeatCount="indefinite" additive="sum"/></g></g><g><animateMotion path="M -150 420 C 400 300, 900 460, 1300 300 S 1600 220, 1750 380" dur="11s" begin="-4.5s" repeatCount="indefinite" rotate="0" /><g transform="scale(1.4)"><circle r="34" fill="#86efac"/><ellipse rx="34" ry="10" fill="none" stroke-width="3" stroke-dasharray="6 6"/><path d="M-14 -18 q8 -8 18 -8" fill="none" stroke="#fff" stroke-width="5"/>
+    <circle cx="-8" cy="4" r="6" fill="#fff"/>
+    <g><circle cx="-8" cy="5.8" r="2.7" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.0999999999999996 -1.2000000000000002;-1.7999999999999998 -2.0999999999999996;0 0"
+      dur="0.5s" repeatCount="indefinite"/></g>
+    <circle cx="8" cy="4" r="6" fill="#fff"/>
+    <g><circle cx="8" cy="5.8" r="2.7" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.0999999999999996 -1.2000000000000002;-1.7999999999999998 -2.0999999999999996;0 0"
+      dur="0.55s" repeatCount="indefinite"/></g><animateTransform attributeName="transform" type="rotate" values="-20 0 0;20 0 0;-20 0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="1.4s" begin="0s" repeatCount="indefinite" additive="sum"/></g></g></g></svg>

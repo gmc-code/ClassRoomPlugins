@@ -1,6 +1,6 @@
-=====================================
-Using My Class Seating Plans
-=====================================
+==============================
+Class Seating Plans user guide
+==============================
 
 The :doc:`/tools/seatingplans` page holds twelve separate seating plans on one page.
 Use them for all your classes, or keep several plans for the same class, for
@@ -8,6 +8,8 @@ example one for each room you teach it in.
 
 This page explains how the plans work together and how they are stored. For
 the buttons, layouts and rules inside a plan, see :doc:`/info/seatingplan_info`.
+Technical details for whoever runs the website are in
+:doc:`/info/seatingplans_dev`.
 
 ----
 
@@ -131,6 +133,24 @@ Changing plans
   browser only; any exported JSON file is unaffected.
 * **Move a plan to a different slot:** **Export JSON** from one plan,
   **Import JSON** into the other, then **Reset** the first.
+
+Getting the most out of it
+--------------------------
+
+* **Keep the plans in a steady order**, e.g. by period or by year level, so you
+  can find a class quickly. Moving a plan to another slot is easy (see
+  `Changing plans`_).
+* **Name every plan clearly**, including the room when a class has more than one
+  plan: *8 Science W9 (Lab 2)*.
+* **Export after every change you want to keep**, and name the files to match
+  the plans. A folder of files is your backup and lets you rebuild the whole page
+  on a new computer in a few minutes.
+* **Use Revert as an undo.** Export before trying a new arrangement; if it
+  doesn't work, **Revert** brings the saved one back.
+* **Print all at the start of term** and keep the copies in your relief folder,
+  so a relief teacher knows where everyone sits.
+* **Before projecting a plan**, tick **Hide Rule Badges** in that plan so
+  students don't see who has a rule.
 
 Good to know
 ------------

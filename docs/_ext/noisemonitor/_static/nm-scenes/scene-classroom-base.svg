@@ -54,16 +54,4 @@
     <line x1="1264" y1="255.0" x2="1506" y2="255.0" stroke-width="10" stroke="#e2e8f0"/>
     <rect x="1250" y="100" width="270" height="310" rx="6" fill="none"/>
     <rect x="1238" y="410" width="294" height="14" rx="4" fill="#e2e8f0"/>
-    <g transform="translate(96.0 650.0) scale(0.620)" >
-    <path d="M-40 -150 Q-90 -230 -60 -290 Q-30 -220 -20 -150 Z" fill="#4ade80"/>
-    <path d="M0 -150 Q-10 -270 30 -330 Q40 -240 18 -150 Z" fill="#22c55e"/>
-    <path d="M30 -150 Q80 -220 110 -240 Q90 -180 50 -140 Z" fill="#4ade80"/>
-    <path d="M-60 -150 L60 -150 L46 0 L-46 0 Z" fill="#ea580c"/>
-    <rect x="-68" y="-160" width="136" height="24" rx="6" fill="#f97316"/>
-    </g><g transform="translate(1520.0 662.0) scale(0.700)" >
-    <path d="M-40 -100 L40 -100 L32 0 L-32 0 Z" fill="#60a5fa"/>
-    <line x1="-14" y1="-80" x2="-12" y2="-16" stroke-width="4"/>
-    <line x1="14" y1="-80" x2="12" y2="-16" stroke-width="4"/>
-    <ellipse cx="0" cy="-100" rx="42" ry="9" fill="#93c5fd"/>
-    <path d="M-12 -104 Q-4 -126 14 -110" fill="#fff"/>
-    </g></g></svg>
+    </g></svg>

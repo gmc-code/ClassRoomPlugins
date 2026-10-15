@@ -1,325 +1,367 @@
-===================================
-Using the Name Picker Directive
-===================================
+======================
+Name Picker user guide
+======================
 
-The ``namepicker`` directive embeds an animated random name picker in a
-documentation page.
+The name picker chooses students at random, with a bit of theatre. A stack of
+brightly coloured name cards spins upwards like a slot machine, slows down, and
+settles with the chosen students on top. Pick one student to answer a question,
+or up to ten at once for a group, a job or a presentation order.
 
-A stack of brightly coloured name cards cycles upwards and settles with the
-chosen students on top. Students can be imported from CSV or Excel files or
-entered directly in the directive, marked absent, picked one or several at a
-time, kept from being picked twice, shown full screen on a projector, saved as
-JSON and printed as a list.
+Everything happens in your browser. Student names are never sent anywhere. The
+page remembers your class, who is away and who has been picked, and the whole
+picker can be saved to a file and opened again later.
+
+This guide shows how to use the picker and get the most out of it. Technical
+details for whoever runs the website are in :doc:`/info/namepicker_dev`.
 
 ----
 
-Quick start
+Getting started
+---------------
+
+#. **Load your class.** If the picker already shows names, skip this step.
+   Otherwise press **Roster** and choose your class list (see
+   `Class lists`_). The picker is named after the file; click the title to
+   change it.
+#. **Choose how many** under **Pick** (1–10).
+#. Press **Pick!** The stack spins and lands on your students. Press
+   **Pick Again!** for the next turn.
+
+That's all you need. The rest of this page covers everything else the picker can
+do.
+
+
+Class lists
 -----------
 
-Add the directive to an RST page:
+**Roster** reads an Excel (``.xlsx``, ``.xls``) or ``.csv`` file whose
+first row is headings. These headings are recognised (any case):
 
-.. code-block:: rst
+* **Preferred** or **First Name**: the name shown on the card
+* **Surname** or **Last Name** (optional)
+* **Homeroom** (optional): shown as a small badge, e.g. *H11*
 
-   .. namepicker::
-      :title: Who's Up?
+Other columns are ignored. Importing a new class list clears the picks and the
+history; you're asked first if there is a history to lose.
 
-      Alex Smith, H11
-      Sam Jones, B11
-      Priya Patel, N12
-      Jordan Lee, N12
-      Mia Chen, H11
-      Tom Brown, B11
+**Already set up a class in another tool?** **Import** also accepts a file
+saved from the **student groups** planner or the **seating plan**. The picker
+takes the class and its title, and from student groups also who is away. Your
+picker settings stay as they are. This is the quickest way to use the same class
+in every tool.
 
-Directive options
------------------
 
-``:count:``
-   Sets how many students are picked each time.
-
-   * ``1`` — one student (default).
-   * Any whole number from ``1`` to ``10``. Other values give a build warning
-     and fall back to ``1``.
-
-   The number can also be changed in the browser.
-
-``:duration:``
-   Sets how long the cards cycle before settling, in seconds.
-
-   * ``6`` — six seconds (default).
-   * Any number from ``1`` to ``20``, including halves such as ``2.5``. Other
-     values give a build warning and fall back to ``6``.
-
-``:easing:``
-   Sets how the cycling cards slow down.
-
-   * ``ease-out`` — smooth slow down (default).
-   * ``linear`` — constant speed, then a sudden stop.
-   * ``ease-in-out`` — slow start and slow end.
-   * ``ease-out-strong`` — fast, then a long crawl to the end.
-   * ``back`` — slips past the final name and settles back.
-   * ``elastic`` — springy finish.
-   * ``bounce`` — bounces into place.
-
-``:roster:``
-   Loads a roster from a CSV file or Excel workbook (``.xlsx``), relative to
-   the documentation page. Students listed in the directive body are added
-   after the roster.
-
-   Excel support requires ``openpyxl``.
-
-   Supported columns:
-
-   * ``Preferred`` or ``First Name``
-   * ``Surname`` or ``Last Name`` (optional)
-   * ``Homeroom`` (optional)
-
-``:title:``
-   Sets the initial title displayed above the picker. The title can also be
-   edited in the browser and is included on printouts.
-
-``:no-repeat:``
-   Starts with **Skip Students Already Picked** ticked, so each student is
-   picked once before anyone is picked again.
-
-``:surname-initial:``
-   Starts with **Surname Initial Only** ticked.
-
-``:hide-homeroom:``
-   Starts with **Show Homeroom** unticked.
-
-``:skip-animation:``
-   Starts with **Skip Animation** ticked, so the result appears straight away.
-
-These four options take no value. They set how the page first appears; the
-matching checkboxes can still be changed in the browser. See
-`What the browser remembers`_.
-
-For example, a picker that chooses three students at a time, takes everyone
-in turn and finishes with a bounce:
-
-.. code-block:: rst
-
-   .. namepicker::
-      :title: Practical Team Leaders
-      :count: 3
-      :duration: 8
-      :easing: bounce
-      :no-repeat:
-      :surname-initial:
-
-``:storage-key:``
-   Sets a custom key for storing the class list and settings in the browser.
-   If omitted, the page name and directive position are used automatically.
-
-``:class:``
-   Adds CSS classes to the name picker container.
-
-Student definitions
--------------------
-
-Each non-blank content line defines a student. Lines beginning with ``#`` are
-ignored.
-
-Student entries
-~~~~~~~~~~~~~~~
-
-Enter students using any of these formats:
-
-.. code-block:: text
-
-   First
-   First Surname
-   First Surname, Homeroom
-
-For example:
-
-.. code-block:: text
-
-   Alex
-   Priya Patel, N12
-   Mia Chen, Hughes 11
-
-The first word becomes the student's first name, and the remaining text
-becomes the surname. Homerooms are abbreviated automatically where possible,
-so ``Hughes 11`` is shown as ``H11``.
-
-If two students have the same name, the build shows a warning. Give them
-different names, for example by adding an initial, so the class can tell them
-apart.
-
-Using the name picker
----------------------
-
-Press **Pick!** to start. The name cards cycle upwards for the chosen
-animation time, then the stack settles with the picked students on top,
-numbered in order. Their names are also listed under the cards.
-
-Press **Pick Again!** to choose again. The previous result slides back into
-the stack before the cards start cycling.
-
-* The line under the cards shows how many students are in the hat and, when
-  **Skip Students Already Picked** is ticked, how many have not been picked
-  yet.
-* Click the title to rename it.
-* In **Projector View**, the :kbd:`Space` bar also presses **Pick!**, as do
-  :kbd:`Page Down` and :kbd:`→`, so a presentation clicker works too.
-
-Toolbar controls
-~~~~~~~~~~~~~~~~
+The toolbar
+-----------
 
 .. list-table::
-   :widths: 24 76
    :header-rows: 1
+   :widths: 26 74
 
-   * - Control
-     - Function
-   * - **Import Roster**
-     - Loads a CSV or Excel class list into the browser, replacing the
-       current students. Imported data is not uploaded anywhere.
-   * - **Import JSON**
-     - Restores a previously exported picker, including its settings,
-       absences and picks.
-   * - **Export JSON**
-     - Downloads the students, settings, absences, students already picked
-       and the last result.
+   * - Button
+     - What it does
+   * - **Roster**
+     - Imports a class list from Excel or CSV.
+   * - **Import** / **Export**
+     - Opens or saves the whole picker as a JSON file (see `Saving and opening`_).
    * - **Reset**
-     - Restores the class list and settings originally defined in the
-       directive.
+     - Goes back to the page's own class list and settings.
+   * - **Revert**
+     - Goes back to the last file you opened or saved.
    * - **Print**
-     - Opens a print-friendly list of the students picked last time.
-   * - **Class List**
-     - Opens the class list, where students can be marked present or absent.
-   * - **Projector View**
-     - Shows only the title, the **Pick!** button and the cards, filling the
-       screen, with the card stack enlarged to fit. Press **Exit projector
-       view** or :kbd:`Esc` to return.
-   * - **Students to pick**
-     - Sets how many students are picked each time, from 1 to 10.
-   * - **Animation time**
-     - Sets how long the cards cycle, from 1 to 20 seconds.
-   * - **Easing**
-     - Sets how the cards slow down. See ``:easing:`` above.
-   * - **Forget Picks**
-     - Clears the record of students already picked, so everyone present can
-       be chosen again.
+     - Prints the last pick as a large numbered list.
+   * - **Class**
+     - The class list: mark who is here today (see `Who is here`_).
+   * - **History**
+     - Every pick so far, and how often each student has been picked.
+   * - **Projector**
+     - Just the title, the Pick button and the cards, full-screen.
+   * - **Pick** 1–10
+     - How many students to pick at once.
+   * - **Order**
+     - The order picked students are shown in (see `Order of the picks`_).
+   * - **Time** and **Speed**
+     - How long the stack spins, and how many names pass the top each second.
+   * - **Easing** and **Settings**
+     - How the spin speeds up and slows down; **Settings** opens Animation
+       Settings.
+   * - **Forget**
+     - Forget Picks: puts everyone back in the hat (the history is kept).
 
-Display options
-~~~~~~~~~~~~~~~
+Hover over any button or option to see what it does. Messages appear in a
+yellow bar under the toolbar. Click **✕** to dismiss one.
+
+
+How many, how long, and how it moves
+------------------------------------
+
+**Pick (1–10).** How many students to pick at once. With more than one, the
+chosen cards are numbered 1, 2, 3 … (see `Order of the picks`_). If fewer
+students are available than you asked for, everyone available is picked and a
+message says so.
+
+**Animation time (1–20 seconds).** How long the stack spins. Short times keep a
+quick question moving; longer times build suspense.
+
+**Easing** changes how the spin slows down. Choose a style from the **Easing**
+list on the toolbar; the **Settings** button beside it opens **Animation Settings** to
+adjust the speed and the style's settings (see `Animation Settings`_).
 
 .. list-table::
-   :widths: 30 70
    :header-rows: 1
+   :widths: 30 70
+
+   * - Easing
+     - Feel
+   * - Linear
+     - Constant speed, then a sudden stop.
+   * - Ease out (default)
+     - Fast at first, slowing smoothly to a stop.
+   * - Ease in-out
+     - Slow start, fast middle, slow finish.
+   * - Ease out strong
+     - Very fast, then a long, tense crawl to the end.
+   * - Sine
+     - A gentle, even slow-down.
+   * - Exponential
+     - Very fast, then a sudden brake.
+   * - Circular
+     - Fast, then a long smooth glide to the end.
+   * - Overshoot
+     - Slips just past the final name, then settles back.
+   * - Elastic
+     - Springs past and bounces back and forth before settling.
+   * - Spring
+     - Wobbles either side of the final name, like a spring coming to rest.
+   * - Bounce
+     - Lands and bounces like a dropped ball.
+   * - Rubber band
+     - Stretches a few names past the end, then snaps back.
+   * - Anticipate
+     - Pulls back a name or two first, then spins away.
+   * - Steps
+     - Moves one name at a time, at a steady pace.
+   * - Ratchet
+     - Slows down click by click, pausing on each name.
+   * - Drumroll
+     - Races up, waits trembling one name short, then drops in the last name.
+   * - Near miss
+     - Seems to stop one or two names short, then creeps on to the real pick.
+   * - Random
+     - A different style each pick, chosen at random from the styles you tick
+       in Animation Settings (each with its own strength). The line under the
+       cards says which style was used.
+
+Whatever the style, it only changes how the stack moves: who is picked is
+decided before the spin starts, so every style is equally fair.
+
+Animation Settings
+~~~~~~~~~~~~~~~~~~
+
+Press **Settings** beside the **Easing** list to fine-tune the spin. Changes are saved straight
+away, and **▶ Preview** tries them on a moving dot (and the graph) without
+picking anyone.
+
+* **Animation time**: the same setting as the toolbar slider.
+* **Spin speed** (1–15 names a second, also **Speed** on the toolbar): how many names rush past the top. More
+  names makes a faster, longer spin; fewer makes it calmer and easier to read.
+  The footer shows roughly how many names will spin past.
+* **Easing**: choose a style from the list. The graph shows how the stack moves
+  over time: a curve above the *end* line means it slips past and comes back,
+  and below the *start* line means it pulls back first.
+* **Strength**: most styles have a slider. It sets, for example, how hard
+  *Ease out* brakes, how far *Overshoot* or *Rubber band* go past, how long the
+  *Drumroll* lasts or how long *Near miss* seems to stop. **Default strength**
+  puts it back.
+* **Random**: tick the styles Random may choose from (**All** ticks them all;
+  **None** leaves just one, as at least one must stay ticked). The graph shows
+  each ticked style in its own colour, and **Preview** tries one at random and
+  names it. To change the strength of a style Random uses, choose that style in
+  the list, set its strength, then choose **Random** again.
+
+Each style remembers its own strength. The strengths and the styles ticked for
+Random are saved with the picker and in **Export**.
+
+**Checkboxes:**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 34 66
 
    * - Option
      - Effect
-   * - **Surname Initial Only**
-     - Shows only the first letter of each surname.
-   * - **Show Homeroom**
-     - Shows or hides homerooms on the cards and printouts.
-   * - **Skip Students Already Picked**
-     - Picks only students who have not been picked yet. When too few are
-       left, everyone goes back in the hat and a message says so.
-   * - **Skip Animation**
-     - Shows the result straight away, without cycling the cards.
+   * - Surname initial
+     - Shows "Smith" as "S."
+   * - Homeroom
+     - Shows the homeroom badge on each card.
+   * - No repeats
+     - Skips students already picked: nobody is picked twice until everyone
+       present has had a turn (see `Fair turns`_).
+   * - No animation
+     - Shows the result straight away.
+   * - Sound
+     - A soft tick as each name passes the top, and a chime when the pick
+       lands.
 
-Marking students absent
-~~~~~~~~~~~~~~~~~~~~~~~
 
-**Class List** opens a list of every student with a tick box. Untick a
-student to mark them absent, so they can't be picked. **All Present** and
-**None Present** tick or untick everyone at once. Students who have already
-been picked are tagged *picked*.
+Order of the picks
+------------------
 
-If fewer students are present than the number to pick, everyone present is
-picked and a message says so.
+**Order** sets the order of the name stack and of the picked students:
 
-What the browser remembers
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+* **Random**: the stack is shuffled, and the picks are shown in the order they
+  landed.
+* **A → Z** / **Z → A**: the stack runs in surname order, and the picks are
+  listed in that order.
+* **Homeroom**: the stack runs homeroom by homeroom (then surname).
 
-The browser remembers the title, students, absences, students already picked,
-the last result and all settings for each directive. This means absences and
-the "already picked" record carry over between lessons until they are changed,
-**Forget Picks** is pressed or the page is reset.
+The stack changes as soon as you choose an order, and the names spin past in
+that order, like a reel. Where it stops is still random, so the student on top
+is a fair pick. When you pick several at once with a sorted order, they are
+neighbours in the list (e.g. three surnames in a row); use **Random** for a
+fully mixed group.
 
-Remembered settings take priority over the directive's options on later
-visits. **Reset** returns the page to the students and settings written in the
-directive.
+Changing the order after a pick re-arranges the picked cards straight away. The
+*Picked:* line, **Print** and **Put Back** follow the same order; the history
+records the order they landed in.
 
-Privacy and student data
-------------------------
 
-.. warning::
+Fair turns
+----------
 
-   A roster supplied directly in the directive or through ``:roster:``
-   becomes part of the generated HTML page.
+Tick **No repeats** to work through the class. Picked students
+stay out of the hat until everyone present has been picked. When too few
+unpicked students are left for the number you asked for, everyone goes back in
+the hat and a message says so. Press **Forget** to start a new round
+yourself.
 
-   Do not publish real student names on a public documentation site.
+The info line under the cards shows how many students are in the hat and how
+many haven't been picked yet.
 
-   For public sites, leave the directive empty and use **Import Roster** in
-   the browser instead, or host the documentation privately.
+**History** shows every pick (newest first, with the time) and a *Times picked*
+list with the least-picked students at the top. It's a quick way to check that
+everyone gets a fair go over a term. **Clear history** empties it.
 
-Installation
-------------
 
-Copy the ``namepicker`` folder next to ``conf.py``. It contains:
-
-* ``__init__.py``
-* ``namepicker.py``
-* ``_static/namepicker.css``
-* ``_static/namepicker.js``
-
-Add the extension to ``conf.py``:
-
-.. code-block:: python
-
-   import os
-   import sys
-
-   sys.path.insert(0, os.path.abspath('.'))
-
-   extensions = [
-       'namepicker',
-   ]
-
-The CSS and JavaScript assets are automatically copied into the generated
-``_static`` directory during HTML builds, so no additional configuration is
-required on Read the Docs. The directive produces no output in PDF or text
-builds.
-
-To enable build-time reading of Excel roster files, add ``openpyxl`` to your
-documentation requirements. Excel files imported in the browser need an
-internet connection the first time, to load the Excel reader.
-
-Examples
+Put Back
 --------
 
-Example class
-~~~~~~~~~~~~~
+Picked someone who is out of the room, or who just answered? Press
+**↩ Put Back** (beside **Pick Again!**). Those students go back in the hat, and
+the pick is removed from the history, as if it never happened. Only the last
+pick can be put back.
 
-This example picks two students at a time, without picking anyone twice.
 
-.. namepicker::
-   :title: Example Class
-   :count: 2
-   :no-repeat:
+Who is here
+-----------
 
-   Alex Smith, H11
-   Sam Jones, H11
-   Priya Patel, N12
-   Jordan Lee, N12
-   Mia Chen, H11
-   Tom Brown, N12
-   Zoe Adams, H11
-   Ben Clark, N12
-   Ava Wilson, H11
-   Lucas White, N12
-   Noah Green, H11
-   Ella Taylor, N12
+**Class** shows the class in two columns, with a search box. Untick anyone
+who is away; they are left out of the picking until you tick them again.
 
-Empty class
-~~~~~~~~~~~
+* **All Present** / **None Present** tick or untick everyone.
+* Students already picked are tagged *picked* (or *picked before* once picks
+  are forgotten), with how many times.
+* **Forget** puts everyone back in the hat.
 
-Use an empty directive when you want users to import their own class list.
 
-.. namepicker::
-   :title: Empty Class
+Projector view
+--------------
+
+**Projector** shows only the title, the **Pick!** button and the cards,
+full-screen, and scales the stack to fill the screen.
+
+* Press **Space**, **Page Down** or **→** to pick. Most presentation clickers
+  send these keys, so you can pick from across the room.
+* Press **Esc** or **✕ Exit projector view** to leave.
+
+
+Printing
+--------
+
+**Print** opens the last pick as a large numbered list, with homerooms if they
+are shown. It's handy for a speaking order or a list of helpers. Pick someone
+first; there is nothing to print before the first pick.
+
+
+Saving and opening
+------------------
+
+**The browser remembers.** The class, who is away, who has been picked, the
+history and every setting are kept in that browser, so the page reopens as you
+left it.
+
+**Export** saves everything as a file. In Chrome and Edge a *Save As* box
+lets you choose the folder and name; other browsers ask for a file name and
+download it.
+
+**Import** opens a saved file, or a class from the student groups or
+seating plan tools. The file is checked first, and a message says what was
+loaded, e.g. *Imported 8J.json: 27 students (2 away), 14 rounds of picks in the
+history.* Damaged files and files from other tools are turned away with a
+reason.
+
+**Revert** goes back to the last file you opened or saved, or the last class
+list you imported.
+
+**Reset** goes back to the page's own class list and settings, and clears the
+picks and history.
+
+
+Getting the most out of it
+--------------------------
+
+* **Cold calling, fairly.** Leave **No repeats** on all
+  lesson so everyone answers once before anyone answers twice. Use **Put Back**
+  when a student genuinely can't answer, so they stay in the hat.
+* **Think, then pick.** Ask the question, give thinking time, *then* press
+  Pick. Everyone prepares an answer because anyone could be chosen.
+* **Speaking order.** Pick 5–10 at once for presentations; the numbers on the
+  cards are the order.
+* **Jobs and helpers.** Pick 2–3 for monitors, equipment or tidy-up, and print
+  the list for the board.
+* **Build suspense, or don't.** Use *Drumroll* or *Near miss* for a dramatic
+  moment, *Ease out strong* with its strength turned up for a long crawl, and
+  **No animation** when you just need a name.
+* **Keep them guessing.** Choose **Random** and tick only the styles your class
+  enjoys, so every pick looks a little different.
+* **Easier to read on the projector.** Lower the **Spin speed** so students can
+  follow the names as they pass.
+* **Same class everywhere.** Set the class up once in student groups or the
+  seating plan, export it, and import that file here.
+* **Check the spread.** Glance at **History → Times picked** at the end of a
+  week to see who has hardly been picked.
+* **Keep a backup.** **Export** at the end of term keeps the history.
+
+
+Privacy
+-------
+
+* Class lists, picks and history stay **in this browser on this computer**.
+  They are not sent to any server or copied to your other devices.
+* They are lost if the browser's site data is cleared, and aren't kept at all in
+  a private or incognito window. **Export** is your backup.
+* On a shared computer, anyone using the same browser can see the class. Press
+  **Reset** before you leave.
+* **Exported files contain student names.** Keep them where you keep other class
+  lists.
+
+
+Troubleshooting
+---------------
+
+The Pick button is greyed out
+   There is nobody to pick. Import a class, or tick students in **Class**.
+
+The same student keeps coming up
+   It's random, so repeats happen. Tick **No repeats**.
+
+No sound
+   Tick **Sound**, check the computer isn't muted, and press **Pick!** once
+   (browsers only allow sound after a click on the page).
+
+Importing an Excel file fails
+   The Excel reader is downloaded the first time, so it needs an internet
+   connection. Save the sheet as CSV instead.
+
+My picks didn't follow me to another computer
+   Everything is saved per browser. Use **Export** and **Import**.

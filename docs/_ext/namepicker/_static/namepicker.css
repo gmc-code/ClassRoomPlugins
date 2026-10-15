@@ -56,6 +56,8 @@
 .np-btn:disabled { opacity: .55; cursor: not-allowed; }
 .np-btn-size { background: transparent; color: #94a3b8; padding: 4px 8px; min-width: 26px; justify-content: center; }
 .np-btn-size:hover { background: #1e293b; color: #f8fafc; }
+.np-btn-order { min-width: 0; padding: 4px 9px; }
+.np-btn-gear { padding: 4px 9px; }
 .np-btn-size.np-active { background: #3b82f6; color: #fff; font-weight: 600; }
 .np-btn-grey { background: #475569; } .np-btn-grey:hover { background: #334155; }
 .np-btn-amber { background: #d97706; } .np-btn-amber:hover { background: #b45309; }
@@ -192,7 +194,130 @@ html.np-projector-open, html.np-projector-open body { overflow: hidden; }
 .np-class-tag { font-size: 10px; font-weight: 700; background: #d1fae5; color: #047857; border-radius: 3px; padding: 0 4px; flex: none; }
 .np-rules-empty { font-size: 13px; color: #64748b; }
 
+/* ---- Pick row: Pick! and Put Back ---- */
+.namepicker .np-pick-row { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.namepicker .np-putback { padding: 8px 14px; font-size: 13px; }
+.np-btn[hidden] { display: none !important; }
+.namepicker .np-status.np-show { cursor: default; }
+.namepicker.np-projector .np-putback { display: none !important; }
+
+/* ---- Panels (Class List, History): same style as the Rules panel in the other tools ---- */
+.np-rp { width: 860px; max-width: 96vw; max-height: 92vh; }
+.np-rp-top { padding: 10px 16px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; }
+.np-rp-help { font-size: 12.5px; color: #64748b; }
+.np-rp .np-modal-body { flex: 1 1 auto; min-height: 0; gap: 8px; padding: 10px 16px; }
+.np-rp-tools { display: flex; gap: 10px; align-items: center; position: sticky; top: -10px; background: #fff; padding: 2px 0 6px; z-index: 1; }
+.np-rp-search {
+    flex: 1; min-width: 0; height: 34px; padding: 4px 10px; border: 1px solid #cbd5e1; border-radius: 5px;
+    font: 400 13px/1.3 inherit; font-family: inherit;
+}
+.np-rp-list { column-count: 2; column-gap: 28px; column-rule: 1px solid #e2e8f0; }
+.np-rp-row {
+    display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-bottom: 1px solid #f1f5f9;
+    cursor: pointer; font-size: 13.5px; border-radius: 4px; break-inside: avoid;
+}
+.np-rp-row:hover { background: #f8fafc; }
+.np-rp-row.np-rp-on { background: #f0fdf4; }
+.np-rp-row input { width: 16px; height: 16px; margin: 0; flex: none; cursor: pointer; accent-color: #0d9488; }
+.np-rp-row.np-absent { color: #94a3b8; }
+.np-rp-row.np-absent .np-rp-name { text-decoration: line-through; }
+.np-rp-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.np-rp-hr { font-size: 11px; font-weight: 700; color: #0369a1; background: #e0f2fe; border-radius: 3px; padding: 0 4px; }
+.np-class-tag-old { background: #f1f5f9; color: #64748b; }
+.np-rp-empty { font-size: 13px; color: #64748b; padding: 14px 0; text-align: center; }
+.np-rp-foot {
+    display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;
+    padding: 10px 16px; border-top: 1px solid #e2e8f0; background: #f8fafc;
+}
+.np-rp-foot > span:last-child { display: flex; flex-wrap: wrap; gap: 6px; }
+.np-rp-count { font-size: 12.5px; color: #475569; }
+
+/* History */
+.np-h-cols { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 20px; }
+.np-h-cols h5 {
+    margin: 0 0 6px; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #64748b;
+}
+.np-h-rounds, .np-h-tally { list-style: none; margin: 0; padding: 0; }
+.np-h-rounds li, .np-h-tally li {
+    display: flex; gap: 10px; align-items: baseline; padding: 4px 6px; border-bottom: 1px solid #f1f5f9; font-size: 13px;
+}
+.np-h-when { flex: none; width: 9.5em; color: #64748b; font-size: 12px; font-variant-numeric: tabular-nums; }
+.np-h-names { flex: 1; min-width: 0; }
+.np-h-n { flex: none; font-weight: 700; min-width: 1.6em; text-align: right; font-variant-numeric: tabular-nums; }
+.np-h-tally li.np-h-zero .np-h-n { color: #16a34a; }
+.np-h-tally li.np-absent { color: #94a3b8; }
+@media (max-width: 640px) {
+    .np-rp-list { column-count: 1; }
+    .np-h-cols { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---- Animation Settings panel ---- */
+.np-anim { width: 720px; }
+.np-an-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 22px; align-items: start; }
+.np-an-cols h5 {
+    margin: 8px 0 6px; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #64748b;
+}
+.np-an-cols h5:first-child { margin-top: 0; }
+.np-an-field { display: block; margin-bottom: 8px; font-size: 13px; color: #334155; }
+.np-an-field > span { display: flex; justify-content: space-between; gap: 8px; }
+.np-an-field b { color: #2563eb; font-variant-numeric: tabular-nums; }
+.np-an-field i { font-style: normal; }
+.np-an-field input[type="range"] { width: 100%; margin: 4px 0 0; accent-color: #7c3aed; }
+.np-an-select {
+    width: 100%; height: 34px; margin-bottom: 8px; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 5px;
+    background: #fff; color: #0f172a; font: 400 13px/1.3 inherit; font-family: inherit;
+}
+.np-an-small { padding: 4px 10px; font-size: 12px; }
+.np-an-random { margin-top: 4px; }
+.np-an-hint { margin: 0 0 6px; font-size: 12px; color: #64748b; }
+.np-an-pool { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 10px; margin-bottom: 6px; }
+.np-an-pool label { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #334155; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.np-an-pool input { margin: 0; accent-color: #7c3aed; flex: none; }
+.np-an-swatch { display: inline-block; flex: none; width: 10px; height: 3px; border-radius: 2px; }
+.np-an-pool-btns { display: flex; align-items: center; gap: 6px; }
+.np-an-pool-count { font-size: 11px; color: #64748b; }
+.np-an-graph-wrap { display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
+.np-an-graph { width: 100%; height: auto; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; touch-action: none; }
+.np-g-box { fill: #fff; stroke: none; }
+.np-g-line { stroke: #cbd5e1; stroke-width: 1; stroke-dasharray: 4 3; }
+.np-g-lab { font-size: 10px; fill: #64748b; font-family: inherit; }
+.np-g-curve { fill: none; stroke: #7c3aed; stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+.np-g-many { stroke-width: 1.6; opacity: .5; }
+.np-g-many.np-g-on { stroke-width: 4; opacity: 1; }
+[hidden].np-an-hint { display: none !important; }
+.np-g-marker { fill: #f59e0b; stroke: #fff; stroke-width: 2; }
+.np-an-track {
+    position: relative; height: 26px; border-radius: 13px; background: #e2e8f0; overflow: visible;
+    background-image: linear-gradient(90deg, transparent calc(12% - 1px), #94a3b8 12%, transparent calc(12% + 1px));
+}
+.np-an-end { position: absolute; left: 82%; top: -4px; bottom: -4px; width: 2px; background: #16a34a; }
+.np-an-dot {
+    position: absolute; left: 12%; top: 3px; width: 20px; height: 20px; margin-left: -10px; border-radius: 50%;
+    background: #ff2d55; box-shadow: 0 2px 4px rgba(0,0,0,.25);
+}
+[hidden].np-an-field, [hidden].np-an-random { display: none !important; }
+@media (max-width: 640px) { .np-an-cols { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---- Compact toolbar ---- */
+.namepicker .np-toolbar { padding: 6px 8px; gap: 5px; }
+.namepicker .np-toolbar-row { gap: 5px 6px; }
+.namepicker .np-toolbar .np-btn { padding: 4px 8px; font-size: 12px; gap: 4px; line-height: 1.2; }
+.namepicker .np-toolbar .np-btn-icon { width: 14px; height: 14px; }
+.namepicker .np-toolbar .np-btn-size { padding: 3px 7px; min-width: 0; }
+.namepicker .np-toolbar .np-sizes { padding: 2px; gap: 2px; }
+.namepicker .np-toolbar-label { font-size: 11.5px; }
+.namepicker .np-toolbar .np-range { width: 96px; }
+.namepicker .np-toolbar .np-range-speed { width: 80px; }
+.namepicker .np-toolbar .np-time-out { min-width: 30px; }
+.namepicker .np-toolbar .np-time-out { min-width: 36px; font-size: 11.5px; }
+.namepicker .np-toolbar .np-select { padding: 2px 6px; font-size: 12px; height: 26px; }
+.namepicker .np-toolbar .np-btn-gear { padding: 4px 6px; }
+.namepicker .np-toolbar .np-checkbox-label { font-size: 12px; gap: 3px; }
+.namepicker .np-toolbar-row--options { gap: 4px 8px; }
+.namepicker .np-toolbar .np-checkbox { width: 14px; height: 14px; }
+.namepicker .np-toolbar [data-action="forget-picks"] { padding: 3px 8px; font-size: 11.5px; }
+
 @media print {
     .namepicker { border: none; background: #fff; }
-    .namepicker .np-toolbar, .namepicker .np-status, .namepicker .np-pick, .np-modal { display: none !important; }
+    .namepicker .np-toolbar, .namepicker .np-status, .namepicker .np-pick-row, .np-modal { display: none !important; }
 }

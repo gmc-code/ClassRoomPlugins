@@ -1,11 +1,15 @@
-=====================================
-Using the Seating Plan
-=====================================
+=======================
+Seating Plan user guide
+=======================
 
 The seating plan lets you load a class list, set up the room, add seating
 rules and arrange students on desks, then print it or show it on the
 projector. Everything happens in your browser: student names are never sent
 anywhere, and the plan is saved on this computer as you work.
+
+This guide shows how to use the seating plan and get the most out of it.
+Technical details for whoever runs the website are in
+:doc:`/info/seatingplan_dev`.
 
 ----
 
@@ -63,7 +67,9 @@ Top row: files and output
    and name; other browsers ask for a name and save to Downloads.
 
 **Reset**
-   Go back to the empty plan (as written on the page by the website author), removing your class list, rules and changes from this browser. You are asked to confirm.
+   Go back to the plan as it was first set up on the page (usually empty),
+   removing your class list, rules and changes from this browser. You are
+   asked to confirm.
 
 **Revert**
    Go back to the last file you imported or exported, undoing everything
@@ -171,7 +177,7 @@ Put empty floor space in square brackets, counted in desk widths:
 * ``[2]3[2]``: a row of 3 desks centred, with 2 spaces each side
 * ``1[6]1, 1[6]1, 8``: a horseshoe
 
-Limits: Up to 12 rows, each with 1–20 desks and at most 24 places wide (desks plus
+Limits: up to 12 rows, each with 1–20 desks and at most 24 places wide (desks plus
 spaces). Desks either side of a space are not counted as next to each other.
 
 Tables
@@ -188,7 +194,7 @@ In **Tables** mode, type the seats at each table, commas between tables and
 | ``6,4,6 / 4,6,4`` means tables of 6, 4 and 6 then tables of 4, 6 and 4.
 | ``2x3`` means 2 rows of 3 tables of 4.
 | ``2x3 6`` uses 2 rows of 3 tables of 6.
-| Limits:Up to 8 rows of 8 tables.
+| Limits: up to 8 rows of 8 tables.
 
 Rows and tables each keep their own layout, so you can switch between them
 without losing either.
@@ -309,6 +315,46 @@ as they are seated. Rule badges, group colours, red highlights and row buttons a
 left off. **One-line Names** and **Teacher's View** are used if they are on.
 Choose **Save as PDF** in the print box to keep a PDF.
 
+Getting the most out of it
+--------------------------
+
+**Set each class up once.** Import the class list, name the plan, choose the
+layout, add your rules, then press **Export JSON** and keep the file. After that,
+changing the seating takes seconds.
+
+**Add rules first, then sort.** Every sort follows the rules, so add *Front row*,
+*Keep apart* and so on before pressing **A → Z** or **Random**. Then fine-tune by
+dragging; red desks show anything you need to fix.
+
+**Use as few rules as you need.** Each rule narrows the choices. With many rules
+in a small room the plan may not be able to meet them all, and it tells you
+which it left out. Keep the essentials (support needs, students who must be
+apart) and handle the rest by hand.
+
+**Match the real room.** Use square brackets for aisles and gaps (``3[1]3``) so
+"next to" means next to in the real room. Students across an aisle are not
+counted as neighbours.
+
+**Fill from the back for small classes.** **Fill: Last → First** leaves the front
+rows empty, or use it with *Front row* rules so the students who need to be
+close still are.
+
+**Freshen up without starting again.** Use a row's **Shuffle** button to mix up
+one row, **⇅ Swap** to move a whole row forward, or **⇄ Flip** to swap the ends
+of a row, without touching the rest of the room.
+
+**Two layouts for one class.** Rows and Tables keep their own layouts, so the
+same class can switch between test seating (rows) and group work (tables) with
+one click. For a different room, keep a second plan (see
+:doc:`/info/seatingplans_info`).
+
+**Project it, then print it.** Tick **Hide Rule Badges** before **Projector
+View** so students don't see who has a rule. Tick **Teacher's View** before
+printing to get a copy that matches what you see from the front.
+
+**Keep a copy before experimenting.** Press **Export JSON** first; **Revert**
+brings the saved plan straight back.
+
 Saving and privacy
 ------------------
 
@@ -326,127 +372,3 @@ Saving and privacy
   shared computer.
 * **Exported files contain student names.** Store them where you keep other
   class lists, not on shared or public drives.
-
-----
-
-For the website author: the directive
------------------------------------------
-
-A plan is added to a page with the ``seatingplan`` directive. All options are
-optional:
-
-.. code-block:: rst
-
-   .. seatingplan::
-      :layout: 5x6
-      :title: Year 8 Science
-      :sort: az
-
-      Alex Smith, H11
-      Sam Jones, B11
-      Priya Patel, N12
-
-      separate: Alex Smith | Sam Jones
-      pair: Priya Patel | Sam Jones
-      front: Priya Patel
-
-Content
-~~~~~~~
-
-* **Students**, one per line: ``First Surname, Homeroom`` (homeroom
-  optional).
-* **Rules**, one per line, naming students exactly as listed:
-  ``front:``, ``back:``, ``left:``, ``right:`` and ``empty:`` take one name;
-  ``pair:`` takes 2–4 names (up to 6 in tables mode) and ``separate:`` takes
-  2 or more, separated by ``|``.
-* Lines starting with ``#`` are ignored.
-
-Teachers can replace the page's class list by importing their own; **Reset**
-brings back what is written here.
-
-Options
-~~~~~~~
-
-``:layout:``
-   Desks per row (``5x6``, ``7,8,9,6``, ``3[1]3``), or tables in tables mode
-   (``6,4,6 / 4,6,4``). Default ``5x6``, or 8 tables of 4 in tables mode.
-``:mode:``
-   ``rows`` (default) or ``tables``.
-``:tables-per-row:``
-   In tables mode, how many tables per row when the layout has no ``/``.
-   Default 3.
-``:roster:``
-   An ``.xlsx`` or ``.csv`` class list to load, relative to the page. Reading
-   ``.xlsx`` at build time needs ``openpyxl``.
-``:title:``
-   The plan's starting title.
-``:fill:``
-   ``first`` (default) or ``last``.
-``:sort:``
-   ``none`` (default), ``az``, ``za``, ``homeroom`` or ``random``.
-``:one-line:``, ``:surname-initial:``, ``:hide-homeroom:``, ``:hide-badges:``, ``:ignore-rules:``, ``:limit-desk-width:``, ``:teacher-view:``
-   Start with that display option on (or, for ``:hide-homeroom:``, off).
-``:hide-row-controls:``
-   Start with the row buttons hidden. Teachers can still turn them on with
-   the **Row Controls** checkbox.
-``:class:``
-   Extra CSS classes for the plan.
-
-
-
-Restyling a plan with ``:class:``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-``:class:`` adds your own class names to the plan, so you can restyle that
-plan without touching the directive's CSS. Several names can be given,
-separated by spaces.
-
-**1. Add the class to the plan:**
-
-.. code-block:: rst
-
-   .. seatingplan::
-      :layout: 3x10
-      :title: 9 Science 2 – Lab B
-      :class: lab-room roomy
-
-**2. Write the CSS** in your own stylesheet, e.g. ``_static/custom.css``.
-Start each rule with ``.seatingplan.`` and your class name, so it applies
-only to plans with that class:
-
-.. code-block:: css
-
-   /* Taller desks and wider gaps between desks */
-   .seatingplan.roomy {
-       --sp-desk-height: 95px;            /* desk height (default 75px) */
-       --sp-desk-height-projector: 130px; /* in Projector View (default 112px) */
-       --sp-row-gap: 14px;                /* gap between desks in a row (default 8px) */
-   }
-   .seatingplan.roomy .sp-grid { gap: 16px; }   /* gap between rows */
-
-   /* A green title bar to mark lab plans */
-   .seatingplan.lab-room .sp-title { background: #166534; }
-
-**3. Load the stylesheet** in ``conf.py``:
-
-.. code-block:: python
-
-   html_static_path = ["_static"]
-   html_css_files = ["custom.css"]
-
-The settings you can override directly are:
-
-* ``--sp-desk-height``: desk height on screen
-* ``--sp-desk-height-projector``: desk height in **Projector View**
-* ``--sp-row-gap``: gap between desks in a row
-* ``--sp-limit-seats``: the desk count that **Limit Desk Width** matches
-  (default 6)
-
-Anything else can be targeted through the plan's own classes, e.g.
-``.sp-title``, ``.sp-whiteboard``, ``.sp-desk``, ``.sp-card`` and ``.sp-grid``.
-
-.. note::
-
-   Extra classes change the plan **on screen and in Projector View only**.
-   **Print** and **Print all my classes** use their own fixed print styles,
-   so printouts look the same for every plan.

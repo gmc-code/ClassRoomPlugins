@@ -17,7 +17,14 @@ and settles with the chosen students on top.
 Names can come from ``:roster:`` (CSV or Excel with Preferred / First Name, Surname and optional
 Homeroom columns), from the directive content (one ``First Surname, Homeroom`` per line), or both.
 Teachers can also import a roster in the page itself, mark students absent with the Class List
-button and change the number picked, the animation time and the easing on the fly.
+button and change the number picked, the animation time and the easing on the fly. Every pick
+is kept in a history; Put Back undoes a pick; ``:sound:`` turns on tick and chime sounds.
+The Animation Settings panel (and ``:easing-strength:``, ``:spin-speed:``) adjusts how the spin
+moves; ``:easing: random`` uses a different style each pick, from the styles listed in
+``:random-from:`` (default: all); ``:order:`` (random, az, za, homeroom) sets the order of the
+stack and of the picked students.
+Export JSON / Import JSON save and load the whole picker (Revert goes back to the last file),
+and Import JSON also takes a class from a studentgroups or seatingplan file.
 
 The page is rendered client-side by namepicker.js / namepicker.css, which are copied into
 ``_static`` by Sphinx during an HTML build.
@@ -28,13 +35,13 @@ import csv
 import html
 import io
 import json
+import shutil
 from pathlib import Path
 
 from docutils import nodes
 from docutils.parsers.rst import directives
 from sphinx.util import logging
 from sphinx.util.docutils import SphinxDirective
-from sphinx.util.fileutil import copy_asset_file
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +50,14 @@ ASSETS = ("namepicker.css", "namepicker.js")
 
 MIN_COUNT, MAX_COUNT, DEFAULT_COUNT = 1, 10, 1
 MIN_DURATION, MAX_DURATION, DEFAULT_DURATION = 1.0, 20.0, 6.0
-EASINGS = ("linear", "ease-out", "ease-in-out", "ease-out-strong", "back", "elastic", "bounce")
+# Styles Random can choose from, in the order of the Easing list (keep in step with namepicker.js).
+STYLES = (
+    "linear", "ease-out", "ease-in-out", "ease-out-strong", "sine", "expo", "circ", "back",
+    "elastic", "spring", "bounce", "rubber-band", "anticipate", "steps", "ratchet", "drumroll",
+    "near-miss",
+)
+EASINGS = STYLES + ("random",)
+MIN_SPEED, MAX_SPEED, DEFAULT_SPEED = 1, 15, 6
 DEFAULT_EASING = "ease-out"
 
 
@@ -81,9 +95,17 @@ def _read_xlsx(path):
     return [dict(zip(headers, row)) for row in rows[1:]]
 
 
+def _cell_text(v):
+    if v is None:
+        return ""
+    if isinstance(v, float) and v.is_integer():
+        v = int(v)  # Excel stores 11 as 11.0
+    return str(v).strip()
+
+
 def _normalise_row(row):
     return {
-        str(k).strip().lower(): ("" if v is None else str(v).strip())
+        str(k).strip().lower(): _cell_text(v)
         for k, v in row.items()
         if k is not None
     }
@@ -154,12 +176,17 @@ class NamePickerDirective(SphinxDirective):
         "count": directives.unchanged,
         "duration": directives.unchanged,
         "easing": _choice(*EASINGS),
+        "easing-strength": directives.unchanged,
+        "random-from": directives.unchanged,
+        "spin-speed": directives.unchanged,
+        "order": _choice("random", "az", "za", "homeroom"),
         "roster": directives.path,
         "title": directives.unchanged,
         "no-repeat": directives.flag,
         "surname-initial": directives.flag,
         "hide-homeroom": directives.flag,
         "skip-animation": directives.flag,
+        "sound": directives.flag,
         "storage-key": directives.unchanged,
         "class": directives.class_option,
     }
@@ -172,7 +199,7 @@ class NamePickerDirective(SphinxDirective):
         storage_id = self.options.get("storage-key") or "%s#%d" % (env.docname, counter)
 
         def warn(msg):
-            logger.warning(msg, location=(self.env.docname, self.lineno))
+            logger.warning(msg, location=self.get_location())
 
         pick_count = _parse_int(
             self.options.get("count", str(DEFAULT_COUNT)),
@@ -190,15 +217,16 @@ class NamePickerDirective(SphinxDirective):
                     rows = _read_xlsx(abspath)
                 else:
                     rows = _read_csv(abspath)
-            except (OSError, ValueError) as exc:
-                raise self.error("namepicker: cannot read roster %r: %s" % (roster, exc))
-            students.extend(_students_from_rows(rows))
-            if not students:
-                warn(
-                    "namepicker: roster %r has no students. It needs a header row with "
-                    "Preferred (or First Name), Surname (or Last Name) and optionally Homeroom."
-                    % roster
-                )
+            except (OSError, ValueError, UnicodeDecodeError) as exc:
+                warn("namepicker: cannot read roster %r: %s" % (roster, exc))
+            else:
+                students.extend(_students_from_rows(rows))
+                if not students:
+                    warn(
+                        "namepicker: roster %r has no students. It needs a header row with "
+                        "Preferred (or First Name), Surname (or Last Name) and optionally Homeroom."
+                        % roster
+                    )
 
         for line in self.content:
             line = line.strip()
@@ -218,7 +246,7 @@ class NamePickerDirective(SphinxDirective):
 
         seen = set()
         for s in students:
-            key = ("%s %s" % (s["firstName"], s["surname"])).lower()
+            key = " ".join(("%s %s" % (s["firstName"], s["surname"])).split()).lower()
             if key in seen:
                 warn(
                     "namepicker: more than one student is called %r. Give them different names "
@@ -227,17 +255,40 @@ class NamePickerDirective(SphinxDirective):
                 )
             seen.add(key)
 
+        _note_doc(env)
+        strength = None
+        if "easing-strength" in self.options:
+            strength = _parse_int(self.options["easing-strength"], 0, 100, 50, "easing-strength", warn) / 100.0
+        easing = self.options.get("easing") or DEFAULT_EASING
+        random_pool = None
+        if "random-from" in self.options:
+            asked = [v.strip().lower() for v in self.options["random-from"].replace(",", " ").split() if v.strip()]
+            unknown = [v for v in asked if v not in STYLES]
+            if unknown:
+                warn("namepicker: :random-from: does not know %s; the styles are %s."
+                     % (", ".join(repr(v) for v in unknown), ", ".join(STYLES)))
+            random_pool = [k for k in STYLES if k in asked] or None
+            if random_pool is None:
+                warn("namepicker: :random-from: lists no known styles; Random will use them all.")
+        spin_speed = _parse_int(self.options.get("spin-speed", str(DEFAULT_SPEED)),
+                                MIN_SPEED, MAX_SPEED, DEFAULT_SPEED, "spin-speed", warn)
+
         node = namepicker()
         node["config"] = {
             "id": storage_id,
             "title": self.options.get("title", "Name Picker"),
             "count": pick_count,
             "duration": duration,
-            "easing": self.options.get("easing", DEFAULT_EASING),
+            "easing": easing,
+            "easingStrength": strength,
+            "randomPool": random_pool,
+            "spinSpeed": spin_speed,
+            "order": {"random": "RANDOM", "az": "AZ", "za": "ZA", "homeroom": "HOMEROOM"}[self.options.get("order", "random")],
             "noRepeat": "no-repeat" in self.options,
             "surnameInitial": "surname-initial" in self.options,
             "showHomeroom": "hide-homeroom" not in self.options,
             "skipAnimation": "skip-animation" in self.options,
+            "sound": "sound" in self.options,
             "students": students,
         }
         node["classes"] = self.options.get("class", [])
@@ -271,10 +322,10 @@ def _find_asset(name):
     return None
 
 
-def add_static_files(app):
+def _copy_assets(app):
     if app.builder.format != "html":
         return
-    target = Path(app.doctreedir) / "namepicker_static"
+    target = Path(app.outdir) / "_static"
     target.mkdir(parents=True, exist_ok=True)
     for name in ASSETS:
         source = _find_asset(name)
@@ -284,8 +335,54 @@ def add_static_files(app):
                 "the name picker will not display.", name
             )
             continue
-        copy_asset_file(str(source), str(target))
-    app.config.html_static_path.append(str(target))
+        shutil.copyfile(str(source), str(target / name))
+
+
+# Rebuild pages with name pickers when the css/js change, so their ?v= tags update.
+
+def _note_doc(env):
+    if not hasattr(env, "namepicker_docs"):
+        env.namepicker_docs = set()
+    env.namepicker_docs.add(env.docname)
+
+
+def _assets_hash():
+    import hashlib
+    h = hashlib.sha1()
+    for name in ASSETS:
+        source = _find_asset(name)
+        if source is not None:
+            h.update(source.read_bytes())
+    return h.hexdigest()
+
+
+def purge_doc(app, env, docname):
+    getattr(env, "namepicker_docs", set()).discard(docname)
+
+
+def merge_docs(app, env, docnames, other):
+    if not hasattr(env, "namepicker_docs"):
+        env.namepicker_docs = set()
+    env.namepicker_docs |= getattr(other, "namepicker_docs", set())
+
+
+def outdated_if_assets_changed(app, env, added, changed, removed):
+    new_hash = _assets_hash()
+    if getattr(env, "namepicker_assets_hash", None) == new_hash:
+        return []
+    env.namepicker_assets_hash = new_hash
+    return sorted(getattr(env, "namepicker_docs", set()) - set(removed))
+
+
+def copy_static_files_early(app):
+    """Copy the css/js into the site's _static folder before pages are written, so the
+    ?v=<checksum> on the tags matches the new files and browsers don't use a cached copy."""
+    _copy_assets(app)
+
+
+def copy_static_files(app, exception):
+    if exception is None:
+        _copy_assets(app)
 
 
 def setup(app):
@@ -300,5 +397,9 @@ def setup(app):
     app.add_directive("namepicker", NamePickerDirective)
     app.add_css_file("namepicker.css")
     app.add_js_file("namepicker.js", defer="defer")
-    app.connect("builder-inited", add_static_files)
+    app.connect("builder-inited", copy_static_files_early)
+    app.connect("env-purge-doc", purge_doc)
+    app.connect("env-merge-info", merge_docs)
+    app.connect("env-get-outdated", outdated_if_assets_changed)
+    app.connect("build-finished", copy_static_files)
     return {"version": "1.0", "parallel_read_safe": True, "parallel_write_safe": True}

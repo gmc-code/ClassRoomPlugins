@@ -17,8 +17,7 @@ These docs provide details on sphinx extensions and how to use them. The extensi
 
 .. toctree::
     :maxdepth: 2
-    :caption: Directive information:
-
+    :caption: User guides:
 
     info/seatingplan_info.rst
     info/seatingplans_info.rst
@@ -41,4 +40,16 @@ These docs provide details on sphinx extensions and how to use them. The extensi
     tools/namepicker.rst
 
     tools/noisemonitor.rst
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Directives for developers:
+
+    info/seatingplan_dev.rst
+    info/seatingplans_dev.rst
+
+    info/studentgroups_dev.rst
+    info/namepicker_dev.rst
+
+    info/noisemonitor_dev.rst
 

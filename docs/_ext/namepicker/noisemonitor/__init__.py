@@ -1,4 +1,0 @@
-
-
-from .noisemonitor import setup
-

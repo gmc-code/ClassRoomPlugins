@@ -18,8 +18,7 @@
   // Keys and ranges mirror DEFAULTS / NUMERIC_LIMITS in noisemonitor.py.
   const SCHEMA = {
     title:           { type: 'string', max: 120 },
-    scene:           { type: 'enum', values: ['classroom', 'lab', 'groups'] },
-    finale:          { type: 'enum', values: ['room', 'tornado', 'foam', 'rocket', 'dino'] },
+    scene:           { type: 'enum', values: ['classroom', 'lab', 'groups', 'maths'] },
     threshold:       { type: 'int',   min: 0,   max: 100 },
     imageMin:        { type: 'int',   min: 0,   max: 99 },
     imageMax:        { type: 'int',   min: 1,   max: 100 },
@@ -31,6 +30,8 @@
     showDb:          { type: 'bool' },
     showMeter:       { type: 'bool' },
     showStatus:      { type: 'bool' },
+    reverseScene:    { type: 'bool' },
+    stopAtTimeUp:    { type: 'bool' },
   };
 
   const KEY_ALIASES = {
@@ -38,17 +39,16 @@
     'image-max': 'imageMax', image_max: 'imageMax',
     'step-down': 'stepDownSeconds', stepDown: 'stepDownSeconds',
     'scene-cycle': 'sceneCycleMinutes', session: 'sessionMinutes',
-    'show-db': 'showDb', 'show-meter': 'showMeter', 'show-status': 'showStatus',
+    'show-db': 'showDb', 'show-meter': 'showMeter', 'show-status': 'showStatus', reverse: 'reverseScene',
   };
 
   const FALLBACK_DEFAULTS = {
     title: '🔊 Noise Level Monitor',
     scene: 'classroom',
-    finale: 'room',
     threshold: 70, imageMin: 35, imageMax: 85,
     stepDownSeconds: 3, sensitivity: 0, smoothing: 0.8,
     sceneCycleMinutes: 0, sessionMinutes: 0,
-    showDb: true, showMeter: true, showStatus: true,
+    showDb: true, showMeter: true, showStatus: true, reverseScene: false, stopAtTimeUp: true,
     messages: ['Level 0', 'Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5'],
   };
 
@@ -245,8 +245,11 @@
     // ---------------------------------------------------------------- scenes
 
     const isScene = () => !!scenes && !!scenes.backgrounds[settings.scene];
-    const finaleFor = (room) => (settings.finale && settings.finale !== 'room'
-      ? settings.finale : (scenes.roomFinale || {})[room]);
+    const finaleFor = (room) => (scenes.roomFinale || {})[room];
+    // "Reverse the scene": the picture runs backwards (busy when quiet, empty when loud).
+    // (Until the monitor is listening, a reversed room stays empty.)
+    const sceneLevel = () => (settings.reverseScene
+      ? (state.running ? NUM_LEVELS - 1 - state.level : 0) : state.level);
 
     // The scene is a stack: room base (walls + floor), then depth slots with the
     // furniture rows between them (back row first), so a gag placed in a slot
@@ -315,22 +318,24 @@
       });
       const fin = scenes.finales[finale];
       if (fin) add(fin, NUM_LEVELS - 1, false);
-      for (let L = 1; L < NUM_LEVELS; L++) { pickGags(L); levelWasOn[L] = L <= state.level; }
+      for (let L = 1; L < NUM_LEVELS; L++) { pickGags(L); levelWasOn[L] = L <= sceneLevel(); }
       updateSceneLayers(true);
     }
 
     function updateSceneLayers(force) {
+      const sl = sceneLevel();
+      card.setAttribute('data-scene-level', sl);
       for (let L = 1; L < NUM_LEVELS; L++) {
-        const on = L <= state.level;
+        const on = L <= sl;
         // A level that is switching on gets a new random mix of its gags.
         if (on && !levelWasOn[L] && !force) pickGags(L);
         levelWasOn[L] = on;
       }
       // From Level 4 up the room gets busy, so each lower level keeps just one gag.
-      const busy = state.level >= 4;
+      const busy = sl >= 4;
       const keptPerLevel = {};
       gags.forEach((gg) => {
-        let on = gg.level <= state.level && (!gg.random || gg.picked);
+        let on = gg.level <= sl && (!gg.random || gg.picked);
         if (on && busy && gg.level < 4 && gg.level !== NUM_LEVELS - 1) {
           keptPerLevel[gg.level] = (keptPerLevel[gg.level] || 0) + 1;
           if (keptPerLevel[gg.level] > 1) on = false;
@@ -349,13 +354,13 @@
     // At Level 3, every 15-25 s show one random Level 4 gag for about 6 s.
     function updateTeaser(now) {
       const t = state.teaser;
-      if (t && (now > t.until || state.level !== 3)) {
+      if (t && (now > t.until || sceneLevel() !== 3)) {
         state.teaser = null;
         state.nextTeaser = now + 15000 + Math.random() * 10000;
         updateSceneLayers();
         return;
       }
-      if (!t && state.level === 3 && isScene()) {
+      if (!t && sceneLevel() === 3 && isScene()) {
         if (!state.nextTeaser) state.nextTeaser = now + 8000 + Math.random() * 7000;
         if (now >= state.nextTeaser) {
           const pool = gags.filter((gg) => gg.level === 4);
@@ -364,7 +369,7 @@
             updateSceneLayers();
           }
         }
-      } else if (state.level !== 3) {
+      } else if (sceneLevel() !== 3) {
         state.nextTeaser = 0;
       }
     }
@@ -443,40 +448,77 @@
       return h ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${String(m).padStart(2, '0')}:${sec}`;
     }
 
-    // Before starting, show the planned session length (if one is set).
-    function showIdleTimer() {
-      if (state.running || els.timer.classList.contains('is-done')) return;
-      const limit = settings.sessionMinutes * 60000;
-      els.timer.hidden = !(limit > 0);
-      els.timer.classList.add('is-idle');
-      els.timer.classList.remove('is-ending');
-      if (limit > 0) {
-        els.timerText.textContent = formatClock(limit);
-        els.timer.title = `Monitor will run for ${formatClock(limit)}`;
-        els.timer.setAttribute('aria-label', els.timer.title);
-      }
+    // The clock runs on its own: it starts with the monitor, but can also be
+    // started, paused and reset from its own panel (click the clock).
+    const clock = { running: false, before: 0, startedAt: 0, done: false };
+    const clockElapsed = (now = Date.now()) => clock.before + (clock.running ? now - clock.startedAt : 0);
+    function clockStart() {
+      if (clock.running) return;
+      if (clock.done) clockReset();
+      clock.running = true;
+      clock.startedAt = Date.now();
+      renderClock();
+    }
+    function clockPause() {
+      if (!clock.running) return;
+      clock.before = clockElapsed();
+      clock.running = false;
+      renderClock();
+    }
+    function clockReset() {
+      clock.running = false;
+      clock.before = 0;
+      clock.done = false;
+      renderClock();
     }
 
-    function updateTimer() {
-      if (!state.running) return;
-      const now = Date.now();
-      const elapsed = now - state.startedAt;
+    function renderClock(now = Date.now()) {
       const limit = settings.sessionMinutes * 60000;
-      els.timer.hidden = false;
-      els.timer.classList.remove('is-done', 'is-idle');
-      if (limit > 0) {
-        const left = limit - elapsed;
-        els.timerText.textContent = formatClock(left);
-        els.timer.classList.toggle('is-ending', left <= 60000);
-        els.timer.title = `Monitor stops in ${formatClock(left)}`;
-        els.timer.setAttribute('aria-label', `${formatClock(left)} left`);
-        if (left <= 0) { stop('timeup'); return; }
+      const elapsed = clockElapsed(now);
+      const t = els.timer;
+      t.hidden = false;
+      t.classList.toggle('is-idle', !clock.running && elapsed === 0 && !clock.done);
+      t.classList.toggle('is-paused', !clock.running && elapsed > 0 && !clock.done);
+      t.classList.toggle('is-done', clock.done);
+      let text;
+      if (clock.done) {
+        text = 'Time’s up!';
+        t.classList.remove('is-ending');
+      } else if (limit > 0) {
+        const left = Math.max(0, limit - elapsed);
+        text = formatClock(left);
+        t.classList.toggle('is-ending', clock.running && left <= 60000);
+        t.title = `${formatClock(left)} left (click for timer controls)`;
       } else {
-        els.timerText.textContent = formatClock(elapsed);
-        els.timer.classList.remove('is-ending');
-        els.timer.title = 'Time monitoring';
-        els.timer.setAttribute('aria-label', `Monitoring for ${formatClock(elapsed)}`);
+        text = formatClock(elapsed);
+        t.classList.remove('is-ending');
+        t.title = 'Timer (click for controls)';
       }
+      els.timerText.textContent = text;
+      t.setAttribute('aria-label', clock.done ? 'Time is up' : `Timer ${text}`);
+      // mirror into the clock panel
+      if (els.clockBig) els.clockBig.textContent = text;
+      if (els.clockMode) {
+        els.clockMode.textContent = clock.done ? 'Time is up'
+          : limit > 0 ? `Counting down from ${formatClock(limit)}` : 'Counting up (no time limit)';
+      }
+      if (els.clockStartStop) els.clockStartStop.textContent = clock.running ? 'Pause' : (elapsed > 0 && !clock.done ? 'Resume' : 'Start');
+      $$('.noise-clock-chip').forEach((chip) => chip.classList.toggle('is-active', +chip.getAttribute('data-min') === settings.sessionMinutes));
+    }
+
+    // One steady tick for the clock, Level 3 teasers and background cycling.
+    function clockTick() {
+      const now = Date.now();
+      const limit = settings.sessionMinutes * 60000;
+      if (clock.running && limit > 0 && clockElapsed(now) >= limit) {
+        clock.before = limit;
+        clock.running = false;
+        clock.done = true;
+        if (state.running && settings.stopAtTimeUp) stop('timeup');
+        else showStatus('Time’s up!', 'safe');
+      }
+      renderClock(now);
+      if (!state.running) return;
       updateTeaser(now);
       if (isScene() && settings.sceneCycleMinutes > 0 &&
           now - state.lastCycleAt >= settings.sceneCycleMinutes * 60000) {
@@ -484,6 +526,9 @@
         cycleBackground();
       }
     }
+    setInterval(clockTick, 500);
+    const showIdleTimer = () => renderClock();
+    const updateTimer = () => renderClock();
 
     // When the picture style changes, swap untouched default messages to the new set.
     function swapDefaultMessages(fromScene, toScene) {
@@ -556,6 +601,8 @@
     }
     els.settingsBtn.addEventListener('click', openSettings);
     els.close.addEventListener('click', closeSettings);
+    const doneBtn = $('.noise-btn-done');
+    if (doneBtn) doneBtn.addEventListener('click', closeSettings);
     // Click on the backdrop (outside the panel) closes it.
     els.dialog.addEventListener('click', (e) => {
       if (e.target !== els.dialog) return;
@@ -649,10 +696,9 @@
         state.buffer = new Float32Array(state.analyser.fftSize);
 
         state.running = true;
-        state.startedAt = state.lastCycleAt = Date.now();
-        clearInterval(state.ticker);
-        state.ticker = setInterval(updateTimer, 1000);
-        updateTimer();
+        state.lastCycleAt = Date.now();
+        clockStart();
+        if (sceneEl) updateSceneLayers();
         state.firstFrame = true;
         state.levelChangedAt = performance.now();
         card.classList.add('is-running');
@@ -682,9 +728,8 @@
 
     function stop(reason) {
       const timeUp = reason === 'timeup';
-      clearInterval(state.ticker);
-      state.ticker = null;
       state.running = false;
+      if (!timeUp) clockPause();
       cleanupAudio();
       cancelCalibration();
       releaseWakeLock();
@@ -696,15 +741,12 @@
       els.peak.style.left = '0%';
       els.bar.classList.remove('is-danger');
       if (els.miniBar) els.miniBar.style.width = '0%';
+      renderClock();
+      if (sceneEl) updateSceneLayers();
       if (timeUp) {
         setLevel(0);
-        els.timer.hidden = false;
-        els.timer.classList.remove('is-ending');
-        els.timer.classList.add('is-done');
-        els.timerText.textContent = 'Time’s up!';
         showStatus('Time’s up! The monitor has stopped.', 'safe');
       } else {
-        showIdleTimer();
         showStatus('Monitoring stopped.');
       }
     }
@@ -884,9 +926,51 @@
       if (state.running && document.visibilityState === 'visible') requestWakeLock();
     });
 
-    els.timer.addEventListener('click', () => {
-      if (els.timer.classList.contains('is-done')) { els.timer.classList.remove('is-done'); showIdleTimer(); }
+    // ---------------------------------------------------------------- clock panel
+
+    els.clockPop = $('.noise-clock-pop');
+    els.clockBig = $('.noise-clock-big');
+    els.clockMode = $('.noise-clock-mode');
+    els.clockStartStop = $('.noise-clock-startstop');
+    const openClock = () => {
+      els.clockPop.hidden = false;
+      els.timer.setAttribute('aria-expanded', 'true');
+      renderClock();
+    };
+    const closeClock = () => {
+      els.clockPop.hidden = true;
+      els.timer.setAttribute('aria-expanded', 'false');
+    };
+    els.timer.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (els.clockPop.hidden) openClock(); else closeClock();
     });
+    els.timer.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); els.timer.click(); }
+    });
+    els.clockPop.addEventListener('click', (e) => e.stopPropagation());
+    document.addEventListener('click', () => { if (!els.clockPop.hidden) closeClock(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !els.clockPop.hidden) closeClock(); });
+    $('.noise-clock-close').addEventListener('click', closeClock);
+    els.clockStartStop.addEventListener('click', () => (clock.running ? clockPause() : clockStart()));
+    $('.noise-clock-reset').addEventListener('click', () => {
+      const wasRunning = clock.running;
+      clockReset();
+      if (wasRunning) clockStart();
+    });
+    const setDuration = (mins) => {
+      const wasRunning = clock.running;
+      setSettings(mergeSettings(settings, { sessionMinutes: mins }).settings);
+      clockReset();
+      if (wasRunning) clockStart();
+    };
+    $$('.noise-clock-chip').forEach((chip) => chip.addEventListener('click', () => setDuration(+chip.getAttribute('data-min'))));
+    const customIn = $('.noise-clock-mins');
+    $('.noise-clock-set').addEventListener('click', () => {
+      const v = parseInt(customIn.value, 10);
+      if (Number.isFinite(v) && v > 0) setDuration(Math.min(240, v));
+    });
+    customIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') $('.noise-clock-set').click(); });
 
     // ---------------------------------------------------------------- go
 
