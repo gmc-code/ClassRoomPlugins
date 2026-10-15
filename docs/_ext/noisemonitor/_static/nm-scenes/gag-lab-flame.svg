@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
+.anim{transform-box:view-box}
+</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+    <g transform="translate(1080 657) scale(0.85)">
+      <ellipse cx="0" cy="-6" rx="46" ry="12" fill="#475569"/>
+      <rect x="-12" y="-120" width="24" height="112" fill="#94a3b8"/>
+      <rect x="-16" y="-64" width="32" height="16" rx="3" fill="#64748b"/>
+      <g>
+        <path d="M0 -270 Q38 -200 26 -150 Q16 -120 0 -120 Q-16 -120 -26 -150 Q-38 -200 0 -270 Z" stroke-width="4">
+          <animate attributeName="fill" values="#22c55e;#22c55e;#f97316;#f97316;#c084fc;#c084fc;#ef4444;#ef4444;#3b82f6;#3b82f6;#22c55e" dur="10s" repeatCount="indefinite"/></path>
+        <path d="M0 -190 Q14 -160 8 -136 Q0 -128 -8 -136 Q-14 -160 0 -190 Z" fill="#e0f2fe" stroke="none"/>
+        <animateTransform attributeName="transform" type="scale" values="1 1;0.94 1.06;1 1" dur="0.35s" repeatCount="indefinite"/>
+      </g>
+      <g transform="translate(0 -300)"><rect x="-64" y="12" width="128" height="40" rx="8" fill="#fff"/><text x="0" y="40" text-anchor="middle" font-family="'Arial Black','Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif" font-size="22" fill="#1e293b" stroke="none" opacity="0">Copper<animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.02;0.18;0.2;1" dur="10s" begin="0s" repeatCount="indefinite"/></text><text x="0" y="40" text-anchor="middle" font-family="'Arial Black','Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif" font-size="22" fill="#1e293b" stroke="none" opacity="0">Sodium<animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.02;0.18;0.2;1" dur="10s" begin="2s" repeatCount="indefinite"/></text><text x="0" y="40" text-anchor="middle" font-family="'Arial Black','Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif" font-size="22" fill="#1e293b" stroke="none" opacity="0">Potassium<animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.02;0.18;0.2;1" dur="10s" begin="4s" repeatCount="indefinite"/></text><text x="0" y="40" text-anchor="middle" font-family="'Arial Black','Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif" font-size="22" fill="#1e293b" stroke="none" opacity="0">Lithium<animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.02;0.18;0.2;1" dur="10s" begin="6s" repeatCount="indefinite"/></text><text x="0" y="40" text-anchor="middle" font-family="'Arial Black','Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif" font-size="22" fill="#1e293b" stroke="none" opacity="0">Gas flame<animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.02;0.18;0.2;1" dur="10s" begin="8s" repeatCount="indefinite"/></text></g>
+    </g></g></svg>

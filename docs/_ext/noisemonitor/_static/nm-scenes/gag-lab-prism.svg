@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
+.anim{transform-box:view-box}
+.shimmer{animation:shim 1.6s ease-in-out infinite alternate}@keyframes shim{from{opacity:.55}to{opacity:1}}</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+    <polygon points="580,520 994,542 994,550 580,534" fill="#fff" fill-opacity="0.85" stroke="none"/>
+    <polygon class="anim shimmer" style="animation-delay:-0.0s" points="1022,546 1499,253 1524,297" fill="#ef4444" fill-opacity="0.45" stroke="none"/><polygon class="anim shimmer" style="animation-delay:-0.2s" points="1022,546 1524,297 1544,343" fill="#f97316" fill-opacity="0.45" stroke="none"/><polygon class="anim shimmer" style="animation-delay:-0.4s" points="1022,546 1544,343 1560,391" fill="#facc15" fill-opacity="0.45" stroke="none"/><polygon class="anim shimmer" style="animation-delay:-0.6000000000000001s" points="1022,546 1560,391 1572,440" fill="#22c55e" fill-opacity="0.45" stroke="none"/><polygon class="anim shimmer" style="animation-delay:-0.8s" points="1022,546 1572,440 1579,490" fill="#3b82f6" fill-opacity="0.45" stroke="none"/><polygon class="anim shimmer" style="animation-delay:-1.0s" points="1022,546 1579,490 1582,540" fill="#8b5cf6" fill-opacity="0.45" stroke="none"/>
+    <polygon points="970,576 1030,576 1000,520" fill="#e0f2fe" fill-opacity="0.85"/>
+    <path d="M988 564 L1000 540" stroke="#fff" stroke-width="4"/></g></svg>

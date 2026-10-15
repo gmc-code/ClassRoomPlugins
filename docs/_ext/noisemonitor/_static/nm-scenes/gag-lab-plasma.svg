@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
+.anim{transform-box:view-box}
+
+    .tend{animation:tend .45s steps(1) infinite}.t1{animation-duration:.33s}.t2{animation-duration:.6s}
+    @keyframes tend{0%{opacity:1}50%{opacity:.25}}
+    .core{animation:core .5s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center}
+    @keyframes core{from{transform:scale(.8)}to{transform:scale(1.3)}}</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+    <g transform="translate(520 657) scale(0.75)">
+      <path d="M-40 0 L40 0 L28 -36 L-28 -36 Z" fill="#1e293b"/>
+      <g transform="translate(0 -104)">
+        <circle r="72" fill="#1e1b4b"/>
+        <g><path class="anim tend t0" style="animation-delay:-0.00s" d="M0 0 L-15 -8 L-33 -11 L-47 -13 L-65 16" fill="none" stroke="#f0abfc" stroke-width="4"/><path class="anim tend t1" style="animation-delay:-0.11s" d="M0 0 L-14 13 L-25 25 L-45 18 L-46 21" fill="none" stroke="#f0abfc" stroke-width="4"/><path class="anim tend t2" style="animation-delay:-0.22s" d="M0 0 L13 11 L33 17 L45 34 L65 27" fill="none" stroke="#f0abfc" stroke-width="4"/><path class="anim tend t0" style="animation-delay:-0.33s" d="M0 0 L13 -13 L16 -12 L36 -17 L34 -31" fill="none" stroke="#f0abfc" stroke-width="4"/><path class="anim tend t1" style="animation-delay:-0.44s" d="M0 0 L11 -16 L10 -33 L28 -48 L46 -63" fill="none" stroke="#f0abfc" stroke-width="4"/><path class="anim tend t2" style="animation-delay:-0.55s" d="M0 0 L7 -16 L7 -29 L9 -49 L-2 -61" fill="none" stroke="#f0abfc" stroke-width="4"/><path class="anim tend t0" style="animation-delay:-0.66s" d="M0 0 L5 16 L10 26 L11 49 L32 58" fill="none" stroke="#f0abfc" stroke-width="4"/><path class="anim tend t1" style="animation-delay:-0.77s" d="M0 0 L14 -11 L19 -12 L38 -28 L48 -30" fill="none" stroke="#f0abfc" stroke-width="4"/><path class="anim tend t2" style="animation-delay:-0.88s" d="M0 0 L-5 -15 L8 -32 L-24 -49 L1 -65" fill="none" stroke="#f0abfc" stroke-width="4"/><animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="6s" begin="0s" repeatCount="indefinite" additive="sum"/></g>
+        <circle class="anim core" r="14" fill="#f5d0fe" stroke="none"/>
+        <circle r="72" fill="none" stroke-width="5"/>
+        <path d="M-44 -40 q20 -22 46 -24" fill="none" stroke="#fff" stroke-opacity="0.6" stroke-width="6"/>
+      </g>
+    </g></g></svg>

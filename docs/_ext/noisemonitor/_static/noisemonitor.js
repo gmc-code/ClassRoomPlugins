@@ -1,297 +1,856 @@
 /**
- * Noise Level Monitor Script
- * Includes:
- * - Dynamic meter scaling (Min Level to Max Level)
- * - 10-second hold timer on higher level images & messages
- * - Auto-injection of level ticks (L0-L5) on meter bar
- * - Web Audio API mic processing
+ * Noise Level Monitor (v2)
+ *
+ * - Web Audio microphone metering (time-domain RMS → dBFS, 0–100 scale)
+ *   with browser auto-gain / noise suppression turned off for honest readings
+ * - Six levels between Min and Max; instant step-up, timed step-down
+ * - Settings dialog (gear button) with live reading and one-tap calibration
+ * - Settings remembered per monitor in this browser (localStorage)
+ * - Export / import settings as JSON (same format the :config: option reads)
+ * - Full-screen mode for projecting; screen kept awake while monitoring
  */
+(function () {
+  'use strict';
 
-document.addEventListener('DOMContentLoaded', () => {
-  const cards = document.querySelectorAll('.noise-monitor-card');
+  const NUM_LEVELS = 6;
+  const FORMAT_VERSION = 2;
 
-  cards.forEach((card) => {
-    initNoiseMonitor(card);
-  });
-});
+  // Keys and ranges mirror DEFAULTS / NUMERIC_LIMITS in noisemonitor.py.
+  const SCHEMA = {
+    title:           { type: 'string', max: 120 },
+    scene:           { type: 'enum', values: ['classroom', 'lab', 'groups'] },
+    finale:          { type: 'enum', values: ['room', 'tornado', 'foam', 'dino'] },
+    threshold:       { type: 'int',   min: 0,   max: 100 },
+    imageMin:        { type: 'int',   min: 0,   max: 99 },
+    imageMax:        { type: 'int',   min: 1,   max: 100 },
+    stepDownSeconds: { type: 'float', min: 0.5, max: 30 },
+    sceneCycleMinutes: { type: 'int', min: 0, max: 60 },
+    sessionMinutes:  { type: 'int',   min: 0,   max: 240 },
+    sensitivity:     { type: 'int',   min: -30, max: 30 },
+    smoothing:       { type: 'float', min: 0,   max: 0.95 },
+    showDb:          { type: 'bool' },
+    showMeter:       { type: 'bool' },
+    showStatus:      { type: 'bool' },
+  };
 
-function initNoiseMonitor(card) {
-  let audioContext = null;
-  let mediaStream = null;
-  let analyser = null;
-  let animationFrameId = null;
-  let isMonitoring = false;
+  const KEY_ALIASES = {
+    'image-min': 'imageMin', image_min: 'imageMin',
+    'image-max': 'imageMax', image_max: 'imageMax',
+    'step-down': 'stepDownSeconds', stepDown: 'stepDownSeconds',
+    'scene-cycle': 'sceneCycleMinutes', session: 'sessionMinutes',
+    'show-db': 'showDb', 'show-meter': 'showMeter', 'show-status': 'showStatus',
+  };
 
-  // Initialize level hold variables
-  card._currentLevelIndex = 0;
-  card._levelHoldTimestamp = 0;
+  const FALLBACK_DEFAULTS = {
+    title: '🔊 Noise Level Monitor',
+    scene: 'classroom',
+    finale: 'room',
+    threshold: 70, imageMin: 35, imageMax: 85,
+    stepDownSeconds: 3, sensitivity: 0, smoothing: 0.8,
+    sceneCycleMinutes: 0, sessionMinutes: 0,
+    showDb: true, showMeter: true, showStatus: true,
+    messages: ['Level 0', 'Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5'],
+  };
 
-  // Dynamically generate level ticks if missing from HTML
-  const meterContainer = card.querySelector('.noise-meter-container');
-  if (meterContainer && !meterContainer.querySelector('.noise-meter-ticks')) {
-    const ticksContainer = document.createElement('div');
-    ticksContainer.className = 'noise-meter-ticks';
-    for (let i = 0; i < 6; i++) {
-      const tick = document.createElement('div');
-      tick.className = 'noise-tick';
-      tick.innerHTML = `<span class="noise-tick-label">L${i}</span>`;
-      ticksContainer.appendChild(tick);
+  const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
+
+  /**
+   * Merge every valid field from `raw` onto a copy of `base`.
+   * Returns { settings, applied } where `applied` counts accepted fields.
+   */
+  function mergeSettings(base, raw) {
+    const out = { ...base, messages: base.messages.slice() };
+    let applied = 0;
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return { settings: out, applied };
+
+    for (let [key, value] of Object.entries(raw)) {
+      key = KEY_ALIASES[key] || key;
+      const spec = SCHEMA[key];
+
+      if (spec) {
+        if (spec.type === 'bool') {
+          if (typeof value === 'boolean') { out[key] = value; applied++; }
+        } else if (spec.type === 'enum') {
+          if (spec.values.includes(value)) { out[key] = value; applied++; }
+        } else if (spec.type === 'string') {
+          if (typeof value === 'string') { out[key] = value.slice(0, spec.max); applied++; }
+        } else {
+          const num = typeof value === 'number' ? value : parseFloat(value);
+          if (Number.isFinite(num)) {
+            let v = clamp(num, spec.min, spec.max);
+            if (spec.type === 'int') v = Math.round(v);
+            out[key] = v;
+            applied++;
+          }
+        }
+      } else if (key === 'messages' && value && typeof value === 'object') {
+        let any = false;
+        for (const [idx, msg] of Object.entries(value)) {
+          const i = parseInt(idx, 10);
+          if (i >= 0 && i < NUM_LEVELS && typeof msg === 'string') {
+            out.messages[i] = msg.slice(0, 400);
+            any = true;
+          }
+        }
+        if (any) applied++;
+      } else if (/^msg[0-5]$/.test(key) && typeof value === 'string') {
+        out.messages[+key[3]] = value.slice(0, 400);
+        applied++;
+      }
     }
-    meterContainer.appendChild(ticksContainer);
+
+    if (out.imageMax <= out.imageMin) out.imageMax = Math.min(100, out.imageMin + 1);
+    return { settings: out, applied };
   }
 
-  const toggleBtn = card.querySelector('.noise-btn-toggle');
-  const thresholdSlider = card.querySelector('.noise-slider-threshold');
-  const minSlider = card.querySelector('.noise-slider-min');
-  const maxSlider = card.querySelector('.noise-slider-max');
+  const storage = {
+    get(key) {
+      if (!key) return null;
+      try { return JSON.parse(window.localStorage.getItem(key)); } catch (e) { return null; }
+    },
+    set(key, value) {
+      if (!key) return;
+      try { window.localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* unavailable */ }
+    },
+    remove(key) {
+      if (!key) return;
+      try { window.localStorage.removeItem(key); } catch (e) { /* unavailable */ }
+    },
+  };
 
-  const thresholdValDisplay = card.querySelector('.noise-slider-val-threshold');
-  const minValDisplay = card.querySelector('.noise-slider-val-min');
-  const maxValDisplay = card.querySelector('.noise-slider-val-max');
-
-  // Range slider handlers
-  if (thresholdSlider) {
-    thresholdSlider.addEventListener('input', () => {
-      if (thresholdValDisplay) thresholdValDisplay.textContent = thresholdSlider.value;
-      refreshUI();
-    });
+  function parseJSONAttr(el, name, fallback) {
+    try { return JSON.parse(el.getAttribute(name)); } catch (e) { return fallback; }
   }
 
-  if (minSlider) {
-    minSlider.addEventListener('input', () => {
-      if (minValDisplay) minValDisplay.textContent = minSlider.value;
-      if (maxSlider && parseFloat(minSlider.value) >= parseFloat(maxSlider.value)) {
-        maxSlider.value = parseFloat(minSlider.value) + 1;
-        if (maxValDisplay) maxValDisplay.textContent = maxSlider.value;
+  // ------------------------------------------------------------------------ //
+
+  function initNoiseMonitor(card) {
+    if (card._noiseMonitorReady) return;
+    card._noiseMonitorReady = true;
+
+    const $ = (sel) => card.querySelector(sel);
+    const $$ = (sel) => Array.from(card.querySelectorAll(sel));
+
+    const els = {
+      toggle: $('.noise-btn-toggle'),
+      toggleLabel: $('.noise-btn-toggle .noise-btn-label'),
+      fullscreen: $('.noise-btn-fullscreen'),
+      timer: $('.noise-timer'),
+      timerText: $('.noise-timer-text'),
+      settingsBtn: $('.noise-btn-settings'),
+      title: $('.noise-title'),
+      message: $('.noise-level-message'),
+      meter: $('.noise-meter'),
+      bar: $('.noise-meter-bar'),
+      peak: $('.noise-meter-peak'),
+      thresholdMark: $('.noise-meter-threshold'),
+      dbRow: $('.noise-readout-level'),
+      db: $('.noise-db-value'),
+      status: $('.noise-status-text'),
+      dialog: $('.noise-settings'),
+      close: $('.noise-btn-close'),
+      liveDb: $('.noise-live-db'),
+      liveLevel: $('.noise-live-level'),
+      miniBar: $('.noise-mini-bar'),
+      miniThreshold: $('.noise-mini-threshold'),
+      calibrate: $('.noise-btn-calibrate'),
+      exportBtn: $('.noise-btn-export'),
+      importBtn: $('.noise-btn-import'),
+      resetBtn: $('.noise-btn-reset'),
+      file: $('.noise-file-import'),
+      feedback: $('.noise-io-feedback'),
+    };
+
+    const scenes = parseJSONAttr(card, 'data-scenes', null);
+    const imageWrap = $('.noise-image-wrap');
+    let sceneEl = null;
+    let sceneLayers = [];
+    let preloadedScenes = false;
+    const pageDefaults = mergeSettings(FALLBACK_DEFAULTS, parseJSONAttr(card, 'data-config', {})).settings;
+    const storageKey = card.getAttribute('data-storage-key') || '';
+    let settings = mergeSettings(pageDefaults, storage.get(storageKey)).settings;
+
+
+    // Runtime state
+    const state = {
+      running: false,
+      audioContext: null,
+      stream: null,
+      analyser: null,
+      buffer: null,
+      rafId: null,
+      smoothed: 0,
+      peak: 0,
+      level: 0,
+      levelChangedAt: 0,
+      wakeLock: null,
+      calibrating: null,
+      bg: null,            // background currently shown (changes when cycling)
+      startedAt: 0,
+      lastCycleAt: 0,
+      ticker: null,
+    };
+
+    // ---------------------------------------------------------------- settings UI
+
+    function scaleToPercent(db) {
+      const range = settings.imageMax - settings.imageMin;
+      return range > 0 ? clamp(((db - settings.imageMin) / range) * 100, 0, 100) : 0;
+    }
+
+    function formatValue(key, v) {
+      if (key === 'smoothing') return v.toFixed(2);
+      if (key === 'stepDownSeconds') return Number.isInteger(v) ? String(v) : v.toFixed(1);
+      if (key === 'sensitivity') return (v > 0 ? '+' : '') + v;
+      return String(v);
+    }
+
+    function fillForm() {
+      $$('[data-setting]').forEach((input) => {
+        const key = input.getAttribute('data-setting');
+        if (input.type === 'checkbox') input.checked = !!settings[key];
+        else {
+          if (input.tagName === 'SELECT' && !Array.from(input.options).some((o) => o.value === String(settings[key]))) {
+            const opt = document.createElement('option');
+            opt.value = String(settings[key]);
+            opt.textContent = key === 'sessionMinutes' ? `${settings[key]} minutes`
+              : key === 'sceneCycleMinutes' ? `Every ${settings[key]} minutes` : String(settings[key]);
+            input.appendChild(opt);
+          }
+          input.value = settings[key];
+        }
+        const out = card.querySelector(`[data-out="${key}"]`);
+        if (out) out.textContent = formatValue(key, settings[key]);
+      });
+      $$('.noise-msg-input').forEach((ta) => {
+        ta.value = settings.messages[+ta.getAttribute('data-level')] || '';
+      });
+    }
+
+    function applySettings() {
+      els.title.textContent = settings.title;
+      els.title.hidden = !settings.title.trim();
+      els.meter.hidden = !settings.showMeter;
+      els.dbRow.hidden = !settings.showDb;
+      els.status.hidden = !settings.showStatus;
+      const thrPct = scaleToPercent(settings.threshold);
+      els.thresholdMark.style.left = `${thrPct}%`;
+      if (els.miniThreshold) els.miniThreshold.style.left = `${thrPct}%`;
+      applyScene();
+      if (typeof showIdleTimer === 'function') showIdleTimer();
+    }
+
+    // ---------------------------------------------------------------- scenes
+
+    const isScene = () => !!scenes && !!scenes.backgrounds[settings.scene];
+    const finaleFor = (room) => (settings.finale && settings.finale !== 'room'
+      ? settings.finale : (scenes.roomFinale || {})[room]);
+
+    // One container per level; each holds that level's gags for the current room.
+    let levelBoxes = [];
+
+    function buildScene() {
+      if (sceneEl) return;
+      sceneEl = document.createElement('div');
+      sceneEl.className = 'noise-scene';
+      const bg = document.createElement('img');
+      bg.className = 'noise-scene-bg';
+      bg.alt = '';
+      sceneEl.appendChild(bg);
+      levelBoxes = [];
+      for (let i = 1; i < NUM_LEVELS; i++) {
+        const box = document.createElement('div');
+        box.className = 'noise-scene-layer';
+        box.setAttribute('data-layer', String(i));
+        sceneEl.appendChild(box);
+        levelBoxes.push(box);
       }
-      refreshUI();
-    });
-  }
+      const finaleBox = document.createElement('div');
+      finaleBox.className = 'noise-scene-layer noise-scene-finale';
+      finaleBox.setAttribute('data-layer', String(NUM_LEVELS - 1));
+      sceneEl.appendChild(finaleBox);
+      levelBoxes.push(finaleBox);
+      sceneLayers = levelBoxes;
+      imageWrap.appendChild(sceneEl);
+    }
 
-  if (maxSlider) {
-    maxSlider.addEventListener('input', () => {
-      if (maxValDisplay) maxValDisplay.textContent = maxSlider.value;
-      if (minSlider && parseFloat(maxSlider.value) <= parseFloat(minSlider.value)) {
-        minSlider.value = Math.max(0, parseFloat(maxSlider.value) - 1);
-        if (minValDisplay) minValDisplay.textContent = minSlider.value;
+    function addGag(box, src, random) {
+      const im = document.createElement('img');
+      im.className = 'noise-gag';
+      im.alt = '';
+      im.src = src;
+      if (random) im.setAttribute('data-random', '');
+      box.appendChild(im);
+    }
+
+    // Show a fresh random selection of the level's pool.
+    function pickGags(box) {
+      const n = +box.getAttribute('data-pick') || 0;
+      const pool = Array.from(box.querySelectorAll('.noise-gag[data-random]'));
+      pool.forEach((im) => im.classList.remove('is-picked'));
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
       }
-      refreshUI();
-    });
-  }
+      pool.slice(0, n).forEach((im) => im.classList.add('is-picked'));
+    }
 
-  // Custom text message input listener
-  const msgInputs = card.querySelectorAll('.noise-msg-input');
-  msgInputs.forEach((input) => {
-    input.addEventListener('input', () => {
-      refreshUI();
-    });
-  });
+    // Point the background, level gags and finale at one room's pictures.
+    function setRoomImages(room) {
+      const finale = finaleFor(room);
+      const key = `${room}|${finale}`;
+      if (sceneEl.getAttribute('data-room') === key) return;
+      sceneEl.setAttribute('data-room', key);
+      sceneEl.querySelector('.noise-scene-bg').src = scenes.backgrounds[room];
+      const layers = (scenes.layers || {})[room] || [];
+      levelBoxes.forEach((box, i) => {
+        box.textContent = '';
+        if (i < NUM_LEVELS - 1) {
+          const spec = layers[i] || { always: [], random: [], pick: 0 };
+          spec.always.forEach((src) => addGag(box, src, false));
+          spec.random.forEach((src) => addGag(box, src, true));
+          box.setAttribute('data-pick', String(spec.pick || 0));
+          pickGags(box);
+        } else if (scenes.finales[finale]) {
+          addGag(box, scenes.finales[finale], false);
+        }
+      });
+    }
 
-  // Toggle button handler
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', async () => {
-      if (!isMonitoring) {
-        await startMonitoring();
+    function updateSceneLayers() {
+      sceneLayers.forEach((layer) => {
+        const on = +layer.getAttribute('data-layer') <= state.level;
+        // A level that is switching on gets a new random mix of its gags.
+        if (on && !layer.classList.contains('is-on')) pickGags(layer);
+        layer.classList.toggle('is-on', on);
+      });
+    }
+
+    // Untouched default messages follow the room on screen; custom ones always win.
+    function isDefaultMessage(m, level) {
+      return !!scenes && Object.values(scenes.messages || {}).some((set) => set[level] === m);
+    }
+    function messageFor(level) {
+      const m = settings.messages[level];
+      if (isScene() && isDefaultMessage(m, level) && scenes.messages[state.bg]) return scenes.messages[state.bg][level];
+      return m;
+    }
+
+    function applyScene() {
+      const on = isScene();
+      card.classList.toggle('is-scene', on);
+      if (on) {
+        buildScene();
+        if (!state.bg || !scenes.backgrounds[state.bg] || !settings.sceneCycleMinutes) state.bg = settings.scene;
+        setRoomImages(state.bg);
+        sceneEl.setAttribute('role', 'img');
+        sceneEl.setAttribute('aria-label', `Classroom scene, noise level ${state.level} of ${NUM_LEVELS - 1}`);
+        updateSceneLayers();
+        if (!preloadedScenes) {
+          preloadedScenes = true;
+          Object.values(scenes.backgrounds).forEach((u) => { const im = new Image(); im.src = u; });
+        }
+      }
+      els.message.textContent = messageFor(state.level);
+      updateThumbs();
+    }
+
+    function updateThumbs() {
+      if (!isScene()) return;
+      const room = settings.scene;
+      const layers = (scenes.layers || {})[room] || [];
+      $$('.noise-msg-thumb').forEach((thumb, i) => {
+        let src = scenes.backgrounds[room];
+        if (i === NUM_LEVELS - 1) src = scenes.finales[finaleFor(room)] || src;
+        else if (i > 0 && layers[i - 1]) src = layers[i - 1].always[0] || layers[i - 1].random[0] || src;
+        thumb.src = src;
+        thumb.style.backgroundImage = i === 0 ? '' : `url("${scenes.backgrounds[room]}")`;
+        thumb.classList.add('is-scene-thumb');
+      });
+    }
+
+    function cycleBackground() {
+      if (!sceneEl) return;
+      const names = Object.keys(scenes.backgrounds);
+      const next = names[(names.indexOf(state.bg) + 1) % names.length];
+      state.bg = next;
+      sceneEl.classList.add('is-changing');
+      setTimeout(() => {
+        setRoomImages(next);
+        els.message.textContent = messageFor(state.level);
+        const bg = sceneEl.querySelector('.noise-scene-bg');
+        const show = () => sceneEl.classList.remove('is-changing');
+        if (bg.complete) setTimeout(show, 60); else bg.addEventListener('load', show, { once: true });
+      }, 500);
+    }
+
+    // ---------------------------------------------------------------- session timer
+
+    function formatClock(ms) {
+      const total = Math.max(0, Math.round(ms / 1000));
+      const h = Math.floor(total / 3600);
+      const m = Math.floor((total % 3600) / 60);
+      const sec = String(total % 60).padStart(2, '0');
+      return h ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${String(m).padStart(2, '0')}:${sec}`;
+    }
+
+    // Before starting, show the planned session length (if one is set).
+    function showIdleTimer() {
+      if (state.running || els.timer.classList.contains('is-done')) return;
+      const limit = settings.sessionMinutes * 60000;
+      els.timer.hidden = !(limit > 0);
+      els.timer.classList.add('is-idle');
+      els.timer.classList.remove('is-ending');
+      if (limit > 0) {
+        els.timerText.textContent = formatClock(limit);
+        els.timer.title = `Monitor will run for ${formatClock(limit)}`;
+        els.timer.setAttribute('aria-label', els.timer.title);
+      }
+    }
+
+    function updateTimer() {
+      if (!state.running) return;
+      const now = Date.now();
+      const elapsed = now - state.startedAt;
+      const limit = settings.sessionMinutes * 60000;
+      els.timer.hidden = false;
+      els.timer.classList.remove('is-done', 'is-idle');
+      if (limit > 0) {
+        const left = limit - elapsed;
+        els.timerText.textContent = formatClock(left);
+        els.timer.classList.toggle('is-ending', left <= 60000);
+        els.timer.title = `Monitor stops in ${formatClock(left)}`;
+        els.timer.setAttribute('aria-label', `${formatClock(left)} left`);
+        if (left <= 0) { stop('timeup'); return; }
       } else {
-        stopMonitoring();
+        els.timerText.textContent = formatClock(elapsed);
+        els.timer.classList.remove('is-ending');
+        els.timer.title = 'Time monitoring';
+        els.timer.setAttribute('aria-label', `Monitoring for ${formatClock(elapsed)}`);
+      }
+      if (isScene() && settings.sceneCycleMinutes > 0 &&
+          now - state.lastCycleAt >= settings.sceneCycleMinutes * 60000) {
+        state.lastCycleAt = now;
+        cycleBackground();
+      }
+    }
+
+    // When the picture style changes, swap untouched default messages to the new set.
+    function swapDefaultMessages(fromScene, toScene) {
+      if (!scenes || !scenes.messages) return settings.messages;
+      const target = scenes.messages[toScene] || scenes.messages.classroom;
+      return settings.messages.map((m, i) => (isDefaultMessage(m, i) ? target[i] : m));
+    }
+
+    let saveTimer = null;
+    function persist() {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => storage.set(storageKey, settings), 250);
+    }
+
+    function setSettings(next, { refillForm = true } = {}) {
+      settings = next;
+      if (refillForm) fillForm();
+      applySettings();
+      render(state.smoothed);
+      persist();
+    }
+
+    $$('[data-setting]').forEach((input) => {
+      const key = input.getAttribute('data-setting');
+      const evt = input.type === 'checkbox' ? 'change' : 'input';
+      input.addEventListener(evt, () => {
+        const type = SCHEMA[key].type;
+        const value = input.type === 'checkbox' ? input.checked
+          : (type === 'string' || type === 'enum') ? input.value : parseFloat(input.value);
+        const patch = { [key]: value };
+        if (key === 'scene') {
+          patch.messages = swapDefaultMessages(settings.scene, value);
+          state.bg = value;
+          state.lastCycleAt = Date.now();
+        }
+
+        // Keep Min < Max by nudging the other slider rather than refusing input.
+        if (key === 'imageMin' && value >= settings.imageMax) patch.imageMax = Math.min(100, value + 1);
+        if (key === 'imageMax' && value <= settings.imageMin) patch.imageMin = Math.max(0, value - 1);
+
+        const next = mergeSettings(settings, patch).settings;
+        // Refill only the sliders that were nudged, so typing in text fields isn't disturbed.
+        setSettings(next, { refillForm: key === 'imageMin' || key === 'imageMax' || key === 'scene' });
+        if (key === 'sessionMinutes' || key === 'sceneCycleMinutes') updateTimer();
+        const out = card.querySelector(`[data-out="${key}"]`);
+        if (out) out.textContent = formatValue(key, next[key]);
+      });
+    });
+
+    $$('.noise-msg-input').forEach((ta) => {
+      ta.addEventListener('input', () => {
+        const messages = settings.messages.slice();
+        messages[+ta.getAttribute('data-level')] = ta.value;
+        setSettings({ ...settings, messages }, { refillForm: false });
+      });
+    });
+
+    // ---------------------------------------------------------------- dialog
+
+    function openSettings() {
+      fillForm();
+      setFeedback('');
+      if (typeof els.dialog.showModal === 'function') els.dialog.showModal();
+      else els.dialog.setAttribute('open', '');
+    }
+    function closeSettings() {
+      if (typeof els.dialog.close === 'function') els.dialog.close();
+      else els.dialog.removeAttribute('open');
+      els.settingsBtn.focus();
+    }
+    els.settingsBtn.addEventListener('click', openSettings);
+    els.close.addEventListener('click', closeSettings);
+    // Click on the backdrop (outside the panel) closes it.
+    els.dialog.addEventListener('click', (e) => {
+      if (e.target !== els.dialog) return;
+      const r = els.dialog.getBoundingClientRect();
+      const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      if (!inside) closeSettings();
+    });
+
+    let feedbackTimer = null;
+    function setFeedback(text, kind) {
+      clearTimeout(feedbackTimer);
+      els.feedback.textContent = text;
+      els.feedback.className = 'noise-io-feedback' + (kind ? ` is-${kind}` : '');
+      if (text) feedbackTimer = setTimeout(() => setFeedback(''), 6000);
+    }
+
+    // ---------------------------------------------------------------- export / import / reset
+
+    els.exportBtn.addEventListener('click', () => {
+      const payload = {
+        app: 'noisemonitor',
+        version: FORMAT_VERSION,
+        exported: new Date().toISOString(),
+        ...settings,
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2) + '\n'], { type: 'application/json' });
+      const slug = (settings.title || 'noise-monitor')
+        .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'noise-monitor';
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${slug}-settings.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      setFeedback(`Saved ${a.download}`, 'ok');
+    });
+
+    els.importBtn.addEventListener('click', () => els.file.click());
+
+    els.file.addEventListener('change', async () => {
+      const file = els.file.files && els.file.files[0];
+      els.file.value = '';
+      if (!file) return;
+      try {
+        if (file.size > 100000) throw new Error('That file is too large to be a settings file.');
+        const raw = JSON.parse(await file.text());
+        if (raw && raw.app && raw.app !== 'noisemonitor') {
+          throw new Error(`That file is for "${raw.app}", not the noise monitor.`);
+        }
+        const { settings: next, applied } = mergeSettings(settings, raw);
+        if (!applied) throw new Error('No noise monitor settings were found in that file.');
+        setSettings(next);
+        setFeedback(`Imported ${applied} setting${applied === 1 ? '' : 's'} from ${file.name}`, 'ok');
+      } catch (err) {
+        const msg = err instanceof SyntaxError ? 'That file is not valid JSON.' : err.message;
+        setFeedback(msg, 'error');
       }
     });
-  }
 
-  function refreshUI() {
-    const dbDisplay = card.querySelector('.noise-db-value');
-    const currentDb = dbDisplay ? parseFloat(dbDisplay.textContent) || 0 : 0;
-    updateNoiseUI(card, currentDb);
-  }
+    els.resetBtn.addEventListener('click', () => {
+      storage.remove(storageKey);
+      setSettings(mergeSettings(pageDefaults, {}).settings);
+      setFeedback('Settings reset to this page’s defaults.', 'ok');
+    });
 
-  async function startMonitoring() {
-    try {
-      audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    // ---------------------------------------------------------------- audio
 
-      const source = audioContext.createMediaStreamSource(mediaStream);
-      analyser = audioContext.createAnalyser();
-      analyser.fftSize = 256;
-      source.connect(analyser);
+    async function start() {
+      if (state.running) return true;
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showStatus('Microphone access needs a secure (https) page in a modern browser.', 'danger');
+        return false;
+      }
+      try {
+        // Turn off the browser's voice processing: auto-gain in particular
+        // flattens loud and quiet rooms to the same level.
+        state.stream = await navigator.mediaDevices.getUserMedia({
+          audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+          video: false,
+        });
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        state.audioContext = new Ctx();
+        if (state.audioContext.state === 'suspended') await state.audioContext.resume();
 
-      isMonitoring = true;
-      toggleBtn.textContent = "Stop Mic Monitor";
-      toggleBtn.classList.add("active");
+        const source = state.audioContext.createMediaStreamSource(state.stream);
+        state.analyser = state.audioContext.createAnalyser();
+        state.analyser.fftSize = 2048;
+        state.analyser.smoothingTimeConstant = 0;
+        source.connect(state.analyser);
+        state.buffer = new Float32Array(state.analyser.fftSize);
 
-      processAudio();
-    } catch (err) {
-      console.error("Microphone access denied or error occurred:", err);
-      alert("Unable to access the microphone. Please check browser permissions.");
-    }
-  }
-
-  function stopMonitoring() {
-    isMonitoring = false;
-
-    if (animationFrameId) {
-      cancelAnimationFrame(animationFrameId);
-    }
-
-    if (mediaStream) {
-      mediaStream.getTracks().forEach((track) => track.stop());
-    }
-
-    if (audioContext && audioContext.state !== 'closed') {
-      audioContext.close();
-    }
-
-    toggleBtn.textContent = "Start Mic Monitor";
-    toggleBtn.classList.remove("active");
-
-    const statusText = card.querySelector('.noise-status-text');
-    if (statusText) {
-      statusText.textContent = "Monitoring stopped.";
-      statusText.className = "noise-status-text";
-    }
-  }
-
-  function processAudio() {
-    if (!isMonitoring || !analyser) return;
-
-    const dataArray = new Uint8Array(analyser.frequencyBinCount);
-    analyser.getByteFrequencyData(dataArray);
-
-    let sum = 0;
-    for (let i = 0; i < dataArray.length; i++) {
-      sum += dataArray[i] * dataArray[i];
-    }
-    const rms = Math.sqrt(sum / dataArray.length);
-
-    let calculatedDb = 0;
-    if (rms > 0) {
-      calculatedDb = Math.min(100, Math.max(0, (rms / 128) * 100));
+        state.running = true;
+        state.startedAt = state.lastCycleAt = Date.now();
+        clearInterval(state.ticker);
+        state.ticker = setInterval(updateTimer, 1000);
+        updateTimer();
+        state.firstFrame = true;
+        state.levelChangedAt = performance.now();
+        card.classList.add('is-running');
+        els.toggle.setAttribute('aria-pressed', 'true');
+        els.toggleLabel.textContent = 'Stop monitor';
+        requestWakeLock();
+        tick();
+        return true;
+      } catch (err) {
+        console.error('noisemonitor: microphone error', err);
+        cleanupAudio();
+        const denied = err && (err.name === 'NotAllowedError' || err.name === 'SecurityError');
+        showStatus(denied
+          ? 'Microphone blocked. Allow microphone access in the browser’s address bar, then try again.'
+          : 'No microphone could be opened. Check one is connected and not in use by another app.', 'danger');
+        return false;
+      }
     }
 
-    updateNoiseUI(card, calculatedDb);
+    function cleanupAudio() {
+      if (state.rafId) cancelAnimationFrame(state.rafId);
+      state.rafId = null;
+      if (state.stream) state.stream.getTracks().forEach((t) => t.stop());
+      if (state.audioContext && state.audioContext.state !== 'closed') state.audioContext.close();
+      state.stream = state.audioContext = state.analyser = null;
+    }
 
-    animationFrameId = requestAnimationFrame(processAudio);
-  }
-}
+    function stop(reason) {
+      const timeUp = reason === 'timeup';
+      clearInterval(state.ticker);
+      state.ticker = null;
+      state.running = false;
+      cleanupAudio();
+      cancelCalibration();
+      releaseWakeLock();
+      card.classList.remove('is-running');
+      els.toggle.setAttribute('aria-pressed', 'false');
+      els.toggleLabel.textContent = 'Start monitor';
+      state.smoothed = state.peak = 0;
+      els.bar.style.width = '0%';
+      els.peak.style.left = '0%';
+      els.bar.classList.remove('is-danger');
+      if (els.miniBar) els.miniBar.style.width = '0%';
+      if (timeUp) {
+        setLevel(0);
+        els.timer.hidden = false;
+        els.timer.classList.remove('is-ending');
+        els.timer.classList.add('is-done');
+        els.timerText.textContent = 'Time’s up!';
+        showStatus('Time’s up! The monitor has stopped.', 'safe');
+      } else {
+        showIdleTimer();
+        showStatus('Monitoring stopped.');
+      }
+    }
 
-/**
- * Updates UI with scaled meter, status, and 10-second hold timer on level drops
- */
-function updateNoiseUI(cardElement, dbValue) {
-  const minSlider = cardElement.querySelector('.noise-slider-min');
-  const maxSlider = cardElement.querySelector('.noise-slider-max');
-  const thresholdSlider = cardElement.querySelector('.noise-slider-threshold');
+    els.toggle.addEventListener('click', () => (state.running ? stop() : start()));
 
-  const imageMin = minSlider ? parseFloat(minSlider.value) : parseFloat(cardElement.dataset.imageMin || 0);
-  const imageMax = maxSlider ? parseFloat(maxSlider.value) : parseFloat(cardElement.dataset.imageMax || 100);
-  const threshold = thresholdSlider ? parseFloat(thresholdSlider.value) : parseFloat(cardElement.dataset.threshold || 60);
+    function measure() {
+      state.analyser.getFloatTimeDomainData(state.buffer);
+      let sum = 0;
+      for (let i = 0; i < state.buffer.length; i++) sum += state.buffer[i] * state.buffer[i];
+      const rms = Math.sqrt(sum / state.buffer.length);
+      const dbfs = 20 * Math.log10(Math.max(rms, 1e-7)); // ≈ -140 … 0
+      return clamp(dbfs + 100 + settings.sensitivity, 0, 100);
+    }
 
-  // 1. Dynamic Meter Scaling based on Min/Max settings
-  let percentage = 0;
-  if (imageMax > imageMin) {
-    percentage = ((dbValue - imageMin) / (imageMax - imageMin)) * 100;
-  }
-  const clampedPercentage = Math.min(Math.max(percentage, 0), 100);
+    function tick() {
+      if (!state.running) return;
+      const instant = measure();
+      const k = settings.smoothing;
+      state.smoothed = state.firstFrame ? instant : k * state.smoothed + (1 - k) * instant;
+      state.firstFrame = false;
+      if (state.calibrating) state.calibrating.samples.push(state.smoothed);
+      render(state.smoothed);
+      state.rafId = requestAnimationFrame(tick);
+    }
 
-  // 2. Real-time Meter Bar Width & Color Updates
-  const meterBar = cardElement.querySelector('.noise-meter-bar');
-  if (meterBar) {
-    meterBar.style.width = `${clampedPercentage}%`;
-    if (dbValue >= threshold) {
-      meterBar.classList.add('danger');
+    // ---------------------------------------------------------------- rendering
+
+    function showStatus(text, kind) {
+      els.status.textContent = text;
+      els.status.className = 'noise-status-text' + (kind ? ` is-${kind}` : '');
+    }
+
+    function rawLevelFor(db) {
+      const range = settings.imageMax - settings.imageMin;
+      if (range <= 0) return 0;
+      const ratio = clamp((db - settings.imageMin) / range, 0, 1);
+      return Math.min(NUM_LEVELS - 1, Math.floor(ratio * NUM_LEVELS));
+    }
+
+    function setLevel(level) {
+      if (level === state.level) return;
+      state.level = level;
+      card.setAttribute('data-level', level);
+      if (sceneEl) {
+        updateSceneLayers();
+        sceneEl.setAttribute('aria-label', `Classroom scene, noise level ${level} of ${NUM_LEVELS - 1}`);
+      }
+      els.message.textContent = messageFor(level);
+    }
+
+    function render(db) {
+      const pct = scaleToPercent(db);
+      const over = state.running && db >= settings.threshold;
+
+      els.bar.style.width = `${pct}%`;
+      els.bar.classList.toggle('is-danger', over);
+      els.meter.setAttribute('aria-valuenow', Math.round(db));
+
+      state.peak = Math.max(pct, state.peak - 0.15);
+      els.peak.style.left = `${state.peak}%`;
+
+      els.db.textContent = Math.round(db);
+      if (els.liveDb) els.liveDb.textContent = state.running ? Math.round(db) : '–';
+      if (els.miniBar) {
+        els.miniBar.style.width = `${pct}%`;
+        els.miniBar.classList.toggle('is-danger', over);
+      }
+
+      if (!state.running) return;
+
+      if (over) showStatus('Too loud — above the warning threshold!', 'danger');
+      else showStatus('Listening…', 'safe');
+
+      // Level: instant step up, one step down per stepDownSeconds of quieter sound.
+      const now = performance.now();
+      const target = rawLevelFor(db);
+      if (target > state.level) {
+        setLevel(target);
+        state.levelChangedAt = now;
+      } else if (target < state.level) {
+        if (now - state.levelChangedAt >= settings.stepDownSeconds * 1000) {
+          setLevel(state.level - 1);
+          state.levelChangedAt = now;
+        }
+      } else {
+        state.levelChangedAt = now;
+      }
+      if (els.liveLevel) els.liveLevel.textContent = `Level ${target}`;
+    }
+
+    // ---------------------------------------------------------------- calibration
+
+    function cancelCalibration() {
+      if (!state.calibrating) return;
+      clearInterval(state.calibrating.timer);
+      state.calibrating = null;
+      els.calibrate.disabled = false;
+      els.calibrate.textContent = 'Calibrate to quiet room';
+    }
+
+    els.calibrate.addEventListener('click', async () => {
+      if (state.calibrating) return;
+      if (!(await start())) {
+        setFeedback('Calibration needs microphone access.', 'error');
+        return;
+      }
+      let remaining = 4;
+      els.calibrate.disabled = true;
+      els.calibrate.textContent = `Listening… ${remaining}`;
+      state.calibrating = { samples: [], timer: null };
+      state.calibrating.timer = setInterval(() => {
+        remaining -= 1;
+        if (remaining > 0) {
+          els.calibrate.textContent = `Listening… ${remaining}`;
+          return;
+        }
+        const samples = state.calibrating.samples.slice().sort((a, b) => a - b);
+        cancelCalibration();
+        if (samples.length < 10) {
+          setFeedback('Not enough audio was captured. Try again.', 'error');
+          return;
+        }
+        // Use the 75th percentile so ordinary quiet-room rustle still reads as Level 0.
+        const quiet = Math.round(samples[Math.floor(samples.length * 0.75)]);
+        const shift = quiet - settings.imageMin;
+        const next = mergeSettings(settings, {
+          imageMin: settings.imageMin + shift,
+          imageMax: settings.imageMax + shift,
+          threshold: settings.threshold + shift,
+        }).settings;
+        setSettings(next);
+        state.level = -1; setLevel(0);
+        setFeedback(`Calibrated: quiet room reads ${quiet} dB. Scale moved ${shift >= 0 ? 'up' : 'down'} ${Math.abs(shift)} dB.`, 'ok');
+      }, 1000);
+    });
+
+    // ---------------------------------------------------------------- full screen
+
+    const fsElement = () => document.fullscreenElement || document.webkitFullscreenElement;
+    function toggleFullscreen() {
+      if (fsElement() === card) {
+        (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      } else {
+        const req = card.requestFullscreen || card.webkitRequestFullscreen;
+        if (req) req.call(card);
+      }
+    }
+    if (!(card.requestFullscreen || card.webkitRequestFullscreen)) {
+      els.fullscreen.hidden = true;
     } else {
-      meterBar.classList.remove('danger');
+      els.fullscreen.addEventListener('click', toggleFullscreen);
+      const onFs = () => {
+        const on = fsElement() === card;
+        card.classList.toggle('is-fullscreen', on);
+        els.fullscreen.setAttribute('aria-label', on ? 'Exit full screen' : 'Full screen');
+        els.fullscreen.title = on ? 'Exit full screen' : 'Full screen';
+      };
+      document.addEventListener('fullscreenchange', onFs);
+      document.addEventListener('webkitfullscreenchange', onFs);
     }
-  }
 
-  // 3. Update Numerical dB Readout
-  const dbDisplay = cardElement.querySelector('.noise-db-value');
-  if (dbDisplay) {
-    dbDisplay.textContent = Math.round(dbValue);
-  }
+    // ---------------------------------------------------------------- wake lock
 
-  // 4. Update Status Text
-  const statusText = cardElement.querySelector('.noise-status-text');
-  if (statusText) {
-    if (dbValue >= threshold) {
-      statusText.textContent = "Warning: Exceeding Noise Threshold!";
-      statusText.className = "noise-status-text text-danger";
-    } else {
-      statusText.textContent = "Monitoring ambient sound...";
-      statusText.className = "noise-status-text text-safe";
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator && document.visibilityState === 'visible') {
+          state.wakeLock = await navigator.wakeLock.request('screen');
+        }
+      } catch (e) { /* not supported or refused; harmless */ }
     }
-  }
-
-  // 5. Calculate Immediate Target Level (0 through 5)
-  let rawLevelIndex = 0;
-  if (imageMax > imageMin) {
-    const normalizedRatio = Math.min(Math.max((dbValue - imageMin) / (imageMax - imageMin), 0), 1);
-    rawLevelIndex = Math.min(5, Math.floor(normalizedRatio * 6));
-  }
-
-  // 6. 10-Second Hold Timer Logic
-//   const now = Date.now();
-//   const HOLD_DURATION_MS = 10000;
-
-//   if (rawLevelIndex > cardElement._currentLevelIndex) {
-//     // Immediate step up on volume spike
-//     cardElement._currentLevelIndex = rawLevelIndex;
-//     cardElement._levelHoldTimestamp = now;
-//   } else if (rawLevelIndex < cardElement._currentLevelIndex) {
-//     // Hold level for 10s before stepping down
-//     if (now - cardElement._levelHoldTimestamp >= HOLD_DURATION_MS) {
-//       cardElement._currentLevelIndex = rawLevelIndex;
-//       cardElement._levelHoldTimestamp = now;
-//     }
-//   } else {
-//     cardElement._levelHoldTimestamp = now;
-//   }
-
-//   const activeLevel = cardElement._currentLevelIndex;
-
-
-// 6. Step-down Timer Logic (1 step down every 3 seconds)
-  const now = Date.now();
-  const DECAY_STEP_MS = 3000; // 3 seconds per step down
-
-  // Initialize timestamp if missing
-  if (!cardElement._levelHoldTimestamp) {
-    cardElement._levelHoldTimestamp = now;
-  }
-
-  if (rawLevelIndex > cardElement._currentLevelIndex) {
-    // Immediate step up on volume spike
-    cardElement._currentLevelIndex = rawLevelIndex;
-    cardElement._levelHoldTimestamp = now;
-  } else if (rawLevelIndex < cardElement._currentLevelIndex) {
-    // Step down 1 level every 3 seconds
-    if (now - cardElement._levelHoldTimestamp >= DECAY_STEP_MS) {
-      cardElement._currentLevelIndex -= 1;
-      cardElement._levelHoldTimestamp = now;
+    function releaseWakeLock() {
+      if (state.wakeLock) state.wakeLock.release().catch(() => {});
+      state.wakeLock = null;
     }
-  } else {
-    // Level matches current, reset timer
-    cardElement._levelHoldTimestamp = now;
+    document.addEventListener('visibilitychange', () => {
+      if (state.running && document.visibilityState === 'visible') requestWakeLock();
+    });
+
+    els.timer.addEventListener('click', () => {
+      if (els.timer.classList.contains('is-done')) { els.timer.classList.remove('is-done'); showIdleTimer(); }
+    });
+
+    // ---------------------------------------------------------------- go
+
+    fillForm();
+    applySettings();
+    card.setAttribute('data-level', '0');
   }
 
-  const activeLevel = cardElement._currentLevelIndex;
-
-  // 7. Update Active Foreground Image
-  const imgElement = cardElement.querySelector('.noise-image');
-  if (imgElement) {
-    const newImgSrc = cardElement.getAttribute(`data-img${activeLevel}`);
-    if (newImgSrc && imgElement.getAttribute('src') !== newImgSrc) {
-      imgElement.setAttribute('src', newImgSrc);
-    }
+  function initAll() {
+    document.querySelectorAll('.noise-monitor-card').forEach(initNoiseMonitor);
   }
 
-  // 8. Update Active Custom Level Message
-  const messageElement = cardElement.querySelector('.noise-level-message');
-  if (messageElement) {
-    const msgInput = cardElement.querySelector(`.noise-msg-input[data-level="${activeLevel}"]`);
-    let activeMsg = msgInput ? msgInput.value : cardElement.getAttribute(`data-msg${activeLevel}`);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initAll);
+  else initAll();
 
-    if (activeMsg !== null) {
-      messageElement.textContent = activeMsg;
-    }
-  }
-}
+  window.NoiseMonitor = { init: initNoiseMonitor, initAll };
+})();

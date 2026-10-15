@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
+.anim{transform-box:view-box}
+
+    .bounce{animation:dbounce .8s cubic-bezier(.3,0,.7,1) infinite;transform-origin:760px 985px}
+    @keyframes dbounce{0%,100%{transform:translateY(0) scale(1.08,.9)}15%{transform:translateY(0) scale(1)}50%{transform:translateY(-150px) scale(.96,1.05)}85%{transform:translateY(0) scale(1)}}
+    .dshadow{animation:dsh .8s cubic-bezier(.3,0,.7,1) infinite;transform-origin:760px 990px}
+    @keyframes dsh{0%,100%{transform:scale(1.1)}50%{transform:scale(.6)}}
+    .popd{animation:popd 1.6s ease-out infinite;transform-origin:1170px 300px}
+    @keyframes popd{0%,25%{transform:scale(0);opacity:0}35%{transform:scale(1.15);opacity:1}45%,85%{transform:scale(1);opacity:1}100%{opacity:0}}</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse class="anim dshadow" cx="760" cy="990" rx="280" ry="22" fill="#000" fill-opacity="0.15" stroke="none"/>
+    <g class="anim bounce"><g transform="translate(760 985) scale(1.05)">
+    <!-- tail -->
+    <path d="M-150 -140 Q-300 -120 -380 -40 Q-300 -60 -160 -70 Z" fill="#4ade80"/>
+    <polygon points="-192,-244 -170,-284 -148,-244" fill="#fb923c"/><polygon points="-142,-294 -120,-334 -98,-294" fill="#fb923c"/><polygon points="-82,-334 -60,-374 -38,-334" fill="#fb923c"/><polygon points="-12,-374 10,-414 32,-374" fill="#fb923c"/><polygon points="48,-424 70,-464 92,-424" fill="#fb923c"/>
+    <!-- legs -->
+    <rect x="-120" y="-90" width="70" height="90" rx="30" fill="#22c55e"/>
+    <rect x="40" y="-90" width="70" height="90" rx="30" fill="#22c55e"/>
+    <!-- body -->
+    <path d="M-190 -150 Q-200 -330 -20 -360 Q90 -380 130 -300 Q170 -160 120 -70 Q0 -30 -130 -60 Q-190 -90 -190 -150 Z" fill="#4ade80"/>
+    <path d="M-90 -110 Q-110 -250 10 -280 Q90 -260 80 -110 Q0 -80 -90 -110 Z" fill="#bbf7d0"/>
+    <path d="M-80 -150 Q0 -136 70 -150 M-84 -200 Q0 -186 74 -200" fill="none" stroke="#86efac" stroke-width="4"/>
+    <!-- tiny arms -->
+    <g><path d="M90 -230 q40 -4 46 20 q-20 6 -40 0 z" fill="#22c55e"/><animateTransform attributeName="transform" type="rotate" values="-30 90 -226;30 90 -226;-30 90 -226" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="0.35s" begin="0s" repeatCount="indefinite" additive="sum"/></g>
+    <!-- neck -->
+    <path d="M-10 -350 Q10 -430 90 -440 L170 -400 Q120 -330 110 -250 Z" fill="#4ade80"/>
+    <!-- head -->
+    <path d="M40 -420 Q60 -520 180 -520 Q290 -520 300 -440 Q306 -380 240 -372 L80 -360 Q30 -370 40 -420 Z" fill="#4ade80"/>
+    <path d="M100 -392 L280 -400 Q270 -366 240 -362 L96 -352 Z" fill="#be123c"/>
+    <path d="M110 -394 l12 16 l12 -16 l12 16 l12 -16 l12 16 l12 -16 l12 16 l12 -16 l12 16 l12 -16" fill="#fff" stroke-width="3"/>
+    <circle cx="282" cy="-470" r="6" fill="#1e293b" stroke="none"/>
+    
+    <circle cx="150" cy="-470" r="26" fill="#fff"/>
+    <g><circle cx="150" cy="-462.2" r="11.700000000000001" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;9.1 -5.2;-7.8 -9.1;0 0"
+      dur="0.4s" repeatCount="indefinite"/></g>
+    <circle cx="212" cy="-478" r="24" fill="#fff"/>
+    <g><circle cx="212" cy="-470.8" r="10.8" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;8.399999999999999 -4.800000000000001;-7.199999999999999 -8.399999999999999;0 0"
+      dur="0.45s" repeatCount="indefinite"/></g>
+    <!-- air valve: it's inflatable! -->
+    <circle cx="-172" cy="-150" r="10" fill="#fde047"/></g></g>
+    <g class="anim popd"><g transform="translate(1170 300) rotate(8) scale(0.85)">
+    <polygon points="150,0 110,21 115,50 59,53 26,77 -20,60 -75,68 -90,39 -141,27 -117,0 -141,-27 -90,-39 -75,-68 -20,-60 26,-77 58,-53 115,-50 110,-21" fill="#fff"/>
+    <text x="0" y="23" text-anchor="middle" font-family="'Arial Black','Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif" font-weight="900" font-size="64" fill="#15803d" stroke="none">RAWR!</text>
+    </g></g></g></svg>

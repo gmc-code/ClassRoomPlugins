@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
+.anim{transform-box:view-box}
+
+    .zap{animation:zap .5s steps(1) infinite}
+    .z1{animation-duration:.37s}.z2{animation-duration:.61s}
+    @keyframes zap{0%{opacity:1}40%{opacity:0}70%{opacity:1}}
+    .glow{animation:glow .4s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center}
+    @keyframes glow{from{transform:scale(.8)}to{transform:scale(1.15)}}
+    .popz{animation:popz 1.6s ease-out infinite;transform-origin:470px 470px}
+    .popz2{animation:popz 2.1s ease-out infinite .7s;transform-origin:1180px 600px}
+    @keyframes popz{0%,35%{transform:scale(0);opacity:0}45%{transform:scale(1.15);opacity:1}55%,85%{transform:scale(1);opacity:1}100%{opacity:0}}</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+    <g transform="translate(250 990) scale(0.9)">
+    <circle class="anim glow" cx="0" cy="-330" r="90" fill="#e9d5ff" fill-opacity="0.55" stroke="none"/>
+    <g class="anim zap z0" style="animation-delay:-0.00s"><path d="M0 -330 L35 -369 L53 -377 L82 -428 L172 -482 L189 -488 L195 -533 L260 -560" fill="none" stroke="#c084fc" stroke-width="12" stroke-opacity="0.6"/><path d="M0 -330 L35 -369 L53 -377 L82 -428 L172 -482 L189 -488 L195 -533 L260 -560" fill="none" stroke="#faf5ff" stroke-width="4"/></g><g class="anim zap z1" style="animation-delay:-0.13s"><path d="M0 -330 L-8 -374 L-26 -430 L-76 -474 L-80 -475 L-95 -523 L-127 -566 L-140 -620" fill="none" stroke="#c084fc" stroke-width="12" stroke-opacity="0.6"/><path d="M0 -330 L-8 -374 L-26 -430 L-76 -474 L-80 -475 L-95 -523 L-127 -566 L-140 -620" fill="none" stroke="#faf5ff" stroke-width="4"/></g><g class="anim zap z2" style="animation-delay:-0.26s"><path d="M0 -330 L23 -345 L105 -327 L137 -363 L175 -362 L223 -336 L265 -336 L330 -360" fill="none" stroke="#c084fc" stroke-width="12" stroke-opacity="0.6"/><path d="M0 -330 L23 -345 L105 -327 L137 -363 L175 -362 L223 -336 L265 -336 L330 -360" fill="none" stroke="#faf5ff" stroke-width="4"/></g><g class="anim zap z0" style="animation-delay:-0.39s"><path d="M0 -330 L38 -414 L24 -453 L19 -518 L87 -595 L84 -656 L99 -679 L110 -760" fill="none" stroke="#c084fc" stroke-width="12" stroke-opacity="0.6"/><path d="M0 -330 L38 -414 L24 -453 L19 -518 L87 -595 L84 -656 L99 -679 L110 -760" fill="none" stroke="#faf5ff" stroke-width="4"/></g><g class="anim zap z1" style="animation-delay:-0.52s"><path d="M0 -330 L-55 -367 L-99 -354 L-140 -389 L-149 -360 L-191 -399 L-215 -427 L-260 -420" fill="none" stroke="#c084fc" stroke-width="12" stroke-opacity="0.6"/><path d="M0 -330 L-55 -367 L-99 -354 L-140 -389 L-149 -360 L-191 -399 L-215 -427 L-260 -420" fill="none" stroke="#faf5ff" stroke-width="4"/></g>
+    <rect x="-80" y="-62" width="160" height="62" rx="8" fill="#475569"/>
+    <rect x="-34" y="-300" width="68" height="240" fill="#b45309"/>
+    <line x1="-34" y1="-290" x2="34" y2="-290" stroke="#f59e0b" stroke-width="3"/><line x1="-34" y1="-278" x2="34" y2="-278" stroke="#f59e0b" stroke-width="3"/><line x1="-34" y1="-266" x2="34" y2="-266" stroke="#f59e0b" stroke-width="3"/><line x1="-34" y1="-254" x2="34" y2="-254" stroke="#f59e0b" stroke-width="3"/><line x1="-34" y1="-242" x2="34" y2="-242" stroke="#f59e0b" stroke-width="3"/><line x1="-34" y1="-230" x2="34" y2="-230" stroke="#f59e0b" stroke-width="3"/><line x1="-34" y1="-218" x2="34" y2="-218" stroke="#f59e0b" stroke-width="3"/><line x1="-34" y1="-206" x2="34" y2="-206" stroke="#f59e0b" stroke-width="3"/><line x1="-34" y1="-194" x2="34" y2="-194" stroke="#f59e0b" stroke-width="3"/><line x1="-34" y1="-182" x2="34" y2="-182" stroke="#f59e0b" stroke-width="3"/><line x1="-34" y1="-170" x2="34" y2="-170" stroke="#f59e0b" stroke-width="3"/><line x1="-34" y1="-158" x2="34" y2="-158" stroke="#f59e0b" stroke-width="3"/><line x1="-34" y1="-146" x2="34" y2="-146" stroke="#f59e0b" stroke-width="3"/><line x1="-34" y1="-134" x2="34" y2="-134" stroke="#f59e0b" stroke-width="3"/><line x1="-34" y1="-122" x2="34" y2="-122" stroke="#f59e0b" stroke-width="3"/><line x1="-34" y1="-110" x2="34" y2="-110" stroke="#f59e0b" stroke-width="3"/><line x1="-34" y1="-98" x2="34" y2="-98" stroke="#f59e0b" stroke-width="3"/><line x1="-34" y1="-86" x2="34" y2="-86" stroke="#f59e0b" stroke-width="3"/><line x1="-34" y1="-74" x2="34" y2="-74" stroke="#f59e0b" stroke-width="3"/>
+    <rect x="-34" y="-300" width="68" height="240" fill="none"/>
+    <ellipse cx="0" cy="-322" rx="96" ry="32" fill="#cbd5e1"/>
+    <ellipse cx="0" cy="-326" rx="40" ry="10" fill="#94a3b8"/>
+    <path d="M-70 -334 q30 -14 60 -6" fill="none" stroke="#fff" stroke-width="5"/></g>
+    <g transform="translate(1340 985) scale(0.95)">
+    <line x1="0" y1="-150" x2="-80" y2="0" stroke-width="9" stroke="#475569"/>
+    <line x1="0" y1="-150" x2="80" y2="0" stroke-width="9" stroke="#475569"/>
+    <g transform="translate(0 -150)"><g>
+      <line x1="0" y1="0" x2="120" y2="0" stroke="#94a3b8" stroke-width="5"/><line x1="0" y1="0" x2="85" y2="85" stroke="#94a3b8" stroke-width="5"/><line x1="0" y1="0" x2="0" y2="120" stroke="#94a3b8" stroke-width="5"/><line x1="0" y1="0" x2="-85" y2="85" stroke="#94a3b8" stroke-width="5"/><line x1="0" y1="0" x2="-120" y2="0" stroke="#94a3b8" stroke-width="5"/><line x1="0" y1="0" x2="-85" y2="-85" stroke="#94a3b8" stroke-width="5"/><line x1="0" y1="0" x2="-0" y2="-120" stroke="#94a3b8" stroke-width="5"/><line x1="0" y1="0" x2="85" y2="-85" stroke="#94a3b8" stroke-width="5"/>
+      <circle r="124" fill="none" stroke-width="10"/>
+      <circle r="112" fill="none" stroke="#38bdf8" stroke-width="12" stroke-dasharray="6 14"/>
+      <animateTransform attributeName="transform" type="rotate" from="360 0 0" to="0 0 0" dur="0.7s" begin="0s" repeatCount="indefinite" additive="sum"/></g>
+      <circle r="12" fill="#475569"/>
+    </g>
+    <!-- hamster -->
+    <g transform="translate(0 -72)"><g>
+      <g stroke-width="6">
+        <line x1="-22" y1="22" x2="-34" y2="40"><animate attributeName="x2" values="-34;-10;-34" dur="0.18s" repeatCount="indefinite"/></line>
+        <line x1="18" y1="22" x2="30" y2="40"><animate attributeName="x2" values="30;6;30" dur="0.18s" repeatCount="indefinite"/></line>
+      </g>
+      <ellipse cx="0" cy="0" rx="54" ry="36" fill="#fdba74"/>
+      <ellipse cx="-6" cy="12" rx="32" ry="18" fill="#fff7ed" stroke="none"/>
+      <circle cx="40" cy="-30" r="14" fill="#fdba74"/><circle cx="40" cy="-30" r="6" fill="#f9a8d4" stroke="none"/>
+      <path d="M44 -16 Q66 -8 64 8" fill="none" stroke-width="4"/>
+      <circle cx="56" cy="-6" r="13" fill="#bae6fd" fill-opacity="0.7" stroke-width="4"/>
+      <circle cx="58" cy="-6" r="4" fill="#1e293b" stroke="none"/>
+      <path d="M43 -12 L28 -8" stroke="#22c55e" stroke-width="5"/>
+      <circle cx="74" cy="6" r="5" fill="#f472b6" stroke="none"/>
+      <animateTransform attributeName="transform" type="translate" values="0 0;0 -5;0 0" dur="0.18s" repeatCount="indefinite"/>
+    </g></g></g>
+    <g class="anim popz"><g transform="translate(470 470) rotate(-8) scale(0.72)">
+    <polygon points="150,0 110,21 115,50 59,53 26,77 -20,60 -75,68 -90,39 -141,27 -117,0 -141,-27 -90,-39 -75,-68 -20,-60 26,-77 58,-53 115,-50 110,-21" fill="#fff"/>
+    <text x="0" y="22" text-anchor="middle" font-family="'Arial Black','Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif" font-weight="900" font-size="60" fill="#9333ea" stroke="none">ZAP!</text>
+    </g></g>
+    <g class="anim popz2"><g transform="translate(1180 600) rotate(6) scale(0.62)">
+    <polygon points="150,0 110,21 115,50 59,53 26,77 -20,60 -75,68 -90,39 -141,27 -117,0 -141,-27 -90,-39 -75,-68 -20,-60 26,-77 58,-53 115,-50 110,-21" fill="#fff"/>
+    <text x="0" y="20" text-anchor="middle" font-family="'Arial Black','Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif" font-weight="900" font-size="56" fill="#ea580c" stroke="none">ZOOM!</text>
+    </g></g></g></svg>

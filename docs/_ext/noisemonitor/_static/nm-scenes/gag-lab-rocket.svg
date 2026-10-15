@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
+.anim{transform-box:view-box}
+.flame{animation:flame .12s steps(2) infinite}@keyframes flame{50%{transform:scaleX(1.3)}}.popr{animation:popr 8s ease-out infinite 0s;transform-origin:1330px 470px}@keyframes popr{0%,30%{transform:scale(0);opacity:0}40%{transform:scale(1.15);opacity:1}50%,85%{transform:scale(1);opacity:1}100%{opacity:0}}</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"><g><animateMotion path="M 1150 560 L 1150 400 C 1150 150, 1450 100, 1500 300 S 1100 600, 800 300 S 400 -50, 200 200 S 300 500, 600 250 S 1200 -100, 1900 100" dur="8s" begin="0s" repeatCount="indefinite" rotate="auto" /><g transform="scale(0.9)">
+    <g class="anim flame"><path d="M-70 0 Q-110 -14 -150 0 Q-110 14 -70 0 Z" fill="#f97316"/>
+      <path d="M-70 0 Q-92 -7 -112 0 Q-92 7 -70 0 Z" fill="#fde047" stroke="none"/></g>
+    <polygon points="-60,-14 -86,-34 -70,-14" fill="#ef4444"/>
+    <polygon points="-60,14 -86,34 -70,14" fill="#ef4444"/>
+    <path d="M-70 -16 L50 -16 Q76 -16 76 0 Q76 16 50 16 L-70 16 Z" fill="#e0f2fe" fill-opacity="0.9"/>
+    <path d="M0 -16 L50 -16 Q76 -16 76 0 Q76 16 50 16 L0 16 Z" fill="#4ade80" stroke="none"/>
+    <path d="M-70 -16 L50 -16 Q76 -16 76 0 Q76 16 50 16 L-70 16 Z" fill="none"/>
+    <rect x="-82" y="-12" width="16" height="24" rx="4" fill="#a16207"/>
+    
+    <circle cx="40" cy="-2" r="8" fill="#fff"/>
+    <g><circle cx="40" cy="0.3999999999999999" r="3.6" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.8 -1.6;-2.4 -2.8;0 0"
+      dur="0.4s" repeatCount="indefinite"/></g></g></g><g transform="translate(1150 577) scale(0.6)"><rect x="-50" y="-30" width="100" height="30" rx="4" fill="#a16207"/><rect x="-30" y="-60" width="10" height="34" fill="#cbd5e1"/><rect x="20" y="-60" width="10" height="34" fill="#cbd5e1"/></g><g class="anim popr"><g transform="translate(1330 470) rotate(-6) scale(0.65)">
+    <polygon points="150,0 110,21 115,50 59,53 26,77 -20,60 -75,68 -90,39 -141,27 -117,0 -141,-27 -90,-39 -75,-68 -20,-60 26,-77 58,-53 115,-50 110,-21" fill="#fff"/>
+    <text x="0" y="12" text-anchor="middle" font-family="'Arial Black','Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif" font-weight="900" font-size="34" fill="#dc2626" stroke="none">3-2-1 BLAST OFF!</text>
+    </g></g></g></svg>

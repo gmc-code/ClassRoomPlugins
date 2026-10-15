@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
+.anim{transform-box:view-box}
+
+    .peek{animation:peek 3s ease-in-out infinite}
+    @keyframes peek{0%,100%{transform:translateY(120px)}25%,75%{transform:translateY(0)}}
+    .popt{animation:popt 3s ease-out infinite;transform-origin:330px 610px}
+    @keyframes popt{0%,25%{transform:scale(0);opacity:0}32%{transform:scale(1.1);opacity:1}40%,70%{transform:scale(1);opacity:1}78%,100%{opacity:0}}</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+    <g class="anim peek"><g transform="translate(165 760)">
+    <circle cx="-44" cy="-50" r="22" fill="#c08457"/><circle cx="-44" cy="-50" r="10" fill="#f5d0a9" stroke="none"/>
+    <circle cx="44" cy="-50" r="22" fill="#c08457"/><circle cx="44" cy="-50" r="10" fill="#f5d0a9" stroke="none"/>
+    <circle r="58" fill="#c08457"/>
+    <ellipse cx="0" cy="22" rx="26" ry="20" fill="#f5d0a9"/>
+    <ellipse cx="0" cy="12" rx="9" ry="6" fill="#1e293b" stroke="none"/>
+    <path d="M-10 26 q10 10 20 0" fill="none" stroke-width="4"/>
+    
+    <circle cx="-20" cy="-12" r="12" fill="#fff"/>
+    <g><circle cx="-20" cy="-8.4" r="5.4" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;4.199999999999999 -2.4000000000000004;-3.5999999999999996 -4.199999999999999;0 0"
+      dur="0.6s" repeatCount="indefinite"/></g>
+    <circle cx="20" cy="-12" r="12" fill="#fff"/>
+    <g><circle cx="20" cy="-8.4" r="5.4" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;4.199999999999999 -2.4000000000000004;-3.5999999999999996 -4.199999999999999;0 0"
+      dur="0.55s" repeatCount="indefinite"/></g>
+    <g><circle cx="78" cy="30" r="22" fill="#c08457"/><animateTransform attributeName="transform" type="rotate" values="-25 60 60;25 60 60;-25 60 60" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="0.5s" begin="0s" repeatCount="indefinite" additive="sum"/></g></g></g>
+    <path d="M70 900 q-30 -110 70 -130 q100 -10 110 90 q10 50 -60 60 q-90 10 -120 -20 z" fill="#f472b6"/>
+    <g class="anim popt"><g transform="translate(330 610) rotate(-6) scale(0.6)">
+    <polygon points="150,0 110,21 115,50 59,53 26,77 -20,60 -75,68 -90,39 -141,27 -117,0 -141,-27 -90,-39 -75,-68 -20,-60 26,-77 58,-53 115,-50 110,-21" fill="#fff"/>
+    <text x="0" y="19" text-anchor="middle" font-family="'Arial Black','Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif" font-weight="900" font-size="54" fill="#c2410c" stroke="none">HELLO!</text>
+    </g></g>
+    <g><animateMotion path="M -120 840 Q 100 520 320 880 Q 520 560 720 910 Q 920 600 1120 870 Q 1320 560 1500 840 Q 1640 620 1760 800" dur="6s" begin="0s" repeatCount="indefinite" rotate="0" /><g transform="scale(1.1)"><path d="M0 0 L55.0 0.0 A55 55 0 0 1 27.5 47.6 Z" fill="#ef4444" stroke-width="3"/><path d="M0 0 L27.5 47.6 A55 55 0 0 1 -27.5 47.6 Z" fill="#fff" stroke-width="3"/><path d="M0 0 L-27.5 47.6 A55 55 0 0 1 -55.0 0.0 Z" fill="#3b82f6" stroke-width="3"/><path d="M0 0 L-55.0 0.0 A55 55 0 0 1 -27.5 -47.6 Z" fill="#fff" stroke-width="3"/><path d="M0 0 L-27.5 -47.6 A55 55 0 0 1 27.5 -47.6 Z" fill="#facc15" stroke-width="3"/><path d="M0 0 L27.5 -47.6 A55 55 0 0 1 55.0 -0.0 Z" fill="#fff" stroke-width="3"/><circle r="55" fill="none"/><circle r="12" fill="#fff"/><animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="1s" begin="0s" repeatCount="indefinite" additive="sum"/></g></g></g></svg>

@@ -63,12 +63,11 @@ Top row: files and output
    and name; other browsers ask for a name and save to Downloads.
 
 **Reset**
-   Go back to the plan as written on the page, removing your class list,
-   rules and changes from this browser. You are asked to confirm.
+   Go back to the empty plan (as written on the page by the website author), removing your class list, rules and changes from this browser. You are asked to confirm.
 
 **Revert**
    Go back to the last file you imported or exported, undoing everything
-   since. Greyed out until you have imported or exported something. After an
+   since. This is greyed out until you have imported or exported something. After an
    **Import Roster**, it returns the class to the file's original order.
 
 **Print**
@@ -170,9 +169,9 @@ Put empty floor space in square brackets, counted in desk widths:
 
 * ``3[1]3``: 3 desks, an aisle, 3 desks
 * ``[2]3[2]``: a row of 3 desks centred, with 2 spaces each side
-* ``2[6]2, 2[6]2, 10``: a horseshoe
+* ``1[6]1, 1[6]1, 8``: a horseshoe
 
-Up to 12 rows, each with 1–20 desks and at most 24 places wide (desks plus
+Limits: Up to 12 rows, each with 1–20 desks and at most 24 places wide (desks plus
 spaces). Desks either side of a space are not counted as next to each other.
 
 Tables
@@ -185,8 +184,11 @@ In **Tables** mode, type the seats at each table, commas between tables and
 * ``6``: a table of 6, 3 wide and 2 deep
 * ``6d``: a table of 6, 2 wide and 3 deep
 
-For example ``6,4,6 / 4,6,4``. ``2x3`` means 2 rows of 3 tables of 4, and
-``2x3 6`` uses tables of 6. Up to 8 rows of 8 tables.
+| For example:
+| ``6,4,6 / 4,6,4`` means tables of 6, 4 and 6 then tables of 4, 6 and 4.
+| ``2x3`` means 2 rows of 3 tables of 4.
+| ``2x3 6`` uses 2 rows of 3 tables of 6.
+| Limits:Up to 8 rows of 8 tables.
 
 Rows and tables each keep their own layout, so you can switch between them
 without losing either.
@@ -327,8 +329,8 @@ Saving and privacy
 
 ----
 
-For the author: the directive
------------------------------
+For the website author: the directive
+-----------------------------------------
 
 A plan is added to a page with the ``seatingplan`` directive. All options are
 optional:
@@ -367,7 +369,7 @@ Options
 
 ``:layout:``
    Desks per row (``5x6``, ``7,8,9,6``, ``3[1]3``), or tables in tables mode
-   (``6,4,6 / 4,6,4``). Default ``5x6``, or 8 tables of 4.
+   (``6,4,6 / 4,6,4``). Default ``5x6``, or 8 tables of 4 in tables mode.
 ``:mode:``
    ``rows`` (default) or ``tables``.
 ``:tables-per-row:``
@@ -389,3 +391,62 @@ Options
    the **Row Controls** checkbox.
 ``:class:``
    Extra CSS classes for the plan.
+
+
+
+Restyling a plan with ``:class:``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``:class:`` adds your own class names to the plan, so you can restyle that
+plan without touching the directive's CSS. Several names can be given,
+separated by spaces.
+
+**1. Add the class to the plan:**
+
+.. code-block:: rst
+
+   .. seatingplan::
+      :layout: 3x10
+      :title: 9 Science 2 – Lab B
+      :class: lab-room roomy
+
+**2. Write the CSS** in your own stylesheet, e.g. ``_static/custom.css``.
+Start each rule with ``.seatingplan.`` and your class name, so it applies
+only to plans with that class:
+
+.. code-block:: css
+
+   /* Taller desks and wider gaps between desks */
+   .seatingplan.roomy {
+       --sp-desk-height: 95px;            /* desk height (default 75px) */
+       --sp-desk-height-projector: 130px; /* in Projector View (default 112px) */
+       --sp-row-gap: 14px;                /* gap between desks in a row (default 8px) */
+   }
+   .seatingplan.roomy .sp-grid { gap: 16px; }   /* gap between rows */
+
+   /* A green title bar to mark lab plans */
+   .seatingplan.lab-room .sp-title { background: #166534; }
+
+**3. Load the stylesheet** in ``conf.py``:
+
+.. code-block:: python
+
+   html_static_path = ["_static"]
+   html_css_files = ["custom.css"]
+
+The settings you can override directly are:
+
+* ``--sp-desk-height``: desk height on screen
+* ``--sp-desk-height-projector``: desk height in **Projector View**
+* ``--sp-row-gap``: gap between desks in a row
+* ``--sp-limit-seats``: the desk count that **Limit Desk Width** matches
+  (default 6)
+
+Anything else can be targeted through the plan's own classes, e.g.
+``.sp-title``, ``.sp-whiteboard``, ``.sp-desk``, ``.sp-card`` and ``.sp-grid``.
+
+.. note::
+
+   Extra classes change the plan **on screen and in Projector View only**.
+   **Print** and **Print all my classes** use their own fixed print styles,
+   so printouts look the same for every plan.

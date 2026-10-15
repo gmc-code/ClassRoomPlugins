@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000"><style>
+.anim{transform-box:view-box}
+</style><g stroke="#1e293b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"><g><animateMotion path="M 1800 160 C 1300 40, 1000 300, 600 140 S 100 60, -200 220" dur="9s" begin="-2s" repeatCount="indefinite" rotate="0" /><g>
+    <g transform="translate(-16 -40)"><g><ellipse cx="-38" cy="-8" rx="38" ry="16" fill="#fff" transform="rotate(-18 -38 -8)"/><animateTransform attributeName="transform" type="scale" values="1 1;1 0.25;1 1" dur="0.38s" begin="0s" repeatCount="indefinite"/></g></g>
+    <g transform="translate(16 -40) scale(-1 1)"><g><ellipse cx="-38" cy="-8" rx="38" ry="16" fill="#fff" transform="rotate(-18 -38 -8)"/><animateTransform attributeName="transform" type="scale" values="1 1;1 0.25;1 1" dur="0.38s" begin="0s" repeatCount="indefinite"/></g></g>
+    <g transform="translate(0.0 30.0) scale(1.300)" >
+    <path d="M-18 -60 L-18 -6 Q-18 0 -12 0 L12 0 Q18 0 18 -6 L18 -60" fill="#e0f2fe" fill-opacity="0.8"/>
+    <path d="M-18 -26 L18 -26 L18 -6 Q18 0 12 0 L-12 0 Q-18 0 -18 -6 Z" fill="#4ade80" stroke="none"/>
+    <path d="M-18 -60 L-18 -6 Q-18 0 -12 0 L12 0 Q18 0 18 -6 L18 -60" fill="none"/>
+    <line x1="-24" y1="-60" x2="24" y2="-60"/>
+    </g>
+    
+    <circle cx="-9" cy="-20" r="7" fill="#fff"/>
+    <g><circle cx="-9" cy="-17.9" r="3.15" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.4499999999999997 -1.4000000000000001;-2.1 -2.4499999999999997;0 0"
+      dur="0.4s" repeatCount="indefinite"/></g>
+    <circle cx="9" cy="-20" r="7" fill="#fff"/>
+    <g><circle cx="9" cy="-17.9" r="3.15" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.4499999999999997 -1.4000000000000001;-2.1 -2.4499999999999997;0 0"
+      dur="0.45s" repeatCount="indefinite"/></g><animateTransform attributeName="transform" type="rotate" values="-8 0 0;8 0 0;-8 0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="0.7s" begin="0s" repeatCount="indefinite" additive="sum"/></g></g><g><animateMotion path="M -200 480 C 300 380, 700 600, 1100 430 S 1500 360, 1850 480" dur="11s" begin="-4s" repeatCount="indefinite" rotate="0" /><g>
+    <g transform="translate(-16 -40)"><g><ellipse cx="-38" cy="-8" rx="38" ry="16" fill="#fff" transform="rotate(-18 -38 -8)"/><animateTransform attributeName="transform" type="scale" values="1 1;1 0.25;1 1" dur="0.38s" begin="0s" repeatCount="indefinite"/></g></g>
+    <g transform="translate(16 -40) scale(-1 1)"><g><ellipse cx="-38" cy="-8" rx="38" ry="16" fill="#fff" transform="rotate(-18 -38 -8)"/><animateTransform attributeName="transform" type="scale" values="1 1;1 0.25;1 1" dur="0.38s" begin="0s" repeatCount="indefinite"/></g></g>
+    <g transform="translate(0.0 30.0) scale(1.300)" >
+    <path d="M-18 -60 L-18 -6 Q-18 0 -12 0 L12 0 Q18 0 18 -6 L18 -60" fill="#e0f2fe" fill-opacity="0.8"/>
+    <path d="M-18 -26 L18 -26 L18 -6 Q18 0 12 0 L-12 0 Q-18 0 -18 -6 Z" fill="#60a5fa" stroke="none"/>
+    <path d="M-18 -60 L-18 -6 Q-18 0 -12 0 L12 0 Q18 0 18 -6 L18 -60" fill="none"/>
+    <line x1="-24" y1="-60" x2="24" y2="-60"/>
+    </g>
+    
+    <circle cx="-9" cy="-20" r="7" fill="#fff"/>
+    <g><circle cx="-9" cy="-17.9" r="3.15" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.4499999999999997 -1.4000000000000001;-2.1 -2.4499999999999997;0 0"
+      dur="0.4s" repeatCount="indefinite"/></g>
+    <circle cx="9" cy="-20" r="7" fill="#fff"/>
+    <g><circle cx="9" cy="-17.9" r="3.15" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.4499999999999997 -1.4000000000000001;-2.1 -2.4499999999999997;0 0"
+      dur="0.45s" repeatCount="indefinite"/></g><animateTransform attributeName="transform" type="rotate" values="-8 0 0;8 0 0;-8 0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="0.7s" begin="0s" repeatCount="indefinite" additive="sum"/></g></g><g><animateMotion path="M 900 -150 C 700 200, 1100 300, 900 500 S 600 700, 700 1150" dur="12s" begin="-7s" repeatCount="indefinite" rotate="0" /><g>
+    <g transform="translate(-16 -40)"><g><ellipse cx="-38" cy="-8" rx="38" ry="16" fill="#fff" transform="rotate(-18 -38 -8)"/><animateTransform attributeName="transform" type="scale" values="1 1;1 0.25;1 1" dur="0.38s" begin="0s" repeatCount="indefinite"/></g></g>
+    <g transform="translate(16 -40) scale(-1 1)"><g><ellipse cx="-38" cy="-8" rx="38" ry="16" fill="#fff" transform="rotate(-18 -38 -8)"/><animateTransform attributeName="transform" type="scale" values="1 1;1 0.25;1 1" dur="0.38s" begin="0s" repeatCount="indefinite"/></g></g>
+    <g transform="translate(0.0 30.0) scale(1.300)" >
+    <path d="M-18 -60 L-18 -6 Q-18 0 -12 0 L12 0 Q18 0 18 -6 L18 -60" fill="#e0f2fe" fill-opacity="0.8"/>
+    <path d="M-18 -26 L18 -26 L18 -6 Q18 0 12 0 L-12 0 Q-18 0 -18 -6 Z" fill="#f472b6" stroke="none"/>
+    <path d="M-18 -60 L-18 -6 Q-18 0 -12 0 L12 0 Q18 0 18 -6 L18 -60" fill="none"/>
+    <line x1="-24" y1="-60" x2="24" y2="-60"/>
+    </g>
+    
+    <circle cx="-9" cy="-20" r="7" fill="#fff"/>
+    <g><circle cx="-9" cy="-17.9" r="3.15" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.4499999999999997 -1.4000000000000001;-2.1 -2.4499999999999997;0 0"
+      dur="0.4s" repeatCount="indefinite"/></g>
+    <circle cx="9" cy="-20" r="7" fill="#fff"/>
+    <g><circle cx="9" cy="-17.9" r="3.15" fill="#1e293b" stroke="none"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;2.4499999999999997 -1.4000000000000001;-2.1 -2.4499999999999997;0 0"
+      dur="0.45s" repeatCount="indefinite"/></g><animateTransform attributeName="transform" type="rotate" values="-8 0 0;8 0 0;-8 0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="0.7s" begin="0s" repeatCount="indefinite" additive="sum"/></g></g></g></svg>
