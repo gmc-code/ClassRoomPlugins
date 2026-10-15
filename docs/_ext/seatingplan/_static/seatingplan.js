@@ -88,6 +88,9 @@
     var LIMIT_SEATS = 6; /* Limit Desk Width: short rows use the desk width of a 6-desk row */
     var XLSX_URL = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
     var xlsxPromise = null;
+    var HTML2CANVAS_URL = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+    var html2canvasPromise = null;
+    var PNG_WIDTH = 1400;   /* px; landscape like the printout, saved at 2x for sharp text */
 
     var PRINT_CSS =
         '@page{size:landscape;margin:10mm}' +
@@ -447,6 +450,65 @@
         return xlsxPromise;
     }
 
+    /* html2canvas draws a page into an image; loaded the first time Save PNG is pressed. */
+    function loadHtml2canvas() {
+        if (window.html2canvas) return Promise.resolve(window.html2canvas);
+        if (!html2canvasPromise) {
+            html2canvasPromise = new Promise(function (resolve, reject) {
+                var s = document.createElement('script');
+                s.src = HTML2CANVAS_URL;
+                s.onload = function () { resolve(window.html2canvas); };
+                s.onerror = function () { html2canvasPromise = null; reject(new Error('Could not load the image maker. Check the internet connection.')); };
+                document.head.appendChild(s);
+            });
+        }
+        return html2canvasPromise;
+    }
+
+    /* Draw printable sections (as built by printSection) into a PNG blob. They are laid out
+       in a hidden frame with the print styles, so the image matches the printout. */
+    function sectionsToPng(sections) {
+        return loadHtml2canvas().then(function (h2c) {
+            var frame = document.createElement('iframe');
+            frame.setAttribute('aria-hidden', 'true');
+            frame.style.cssText = 'position:fixed;left:-20000px;top:0;border:0;width:' + PNG_WIDTH + 'px;height:800px';
+            document.body.appendChild(frame);
+            var doc = frame.contentDocument;
+            doc.open();
+            doc.write('<!doctype html><html><head><meta charset="utf-8"><style>' + PRINT_CSS +
+                'body{background:#fff;padding:24px;box-sizing:border-box;width:' + PNG_WIDTH + 'px}' +
+                '.sp-page+.sp-page{margin-top:40px;padding-top:24px;border-top:2px dashed #999}' +
+                '</style></head><body>' +
+                sections.map(function (sec) { return '<section class="sp-page ' + sec.classes + '">' + sec.html + '</section>'; }).join('') +
+                '</body></html>');
+            doc.close();
+            frame.style.height = doc.body.scrollHeight + 'px';
+            return h2c(doc.body, { backgroundColor: '#ffffff', scale: 2, logging: false, windowWidth: PNG_WIDTH })
+                .then(function (canvas) {
+                    return new Promise(function (resolve, reject) {
+                        canvas.toBlob(function (b) { b ? resolve(b) : reject(new Error('Could not make the image.')); }, 'image/png');
+                    });
+                })
+                .then(function (blob) { frame.remove(); return blob; },
+                      function (err) { frame.remove(); throw err; });
+        });
+    }
+
+    function downloadBlob(blob, name) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    }
+
+    function fileSlug(title, fallback) {
+        return String(title || '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || fallback;
+    }
+
     function decodeBuffer(buf) {
         var b = new Uint8Array(buf);
         if (b[0] === 0xFF && b[1] === 0xFE) return new TextDecoder('utf-16le').decode(b);
@@ -764,6 +826,11 @@
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>' +
                 'Print</button>' +
 
+                '<button type="button" class="sp-btn sp-btn-teal" data-action="png" data-role="png" ' +
+                'title="Save the printable plan as a picture (PNG)">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg>' +
+                'Save PNG</button>' +
+
                 '<button type="button" class="sp-btn sp-btn-teal" data-action="projector">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>' +
                 'Projector View</button>' +
@@ -865,7 +932,7 @@
                 '<div class="sp-grid" data-role="grid"></div></div>' +
                 '</div>';
 
-            ['title', 'revert', 'layouts', 'custom-layout', 'fill', 'file', 'json-file', 'toggle-surname-initial', 'toggle-homeroom', 'toggle-ignore-rules', 'toggle-oneline', 'toggle-hide-badges', 'toggle-limit-width', 'toggle-teacher-view', 'toggle-row-controls', 'status', 'count', 'pool', 'grid'].forEach(function (r) {
+            ['title', 'revert', 'layouts', 'custom-layout', 'fill', 'file', 'json-file', 'toggle-surname-initial', 'toggle-homeroom', 'toggle-ignore-rules', 'toggle-oneline', 'toggle-hide-badges', 'toggle-limit-width', 'toggle-teacher-view', 'toggle-row-controls', 'png', 'status', 'count', 'pool', 'grid'].forEach(function (r) {
                 ui[r] = root.querySelector('[data-role="' + r + '"]');
             });
 
@@ -1035,6 +1102,7 @@
                 case 'reset': resetToPage(); break;
                 case 'revert': revertToImport(); break;
                 case 'print': printPlan(); break;
+                case 'png': savePng(); break;
                 case 'projector': enterProjector(); break;
                 case 'projector-exit': exitProjector(); break;
                 case 'row-flip': cancelSwap(); flipRow(+t.getAttribute('data-row')); break;
@@ -2194,6 +2262,21 @@
         function printPlan() {
             var sec = printSection();
             openPrintWindow(sec.title, [sec]);
+        }
+
+        /* Save PNG: the printable plan as a picture, e.g. to paste into an email or slide. */
+        function savePng() {
+            var sec = printSection();
+            var btn = ui.png;
+            btn.disabled = true;
+            setStatus('Making the picture…');
+            sectionsToPng([sec]).then(function (blob) {
+                var name = fileSlug(sec.title, 'seating_plan') + '.png';
+                downloadBlob(blob, name);
+                setStatus('Saved ' + name + ' (check your Downloads folder).');
+            }).catch(function (err) {
+                setStatus('Could not save the picture: ' + (err && err.message ? err.message : err));
+            }).then(function () { btn.disabled = false; });
         }
 
         /* ----- rules panel -----
