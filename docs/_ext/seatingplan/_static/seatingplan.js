@@ -131,6 +131,16 @@
         '.sp-teacher-view .sp-table-seats{transform:rotate(180deg)}' +
         '.sp-teacher-view .sp-table-seats>.sp-desk{transform:rotate(180deg)}';
 
+    /* Student names must never be machine-translated (browser "Translate this page" turns
+       surnames such as Le or Ang into "the"). translate="no" + class notranslate is honoured by
+       Google Translate in Chrome, Edge's translator and Safari. */
+    var NO_TRANSLATE_HTML = '<!doctype html><html lang="en" translate="no" class="notranslate"><head>' +
+        '<meta charset="utf-8"><meta name="google" content="notranslate">';
+    function noTranslate(el) {
+        el.setAttribute('translate', 'no');
+        el.classList.add('notranslate');
+    }
+
     /* ---------------- helpers ---------------- */
 
     function make(tag, cls, text) {
@@ -475,7 +485,7 @@
             document.body.appendChild(frame);
             var doc = frame.contentDocument;
             doc.open();
-            doc.write('<!doctype html><html><head><meta charset="utf-8"><style>' + PRINT_CSS +
+            doc.write(NO_TRANSLATE_HTML + '<style>' + PRINT_CSS +
                 'body{background:#fff;padding:24px;box-sizing:border-box;width:' + PNG_WIDTH + 'px}' +
                 '.sp-page+.sp-page{margin-top:40px;padding-top:24px;border-top:2px dashed #999}' +
                 '</style></head><body>' +
@@ -2411,6 +2421,7 @@
 
         function buildModal() {
             modal = make('div', 'sp-modal');
+            noTranslate(modal);
             modal.innerHTML =
                 '<div class="sp-modal-card sp-rp" role="dialog" aria-modal="true" aria-label="Seating rules">' +
                 '<div class="sp-modal-head"><span>Seating Rules</span>' +
@@ -2752,7 +2763,7 @@
         }).join('');
         var win = window.open('', '_blank');
         if (!win) { window.print(); return; }
-        win.document.write('<!doctype html><html><head><meta charset="utf-8"><title>' + esc(title) +
+        win.document.write(NO_TRANSLATE_HTML + '<title>' + esc(title) +
             '</title><style>' + PRINT_CSS + '</style></head><body>' + body + '</body></html>');
         win.document.close();
         win.focus();
@@ -2791,6 +2802,7 @@
         Array.prototype.forEach.call(document.querySelectorAll('.seatingplan[data-seatingplan]'), function (el) {
             if (el.getAttribute('data-sp-ready')) return;
             el.setAttribute('data-sp-ready', '1');
+            noTranslate(el);
             try {
                 new SeatingPlan(el, JSON.parse(el.getAttribute('data-seatingplan')));
             } catch (err) {

@@ -421,8 +421,9 @@ class SeatingPlanPrintDirective(SphinxDirective):
 
 def visit_seatingplan_html(self, node):
     payload = html.escape(json.dumps(node["config"], ensure_ascii=False), quote=True)
-    classes = " ".join(["seatingplan"] + list(node.get("classes", [])))
-    self.body.append('<div class="%s" data-seatingplan="%s">' % (classes, payload))
+    # notranslate: browser page translation must not turn surnames (Le, Ang ...) into words
+    classes = " ".join(["seatingplan", "notranslate"] + list(node.get("classes", [])))
+    self.body.append('<div class="%s" translate="no" data-seatingplan="%s">' % (classes, payload))
     self.body.append("<noscript>JavaScript is required to show the seating plan.</noscript>")
 
 
