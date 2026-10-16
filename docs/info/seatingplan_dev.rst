@@ -19,7 +19,7 @@ Files and installation
        __init__.py
        seatingplan.py          # directives, layout parsing, roster reading
        _static/
-           seatingplan.js      # the plan (plain ES5, no dependencies)
+           seatingplan.js      # the plan (plain ES5; loads two libraries on demand)
            seatingplan.css
 
 Enable it in ``conf.py``:
@@ -210,9 +210,15 @@ How the page is built
 
 The directive renders::
 
-   <div class="seatingplan [classes]" data-seatingplan="{...json...}">
+   <div class="seatingplan notranslate [classes]" translate="no"
+        data-seatingplan="{...json...}">
      <noscript>JavaScript is required to show the seating plan.</noscript>
    </div>
+
+``translate="no"`` and ``notranslate`` stop browser page translation (Chrome,
+Edge, Safari) from rewriting student names: surnames such as *Le* or *Ang*
+were being turned into "the". The Rules panel, the print window and the PNG
+frame are marked the same way.
 
 ``data-seatingplan`` holds the build-time configuration: ``id``, ``title``,
 ``layout`` (list of rows), ``mode``, ``tables`` (rows of table codes, or
@@ -362,6 +368,32 @@ plan works but forgets everything when the page closes.
 first time an Excel file is chosen; CSV needs no download.
 
 
+Save PNG
+--------
+
+**Save PNG** turns the plan's print section (the same ``spPrintSection()``
+output **Print** uses) into an image:
+
+#. In Chrome and Edge, ``showSaveFilePicker`` is called **first**, while the
+   click still counts as a user gesture; the picker is refused once that has
+   expired, and drawing the image can take longer. Cancel stops there. If the
+   picker is unavailable or refused (e.g. the page is in a cross-origin
+   frame), the image is downloaded under the suggested name instead. Other
+   browsers get a ``prompt()`` for the file name, then a normal download.
+#. The section is written into an off-screen ``<iframe>`` 1400 px wide with
+   the fixed print CSS, so the image matches the printout, including
+   **Teacher's View** and **One-line Names**.
+#. html2canvas (``html2canvas@1.4.1`` from cdn.jsdelivr.net, loaded the first
+   time the button is pressed) draws the frame's body at ``scale: 2``. The
+   result is about 2800 px wide, saved with ``canvas.toBlob('image/png')``.
+   The frame is removed afterwards.
+
+The suggested name is the title in lower case with runs of other characters
+replaced by ``_``, e.g. ``8_science_w9.png``. If the CDN is blocked, the
+button reports that the image maker could not be loaded; **Print** still
+works.
+
+
 Restyling a plan with ``:class:``
 ---------------------------------
 
@@ -416,8 +448,8 @@ Anything else can be targeted through the plan's own classes, e.g.
 .. note::
 
    Extra classes change the plan **on screen and in Projector View only**.
-   **Print** and **Print all my classes** use their own fixed print styles,
-   so printouts look the same for every plan.
+   **Print**, **Print all my classes** and **Save PNG** use their own fixed
+   print styles, so printouts and pictures look the same for every plan.
 
 
 Other style hooks
@@ -433,6 +465,8 @@ Browser support
 ---------------
 
 Current Chrome, Edge, Firefox and Safari. The plan uses ``localStorage``,
-``FileReader``, ``TextDecoder``, HTML drag and drop and the Fullscreen API
-(projector view falls back to a full-window overlay). Dragging is unreliable on
+``FileReader``, ``TextDecoder``, HTML drag and drop, ``canvas.toBlob`` and the
+Fullscreen API (projector view falls back to a full-window overlay). The
+**Save As** box for **Export JSON** and **Save PNG** is Chrome and Edge only;
+other browsers fall back to a download. Dragging is unreliable on
 some touch devices.

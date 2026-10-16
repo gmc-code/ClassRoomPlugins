@@ -39,7 +39,7 @@ A page like this needs nothing beyond the ``seatingplan`` extension:
    .. ... and so on to Plan 12
 
 * Each plan is an independent instance with its own storage, Reset, Revert,
-  Print and Projector View. No data is shared between them.
+  Print, Save PNG and Projector View. No data is shared between them.
 * The plans have no content, so each starts empty (5 × 6 rows, or 8 tables of
   4 in tables mode) and teachers load their own class with **Import Roster**.
 * ``:skip-empty:`` makes **Print all my classes** leave out unused plans. Each
@@ -100,12 +100,14 @@ Privacy notes for the site
 --------------------------
 
 * Student data never leaves the teacher's browser. The page makes no network
-  requests for it; the only request the plans make is to load the Excel reader
-  (SheetJS, ``xlsx@0.18.5`` from cdn.jsdelivr.net) the first time a teacher
-  imports an ``.xlsx`` or ``.xls`` file. If that CDN is blocked, CSV import
-  still works.
-* Exported JSON files contain names and homerooms. Point teachers to an approved
-  place to keep them.
+  requests for it. The plans load two libraries from cdn.jsdelivr.net, each
+  only when first needed: the Excel reader (SheetJS, ``xlsx@0.18.5``) the first
+  time a teacher imports an ``.xlsx`` or ``.xls`` file, and the image maker
+  (``html2canvas@1.4.1``) the first time they press **Save PNG**. Neither
+  receives any class data. If that CDN is blocked, CSV import and **Print**
+  still work.
+* Exported JSON files and saved pictures contain names and homerooms. Point
+  teachers to an approved place to keep them.
 * On shared computers the plans are visible to anyone using the same browser
   profile. The user guide tells teachers to press **Reset** before leaving.
 

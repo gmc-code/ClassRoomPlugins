@@ -41,7 +41,7 @@ One page, twelve plans
 
 * **Each plan is independent.** Importing, sorting, adding rules or changing
   the layout in *Plan 3* never touches *Plan 4*. Each has its own **Reset**,
-  **Revert**, **Print** and **Projector View**.
+  **Revert**, **Print**, **Save PNG** and **Projector View**.
 * **Each plan is saved separately**, with its own class list, rules, layout,
   seats and display options.
 * **Plans you haven't used stay empty** and are left out when printing. Use
@@ -107,7 +107,11 @@ seats, title, **One-line Names** and **Teacher's View**. Rule badges, group
 colours and row buttons are left off. Choose **Save as PDF** in the print box
 to keep one PDF of every plan.
 
-To print a single plan, use the **Print** button in that plan.
+To print a single plan, use the **Print** button in that plan. To save one
+plan as a picture (e.g. for an email to a relief teacher), use its
+**Save PNG** button: Chrome and Edge let you choose the folder and file name,
+other browsers ask for a name and save to Downloads. See
+:doc:`/info/seatingplan_info` for details.
 
 Backing up and moving your plans
 --------------------------------
@@ -148,7 +152,8 @@ Getting the most out of it
 * **Use Revert as an undo.** Export before trying a new arrangement; if it
   doesn't work, **Revert** brings the saved one back.
 * **Print all at the start of term** and keep the copies in your relief folder,
-  so a relief teacher knows where everyone sits.
+  so a relief teacher knows where everyone sits. Or use **Save PNG** in each
+  plan and keep the pictures in a shared relief folder.
 * **Before projecting a plan**, tick **Hide Rule Badges** in that plan so
   students don't see who has a rule.
 

@@ -2274,16 +2274,56 @@
             openPrintWindow(sec.title, [sec]);
         }
 
-        /* Save PNG: the printable plan as a picture, e.g. to paste into an email or slide. */
+        /* Save PNG: the printable plan as a picture, e.g. to paste into an email or slide.
+           Chrome/Edge: the Save As box opens straight away (it must open while the click is
+           still fresh), then the picture is made and written to the chosen file.
+           Other browsers: ask for a file name, then download as usual. */
         function savePng() {
             var sec = printSection();
+            var suggested = fileSlug(sec.title, 'seating_plan') + '.png';
+
+            if (window.showSaveFilePicker) {
+                var picking;
+                try {
+                    picking = window.showSaveFilePicker({
+                        suggestedName: suggested,
+                        types: [{ description: 'PNG image', accept: { 'image/png': ['.png'] } }]
+                    });
+                } catch (e) { picking = Promise.reject(e); }
+                picking.then(function (handle) {
+                    makePng(sec, function (blob) {
+                        return handle.createWritable().then(function (w) {
+                            return w.write(blob).then(function () { return w.close(); });
+                        }).then(function () { return handle.name; });
+                    });
+                }, function (err) {
+                    if (err && err.name === 'AbortError') return;   /* Cancel pressed */
+                    /* Save As box not allowed here (e.g. page inside a frame): download instead */
+                    makePng(sec, function (blob) {
+                        downloadBlob(blob, suggested);
+                        return suggested + ' to your Downloads folder';
+                    });
+                });
+                return;
+            }
+
+            var name = window.prompt('File name for the picture:', suggested);
+            if (name == null) return;                                /* Cancel pressed */
+            name = name.trim().replace(/[\\/:*?"<>|]+/g, '_') || suggested;
+            if (!/\.png$/i.test(name)) name += '.png';
+            makePng(sec, function (blob) {
+                downloadBlob(blob, name);
+                return name + ' to your Downloads folder';
+            });
+        }
+
+        /* Make the picture, hand it to write(blob) (which returns what to report), show progress. */
+        function makePng(sec, write) {
             var btn = ui.png;
             btn.disabled = true;
             setStatus('Making the picture…');
-            sectionsToPng([sec]).then(function (blob) {
-                var name = fileSlug(sec.title, 'seating_plan') + '.png';
-                downloadBlob(blob, name);
-                setStatus('Saved ' + name + ' (check your Downloads folder).');
+            sectionsToPng([sec]).then(write).then(function (where) {
+                setStatus('Saved ' + where + '.');
             }).catch(function (err) {
                 setStatus('Could not save the picture: ' + (err && err.message ? err.message : err));
             }).then(function () { btn.disabled = false; });

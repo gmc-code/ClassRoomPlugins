@@ -21,7 +21,7 @@ Quick start
 #. Pick a layout that matches the room, or type your own.
 #. Press **Rules** to add any seating rules.
 #. Press **A → Z**, **Random** or another sort, then drag students to fine-tune.
-#. **Print**, or press **Projector View** to show it to the class.
+#. **Print** or **Save PNG**, or press **Projector View** to show it to the class.
 #. Press **Export JSON** to keep a backup copy.
 
 Importing a class list
@@ -47,7 +47,7 @@ The title
 
 Click the dark title bar to type a new title, then press **Enter** or click
 away. The title is saved, printed at the top of the page and used as the
-suggested file name for **Export JSON**.
+suggested file name for **Export JSON** and **Save PNG**.
 
 The toolbar
 -----------
@@ -78,6 +78,10 @@ Top row: files and output
 
 **Print**
    Print this plan on one landscape page (see `Printing`_).
+
+**Save PNG**
+   Save the printable plan as a picture, ready to paste into an email, a
+   slide or relief-teacher notes (see `Saving as a picture`_).
 
 **Projector View**
    Show only the whiteboard and desks, full screen, in large text. Press
@@ -315,6 +319,28 @@ as they are seated. Rule badges, group colours, red highlights and row buttons a
 left off. **One-line Names** and **Teacher's View** are used if they are on.
 Choose **Save as PDF** in the print box to keep a PDF.
 
+Saving as a picture
+~~~~~~~~~~~~~~~~~~~
+
+**Save PNG** saves the same printable layout as a PNG image. It shows
+exactly what **Print** would: no rule badges, group colours or row buttons,
+with **One-line Names** and **Teacher's View** applied if they are on. The
+image is high-resolution, so it stays sharp when printed or shown on a
+screen.
+
+You choose where it goes:
+
+* **Chrome and Edge:** a **Save As** box opens, so you can pick the folder and
+  file name. The name starts as the plan's title, e.g.
+  ``8_science_w9.png``. The picture is ready a moment after you press
+  **Save**; the message bar says when.
+* **Other browsers:** you are asked for a file name, and the picture is saved
+  to your Downloads folder (or wherever your browser saves downloads).
+
+The first time you press **Save PNG**, the page downloads a small image
+library, so an internet connection is needed. The picture itself is made in
+your browser: student names are not sent anywhere.
+
 Getting the most out of it
 --------------------------
 
@@ -351,6 +377,10 @@ one click. For a different room, keep a second plan (see
 **Project it, then print it.** Tick **Hide Rule Badges** before **Projector
 View** so students don't see who has a rule. Tick **Teacher's View** before
 printing to get a copy that matches what you see from the front.
+
+**Share it as a picture.** **Save PNG** gives an image you can paste into an
+email to a relief teacher, a slide for the first lesson, or your class notes.
+It is often quicker than printing.
 
 **Keep a copy before experimenting.** Press **Export JSON** first; **Revert**
 brings the saved plan straight back.
