@@ -1,0 +1,386 @@
+/* christmas.css : styles for the christmas directive and the student kit. */
+
+.xmas {
+  --xmas-green: #14532d;
+  --xmas-green-light: #1f7a45;
+  --xmas-red: #b91c1c;
+  --xmas-gold: #fbbf24;
+  --xmas-cream: #fffbeb;
+  box-sizing: border-box;
+  margin: 1.25rem 0;
+  padding: 0.75rem;
+  border-radius: 14px;
+  background: var(--xmas-green);
+  color: var(--xmas-cream);
+  border: 3px solid var(--xmas-gold);
+  font-family: system-ui, -apple-system, "Segoe UI", Calibri, sans-serif;
+}
+
+.xmas *,
+.xmas *::before,
+.xmas *::after {
+  box-sizing: border-box;
+}
+
+.xmas-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  padding: 0 0.25rem;
+}
+
+.xmas-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--xmas-gold);
+}
+
+.xmas-counter {
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.xmas-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.5rem 0;
+}
+
+.xmas-btn {
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  border: 2px solid var(--xmas-gold);
+  background: var(--xmas-green-light);
+  color: var(--xmas-cream);
+  cursor: pointer;
+}
+
+.xmas-btn:hover {
+  background: var(--xmas-red);
+}
+
+.xmas-btn[aria-pressed="true"] {
+  background: var(--xmas-gold);
+  color: #1c1917;
+}
+
+.xmas-btn:focus-visible,
+.xmas-item:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------- stage */
+
+.xmas-stage {
+  position: relative;
+  overflow: hidden;
+  margin: 0 auto;
+  border-radius: 10px;
+  background: #1e2a5a;
+}
+
+.xmas-bg {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  user-select: none;
+}
+
+.xmas-no-bg {
+  aspect-ratio: 16 / 9;
+}
+
+.xmas-is-grid .xmas-stage {
+  display: grid;
+  grid-template-columns: repeat(var(--xmas-columns, 4), minmax(0, 1fr));
+  gap: 0.6rem;
+  padding: 0.75rem;
+}
+
+/* ---------------------------------------------------------------- pictures */
+
+.xmas-item {
+  appearance: none;
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.15s ease;
+}
+
+.xmas-is-scene .xmas-item {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.xmas-is-scene .xmas-item:hover,
+.xmas-is-scene .xmas-item:focus-visible {
+  transform: translate(-50%, -50%) scale(1.06);
+  z-index: 2;
+}
+
+.xmas-is-grid .xmas-item {
+  padding: 0.5rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.xmas-is-grid .xmas-item:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.xmas-frame {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.xmas-still,
+.xmas-gif {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none;
+}
+
+.xmas-gif {
+  visibility: hidden;
+}
+
+.xmas-playing .xmas-gif {
+  visibility: visible;
+}
+
+.xmas-playing .xmas-still {
+  visibility: hidden;
+}
+
+.xmas-name {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* In a scene the name is a small label that shows when the picture is pointed at. */
+.xmas-is-scene .xmas-name {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.xmas-is-scene .xmas-item:hover .xmas-name,
+.xmas-is-scene .xmas-item:focus-visible .xmas-name,
+.xmas-arranging .xmas-name {
+  opacity: 1;
+}
+
+.xmas-hide-names .xmas-name {
+  display: none;
+}
+
+.xmas-missing .xmas-frame {
+  aspect-ratio: 1 !important;
+  border: 3px dashed #fca5a5;
+  border-radius: 8px;
+  background: rgba(127, 29, 29, 0.85);
+}
+
+.xmas-missing-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem;
+  font-size: 0.7rem;
+  line-height: 1.2;
+  color: #fff;
+  overflow-wrap: anywhere;
+}
+
+/* ---------------------------------------------------------------- snow */
+
+.xmas-snow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.xmas-flake {
+  position: absolute;
+  top: -20px;
+  border-radius: 50%;
+  background: #fff;
+  animation: xmas-fall linear infinite;
+}
+
+@keyframes xmas-fall {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(var(--xmas-drift, 0), 1200px);
+  }
+}
+
+/* ---------------------------------------------------------------- messages */
+
+.xmas-message {
+  margin-top: 0.6rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  background: var(--xmas-red);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.xmas-problems {
+  margin-top: 0.6rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  background: #fef3c7;
+  color: #7c2d12;
+  font-size: 0.95rem;
+}
+
+.xmas-kit-error {
+  background: #fef3c7;
+  color: #7c2d12;
+  border-color: #b91c1c;
+  padding: 1rem;
+  line-height: 1.6;
+}
+
+/* ---------------------------------------------------------------- arranging */
+
+.xmas-arranging .xmas-item {
+  cursor: move;
+  touch-action: none;
+  outline: 2px dashed rgba(255, 255, 255, 0.7);
+}
+
+.xmas-arranging .xmas-item.xmas-selected {
+  outline: 3px solid var(--xmas-gold);
+  z-index: 2;
+}
+
+.xmas-arrange {
+  margin-top: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  background: var(--xmas-cream);
+  color: #1c1917;
+}
+
+.xmas-arrange-help {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+}
+
+.xmas-size-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.xmas-size-row input {
+  flex: 1 1 12rem;
+}
+
+.xmas-output {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  padding: 0.4rem;
+  border: 1px solid #a8a29e;
+  border-radius: 6px;
+  background: #fff;
+  color: #1c1917;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.85rem;
+  white-space: pre;
+}
+
+.xmas-arrange .xmas-btn {
+  background: var(--xmas-green);
+}
+
+/* ---------------------------------------------------------------- full screen, motion, print */
+
+.xmas:fullscreen {
+  display: flex;
+  flex-direction: column;
+  border-radius: 0;
+  overflow: auto;
+}
+
+.xmas:fullscreen .xmas-stage {
+  width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xmas-item {
+    transition: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .xmas-is-grid .xmas-stage {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media print {
+  .xmas-bar,
+  .xmas-snow,
+  .xmas-arrange,
+  .xmas-counter {
+    display: none !important;
+  }
+
+  .xmas {
+    background: none;
+    color: #000;
+    border-color: #000;
+  }
+
+  .xmas-title {
+    color: #000;
+  }
+}

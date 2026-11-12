@@ -27,6 +27,8 @@ These docs provide details on sphinx extensions and how to use them. The extensi
 
     info/noisemonitor_info.rst
 
+    info/christmas_info.rst
+
 
 
 .. toctree::
@@ -41,6 +43,14 @@ These docs provide details on sphinx extensions and how to use them. The extensi
 
     tools/noisemonitor.rst
 
+    tools/christmas.rst
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Student tutorials:
+
+    info/christmas_tutorial.rst
+
 .. toctree::
     :maxdepth: 2
     :caption: Directives for developers:
@@ -52,4 +62,6 @@ These docs provide details on sphinx extensions and how to use them. The extensi
     info/namepicker_dev.rst
 
     info/noisemonitor_dev.rst
+
+    info/christmas_dev.rst
 
