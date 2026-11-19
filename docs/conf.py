@@ -39,6 +39,7 @@ extensions = [
     "studentgroups.studentgroups",  # custom directive
     "namepicker.namepicker",  # custom directive
     "christmas.christmas",  # custom directive
+    "lockers.lockers",  # custom directive
 ]
 
 

@@ -1,0 +1,7 @@
+docutils
+openpyxl
+shibuya
+Sphinx
+sphinx-copybutton
+sphinx-design
+sphinx-togglebutton

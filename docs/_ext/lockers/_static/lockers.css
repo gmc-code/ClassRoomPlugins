@@ -1,0 +1,288 @@
+/* lockers directive styles. Everything is prefixed lk- to avoid clashing with the theme.
+   Colours and buttons match the seatingplan directive. */
+
+.lockers {
+    --lk-cell-w: 112px;
+    margin: 1em 0;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #f1f5f9;
+    color: #0f172a;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.3;
+    overflow: hidden;
+}
+.lockers *, .lk-modal * { box-sizing: border-box; }
+
+.lockers .lk-title {
+    background: #0f172a; color: #fff; font-weight: 600; padding: 8px 14px;
+    outline: none; cursor: text; user-select: text; transition: background-color .2s;
+}
+.lockers .lk-title:hover, .lockers .lk-title:focus { background: #1e293b; }
+.lockers .lk-title:focus { box-shadow: inset 0 0 0 2px #3b82f6; }
+
+/* ---- toolbar ---- */
+.lockers .lk-toolbar { background: #1e293b; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
+.lockers .lk-toolbar-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.lockers .lk-label { color: #cbd5e1; font-size: 12px; font-weight: 600; }
+.lockers .lk-sep { width: 1px; height: 22px; background: #334155; margin: 0 2px; }
+.lockers .lk-file { display: none; }
+
+.lk-checkbox-label { color: #f8fafc; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; }
+.lk-checkbox { width: 1rem; height: 1rem; accent-color: #38bdf8; cursor: pointer; margin: 0; }
+
+.lk-btn {
+    background: #3b82f6; color: #fff; border: none; border-radius: 4px;
+    padding: 5px 8px; font: 500 12px/1.2 inherit; font-family: inherit;
+    cursor: pointer; transition: background-color .2s;
+    display: inline-flex; align-items: center; gap: 6px;
+}
+.lk-btn:hover { background: #2563eb; }
+.lk-btn-icon { flex-shrink: 0; }
+.lk-btn-grey { background: #475569; }   .lk-btn-grey:hover { background: #334155; }
+.lk-btn-amber { background: #d97706; }  .lk-btn-amber:hover { background: #b45309; }
+.lk-btn-purple { background: #7c3aed; } .lk-btn-purple:hover { background: #6d28d9; }
+.lk-btn-teal { background: #0d9488; }   .lk-btn-teal:hover { background: #0f766e; }
+.lk-btn-red { background: #dc2626; }    .lk-btn-red:hover { background: #b91c1c; }
+.lk-btn:disabled, .lk-btn:disabled:hover { opacity: .45; cursor: not-allowed; background: #475569; }
+.lk-btn-small { padding: 4px 8px; font-size: 11px; }
+
+.lockers .lk-seg {
+    display: inline-flex; gap: 2px; background: #0f172a; padding: 3px;
+    border-radius: 6px; border: 1px solid #334155;
+}
+.lockers .lk-seg.lk-disabled { opacity: .45; }
+.lk-btn-seg { background: transparent; color: #94a3b8; padding: 3px 9px; font-weight: 600; }
+.lk-btn-seg:hover { background: #1e293b; color: #f8fafc; }
+.lk-btn-seg.lk-active { background: #0d9488; color: #fff; }
+
+.lockers .lk-search {
+    margin-left: auto; display: inline-flex; align-items: center; gap: 6px;
+    background: #0f172a; border: 1px solid #334155; border-radius: 4px; padding: 0 8px; color: #64748b;
+}
+.lockers .lk-search input {
+    background: transparent; border: none; color: #f8fafc; padding: 5px 0; width: 130px;
+    font: 500 12px/1.2 inherit; font-family: inherit; outline: none;
+}
+.lockers .lk-search input::placeholder { color: #64748b; }
+
+/* ---- quick entry bar ---- */
+.lockers .lk-entry {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+    background: #e0f2fe; border-bottom: 1px solid #7dd3fc; padding: 8px 12px;
+}
+.lockers .lk-entry-locker-label { font-weight: 700; font-size: 13px; color: #075985; display: inline-flex; align-items: center; gap: 6px; }
+.lockers .lk-entry input[type="text"] {
+    border: 2px solid #38bdf8; border-radius: 5px; padding: 5px 8px;
+    font: 600 15px/1.2 inherit; font-family: inherit; background: #fff; color: #0f172a; outline: none;
+}
+.lockers .lk-entry input[type="text"]:focus { border-color: #0284c7; box-shadow: 0 0 0 3px rgba(2,132,199,.2); }
+.lockers .lk-entry-locker { width: 90px; text-align: center; }
+.lockers .lk-entry-locker.lk-invalid { border-color: #dc2626 !important; background: #fef2f2 !important; }
+.lockers .lk-entry-arrow { font-size: 18px; color: #0369a1; font-weight: 700; }
+.lockers .lk-entry-name-wrap { position: relative; }
+.lockers .lk-entry-name { width: 260px; max-width: 70vw; }
+.lockers .lk-entry-current { font-size: 12px; color: #0c4a6e; font-weight: 600; min-width: 120px; }
+.lockers .lk-entry-help { font-size: 11px; color: #475569; flex-basis: 100%; }
+.lockers .lk-entry-help b { background: #fff; border: 1px solid #94a3b8; border-radius: 3px; padding: 0 4px; }
+
+.lockers .lk-suggest {
+    display: none; position: absolute; top: 100%; left: 0; z-index: 50; min-width: 100%; width: max-content; max-width: 380px;
+    margin: 3px 0 0; padding: 4px; list-style: none; background: #fff; border: 1px solid #94a3b8;
+    border-radius: 6px; box-shadow: 0 10px 20px -5px rgba(0,0,0,.25);
+}
+.lockers .lk-suggest.lk-open { display: block; }
+.lockers .lk-suggest li {
+    display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 4px; cursor: pointer; margin: 0;
+}
+.lockers .lk-suggest li.lk-active, .lockers .lk-suggest li:hover { background: #dbeafe; }
+.lockers .lk-suggest .lk-sg-name { font-weight: 600; }
+.lockers .lk-suggest .lk-sg-has { margin-left: auto; font-size: 11px; color: #b45309; background: #fef3c7; border-radius: 3px; padding: 1px 5px; }
+.lockers .lk-suggest .lk-suggest-none { color: #64748b; cursor: default; }
+
+.lockers .lk-status { display: none; padding: 6px 12px; font-size: 12px; background: #fef3c7; color: #92400e; border-bottom: 1px solid #fcd34d; }
+.lockers .lk-status.lk-show { display: block; }
+
+/* ---- body: sidebar + lockers ---- */
+.lockers .lk-body { display: flex; min-height: 380px; max-height: 760px; }
+.lockers .lk-sidebar {
+    width: 210px; flex: none; background: #fff; border-right: 1px solid #e2e8f0;
+    padding: 8px; display: flex; flex-direction: column; gap: 8px; min-height: 0;
+}
+.lockers .lk-stats {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 3px 8px; font-size: 12px; color: #475569;
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 8px;
+}
+.lockers .lk-stats b { color: #0f172a; font-size: 14px; }
+.lockers .lk-stats .lk-warn { grid-column: 1 / -1; color: #b91c1c; font-weight: 600; }
+.lockers .lk-side-title { font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: .5px; }
+.lockers .lk-pool { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; min-height: 60px; }
+.lockers .lk-pool-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 6px;
+    padding: 4px 7px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px;
+    font-size: 12px; cursor: grab;
+}
+.lockers .lk-pool-item:hover { background: #e0f2fe; border-color: #7dd3fc; }
+.lockers .lk-pool-item.lk-hit { background: #fef08a; border-color: #ca8a04; }
+.lockers .lk-pool-empty { font-size: 12px; color: #64748b; padding: 4px; }
+.lockers .lk-hr {
+    font-size: 10px; font-weight: 700; color: #475569; background: #e2e8f0; border-radius: 3px;
+    padding: 0 4px; margin-left: 4px; white-space: nowrap;
+}
+
+.lockers .lk-canvas { flex: 1; min-width: 0; padding: 12px; overflow: auto; display: flex; flex-direction: column; gap: 14px; }
+.lockers .lk-empty { padding: 30px; text-align: center; color: #475569; }
+.lockers .lk-empty code { background: #e2e8f0; padding: 1px 5px; border-radius: 3px; }
+.lockers .lk-area { display: flex; flex-direction: column; gap: 6px; }
+.lockers .lk-area-name {
+    font-weight: 700; font-size: 13px; color: #334155; text-transform: uppercase; letter-spacing: .5px;
+    border-bottom: 2px solid #cbd5e1; padding-bottom: 2px;
+}
+.lockers .lk-area-banks { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
+.lockers .lk-bank {
+    background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 6px 8px;
+    flex: 0 0 auto; max-width: 100%; min-width: 0;
+}
+.lockers .lk-bank.lk-bank-wide { flex: 1 1 100%; }
+.lockers .lk-bank-head { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; }
+.lockers .lk-bank-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; min-width: 0; }
+.lockers .lk-bank-name { font-weight: 700; font-size: 13px; }
+.lockers .lk-bank-info { font-size: 11px; color: #64748b; }
+.lockers .lk-bank-settings {
+    display: flex; flex-wrap: wrap; gap: 6px 12px; background: #f1f5f9; border: 1px solid #e2e8f0;
+    border-radius: 6px; padding: 6px 8px; margin-bottom: 6px; font-size: 12px; max-width: 520px;
+}
+.lockers .lk-bs-opt { display: inline-flex; align-items: center; gap: 4px; font-weight: 600; color: #334155; }
+.lockers .lk-bs-opt select, .lockers .lk-bs-opt input {
+    font: 12px/1.2 inherit; font-family: inherit; padding: 2px 4px; border: 1px solid #94a3b8; border-radius: 4px; background: #fff;
+}
+.lockers .lk-bs-opt input { width: 110px; }
+/* margin: 0 stops theme rules (e.g. Shibuya's ".yue section > div") adding space under the lockers */
+.lockers .lk-grid-wrap { overflow-x: auto; padding: 0; margin: 0; }
+.lockers .lk-grid, .lockers .lk-area, .lockers .lk-area-banks, .lockers .lk-bank { margin: 0; }
+.lockers .lk-grid { display: grid; gap: 4px; width: max-content; min-width: 100%; }
+.lockers .lk-grid.lk-grid-wrapfree { width: auto; }
+
+.lockers .lk-cell {
+    position: relative; min-height: 58px; padding: 3px 6px 4px; border-radius: 5px;
+    border: 1px solid #94a3b8; background: #f8fafc; cursor: pointer; user-select: none;
+    display: flex; flex-direction: column; justify-content: flex-start; overflow: hidden;
+    transition: box-shadow .1s, background-color .1s;
+}
+.lockers .lk-cell:hover { border-color: #0284c7; }
+.lockers .lk-num { font-size: 11px; font-weight: 700; color: #64748b; }
+.lockers .lk-first { font-weight: 700; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lockers .lk-last { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lockers .lk-cell.lk-filled { background: #e0f2fe; border-color: #38bdf8; cursor: grab; }
+.lockers .lk-cell.lk-filled .lk-num { color: #0369a1; }
+.lockers .lk-cell.lk-free { border-style: dashed; }
+.lockers .lk-cell.lk-out {
+    background: repeating-linear-gradient(45deg, #f1f5f9, #f1f5f9 6px, #e2e8f0 6px, #e2e8f0 12px);
+    border-color: #cbd5e1; color: #64748b;
+}
+.lockers .lk-out-label { font-size: 11px; font-style: italic; }
+.lockers .lk-cell.lk-selected { box-shadow: 0 0 0 3px #f59e0b; border-color: #d97706; z-index: 1; }
+.lockers .lk-cell.lk-drag-over { box-shadow: 0 0 0 3px #7c3aed; }
+.lockers.lk-searching .lk-cell { opacity: .45; }
+.lockers.lk-searching .lk-cell.lk-hit { opacity: 1; background: #fef08a; border-color: #ca8a04; }
+
+@media (max-width: 700px) {
+    .lockers .lk-body { flex-direction: column; max-height: none; }
+    .lockers .lk-sidebar { width: auto; max-height: 200px; border-right: none; border-bottom: 1px solid #e2e8f0; }
+    .lockers .lk-search { margin-left: 0; }
+}
+
+/* ---- dialogs (appended to <body>) ---- */
+.lk-modal {
+    display: none; position: fixed; inset: 0; z-index: 10000; background: rgba(15,23,42,.6);
+    justify-content: center; align-items: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px; color: #0f172a;
+}
+.lk-modal.lk-open { display: flex; }
+.lk-modal-card {
+    background: #fff; border-radius: 8px; width: 600px; max-width: 94%; max-height: 88vh;
+    display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,.25);
+}
+.lk-modal-card.lk-modal-wide { width: 760px; }
+.lk-modal-head {
+    background: #1e293b; color: #fff; padding: 12px 18px; font-weight: 600;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.lk-modal-close { background: transparent; border: none; color: #94a3b8; font-size: 18px; cursor: pointer; }
+.lk-modal-close:hover { color: #fff; }
+.lk-modal-body { padding: 14px 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; min-height: 0; flex: 1 1 auto; }
+.lk-modal-foot { display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-top: 1px solid #e2e8f0; background: #f8fafc; }
+.lk-modal-msg { margin-right: auto; font-size: 12px; color: #475569; }
+.lk-modal .lk-help { margin: 0; font-size: 13px; color: #334155; }
+.lk-modal code { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 3px; padding: 0 4px; font-size: 12px; }
+.lk-textarea {
+    width: 100%; font: 13px/1.45 Consolas, "Courier New", monospace; padding: 8px;
+    border: 1px solid #94a3b8; border-radius: 5px; resize: vertical;
+}
+.lk-textarea:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.2); }
+.lk-preview { font-size: 13px; background: #f1f5f9; border-radius: 5px; padding: 8px 10px; }
+.lk-errors { margin-top: 6px; color: #b91c1c; font-size: 12px; max-height: 160px; overflow-y: auto; }
+.lk-check-row { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
+
+.lk-bs-filter input { width: 100%; padding: 6px 8px; border: 1px solid #94a3b8; border-radius: 5px; font: inherit; }
+.lk-bs-wrap { overflow-y: auto; max-height: 52vh; border: 1px solid #e2e8f0; border-radius: 6px; }
+.lk-bs { width: 100%; border-collapse: collapse; font-size: 13px; margin: 0; }
+.lk-bs th { position: sticky; top: 0; background: #e2e8f0; text-align: left; padding: 5px 8px; font-size: 12px; z-index: 1; }
+.lk-bs td { padding: 3px 8px; border-top: 1px solid #f1f5f9; }
+.lk-bs tr:nth-child(even) td { background: #f8fafc; }
+.lk-bs-input {
+    width: 90px; padding: 3px 6px; border: 1px solid #94a3b8; border-radius: 4px;
+    font: 600 13px/1.2 inherit; font-family: inherit; text-align: center;
+}
+.lk-bs-input:focus { outline: none; border-color: #0284c7; box-shadow: 0 0 0 3px rgba(2,132,199,.2); background: #f0f9ff; }
+.lk-bs tr.lk-bad .lk-bs-input { border-color: #dc2626; background: #fef2f2; }
+.lk-bs-note { color: #b91c1c; font-size: 12px; white-space: nowrap; }
+
+@media print {
+    .lockers .lk-toolbar, .lockers .lk-entry, .lockers .lk-status, .lockers .lk-sidebar, .lk-modal { display: none !important; }
+}
+
+/* ---- bank header buttons and right-to-left banks ---- */
+.lockers .lk-bank-tools { margin-left: auto; display: inline-flex; gap: 3px; flex: none; }
+.lk-btn-bank { background: #e2e8f0; color: #334155; padding: 2px 7px; font-size: 12px; font-weight: 600; }
+.lk-btn-bank:hover { background: #cbd5e1; }
+.lk-btn-bank-del:hover { background: #dc2626; color: #fff; }
+.lockers .lk-grid.lk-rtl { direction: rtl; }
+.lockers .lk-grid.lk-rtl .lk-cell { direction: ltr; }
+
+/* ---- typed locker + drop on the entry bar ---- */
+.lockers .lk-entry-locker.lk-valid { border-color: #16a34a !important; background: #f0fdf4 !important; }
+.lockers .lk-entry.lk-drop-ready { background: #ede9fe; box-shadow: inset 0 0 0 3px #7c3aed; }
+.lockers .lk-side-hint { font-size: 11px; color: #64748b; line-height: 1.35; }
+.lockers .lk-select {
+    font: 500 12px/1.2 inherit; font-family: inherit; padding: 3px 6px; border-radius: 4px;
+    background: #0f172a; color: #f8fafc; border: 1px solid #334155;
+}
+
+/* badge (Y7 / H13 / 7H13 / TG) in the top-right corner of each locker */
+.lockers .lk-cell .lk-cell-badge { position: absolute; top: 3px; right: 4px; margin: 0; line-height: 1.35; }
+.lockers .lk-cell.lk-filled .lk-first { padding-right: 2px; }
+
+/* every student has a locker: the No locker list is hidden and the lockers use the full width */
+.lockers.lk-all-placed .lk-sidebar { display: none; }
+.lockers .lk-done-bar {
+    background: #dcfce7; color: #166534; border: 1px solid #86efac; border-radius: 6px;
+    padding: 5px 10px; font-size: 12px; font-weight: 600;
+}
+
+/* ---- year-level colours ---- */
+.lockers .lk-cell.lk-filled.lk-yr:not(.lk-hit) { background: var(--lk-yr-bg); border-color: var(--lk-yr-bd); }
+.lockers .lk-cell.lk-filled.lk-yr .lk-num { color: #334155; }
+.lockers .lk-pool-item.lk-yr { border-left: 4px solid var(--lk-yr-bd); }
+.lockers .lk-legend { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.lockers .lk-legend-chip {
+    font-size: 11px; font-weight: 700; color: #1e293b; border: 1px solid; border-left-width: 4px;
+    border-radius: 4px; padding: 1px 7px;
+}
+
+/* export dialog */
+.lk-x-group { display: flex; flex-direction: column; gap: 5px; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px; }
+.lk-x-group > b { font-size: 12px; color: #334155; text-transform: uppercase; letter-spacing: .4px; }
+.lk-x-group select { font: inherit; padding: 2px 4px; border: 1px solid #94a3b8; border-radius: 4px; }
