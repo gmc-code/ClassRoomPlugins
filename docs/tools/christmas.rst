@@ -2,8 +2,7 @@
 Christmas scene
 ========================
 
-Click a picture to bring it to life. See :doc:`/info/christmas_info` for how to use it, and
-:doc:`/info/christmas_tutorial` for the Year 7 tutorial on making the GIFs in Photoshop.
+Click a picture to bring it to life.
 
 .. christmas::
    :title: Christmas scene
