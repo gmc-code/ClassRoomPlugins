@@ -39,8 +39,8 @@ Introduction
      - :doc:`Developer reference </info/noisemonitor_dev>`
    * - Christmas scene
      - :doc:`Christmas scene </tools/christmas>`
-     - :doc:`User guide </info/christmas_info>` and :doc:`Year 7 tutorial </info/christmas_tutorial>`
-     - :doc:`Developer reference </info/christmas_dev>`
+     -
+     -
 
 ----
 
