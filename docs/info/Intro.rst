@@ -21,6 +21,10 @@ Introduction
      - :doc:`Class seating plans </tools/seatingplans>`
      - :doc:`User guide </info/seatingplans_info>`
      - :doc:`Developer reference </info/seatingplans_dev>`
+   * - Locker allocation
+     - :doc:`Locker allocation </tools/lockers>`
+     - :doc:`User guide </info/lockers_info>`
+     - :doc:`Developer reference </info/lockers_dev>`
    * - Student groups
      - :doc:`Student groups </tools/studentgroups>`
      - :doc:`User guide </info/studentgroups_info>`
@@ -43,8 +47,8 @@ Introduction
 About these classroom tools
 ===========================
 
-The seating plan, student groups planner, name picker and noise monitor are **Sphinx
-directives**: small extensions to `Sphinx <https://www.sphinx-doc.org>`_, the
+The seating plan, locker allocation tool, student groups planner, name picker
+and noise monitor are **Sphinx directives**: small extensions to `Sphinx <https://www.sphinx-doc.org>`_, the
 tool that builds this website from plain-text pages. A website author adds one
 line, such as ``.. seatingplan::``, to a page, and Sphinx turns it into a working
 tool on the published site.
@@ -58,7 +62,8 @@ Where they can be used
 * **Pages written in reStructuredText.** In reStructuredText use
   ``.. studentgroups::``.
 * **Any page, as often as needed.** A page can hold several tools, for
-  example twelve seating plans, or a group planner next to a noise monitor.
+  example twelve seating plans, a locker tool for each year level, or a group
+  planner next to a noise monitor.
 * **Web pages only.** They run in the browser, so they appear in the HTML
   version of the site.
 
