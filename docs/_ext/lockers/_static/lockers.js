@@ -36,8 +36,10 @@
         '.lk-lcol{flex:1 1 0;min-width:0}' +
         '.lk-lcol.lk-lone{flex:1 1 100%}' +
         '.lk-ltab{font-size:11px}' +
-        '.lk-ltab .cbc{font-family:Consolas,monospace;letter-spacing:.5px}' +
+        '.lk-ltab td.cbc{font-family:Consolas,monospace;letter-spacing:.5px}' +
         '.lk-ltab td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:40mm;padding:2px 5px}' +
+        '.lk-ltab th{font-size:10px;line-height:1.15;padding:2px 5px;vertical-align:bottom}' +
+        '.lk-ltab .yl,.lk-ltab .ln{text-align:center}' +
         'tr{break-inside:avoid}';
 
     /* ---------------- helpers ---------------- */
@@ -2067,40 +2069,29 @@
         function printList() {
             if (!state.students.length) { setStatus('There are no students to print.'); return; }
             var list = state.students.slice().sort(bySurname);
-            /* homeroom plus up to three extra columns (TG, House ...) that anyone has */
+            /* same columns as Export (Surname Name, First Name, Year Level, Locker number, Locker Combo) */
             var cols = [];
-            if (list.some(function (s) { return s.year || roomOf(s); })) cols.push({ label: 'HR', get: function (s) { return yearRoom(s); } });
-            extraFields().slice(0, 3).forEach(function (f) { cols.push({ label: f, get: function (s) { return extraValue(s, f); } }); });
+            if (list.some(function (s) { return s.year; })) cols.push({ label: 'Year Level', cls: 'yl', get: function (s) { return s.year || ''; } });
             var withCombo = state.display.combo && comboCount() > 0;
             function row(s) {
                 var l = lockerOf(s.id);
                 return '<tr><td>' + esc(s.surname) + '</td><td>' + esc(s.firstName) + '</td>' +
-                    cols.map(function (c) { return '<td>' + esc(c.get(s) || '') + '</td>'; }).join('') +
-                    '<td><b>' + esc(l || '—') + '</b></td>' + (withCombo ? '<td class="cbc">' + esc(studentCombo(s)) + '</td>' : '') + '</tr>';
+                    cols.map(function (c) { return '<td class="' + c.cls + '">' + esc(c.get(s) || '') + '</td>'; }).join('') +
+                    '<td class="ln"><b>' + esc(l || '—') + '</b></td>' + (withCombo ? '<td class="cbc">' + esc(studentCombo(s)) + '</td>' : '') + '</tr>';
             }
-            var head = '<thead><tr><th>Surname</th><th>First name</th>' +
-                cols.map(function (c) { return '<th>' + esc(c.label) + '</th>'; }).join('') + '<th>Locker</th>' + (withCombo ? '<th>Combo</th>' : '') + '</tr></thead>';
+            var head = '<thead><tr><th>Surname Name</th><th>First Name</th>' +
+                cols.map(function (c) { return '<th class="' + c.cls + '">' + esc(c.label) + '</th>'; }).join('') +
+                '<th class="ln">Locker number</th>' + (withCombo ? '<th class="cbc">Locker Combo</th>' : '') + '</tr></thead>';
             function table(part) { return '<table class="lk-ltab">' + head + '<tbody>' + part.map(row).join('') + '</tbody></table>'; }
 
-            /* Pages are built by hand so names run DOWN the first column, then down the second,
-               then on to the next page. Two columns when there are only a few detail columns. */
-            var twoCols = cols.length + (withCombo ? 1 : 0) <= 2;
-            var FIRST = 40, LATER = 44;            /* rows per column: first page has the heading */
+            /* One column down the page, then on to the next page. */
+            var FIRST = 40, LATER = 44;            /* rows per page: first page has the heading */
             var body = '<h1>' + esc(state.title) + '</h1><p class="lk-sub">Students in surname order</p>';
             var i = 0, page = 0;
             while (i < list.length) {
-                var per = page === 0 ? FIRST : LATER;
-                var take = twoCols ? per * 2 : per;
+                var take = page === 0 ? FIRST : LATER;
                 var chunk = list.slice(i, i + take);
-                if (twoCols && chunk.length <= per * 2) {
-                    /* last page: split evenly so both columns are about the same length */
-                    var half = chunk.length < take ? Math.ceil(chunk.length / 2) : per;
-                    var left = chunk.slice(0, half), right = chunk.slice(half);
-                    body += '<div class="lk-lpage' + (i + take < list.length ? ' lk-break' : '') + '"><div class="lk-lcol">' + table(left) + '</div>' +
-                        (right.length ? '<div class="lk-lcol">' + table(right) + '</div>' : '') + '</div>';
-                } else {
-                    body += '<div class="lk-lpage' + (i + take < list.length ? ' lk-break' : '') + '"><div class="lk-lcol lk-lone">' + table(chunk) + '</div></div>';
-                }
+                body += '<div class="lk-lpage' + (i + take < list.length ? ' lk-break' : '') + '"><div class="lk-lcol lk-lone">' + table(chunk) + '</div></div>';
                 i += take;
                 page++;
             }

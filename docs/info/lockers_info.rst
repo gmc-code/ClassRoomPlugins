@@ -513,15 +513,16 @@ Printing and saving
    lockers. Good for pinning up near the lockers.
 
 **List**
-   Students in surname order with their locker number. Names run down the
-   first column, then down the second, then on to the next page.
-   Good for roll marking or handing to the office.
+   Students in surname order, with the same columns as **Export**:
+   **Surname Name**, **First Name**, **Year Level** and **Locker number**.
+   One column down the page, about 40 names a page. Good for roll marking
+   or handing to the office.
 
    .. figure:: images/lockers/lockers_print_list.png
-      :alt: List with Combos ticked: a Combo column is added. Untick Combos for a list students will see
+      :alt: List with Combos ticked: a Locker Combo column is added. Untick Combos for a list students will see
       :width: 80%
 
-      List with Combos ticked: a Combo column is added. Untick Combos for a list students will see.
+      List with Combos ticked: a Locker Combo column is added. Untick Combos for a list students will see.
 
 
 All the print buttons open your browser's print box straight over this page,
