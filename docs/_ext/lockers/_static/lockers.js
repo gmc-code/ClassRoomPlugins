@@ -357,6 +357,37 @@
         setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
     }
 
+    /* Save a file with a Save As dialog where the browser has one (Chrome, Edge): the person picks the
+       folder and name. The dialog has to open straight from the click, so it opens first and the file is
+       made afterwards (makeBlob returns a Promise of a Blob). Other browsers ask for a name and save to
+       Downloads. Resolves with the file name, or null if the person cancelled. */
+    function saveFile(suggested, description, mime, ext, makeBlob) {
+        function fallback() {
+            var name = window.prompt('Save as (it goes to your Downloads folder):', suggested);
+            if (!name) return Promise.resolve(null);
+            name = name.trim();
+            if (!/\.[A-Za-z0-9]+$/.test(name)) name += ext;
+            return makeBlob().then(function (blob) { downloadBlob(blob, name); return name; });
+        }
+        if (!window.showSaveFilePicker) return fallback();
+        var accept = {};
+        accept[mime] = [ext];
+        var picking;
+        try {
+            picking = window.showSaveFilePicker({ suggestedName: suggested, types: [{ description: description, accept: accept }] });
+        } catch (e) { picking = Promise.reject(e); }
+        return picking.then(function (handle) {
+            return makeBlob().then(function (blob) {
+                return handle.createWritable().then(function (w) {
+                    return w.write(blob).then(function () { return w.close(); });
+                });
+            }).then(function () { return handle.name; });
+        }, function (err) {
+            if (err && err.name === 'AbortError') return null;   /* the person pressed Cancel */
+            return fallback();                                    /* e.g. not allowed inside a frame */
+        });
+    }
+
     function fileSlug(title, fallback) {
         return String(title || '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || fallback;
     }
@@ -852,6 +883,10 @@
                 '<label class="lk-checkbox-label" title="Keep existing: ticked = only students without a locker are allocated, into free lockers; unticked = everyone is reallocated">' +
                 '<input type="checkbox" class="lk-checkbox" data-role="keep"> Keep</label>' +
                 btn('clear-all', 'lk-btn-red', 'trash', 'Clear', ' title="Take every student out of their locker"') +
+                '<span class="lk-sep"></span>' +
+                '<span class="lk-label" title="Remove a whole year group, e.g. at the end of the year">Remove:</span>' +
+                btn('remove-year', 'lk-btn-red lk-btn-remove', '', 'Y9', ' data-year="9" data-role="remove-y9" title="Remove every Year 9 student (e.g. at the end of the year): they come off the list and their lockers become free"') +
+                btn('remove-year', 'lk-btn-red lk-btn-remove', '', 'Y12', ' data-year="12" data-role="remove-y12" title="Remove every Year 12 student (e.g. at the end of the year): they come off the list and their lockers become free"') +
                 '</div>' +
                 '<div class="lk-toolbar-row lk-toolbar-row--options">' +
                 '<span class="lk-label" title="How many lockers high each bank is">Tiers:</span><div class="lk-seg" data-role="tiers">' +
@@ -1056,6 +1091,13 @@
             ui['toggle-colours'].checked = state.display.yearColours;
             ui['toggle-colours'].parentNode.style.display = hasYears() ? '' : 'none';
             ui['toggle-combo'].checked = !!state.display.combo;
+            Array.prototype.forEach.call(root.querySelectorAll('[data-action="remove-year"]'), function (b) {
+                var y = b.getAttribute('data-year');
+                var n = state.students.filter(function (st) { return String(st.year) === y; }).length;
+                b.disabled = !n;
+                b.title = n ? 'Remove the ' + n + ' Year ' + y + ' student' + (n === 1 ? '' : 's') + ' (e.g. at the end of the year): they come off the list and their lockers become free'
+                    : 'No Year ' + y + ' students';
+            });
             Array.prototype.forEach.call(ui.tiers.children, function (b) { b.classList.toggle('lk-active', +b.getAttribute('data-n') === state.tiers); });
             Array.prototype.forEach.call(ui.order.children, function (b) { b.classList.toggle('lk-active', b.getAttribute('data-order') === state.order); });
             ui.order.classList.toggle('lk-disabled', false);
@@ -1549,6 +1591,7 @@
             else if (a === 'combos') openCombos();
             else if (a === 'auto') autoAllocate(b.getAttribute('data-mode'));
             else if (a === 'clear-all') clearAll();
+            else if (a === 'remove-year') removeYear(b.getAttribute('data-year'));
             else if (a === 'tiers') { pushUndo(); state.tiers = +b.getAttribute('data-n'); state.banks.forEach(function (k) { k.tiers = 0; }); changed(); }
             else if (a === 'order') { pushUndo(); state.order = b.getAttribute('data-order'); state.banks.forEach(function (k) { k.order = ''; }); changed(); }
             else if (a === 'side') { pushUndo(); state.side = b.getAttribute('data-side'); state.banks.forEach(function (k) { k.side = ''; }); changed(); }
@@ -1633,6 +1676,28 @@
             pushUndo();
             state.assign = {};
             changed();
+        }
+
+        /* Take every student of one year level off the list, e.g. Year 9s or Year 12s at the end of
+           the year. Their lockers become free (and their combinations go with them). */
+        function removeYear(year) {
+            var leaving = state.students.filter(function (st) { return String(st.year) === String(year); });
+            if (!leaving.length) {
+                setStatus('There are no Year ' + year + ' students. (Students need a year level, e.g. from a Year or Year Level column.)');
+                return;
+            }
+            var withLocker = leaving.filter(function (st) { return lockerOf(st.id); }).length;
+            if (!window.confirm('Remove all ' + leaving.length + ' Year ' + year + ' student' + (leaving.length === 1 ? '' : 's') + '?' +
+                (withLocker ? ' Their ' + withLocker + ' locker' + (withLocker === 1 ? '' : 's') + ' will become free.' : '') +
+                '\n\nTip: Export or Save first if you want a record. Undo can bring them back.')) return;
+            pushUndo();
+            var gone = {};
+            leaving.forEach(function (st) { gone[st.id] = true; });
+            state.students = state.students.filter(function (st) { return !gone[st.id]; });
+            Object.keys(state.assign).forEach(function (id) { if (gone[state.assign[id]]) delete state.assign[id]; });
+            changed();
+            setStatus(leaving.length + ' Year ' + year + ' student' + (leaving.length === 1 ? '' : 's') + ' removed' +
+                (withLocker ? '; ' + withLocker + ' locker' + (withLocker === 1 ? ' is' : 's are') + ' now free' : '') + '. Undo brings them back.', true);
         }
 
         function resetAll() {
@@ -1799,8 +1864,14 @@
         }
 
         function exportJson() {
-            var blob = new Blob([JSON.stringify(JSON.parse(snapshot()), null, 2)], { type: 'application/json' });
-            downloadBlob(blob, fileSlug(state.title, 'lockers') + '.json');
+            var text = JSON.stringify(JSON.parse(snapshot()), null, 2);
+            saveFile(fileSlug(state.title, 'lockers') + '.json', 'Locker file', 'application/json', '.json', function () {
+                return Promise.resolve(new Blob([text], { type: 'application/json' }));
+            }).then(function (name) {
+                if (name) setStatus('Saved ' + name + '. Open it later to carry on.');
+            }).catch(function (err) {
+                setStatus('Could not save: ' + (err && err.message ? err.message : err), true);
+            });
         }
 
         /* Full locker list: one row per locker, then students with no locker. */
@@ -1844,7 +1915,9 @@
 
         function downloadRows(rows, name, format) {
             if (format === 'xlsx') {
-                return loadXlsx().then(function (XLSX) {
+                return saveFile(name + '.xlsx', 'Excel workbook',
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', '.xlsx', function () {
+                    return loadXlsx().then(function (XLSX) {
                     /* locker and year numbers go in as numbers so Excel doesn't flag them as text */
                     var data = rows.map(function (r, i) {
                         return i === 0 ? r : r.map(function (v) { return /^\d{1,9}$/.test(String(v)) ? +v : v; });
@@ -1857,13 +1930,16 @@
                     });
                     var wb = XLSX.utils.book_new();
                     XLSX.utils.book_append_sheet(wb, ws, 'Lockers');
-                    XLSX.writeFile(wb, name + '.xlsx');
+                    var bytes = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+                    return new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                    });
                 });
             }
             var text = rows.map(function (r) { return r.map(csvCell).join(','); }).join('\r\n');
             /* BOM so Excel opens accented names correctly */
-            downloadBlob(new Blob(['\ufeff' + text], { type: 'text/csv' }), name + '.csv');
-            return Promise.resolve();
+            return saveFile(name + '.csv', 'CSV file', 'text/csv', '.csv', function () {
+                return Promise.resolve(new Blob(['\ufeff' + text], { type: 'text/csv' }));
+            });
         }
 
         /* Export dialog: which columns, and CSV or Excel. Choices are remembered. */
@@ -1904,9 +1980,11 @@
                     var rows = c.layout === 'full' ? fullRows() : simpleRows(c);
                     var name = fileSlug(state.title, 'lockers') + (c.layout === 'full' ? '' : '_list');
                     mui.ok.disabled = true;
-                    downloadRows(rows, name, c.format).then(function () {
+                    downloadRows(rows, name, c.format).then(function (saved) {
+                        mui.ok.disabled = false;
+                        if (!saved) return;   /* cancelled: leave the dialog open */
                         closeModal();
-                        setStatus('Exported ' + (rows.length - 1) + ' row' + (rows.length === 2 ? '' : 's') + ' as ' + (c.format === 'xlsx' ? 'Excel' : 'CSV') + '.');
+                        setStatus('Exported ' + (rows.length - 1) + ' row' + (rows.length === 2 ? '' : 's') + ' to ' + saved + '.');
                     }).catch(function (err) {
                         mui.ok.disabled = false;
                         mui.msg.textContent = (err && err.message ? err.message : 'Excel export failed') + ' Try CSV instead.';

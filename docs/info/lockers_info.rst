@@ -47,7 +47,7 @@ The buttons are coloured by what they do:
 * **Grey**: **Undo** and **Reset**.
 * **Amber** and **purple**: setting up and allocating (**Lockers**,
   **By Student**, **Paste**, **Combos**, **A–Z**, **Random** …), and **red**
-  for **Clear**.
+  for **Clear** and **Remove: Y9 / Y12**.
 
 Hover over any button to see what it does.
 
@@ -335,6 +335,26 @@ press **Empty** at the top of that bank: its students go back to the
 **No locker** list and the lockers stay. (**Empty** only shows when the bank
 has names in it.)
 
+End of the year: removing Year 9s or Year 12s
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When a year group leaves, press **Y9** or **Y12** next to **Remove:** in
+the toolbar. Every student
+in that year comes off the list altogether (not just out of their locker), and
+their lockers become free for next year's students. You are asked to confirm
+first, and the message line says how many students were removed and how many
+lockers are now free.
+
+* The buttons work from each student's year level, so the class list needs a
+  **Year** or **Year Level** column (or "Year 9" in the homeroom). A button is
+  greyed out when there are no students in that year; hover over it to see
+  how many there are.
+* The students' combinations go with them.
+* **Undo** brings them back. To keep a record, press **Export** or **Save**
+  before removing them.
+* Then use **Add** to bring in the new students and **A–Z** (with **Keep**
+  ticked) to give them the free lockers.
+
 By Student (enter lockers down a list)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -530,6 +550,11 @@ with no new window or tab, so pop-up blockers don't get in the way. Choose
      name, year, homeroom, every other detail, status), then students with
      no locker.
 
+   After **Download**, choose where to save it: in Chrome and Edge a Save As
+   box lets you pick the folder and file name; other browsers ask for a name
+   and save to Downloads. Press **Cancel** in the Save As box to go back to
+   the Export dialog.
+
    Your choices are remembered for next time, and **Import** can read either
    file back. Excel files need an internet connection (the same as importing
    Excel); CSV always works.
@@ -541,8 +566,10 @@ with no new window or tab, so pop-up blockers don't get in the way. Choose
       Export: the simple list with a Locker Combo column, as an Excel file.
 
 **Save** / **Open**
-   The whole set-up: lockers, tiers, students, allocations and out-of-service
-   lockers. Use it as a backup or to move to another computer.
+   The whole set-up: lockers, tiers, students, allocations, combinations and
+   out-of-service lockers. Use it as a backup or to move to another computer.
+   **Save** opens a Save As box in Chrome and Edge so you can choose the
+   folder and file name; other browsers ask for a name and save to Downloads.
 
 **Undo**
    Steps back through your last 60 changes.
