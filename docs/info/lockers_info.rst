@@ -520,7 +520,7 @@ Printing and saving
 
    .. figure:: images/lockers/lockers_print_list.png
       :alt: List with Combos ticked: a Locker Combo column is added. Untick Combos for a list students will see
-      :width: 80%
+      :width: 420px
 
       List with Combos ticked: a Locker Combo column is added. Untick Combos for a list students will see.
 

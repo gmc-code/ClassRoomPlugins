@@ -35,7 +35,7 @@
         '.lk-lpage.lk-break{break-after:page;page-break-after:always}' +
         '.lk-lcol{flex:1 1 0;min-width:0}' +
         '.lk-lcol.lk-lone{flex:1 1 100%}' +
-        '.lk-ltab{font-size:11px}' +
+        '.lk-ltab{font-size:11px;width:auto}' +
         '.lk-ltab td.cbc{font-family:Consolas,monospace;letter-spacing:.5px}' +
         '.lk-ltab td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:40mm;padding:2px 5px}' +
         '.lk-ltab th{font-size:10px;line-height:1.15;padding:2px 5px;vertical-align:bottom}' +
