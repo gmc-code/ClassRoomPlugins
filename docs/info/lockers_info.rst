@@ -10,6 +10,14 @@ as you go.
 
 Technical details for whoever runs the website are in :doc:`/info/lockers_dev`.
 
+All the pictures in this guide use made-up students.
+
+.. figure:: images/lockers/lockers_overview.png
+   :alt: Three year levels of lockers in two areas, coloured by year, with each student's year and homeroom (top right) and padlock combination
+   :width: 100%
+
+   Three year levels of lockers in two areas, coloured by year, with each student's year and homeroom (top right) and padlock combination.
+
 ----
 
 Quick start
@@ -28,11 +36,39 @@ Quick start
    surname order with their locker).
 #. Press **Save** to keep a backup copy.
 
+The toolbar
+~~~~~~~~~~~
+
+The buttons are coloured by what they do:
+
+* **Blue**: bring students in (**Import**, **Add**).
+* **Lighter blue**: files (**Open**, **Save**, **Export**).
+* **Teal**: printing (**Print**, **Map**, **List**).
+* **Grey**: **Undo** and **Reset**.
+* **Amber** and **purple**: setting up and allocating (**Lockers**,
+  **By Student**, **Paste**, **Combos**, **A–Z**, **Random** …), and **red**
+  for **Clear**.
+
+Hover over any button to see what it does.
+
+.. figure:: images/lockers/lockers_toolbar.png
+   :alt: The toolbar
+   :width: 100%
+
+   The toolbar.
+
 Setting up the lockers
 ----------------------
 
 Press **Lockers**. Type one *bank* of lockers per line. A name and a
 colon at the start is optional:
+
+.. figure:: images/lockers/lockers_setup.png
+   :alt: Set up lockers: the line under the box counts the lockers in each bank as you type
+   :width: 80%
+
+   Set up lockers: the line under the box counts the lockers in each bank as you type.
+
 
 .. code-block:: text
 
@@ -87,6 +123,13 @@ brackets. Banks in an area sit side by side, like the real lockers.
 * You don't have to type it. Press the **⚙** button on a bank to change its
   name, height, direction, start corner and area. Typing an area name there
   moves the bank into that area.
+
+.. figure:: images/lockers/lockers_bank_settings.png
+   :alt: The ⚙ panel for bank A3, which starts at the right-hand end (111 is bottom right)
+   :width: 70%
+
+   The ⚙ panel for bank A3, which starts at the right-hand end (111 is bottom right).
+
 
 Removing lockers
 ~~~~~~~~~~~~~~~~
@@ -161,7 +204,7 @@ In the class list                              Year      Homeroom  Year + Homero
 =============================================  ========  ========  ===============
 Homeroom *Hughes 13*, Year *Year 7*            Y7        H13       7 H13
 Homeroom *Year 7 in Hughes 13*                 Y7        H13       7 H13
-House *Kelly 21*, Year Level *Year 8*          Y8        K21       8 K21
+House *Hughes 13*, Year Level *Year 9*         Y9        H13       9 H13
 =============================================  ========  ========  ===============
 
 To add the year level to students you already have, use **Add**
@@ -239,6 +282,13 @@ This is the fastest way to work through a pile of forms or a list on paper.
 #. Press **Enter** to give them the top match (**↑** and **↓** choose another).
    The bar jumps to the next locker, ready for the next name.
 
+.. figure:: images/lockers/lockers_entry.png
+   :alt: Locker G5 is picked and "ar" typed: students without a locker come first, and "has 112" shows who already has one
+   :width: 100%
+
+   Locker G5 is picked and "ar" typed: students without a locker come first, and "has 112" shows who already has one.
+
+
 Other keys in the name box:
 
 =========================  ==================================================
@@ -296,6 +346,13 @@ Problems show in red beside the box: *No such locker*, *Out of service* or
 *Used twice*. Press **Save** to apply; any row still showing a problem is left
 without a locker.
 
+.. figure:: images/lockers/lockers_by_student.png
+   :alt: By Student: the cursor starts at the first student without a locker
+   :width: 80%
+
+   By Student: the cursor starts at the first student without a locker.
+
+
 Paste (allocations from Excel or a list)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -315,6 +372,75 @@ names as new students and unknown lockers to the *Other* bank.
 
 Pasted allocations win: if a pasted locker belonged to someone else, they go to
 **No locker**. Lockers not in the paste are left as they were.
+
+A combination on a line (such as ``07 33 03``) is saved with that student, and
+a line with just a locker and a combination (``506 07 33 03``) gives the
+combination to whoever is in that locker. If the first line is a heading row, the columns are read by
+their headings, so a table copied straight from Excel works:
+
+.. code-block:: text
+
+   Surname Name	First Name	Year Level	Locker number	Locker Combo
+   Barden	Oliver	7	506	07 33 03
+   Brown	Oliver	7	498	34 20 30
+
+With **Add names that are not on the class list** ticked, new students get the
+year level from the table too.
+
+.. figure:: images/lockers/lockers_paste.png
+   :alt: A table pasted from Excel, with a heading row. The line at the bottom shows what will happen before you press Apply
+   :width: 80%
+
+   A table pasted from Excel, with a heading row. The line at the bottom shows what will happen before you press Apply.
+
+
+Lock combinations
+-----------------
+
+Each student can have their padlock's combination. The combination belongs
+to the **student**, not the locker: if a student moves to another locker (or
+is swapped, or taken out and put back), their combination goes with them.
+An empty locker has no combination.
+
+Combinations can be written ``07 33 03``, ``7-33-3`` or ``073303``; they are
+tidied to ``07 33 03``.
+
+Entering combinations
+~~~~~~~~~~~~~~~~~~~~~
+
+* **Combo box in the blue entry bar**: pick a locker, type the combination of
+  the student in it and press **Enter**. The bar moves to the next locker
+  that has a student, with the Combo box still selected, so you can work
+  through a whole bank without the mouse (**↑** goes back). The box is greyed
+  out for an empty locker.
+* **Combos** button: every student in a list, in locker order (students with
+  no locker at the end), with a box for their combination. **Enter** or **↓**
+  moves down, and the filter narrows the list to one bank or name. Clear a box
+  to remove a combination.
+* **Paste**: a table with a **Locker Combo** column, or lines like
+  ``506 07 33 03`` (see above).
+* **Import** / **Add**: a class list with a **Locker Combo** (or **Combo**,
+  **Combination**) column. A file with just **Locker** and **Locker Combo**
+  columns gives each combination to the student in that locker.
+
+
+.. figure:: images/lockers/lockers_combos.png
+   :alt: The Combos list: one box per student, in locker order
+   :width: 80%
+
+   The Combos list: one box per student, in locker order.
+
+Showing combinations
+~~~~~~~~~~~~~~~~~~~~
+
+Tick **Combos** in the toolbar to show each combination on its own line under
+the student's name. It switches on
+by itself the first time combinations are added. Hovering over a locker always
+shows its combination.
+
+**Print** and **Map** include the combinations when **Combos** is ticked, and
+**List** adds a Combo column. Untick **Combos** before printing a list that
+students will see.
 
 When everyone has a locker
 --------------------------
@@ -349,7 +475,7 @@ only shows when students have a year level. **Print** keeps the colours;
 Finding a student or locker
 ---------------------------
 
-Type in **Find…** (top right). Matching lockers light up
+Type in **Find…** (right-hand end of the top row). Matching lockers light up
 yellow, the rest fade, and matching names in the **No locker** list light up.
 Press **Enter** to select the first match.
 
@@ -369,8 +495,14 @@ Printing and saving
 **List**
    Students in surname order with their locker number. Names run down the
    first column, then down the second, then on to the next page.
-   Good
-   for roll marking or handing to the office.
+   Good for roll marking or handing to the office.
+
+   .. figure:: images/lockers/lockers_print_list.png
+      :alt: List with Combos ticked: a Combo column is added. Untick Combos for a list students will see
+      :width: 80%
+
+      List with Combos ticked: a Combo column is added. Untick Combos for a list students will see.
+
 
 All the print buttons open your browser's print box straight over this page,
 with no new window or tab, so pop-up blockers don't get in the way. Choose
@@ -391,14 +523,22 @@ with no new window or tab, so pop-up blockers don't get in the way. Choose
 
      Options: Year Level as *7* or *Year 7*; order by surname or by locker
      number; include students without a locker (their Locker number is left
-     blank) or leave them out.
+     blank) or leave them out; add a **Locker Combo** column (ticked when
+     there are combinations).
 
-   * **Full locker list**: one row per locker (number, bank, name, year,
-     homeroom, every other detail, status), then students with no locker.
+   * **Full locker list**: one row per locker (number, bank, combination,
+     name, year, homeroom, every other detail, status), then students with
+     no locker.
 
    Your choices are remembered for next time, and **Import** can read either
    file back. Excel files need an internet connection (the same as importing
    Excel); CSV always works.
+
+   .. figure:: images/lockers/lockers_export.png
+      :alt: The Export dialog
+      :width: 70%
+
+      Export: the simple list with a Locker Combo column, as an Excel file.
 
 **Save** / **Open**
    The whole set-up: lockers, tiers, students, allocations and out-of-service

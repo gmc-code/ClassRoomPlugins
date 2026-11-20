@@ -169,7 +169,7 @@ change, and **Save** writes the same object:
      "side": "left",
      "row": "top",
      "students": [{ "id": "s…", "firstName": "Alex", "surname": "Smith", "year": "7", "homeroom": "H11",
-                    "extra": { "TG": "7A", "House": "Red" } }],
+                    "combo": "07 33 03", "extra": { "TG": "7A", "House": "Red" } }],
      "assign": { "101": "s…" },
      "out": { "112": true },
      "keepExisting": true,
@@ -197,22 +197,43 @@ values with any non-blank value from the file.
 ``assign`` maps locker number to student ``id``. On import, entries for
 lockers or students that do not exist are dropped.
 
+Lock combinations
+~~~~~~~~~~~~~~~~~
+
+Each student's ``combo`` holds their padlock combination, so it moves with
+them when they change lockers; ``comboOf(locker)`` reads the combination of
+whoever is in a locker. (Older saves with a top-level ``combo`` map of locker
+to combination are converted on load: each combination goes to the student in
+that locker.) ``normCombo()`` tidies ``7-33-3`` or ``073303`` to
+``07 33 03`` (2–5 groups of up to three digits); anything else is kept as
+typed. Combination columns (``Locker Combo``, ``Combo``, ``Combination``,
+``Lock Combo``, ``Locker Combination``) are read by **Import**, **Add**,
+**Paste** (heading rows) and by ``:roster:`` files at build time.
+``display.combo`` shows them under the name.
+
+Paste reads a heading row when the first line has a recognised heading
+(surname, first name or locker); otherwise each line is split on tabs, commas
+or semicolons, a field matching ``COMBO_RE`` is taken as the combination (or
+the last three 1–2 digit numbers on a space-separated line), and a lone 1–2
+digit number is taken as the year level rather than part of the name.
+
 Export layouts
 ~~~~~~~~~~~~~~
 
 **Export** writes CSV (UTF-8 with BOM) or ``.xlsx`` (SheetJS, loaded from the
 CDN on demand; numeric cells are written as numbers).
 
-Simple: ``Surname Name, First Name, Year Level, Locker number``. Year Level is
-``7`` or ``Year 7``; rows are ordered by surname or by locker (students
-without a locker last); students without a locker can be left out.
+Simple: ``Surname Name, First Name, Year Level, Locker number`` and optionally
+``Locker Combo``. Year Level is ``7`` or ``Year 7``; rows are ordered by
+surname or by locker (students without a locker last); students without a
+locker can be left out.
 
-Full: ``Locker, Bank, First Name, Surname, Year, Homeroom, <every extra
-column>, Status``. Status is blank, ``Free``, ``Out of service`` or
+Full: ``Locker, Bank, Locker Combo, First Name, Surname, Year, Homeroom,
+<every extra column>, Status``. Status is blank, ``Free``, ``Out of service`` or
 ``No locker``.
 
-Both read back through **Import** (``Surname Name`` and ``Locker number`` are
-recognised column names). The dialog's choices are kept in
+Both read back through **Import** (``Surname Name``, ``Locker number`` and
+``Locker Combo`` are recognised column names). The dialog's choices are kept in
 ``display.exportPrefs``.
 
 Name matching (Paste)

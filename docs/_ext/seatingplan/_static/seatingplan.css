@@ -117,6 +117,11 @@
 .sp-btn-amber { background: #d97706; } .sp-btn-amber:hover { background: #b45309; }
 .sp-btn-purple { background: #7c3aed; } .sp-btn-purple:hover { background: #6d28d9; }
 .sp-btn-teal { background: #0d9488; }  .sp-btn-teal:hover { background: #0f766e; }
+/* data buttons, apart from printing (teal): Import Roster in blue, Import / Export JSON in a lighter sky blue */
+.sp-btn-data { background: #2563eb; }  .sp-btn-data:hover { background: #1d4ed8; }
+.sp-btn-file { background: #0284c7; }  .sp-btn-file:hover { background: #0369a1; }
+/* divider between toolbar button groups */
+.seatingplan .sp-tsep { width: 1px; height: 22px; background: #334155; margin: 0 2px; }
 .sp-btn-red { background: #dc2626; }   .sp-btn-red:hover { background: #b91c1c; }
 
 .seatingplan .sp-status { display: none; padding: 6px 12px; font-size: 12px; background: #fef3c7; color: #92400e; border-bottom: 1px solid #fcd34d; }
@@ -268,6 +273,19 @@
 .sp-badges { display: flex; flex-wrap: wrap; gap: 2px; align-items: center; justify-content: center; margin-top: 1px; }
 .sp-badge { font-size: 9.5px; font-weight: 700; padding: 0 3px; border-radius: 3px; white-space: nowrap; }
 .sp-badge-hr { background: #bae6fd; color: #0369a1; }
+/* Desk cards laid out like the lockers tool: desk number top left, year + homeroom badge
+   (e.g. "7 H13") top right, then the first name (bold) and surname, left-aligned underneath. */
+.seatingplan .sp-desk .sp-badge-hr { position: absolute; top: 4px; right: 6px; margin: 0; }
+.seatingplan .sp-desk .sp-card {
+    align-items: flex-start; justify-content: flex-start; text-align: left; padding: 16px 7px 4px;
+}
+.seatingplan .sp-desk .sp-first { font-weight: 700; font-size: 13px; }
+.seatingplan .sp-desk .sp-badges, .seatingplan .sp-desk .sp-badge-stack { justify-content: flex-start; align-items: flex-start; }
+.seatingplan.sp-compact .sp-desk .sp-name-line { justify-content: flex-start; }
+.seatingplan .sp-desk .sp-desk-num { font-weight: 700; color: #64748b; font-size: 10px; top: 4px; left: 8px; z-index: 1; }
+/* Year colours (same as the lockers tool); rule colours above take priority */
+.seatingplan .sp-desk .sp-card.sp-yr { background: var(--sp-yr-bg); border-color: var(--sp-yr-bd); }
+.seatingplan .sp-sidebar .sp-card.sp-yr { border-left: 4px solid var(--sp-yr-bd); }
 .sp-badge-sep { background: #ffedd5; color: #c2410c; border: 1px solid #f97316; }
 .sp-badge-pair { background: #d1fae5; color: #047857; border: 1px solid #10b981; }
 .sp-badge-pos { background: #dbeafe; color: #1d4ed8; border: 1px solid #3b82f6; }
@@ -433,3 +451,11 @@ html.sp-projector-open, html.sp-projector-open body { overflow: hidden; }
 .seatingplan-print { margin: 12px 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .seatingplan-print .sp-print-all-msg { font-size: 13px; color: #b91c1c; }
 @media print { .seatingplan-print { display: none; } }
+
+/* projector view: bigger number and badge, so leave more room above the names */
+.seatingplan.sp-projector .sp-desk .sp-desk-num { font-size: 13px; top: 5px; left: 10px; }
+.seatingplan.sp-projector .sp-desk .sp-card { padding-top: 26px; padding-left: 10px; }
+.seatingplan.sp-projector .sp-desk .sp-first { font-size: inherit; }
+/* homeroom badge on a desk uses the lockers tool's grey badge, so it reads on every year colour */
+.seatingplan .sp-desk .sp-badge-hr { background: #e2e8f0; color: #475569; font-size: 10px; padding: 0 4px; line-height: 1.35; }
+.seatingplan.sp-projector .sp-desk .sp-badge-hr { font-size: 13px; }

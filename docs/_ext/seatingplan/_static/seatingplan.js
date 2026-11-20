@@ -211,13 +211,41 @@
 
     function clean(v) { return v == null ? '' : String(v).trim(); }
 
-    function formatHomeroom(hr) {
+    /* "Hughes 13" -> "H13"; with the year level in front: year "Year 7" (or "Year 7" inside the
+       homeroom text, e.g. "Year 7 in Hughes 13") gives "7 H13". Same rules as the lockers tool. */
+    function formatHomeroom(hr, year) {
         var str = clean(hr);
-        if (!str) return '';
-        if (str.length <= 4 && !/\s/.test(str)) return str;
-        var digits = str.replace(/\D/g, '');
-        return str.charAt(0) + (digits.length >= 2 ? digits.slice(-2) : digits);
+        var ym = clean(year).match(/\d{1,2}/), y = ym ? String(+ym[0]) : '';
+        var m = str.match(/\b(?:year|yr|y)\s*(\d{1,2})\b/i);
+        if (m) {
+            if (!y) y = String(+m[1]);
+            str = str.replace(m[0], ' ').replace(/^[\s,:\-]*(?:in\b)?[\s,:\-]*/i, '').trim();
+        }
+        var room = '';
+        if (str) {
+            var combined = str.match(/^(\d{1,2})\s*([A-Za-z]\w{0,3})$/);   /* already "7H13" / "7 H13" */
+            if (combined) { if (!y) y = String(+combined[1]); room = combined[2]; }
+            else if (str.length <= 4 && !/\s/.test(str)) room = str;
+            else {
+                var digits = str.replace(/\D/g, '');
+                room = str.charAt(0).toUpperCase() + (digits.length >= 2 ? digits.slice(-2) : digits);
+            }
+        }
+        return [y, room].filter(Boolean).join(' ');
     }
+
+    /* Year-level colours, the same as the lockers tool: [card background, border] */
+    var YEAR_COLOURS = {
+        7: ['#dbeafe', '#3b82f6'], 8: ['#dcfce7', '#22c55e'], 9: ['#fef3c7', '#f59e0b'],
+        10: ['#ede9fe', '#8b5cf6'], 11: ['#fce7f3', '#ec4899'], 12: ['#ccfbf1', '#14b8a6']
+    };
+    var EXTRA_YEAR_COLOURS = [['#fee2e2', '#ef4444'], ['#e0e7ff', '#6366f1'], ['#ffedd5', '#f97316'], ['#f1f5f9', '#64748b']];
+    /* the year at the front of a formatted homeroom ("7 H13" -> 7) */
+    function yearOf(student) {
+        var m = clean(student && student.homeroom).match(/^(\d{1,2})(?:\s|$)/);
+        return m ? +m[1] : 0;
+    }
+    function yearColour(y) { return y ? (YEAR_COLOURS[y] || EXTRA_YEAR_COLOURS[y % EXTRA_YEAR_COLOURS.length]) : null; }
 
     function isSingleStudentRule(type) {
         return type === 'FRONT_ROW' || type === 'BACK_ROW' || type === 'EMPTY_SEAT' || type === 'SIT_LEFT' || type === 'SIT_RIGHT';
@@ -575,7 +603,8 @@
                 firstName: first,
                 surname: surname,
                 fullName: first + ' ' + surname,
-                homeroom: formatHomeroom(r['homeroom'])
+                homeroom: formatHomeroom(r['homeroom'] || r['home room'] || r['home group'] || r['homegroup'] || r['form'],
+                    r['year'] || r['year level'] || r['yr'] || r['yr level'] || r['year group'] || r['grade'])
             });
         });
         return students;
@@ -604,7 +633,8 @@
             hideBadges: 'toggle-hide-badges',
             limitWidth: 'toggle-limit-width',
             teacherView: 'toggle-teacher-view',
-            rowControls: 'toggle-row-controls'
+            rowControls: 'toggle-row-controls',
+            yearColours: 'toggle-year-colours'
         };
         var draggingId = null;
         var ui = {};
@@ -627,7 +657,8 @@
                 hideBadges: d.hideBadges === true,
                 limitWidth: d.limitWidth === true,
                 teacherView: d.teacherView === true,
-                rowControls: d.rowControls !== false
+                rowControls: d.rowControls !== false,
+                yearColours: d.yearColours !== false
             };
         }
 
@@ -642,7 +673,7 @@
                     firstName: first,
                     surname: surname,
                     fullName: first + ' ' + surname,
-                    homeroom: formatHomeroom(s.homeroom)
+                    homeroom: formatHomeroom(s.homeroom, s.year)
                 };
             });
             state.rules = (cfg.rules || []).map(function (r, i) {
@@ -809,28 +840,21 @@
 
                 /* Row 1: Import and export controls */
                 '<div class="sp-toolbar-row">' +
-                '<button type="button" class="sp-btn" data-action="import">' +
+                '<button type="button" class="sp-btn sp-btn-data" data-action="import">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>' +
                 'Import Roster</button>' +
                 '<input type="file" class="sp-file" accept=".xlsx,.xls,.csv" data-role="file">' +
 
-                '<button type="button" class="sp-btn sp-btn-teal" data-action="import-json">' +
+                '<button type="button" class="sp-btn sp-btn-file" data-action="import-json">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L8.6 3.3A2 2 0 0 0 6.9 2.5H4a2 2 0 0 0-2 2v13.5a2 2 0 0 0 2 2z"/><path d="M12 10v6"/><path d="m9 13 3-3 3 3"/></svg>' +
                 'Import JSON</button>' +
                 '<input type="file" class="sp-file" accept=".json" data-role="json-file">' +
 
-                '<button type="button" class="sp-btn sp-btn-teal" data-action="export-json">' +
+                '<button type="button" class="sp-btn sp-btn-file" data-action="export-json">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>' +
                 'Export JSON</button>' +
 
-                '<button type="button" class="sp-btn sp-btn-grey" data-action="reset">' +
-                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>' +
-                'Reset</button>' +
-
-                '<button type="button" class="sp-btn sp-btn-grey" data-action="revert" data-role="revert" disabled ' +
-                'title="Nothing imported yet">' +
-                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>' +
-                'Revert</button>' +
+                '<span class="sp-tsep"></span>' +
 
                 '<button type="button" class="sp-btn sp-btn-teal" data-action="print">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>' +
@@ -844,6 +868,17 @@
                 '<button type="button" class="sp-btn sp-btn-teal" data-action="projector">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>' +
                 'Projector View</button>' +
+
+                '<span class="sp-tsep"></span>' +
+
+                '<button type="button" class="sp-btn sp-btn-grey" data-action="reset">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>' +
+                'Reset</button>' +
+
+                '<button type="button" class="sp-btn sp-btn-grey" data-action="revert" data-role="revert" disabled ' +
+                'title="Nothing imported yet">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>' +
+                'Revert</button>' +
                 '</div>' +
 
                 /* Row 2: Student ordering and seating plan management */
@@ -874,7 +909,7 @@
 
                 '<button type="button" class="sp-btn sp-btn-purple" data-action="fill" data-role="fill"></button>' +
 
-                '<button type="button" class="sp-btn sp-btn-teal" data-action="rules">' +
+                '<button type="button" class="sp-btn sp-btn-amber" data-action="rules">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><line x1="4" x2="20" y1="21" y2="21"/><line x1="4" x2="8" y1="14" y2="14"/><line x1="12" x2="20" y1="14" y2="14"/><line x1="16" x2="20" y1="7" y2="7"/><line x1="4" x2="12" y1="7" y2="7"/><circle cx="10" cy="14" r="2"/><circle cx="14" cy="7" r="2"/></svg>' +
                 'Rules</button>' +
                 '<div class="sp-mode" role="group" aria-label="Room type">' +
@@ -927,6 +962,10 @@
                 '<input type="checkbox" data-role="toggle-teacher-view" class="sp-checkbox">' +
                 'Teacher\'s View' +
                 '</label>' +
+                '<label class="sp-checkbox-label" title="Colour each desk by the student\'s year level (rule colours come first)">' +
+                '<input type="checkbox" data-role="toggle-year-colours" class="sp-checkbox" checked>' +
+                'Year Colours' +
+                '</label>' +
                 '<label class="sp-checkbox-label" title="Show the Flip (⇄) and Swap (⇅) buttons beside each row">' +
                 '<input type="checkbox" data-role="toggle-row-controls" class="sp-checkbox" checked>' +
                 'Row Controls' +
@@ -942,7 +981,7 @@
                 '<div class="sp-grid" data-role="grid"></div></div>' +
                 '</div>';
 
-            ['title', 'revert', 'layouts', 'custom-layout', 'fill', 'file', 'json-file', 'toggle-surname-initial', 'toggle-homeroom', 'toggle-ignore-rules', 'toggle-oneline', 'toggle-hide-badges', 'toggle-limit-width', 'toggle-teacher-view', 'toggle-row-controls', 'png', 'status', 'count', 'pool', 'grid'].forEach(function (r) {
+            ['title', 'revert', 'layouts', 'custom-layout', 'fill', 'file', 'json-file', 'toggle-surname-initial', 'toggle-homeroom', 'toggle-ignore-rules', 'toggle-oneline', 'toggle-hide-badges', 'toggle-limit-width', 'toggle-teacher-view', 'toggle-row-controls', 'toggle-year-colours', 'png', 'status', 'count', 'pool', 'grid'].forEach(function (r) {
                 ui[r] = root.querySelector('[data-role="' + r + '"]');
             });
 
@@ -1004,6 +1043,11 @@
             root.classList.toggle('sp-hide-badges', state.display.hideBadges);
             root.classList.toggle('sp-teacher-view', state.display.teacherView);
             root.classList.toggle('sp-hide-row-ctrl', !state.display.rowControls);
+            /* the Year Colours box only matters when students have a year level */
+            if (ui['toggle-year-colours']) {
+                ui['toggle-year-colours'].parentNode.style.display =
+                    state.students.some(function (st) { return yearOf(st); }) ? '' : 'none';
+            }
         }
 
         function syncDisplayControls() {
@@ -1199,6 +1243,14 @@
             } else if (flags.sep) card.classList.add('sp-has-sep');
             else if (flags.pair) card.classList.add('sp-has-pair');
             else if (flags.front || flags.back || flags.empty || flags.left || flags.right) card.classList.add('sp-has-pos');
+            /* no rule colour: colour the card by year level, like the lockers tool */
+            card.classList.remove('sp-yr');
+            var yc = state.display.yearColours !== false && yearColour(yearOf(student));
+            if (yc && !/\bsp-has-(sep|pair|pos|grp)\b/.test(card.className)) {
+                card.classList.add('sp-yr');
+                card.style.setProperty('--sp-yr-bg', yc[0]);
+                card.style.setProperty('--sp-yr-bd', yc[1]);
+            }
 
             card.textContent = '';
 

@@ -179,6 +179,7 @@ def _students_from_rows(rows):
             "homeroom": r.get("homeroom") or r.get("home room") or r.get("home group") or r.get("homegroup") or r.get("form") or "",
             "year": r.get("year") or r.get("year level") or r.get("yr") or r.get("yr level") or r.get("year group") or r.get("grade") or "",
             "locker": r.get("locker") or r.get("locker number") or r.get("locker no") or "",
+            "combo": r.get("locker combo") or r.get("combo") or r.get("combination") or r.get("lock combo") or "",
             # every other column (TG, House ...) is kept as extra information
             "extra": {str(k).strip(): _cell_text(v) for k, v in row.items()
                       if k is not None and str(k).strip()
@@ -189,7 +190,8 @@ def _students_from_rows(rows):
 
 KNOWN_COLS = {
     "preferred", "first name", "firstname", "given name", "surname", "last name", "lastname",
-    "family name", "surname name", "locker", "locker number", "locker no", "locker #", "status", "homeroom",
+    "family name", "surname name", "locker combo", "combo", "combination", "lock combo",
+    "locker combination", "lock combination", "locker", "locker number", "locker no", "locker #", "status", "homeroom",
     "home room", "form", "bank", "student", "home group", "homegroup", "year", "year level", "yr",
     "yr level", "year group", "grade",
 }

@@ -25,6 +25,7 @@
         '.lk-pcell{direction:ltr;border:1px solid #000;border-radius:3px;padding:2px 4px;min-height:44px;font-size:11px;break-inside:avoid}' +
         '.lk-pcell b{display:block;font-size:10px;color:#333}' +
         '.lk-pcell .n{font-weight:700}' +
+        '.lk-pcell .cb{display:block;font-family:Consolas,monospace;font-size:10px;letter-spacing:.5px}' +
         '.lk-pcell .bd{float:right;font-size:9px;font-weight:700;border:1px solid #999;border-radius:2px;padding:0 2px;margin-left:3px}' +
         '.lk-pcell.out{background:repeating-linear-gradient(45deg,#fff,#fff 4px,#ddd 4px,#ddd 8px);color:#444}' +
         'table{border-collapse:collapse;width:100%;font-size:12px}' +
@@ -35,6 +36,7 @@
         '.lk-lcol{flex:1 1 0;min-width:0}' +
         '.lk-lcol.lk-lone{flex:1 1 100%}' +
         '.lk-ltab{font-size:11px}' +
+        '.lk-ltab .cbc{font-family:Consolas,monospace;letter-spacing:.5px}' +
         '.lk-ltab td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:40mm;padding:2px 5px}' +
         'tr{break-inside:avoid}';
 
@@ -82,6 +84,19 @@
         return { year: y, room: room };
     }
 
+    /* Lock combinations: "7-33-3", "073303" or "07 33 03" -> "07 33 03". Anything else is kept as typed. */
+    var COMBO_RE = /^\d{1,3}(?:[\s\-:.\/]+\d{1,3}){2,4}$/;
+    function normCombo(v) {
+        var s = clean(v);
+        if (!s) return '';
+        if (/^\d{6}$|^\d{8}$/.test(s)) return s.match(/\d\d/g).join(' ');
+        var parts = s.split(/[\s\-:.,\/]+/).filter(Boolean);
+        if (parts.length >= 2 && parts.length <= 5 && parts.every(function (x) { return /^\d{1,3}$/.test(x); })) {
+            return parts.map(function (x) { return x.length < 2 ? '0' + x : x; }).join(' ');
+        }
+        return s;
+    }
+
     /* Year-level colours: [locker background, border/stripe]. Years outside 7-12 reuse the extras. */
     var YEAR_COLOURS = {
         7: ['#dbeafe', '#3b82f6'],    /* blue */
@@ -103,7 +118,7 @@
 
     /* Roster columns that are not "extra" information about a student */
     var KNOWN_COLS = ['preferred', 'first name', 'firstname', 'given name', 'surname', 'last name', 'lastname',
-        'family name', 'surname name', 'locker', 'locker number', 'locker no', 'locker #', 'status', 'homeroom', 'home room',
+        'family name', 'surname name', 'locker combo', 'combo', 'combination', 'lock combo', 'locker combination', 'lock combination', 'locker number', 'locker no', 'locker #', 'status', 'homeroom', 'home room',
         'form', 'bank', 'student', 'home group', 'homegroup', 'year', 'year level', 'yr', 'yr level', 'year group', 'grade'];
     function isKnownCol(k) {
         k = clean(k).toLowerCase();
@@ -445,7 +460,8 @@
                     homeroom: !(cfg.display && cfg.display.homeroom === false),
                     field: cfg.display && cfg.display.homeroom === false ? 'none' : 'auto',
                     surnameInitial: !!(cfg.display && cfg.display.surnameInitial),
-                    yearColours: !(cfg.display && cfg.display.yearColours === false)
+                    yearColours: !(cfg.display && cfg.display.yearColours === false),
+                    combo: !!(cfg.display && cfg.display.combo)
                 },
                 sel: null
             };
@@ -456,16 +472,18 @@
             });
             var extra = [];
             (cfg.students || []).forEach(function (s, i) {
-                var st = newStudent(s.firstName, s.surname, s.homeroom, i, s.extra, s.year);
+                var st = newStudent(s.firstName, s.surname, s.homeroom, i, s.extra, s.year, s.combo);
                 state.students.push(st);
                 if (clean(s.locker)) extra.push({ locker: clean(s.locker), sid: st.id });
             });
             placeAllocations(extra);
+            if (comboCount()) state.display.combo = true;
         }
 
-        function newStudent(first, surname, homeroom, n, extra, year) {
+        function newStudent(first, surname, homeroom, n, extra, year, combo) {
             var hr = parseHomeroom(homeroom, year);
             return {
+                combo: normCombo(combo),
                 year: hr.year,
                 extra: cleanExtra(extra),
                 id: 's' + Date.now().toString(36) + '-' + n + '-' + Math.floor(Math.random() * 1e6).toString(36),
@@ -619,6 +637,40 @@
 
         function findLocker(id) { return lockerIndex[clean(id).toLowerCase()] || null; }
 
+        /* A combination belongs to the STUDENT (their padlock): it moves with them when they change lockers. */
+        function studentCombo(st) { return (st && st.combo) || ''; }
+        /* combination of whoever is in a locker ('' if it is empty) */
+        function comboOf(id) { return state.assign[id] ? studentCombo(studentById(state.assign[id])) : ''; }
+        function comboCount() { return state.students.filter(function (st) { return st.combo; }).length; }
+        function setStudentCombo(st, v) {
+            if (!st) return false;
+            v = normCombo(v);
+            if (v) st.combo = v; else delete st.combo;
+            return true;
+        }
+        /* set the combination of the student in a locker; false if the locker is unknown or empty */
+        function setCombo(id, v) {
+            var l = findLocker(id);
+            if (!l || !state.assign[l.id]) return false;
+            return setStudentCombo(studentById(state.assign[l.id]), v);
+        }
+        /* [{sid or locker, combo}] -> combinations; counts how many were set and which lockers had nobody in them */
+        function applyCombos(list) {
+            var had = comboCount(), set = 0, missing = [];
+            list.forEach(function (c) {
+                if (!normCombo(c.combo)) return;
+                var ok = c.sid ? setStudentCombo(studentById(c.sid), c.combo) : setCombo(c.locker, c.combo);
+                if (ok) set++; else missing.push(c.locker);
+            });
+            if (set && !had) state.display.combo = true;   /* first combinations: show them */
+            return { set: set, missing: missing };
+        }
+        function comboMsg(r) {
+            if (!r.set && !r.missing.length) return '';
+            return (r.set ? r.set + ' combination' + (r.set === 1 ? '' : 's') + ' saved. ' : '') +
+                (r.missing.length ? 'No student in locker(s) ' + r.missing.slice(0, 8).join(', ') + (r.missing.length > 8 ? '…' : '') + ', so their combinations were not saved. ' : '');
+        }
+
         function studentById(id) {
             for (var i = 0; i < state.students.length; i++) if (state.students[i].id === id) return state.students[i];
             return null;
@@ -681,8 +733,10 @@
             state.row = d.row === 'bottom' ? 'bottom' : 'top';
             state.students = d.students.map(function (s, i) {
                 var hr = parseHomeroom(s.homeroom, s.year);
-                return { id: clean(s.id) || 's-imp-' + i, firstName: clean(s.firstName) || 'Student', surname: clean(s.surname),
+                var st = { id: clean(s.id) || 's-imp-' + i, firstName: clean(s.firstName) || 'Student', surname: clean(s.surname),
                     year: hr.year, homeroom: hr.room, extra: cleanExtra(s.extra) };
+                if (normCombo(s.combo)) st.combo = normCombo(s.combo);
+                return st;
             });
             state.assign = {};
             state.out = {};
@@ -692,12 +746,18 @@
                 if (l && studentById(d.assign[id])) state.assign[l.id] = d.assign[id];
             });
             Object.keys(d.out || {}).forEach(function (id) { var l = findLocker(id); if (l) state.out[l.id] = true; });
+            /* older saves kept combinations per locker: give each one to the student in that locker */
+            Object.keys(d.combo || {}).forEach(function (id) {
+                var l = findLocker(id), st = l && state.assign[l.id] ? studentById(state.assign[l.id]) : null;
+                if (st && !st.combo) setStudentCombo(st, d.combo[id]);
+            });
             if (typeof d.keepExisting === 'boolean') state.keepExisting = d.keepExisting;
             if (d.display) {
                 state.display.homeroom = d.display.homeroom !== false;
                 state.display.field = typeof d.display.field === 'string' ? d.display.field : (state.display.homeroom ? 'auto' : 'none');
                 state.display.surnameInitial = !!d.display.surnameInitial;
                 state.display.yearColours = d.display.yearColours !== false;
+                state.display.combo = !!d.display.combo;
                 if (d.display.exportPrefs && typeof d.display.exportPrefs === 'object') state.display.exportPrefs = d.display.exportPrefs;
             }
         }
@@ -762,23 +822,28 @@
                 '<div class="lk-title" data-role="title" title="Click to edit the title"></div>' +
                 '<div class="lk-toolbar">' +
                 '<div class="lk-toolbar-row">' +
-                btn('import', '', 'upload', 'Import', ' title="Import a class list (Excel or CSV), replacing the students already here"') +
-                btn('import-add', '', 'upload', 'Add', ' title="Add students from another class list, or add details (year, TG …) to the students already here"') +
+                btn('import', 'lk-btn-data', 'upload', 'Import', ' title="Import a class list (Excel or CSV), replacing the students already here"') +
+                btn('import-add', 'lk-btn-data', 'upload', 'Add', ' title="Add students from another class list, or add details (year, TG …) to the students already here"') +
                 '<input type="file" class="lk-file" accept=".xlsx,.xls,.csv" data-role="file">' +
-                btn('import-json', 'lk-btn-teal', 'folder', 'Open', ' title="Open a saved locker file (.json)"') +
+                btn('import-json', 'lk-btn-file', 'folder', 'Open', ' title="Open a saved locker file (.json)"') +
                 '<input type="file" class="lk-file" accept=".json" data-role="json-file">' +
-                btn('export-json', 'lk-btn-teal', 'download', 'Save', ' title="Save everything to a file (.json) you can open later"') +
-                btn('export-csv', 'lk-btn-teal', 'table', 'Export', ' title="Download the list as Excel or CSV: a simple Surname Name / First Name / Year Level / Locker number list, or the full locker list"') +
+                btn('export-json', 'lk-btn-file', 'download', 'Save', ' title="Save everything to a file (.json) you can open later"') +
+                btn('export-csv', 'lk-btn-file', 'table', 'Export', ' title="Download the list as Excel or CSV: a simple Surname Name / First Name / Year Level / Locker number list, or the full locker list"') +
+                '<span class="lk-sep"></span>' +
                 btn('print-screen', 'lk-btn-teal', 'print', 'Print', ' title="Print the lockers as they look on screen, shrunk to fit the page"') +
                 btn('print-grid', 'lk-btn-teal', 'print', 'Map', ' title="Print a plain black-and-white map of the lockers"') +
                 btn('print-list', 'lk-btn-teal', 'list', 'List', ' title="Print the students in surname order with their lockers"') +
+                '<span class="lk-sep"></span>' +
                 btn('undo', 'lk-btn-grey', 'undo', 'Undo', ' data-role="undo" disabled') +
                 btn('reset', 'lk-btn-grey', 'reset', 'Reset', ' title="Go back to how this page was first set up"') +
+                '<div class="lk-search">' + icon('search') +
+                '<input type="search" data-role="search" placeholder="Find…" title="Find a student, locker number, year (y7) or homeroom" aria-label="Find a student or locker"></div>' +
                 '</div>' +
                 '<div class="lk-toolbar-row">' +
                 btn('setup', 'lk-btn-amber', 'locker', 'Lockers', ' title="Set up the locker numbers, banks and areas"') +
                 btn('by-student', 'lk-btn-purple', 'keyboard', 'By Student', ' title="Type each student\'s locker number down a list"') +
-                btn('paste', 'lk-btn-purple', 'paste', 'Paste', ' title="Paste names and locker numbers, e.g. from Excel"') +
+                btn('paste', 'lk-btn-purple', 'paste', 'Paste', ' title="Paste names, locker numbers and combinations, e.g. from Excel"') +
+                btn('combos', 'lk-btn-purple', 'keyboard', 'Combos', ' title="Type each student\'s padlock combination down a list"') +
                 '<span class="lk-sep"></span>' +
                 '<span class="lk-label">Allocate:</span>' +
                 btn('auto', 'lk-btn-purple', 'az', 'A–Z', ' data-mode="AZ" title="Fill free lockers in surname order"') +
@@ -808,8 +873,7 @@
                 '<select class="lk-select" data-role="badge-field"></select></label>' +
                 '<label class="lk-checkbox-label" title="Show surnames as an initial only, e.g. Alex S."><input type="checkbox" class="lk-checkbox" data-role="toggle-initial"> Initial</label>' +
                 '<label class="lk-checkbox-label" title="Colour each locker by the student\'s year level"><input type="checkbox" class="lk-checkbox" data-role="toggle-colours"> Year colours</label>' +
-                '<div class="lk-search">' + icon('search') +
-                '<input type="search" data-role="search" placeholder="Find…" title="Find a student, locker number, year (y7) or homeroom" aria-label="Find a student or locker"></div>' +
+                '<label class="lk-checkbox-label" title="Show each lock\'s combination on a new line under the name"><input type="checkbox" class="lk-checkbox" data-role="toggle-combo"> Combos</label>' +
                 '</div>' +
                 '</div>' +
                 /* quick entry bar */
@@ -821,6 +885,8 @@
                 'placeholder="Type a name, press Enter" aria-label="Student name">' +
                 '<ul class="lk-suggest" data-role="suggest" role="listbox"></ul>' +
                 '</div>' +
+                '<label class="lk-entry-combo-label" title="Lock combination for this locker. Enter saves it and moves to the next locker.">Combo ' +
+                '<input type="text" data-role="entry-combo" class="lk-entry-combo" autocomplete="off" spellcheck="false" placeholder="00 00 00"></label>' +
                 '<span class="lk-entry-current" data-role="entry-current"></span>' +
                 '<button type="button" class="lk-btn lk-btn-grey lk-btn-small" data-action="entry-clear" title="Take the name out of this locker">Empty</button>' +
                 '<button type="button" class="lk-btn lk-btn-grey lk-btn-small" data-action="entry-out" data-role="entry-out" title="Mark this locker out of service (or back in service)">Out</button>' +
@@ -837,8 +903,8 @@
                 '<div class="lk-canvas" data-role="canvas"></div>' +
                 '</div>';
 
-            ['title', 'file', 'json-file', 'undo', 'keep', 'tiers', 'order', 'side', 'row', 'badge-field', 'toggle-initial', 'toggle-colours', 'search',
-                'entry-locker', 'entry-name', 'suggest', 'entry-current', 'entry-out', 'status', 'stats', 'count', 'pool', 'canvas'
+            ['title', 'file', 'json-file', 'undo', 'keep', 'tiers', 'order', 'side', 'row', 'badge-field', 'toggle-initial', 'toggle-colours', 'toggle-combo', 'search',
+                'entry-locker', 'entry-name', 'entry-combo', 'suggest', 'entry-current', 'entry-out', 'status', 'stats', 'count', 'pool', 'canvas'
             ].forEach(function (r) { ui[r] = root.querySelector('[data-role="' + r + '"]'); });
 
             ui.title.contentEditable = 'true';
@@ -860,6 +926,7 @@
             });
             ui['toggle-initial'].addEventListener('change', function () { state.display.surnameInitial = ui['toggle-initial'].checked; changed(); });
             ui['toggle-colours'].addEventListener('change', function () { state.display.yearColours = ui['toggle-colours'].checked; changed(); });
+            ui['toggle-combo'].addEventListener('change', function () { state.display.combo = ui['toggle-combo'].checked; changed(); });
             ui.search.addEventListener('input', applySearch);
             ui.search.addEventListener('keydown', function (e) {
                 if (e.key === 'Enter') {
@@ -887,6 +954,24 @@
                 ui['entry-locker'].classList.toggle('lk-valid', !!l);
                 if (l) selectLocker(l.id, false);
             });
+            ui['entry-combo'].addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    saveEntryCombo();
+                    var next = e.key === 'ArrowUp' ? prevLocker(state.sel, true) : nextLocker(state.sel, true);
+                    if (next) {
+                        ui['entry-locker'].value = next;
+                        selectLocker(next, false);
+                        ui['entry-combo'].value = comboOf(next);
+                        ui['entry-combo'].focus();
+                        ui['entry-combo'].select();
+                    } else setStatus('That was the last locker.');
+                } else if (e.key === 'Escape') {
+                    ui['entry-combo'].value = comboOf(state.sel);
+                }
+            });
+            ui['entry-combo'].addEventListener('change', saveEntryCombo);
+            ui['entry-combo'].addEventListener('focus', function () { ui['entry-combo'].select(); });
             ui['entry-name'].addEventListener('input', updateSuggestions);
             ui['entry-name'].addEventListener('focus', updateSuggestions);
             ui['entry-name'].addEventListener('blur', function () { setTimeout(hideSuggestions, 150); });
@@ -970,6 +1055,7 @@
             ui['toggle-initial'].checked = state.display.surnameInitial;
             ui['toggle-colours'].checked = state.display.yearColours;
             ui['toggle-colours'].parentNode.style.display = hasYears() ? '' : 'none';
+            ui['toggle-combo'].checked = !!state.display.combo;
             Array.prototype.forEach.call(ui.tiers.children, function (b) { b.classList.toggle('lk-active', +b.getAttribute('data-n') === state.tiers); });
             Array.prototype.forEach.call(ui.order.children, function (b) { b.classList.toggle('lk-active', b.getAttribute('data-order') === state.order); });
             ui.order.classList.toggle('lk-disabled', false);
@@ -1067,6 +1153,7 @@
             /* everyone has a locker: hide the student list and show the totals above the lockers instead */
             var allPlaced = state.students.length > 0 && waiting.length === 0;
             root.classList.toggle('lk-all-placed', allPlaced);
+            root.classList.toggle('lk-show-combo', !!state.display.combo);
             if (allPlaced) {
                 var bar = make('div', 'lk-done-bar');
                 bar.textContent = '✓ All ' + state.students.length + ' students have lockers · ' + order.length + ' lockers · ' +
@@ -1161,6 +1248,11 @@
                 cell.classList.add('lk-free');
                 cell.title = 'Locker ' + id + ' is free. Click, then type a name. Right-click: out of service.';
             }
+            var cb = comboOf(id);
+            if (cb) cell.title += '\nCombination: ' + cb;
+            /* own line under the name; a student without a combination keeps an empty line, so every
+               locker stays the same height while combinations are shown */
+            if (state.display.combo && s && !state.out[id]) cell.appendChild(make('div', 'lk-combo' + (cb ? '' : ' lk-combo-blank'), cb || '\u00a0'));
             if (state.sel === id) cell.classList.add('lk-selected');
             return cell;
         }
@@ -1226,13 +1318,41 @@
                 cur.textContent = 'Free';
             }
             ui['entry-out'].textContent = id && state.out[id] ? 'Back in' : 'Out';
+            if (document.activeElement !== ui['entry-combo']) ui['entry-combo'].value = id ? comboOf(id) : '';
+            ui['entry-combo'].disabled = !id || !state.assign[id];
+            ui['entry-combo'].placeholder = id && !state.assign[id] ? 'no student' : '00 00 00';
             ui['entry-out'].disabled = !id;
         }
 
-        /* next locker after id that is in service */
-        function nextLocker(id) {
+        function saveEntryCombo() {
+            var id = targetLocker();
+            if (!id) { setStatus('Pick a locker first, then type its combination.'); return; }
+            if (!state.assign[id]) {
+                if (ui['entry-combo'].value.trim()) setStatus('Locker ' + id + ' is empty. A combination belongs to a student, so put a student in the locker first.');
+                ui['entry-combo'].value = '';
+                return;
+            }
+            var v = normCombo(ui['entry-combo'].value);
+            if (v === comboOf(id)) { ui['entry-combo'].value = v; return; }
+            pushUndo();
+            setCombo(id, v);
+            if (v && comboCount() === 1) state.display.combo = true;
+            changed();
+            ui['entry-combo'].value = v;
+            var who = fullName(studentById(state.assign[id]));
+            setStatus(v ? who + ' (locker ' + id + ') combination: ' + v + '.' : who + '\'s combination cleared.');
+        }
+
+        function prevLocker(id, occupied) {
             var i = order.indexOf(id);
-            for (var k = i + 1; k < order.length; k++) if (!state.out[order[k]]) return order[k];
+            for (var k = i - 1; k >= 0; k--) if (!state.out[order[k]] && (!occupied || state.assign[order[k]])) return order[k];
+            return null;
+        }
+
+        /* next locker after id that is in service */
+        function nextLocker(id, occupied) {
+            var i = order.indexOf(id);
+            for (var k = i + 1; k < order.length; k++) if (!state.out[order[k]] && (!occupied || state.assign[order[k]])) return order[k];
             return null;
         }
 
@@ -1426,6 +1546,7 @@
             else if (a === 'setup') openSetup();
             else if (a === 'by-student') openByStudent();
             else if (a === 'paste') openPaste();
+            else if (a === 'combos') openCombos();
             else if (a === 'auto') autoAllocate(b.getAttribute('data-mode'));
             else if (a === 'clear-all') clearAll();
             else if (a === 'tiers') { pushUndo(); state.tiers = +b.getAttribute('data-n'); state.banks.forEach(function (k) { k.tiers = 0; }); changed(); }
@@ -1552,7 +1673,7 @@
 
         /* Rows with Preferred/First Name, Surname, Homeroom and optionally Locker (and Status). */
         function applyRoster(rows, fileName) {
-            var people = [], allocs = [], outs = [];
+            var people = [], allocs = [], outs = [], combos = [];
             rows.forEach(function (row) {
                 var r = {};
                 Object.keys(row).forEach(function (k) { r[clean(k).toLowerCase()] = clean(row[k]); });
@@ -1561,18 +1682,27 @@
                 var first = r['preferred'] || r['first name'] || r['firstname'] || r['given name'] || '';
                 var surname = r['surname'] || r['surname name'] || r['last name'] || r['lastname'] || r['family name'] || '';
                 if (locker && /out/i.test(r['status'] || '')) outs.push(locker);
-                if (!first && !surname) return;
+                var combo = r['locker combo'] || r['combo'] || r['combination'] || r['lock combo'] || r['locker combination'] || r['lock combination'] || '';
+                if (!first && !surname) { if (locker && combo) combos.push({ locker: locker, combo: combo }); return; }
                 var extra = {};
                 Object.keys(row).forEach(function (k) { if (!isKnownCol(k) && clean(row[k])) extra[clean(k)] = clean(row[k]); });
                 var year = r['year'] || r['year level'] || r['yr'] || r['yr level'] || r['year group'] || r['grade'] || '';
                 people.push({ first: first, surname: surname, homeroom: r['homeroom'] || r['home room'] || r['home group'] || r['homegroup'] || r['form'] || '',
-                    year: year, locker: locker, extra: extra });
+                    year: year, locker: locker, extra: extra, combo: combo });
             });
+            if (!people.length && combos.length) {
+                /* a file of just lockers and combinations */
+                pushUndo();
+                var only = applyCombos(combos);
+                changed();
+                setStatus(comboMsg(only) || 'No combinations found.', true);
+                return;
+            }
             if (!people.length) {
                 setStatus('No students found. The first row needs headings such as Preferred or First Name, and Surname.', true);
                 return;
             }
-            if (rosterMode === 'add' && state.students.length) { addRoster(people, outs); return; }
+            if (rosterMode === 'add' && state.students.length) { addRoster(people, outs, combos); return; }
             if (state.students.length && !window.confirm('Replace the ' + state.students.length +
                 ' students already here with the ' + people.length + ' in this file? Their allocations will be replaced too.\n\n' +
                 '(To keep them and add these students, press Cancel and use Add.)')) return;
@@ -1580,12 +1710,15 @@
             state.students = [];
             state.assign = {};
             people.forEach(function (p, i) {
-                var s = newStudent(p.first, p.surname, p.homeroom, i, p.extra, p.year);
+                var s = newStudent(p.first, p.surname, p.homeroom, i, p.extra, p.year, p.combo);
                 state.students.push(s);
                 if (p.locker) allocs.push({ locker: p.locker, sid: s.id });
             });
             var msgs = placeAllocations(allocs);
             outs.forEach(function (id) { var l = findLocker(id); if (l && !state.assign[l.id]) state.out[l.id] = true; });
+            var withCombo = state.students.filter(function (st) { return st.combo; }).length;
+            if (withCombo) { state.display.combo = true; msgs.push(withCombo + ' with combinations.'); }
+            msgs.push(comboMsg(applyCombos(combos)));
             var base = String(fileName || '').replace(/\.[^.]+$/, '').replace(/[_]+/g, ' ').trim();
             if (base && (!state.title || state.title === 'Locker allocation' || state.title === cfg.title)) state.title = base;
             changed();
@@ -1597,7 +1730,7 @@
            details are filled in from the file: homeroom, and every other column such as TG or
            House (a value in the file replaces the old one). They also get the file's locker if they
            have none. Current allocations are kept. */
-        function addRoster(people, outs) {
+        function addRoster(people, outs, combos) {
             pushUndo();
             var byName = {};
             state.students.forEach(function (s) { byName[norm(fullName(s))] = s; });
@@ -1619,9 +1752,10 @@
                         if (existing && existing !== k) { delete s.extra[existing]; }
                         if (s.extra[k] !== p.extra[k]) { s.extra[k] = p.extra[k]; changedAny = true; }
                     });
+                    if (normCombo(p.combo) && normCombo(p.combo) !== s.combo) { s.combo = normCombo(p.combo); changedAny = true; }
                     if (changedAny) updated++;
                 } else {
-                    s = newStudent(p.first, p.surname, p.homeroom, state.students.length + i, p.extra, p.year);
+                    s = newStudent(p.first, p.surname, p.homeroom, state.students.length + i, p.extra, p.year, p.combo);
                     state.students.push(s);
                     byName[key] = s;
                     added++;
@@ -1631,6 +1765,7 @@
             var beforeN = Object.keys(state.assign).length;
             var msgs = placeAllocations(allocs);
             outs.forEach(function (id) { var l = findLocker(id); if (l && !state.assign[l.id]) state.out[l.id] = true; });
+            msgs.push(comboMsg(applyCombos(combos || [])));
             var placed = Object.keys(state.assign).length - beforeN;
             extraFields().forEach(function (f) { if (before.indexOf(f.toLowerCase()) < 0) newCols[f] = true; });
             var cols = Object.keys(newCols);
@@ -1671,17 +1806,17 @@
         /* Full locker list: one row per locker, then students with no locker. */
         function fullRows() {
             var fields = extraFields(true);
-            var rows = [['Locker', 'Bank', 'First Name', 'Surname', 'Year', 'Homeroom'].concat(fields).concat(['Status'])];
+            var rows = [['Locker', 'Bank', 'Locker Combo', 'First Name', 'Surname', 'Year', 'Homeroom'].concat(fields).concat(['Status'])];
             function more(s) { return fields.map(function (f) { return s ? extraValue(s, f) : ''; }); }
             state._bankIds.forEach(function (ids, bi) {
                 ids.forEach(function (id) {
                     var s = state.assign[id] ? studentById(state.assign[id]) : null;
-                    rows.push([id, state.banks[bi].name, s ? s.firstName : '', s ? s.surname : '', s ? s.year : '', s ? s.homeroom : '']
+                    rows.push([id, state.banks[bi].name, comboOf(id), s ? s.firstName : '', s ? s.surname : '', s ? s.year : '', s ? s.homeroom : '']
                         .concat(more(s)).concat([state.out[id] ? 'Out of service' : (s ? '' : 'Free')]));
                 });
             });
             state.students.filter(function (s) { return !lockerOf(s.id); }).sort(bySurname).forEach(function (s) {
-                rows.push(['', '', s.firstName, s.surname, s.year, s.homeroom].concat(more(s)).concat(['No locker']));
+                rows.push(['', '', studentCombo(s), s.firstName, s.surname, s.year, s.homeroom].concat(more(s)).concat(['No locker']));
             });
             return rows;
         }
@@ -1698,10 +1833,11 @@
                     return (la ? pos[la] - pos[lb] : 0) || bySurname(a, b);
                 });
             } else list.sort(bySurname);
-            var rows = [['Surname Name', 'First Name', 'Year Level', 'Locker number']];
+            var rows = [['Surname Name', 'First Name', 'Year Level', 'Locker number'].concat(o.combo ? ['Locker Combo'] : [])];
             list.forEach(function (s) {
                 var y = s.year ? (o.yearWord ? 'Year ' + s.year : s.year) : '';
-                rows.push([s.surname, s.firstName, y, lockerOf(s.id) || '']);
+                var l = lockerOf(s.id) || '';
+                rows.push([s.surname, s.firstName, y, l].concat(o.combo ? [studentCombo(s)] : []));
             });
             return rows;
         }
@@ -1734,19 +1870,21 @@
         function openExport() {
             var o = state.display.exportPrefs || {};
             o = { layout: o.layout || 'simple', format: o.format || 'xlsx', yearWord: !!o.yearWord,
-                noLocker: o.noLocker !== false, sort: o.sort || 'surname' };
+                noLocker: o.noLocker !== false, sort: o.sort || 'surname',
+                combo: o.combo != null ? !!o.combo : comboCount() > 0 };
             function radio(name, value, label, cur) {
-                return '<label class="lk-check-row"><input type="radio" name="lk-x-' + name + '" value="' + value + '"' + (cur === value ? ' checked' : '') + '> ' + label + '</label>';
+                return '<label class="lk-check-row"><input type="radio" name="lk-x-' + name + '" value="' + value + '"' + (cur === value ? ' checked' : '') + '> <span>' + label + '</span></label>';
             }
             openModal('Export',
                 '<div class="lk-x-group"><b>Columns</b>' +
-                radio('layout', 'simple', 'Simple list: <code>Surname Name</code>, <code>First Name</code>, <code>Year Level</code>, <code>Locker number</code>', o.layout) +
-                radio('layout', 'full', 'Full locker list: every locker with bank, name, year, homeroom, other details and status', o.layout) +
+                radio('layout', 'simple', 'Simple list: <code>Surname Name</code>, <code>First Name</code>, <code>Year Level</code>, <code>Locker number</code> (and <code>Locker Combo</code>)', o.layout) +
+                radio('layout', 'full', 'Full locker list: every locker with bank, combination, name, year, homeroom, other details and status', o.layout) +
                 '</div>' +
                 '<div class="lk-x-group lk-x-simple"><b>Simple list options</b>' +
                 '<label class="lk-check-row">Year Level as <select data-m="yearWord"><option value="0">7</option><option value="1">Year 7</option></select></label>' +
                 '<label class="lk-check-row">Order by <select data-m="sort"><option value="surname">Surname</option><option value="locker">Locker number</option></select></label>' +
                 '<label class="lk-check-row"><input type="checkbox" data-m="noLocker"> Include students without a locker (Locker number left blank)</label>' +
+                '<label class="lk-check-row"><input type="checkbox" data-m="xcombo"> <span>Add a <code>Locker Combo</code> column</span></label>' +
                 '</div>' +
                 '<div class="lk-x-group"><b>File type</b>' +
                 radio('format', 'xlsx', 'Excel (.xlsx)', o.format) +
@@ -1758,7 +1896,8 @@
                         layout: get('layout'), format: get('format'),
                         yearWord: mui.body.querySelector('[data-m="yearWord"]').value === '1',
                         sort: mui.body.querySelector('[data-m="sort"]').value,
-                        noLocker: mui.body.querySelector('[data-m="noLocker"]').checked
+                        noLocker: mui.body.querySelector('[data-m="noLocker"]').checked,
+                        combo: mui.body.querySelector('[data-m="xcombo"]').checked
                     };
                     state.display.exportPrefs = c;
                     save();
@@ -1776,6 +1915,7 @@
             mui.body.querySelector('[data-m="yearWord"]').value = o.yearWord ? '1' : '0';
             mui.body.querySelector('[data-m="sort"]').value = o.sort;
             mui.body.querySelector('[data-m="noLocker"]').checked = o.noLocker;
+            mui.body.querySelector('[data-m="xcombo"]').checked = o.combo;
             function sync() {
                 var simple = mui.body.querySelector('input[name="lk-x-layout"]:checked').value === 'simple';
                 mui.body.querySelector('.lk-x-simple').style.display = simple ? '' : 'none';
@@ -1805,7 +1945,8 @@
                     body += '<div class="lk-pcell' + (state.out[id] ? ' out' : '') + '"' + at + '>' +
                         (s && !state.out[id] && badgeOf(s) ? '<small class="bd">' + esc(badgeOf(s)) + '</small>' : '') +
                         '<b>' + esc(id) + '</b>' +
-                        (state.out[id] ? 'Out of service' : s ? '<span class="n">' + esc(s.firstName) + '</span> ' + esc(displaySurname(s)) : '') + '</div>';
+                        (state.out[id] ? 'Out of service' : s ? '<span class="n">' + esc(s.firstName) + '</span> ' + esc(displaySurname(s)) : '') +
+                        (state.display.combo && s && !state.out[id] ? '<span class="cb">' + (comboOf(id) ? esc(comboOf(id)) : '&nbsp;') + '</span>' : '') + '</div>';
                 });
                 body += '</div></div>';
             });
@@ -1852,19 +1993,20 @@
             var cols = [];
             if (list.some(function (s) { return s.year || roomOf(s); })) cols.push({ label: 'HR', get: function (s) { return yearRoom(s); } });
             extraFields().slice(0, 3).forEach(function (f) { cols.push({ label: f, get: function (s) { return extraValue(s, f); } }); });
+            var withCombo = state.display.combo && comboCount() > 0;
             function row(s) {
                 var l = lockerOf(s.id);
                 return '<tr><td>' + esc(s.surname) + '</td><td>' + esc(s.firstName) + '</td>' +
                     cols.map(function (c) { return '<td>' + esc(c.get(s) || '') + '</td>'; }).join('') +
-                    '<td><b>' + esc(l || '—') + '</b></td></tr>';
+                    '<td><b>' + esc(l || '—') + '</b></td>' + (withCombo ? '<td class="cbc">' + esc(studentCombo(s)) + '</td>' : '') + '</tr>';
             }
             var head = '<thead><tr><th>Surname</th><th>First name</th>' +
-                cols.map(function (c) { return '<th>' + esc(c.label) + '</th>'; }).join('') + '<th>Locker</th></tr></thead>';
+                cols.map(function (c) { return '<th>' + esc(c.label) + '</th>'; }).join('') + '<th>Locker</th>' + (withCombo ? '<th>Combo</th>' : '') + '</tr></thead>';
             function table(part) { return '<table class="lk-ltab">' + head + '<tbody>' + part.map(row).join('') + '</tbody></table>'; }
 
             /* Pages are built by hand so names run DOWN the first column, then down the second,
                then on to the next page. Two columns when there are only a few detail columns. */
-            var twoCols = cols.length <= 2;
+            var twoCols = cols.length + (withCombo ? 1 : 0) <= 2;
             var FIRST = 40, LATER = 44;            /* rows per column: first page has the heading */
             var body = '<h1>' + esc(state.title) + '</h1><p class="lk-sub">Students in surname order</p>';
             var i = 0, page = 0;
@@ -2058,11 +2200,14 @@
 
         /* Paste Allocations: lines like "Alex Smith, 105", "105 Alex Smith", or two columns copied from Excel. */
         function openPaste() {
-            openModal('Paste allocations',
+            openModal('Paste allocations and combinations',
                 '<p class="lk-help">Paste or type one student per line with their locker number, in any order: ' +
                 '<code>Alex Smith 105</code>, <code>105, Smith, Alex</code>, or columns copied from Excel. ' +
-                'Names are matched to the class list (first name + surname, either way round).</p>' +
-                '<textarea class="lk-textarea" data-m="paste" rows="9" spellcheck="false" placeholder="Alex Smith\t105\nSam Jones\t106\n107 Priya Patel"></textarea>' +
+                'A combination such as <code>07 33 03</code> on the line is saved with that student. ' +
+                'A line with just a locker and a combination (<code>506 07 33 03</code>) gives the combination to the student in that locker.</p>' +
+                '<p class="lk-help">If the first line is a heading row, such as <code style="white-space:normal">Surname Name · First Name · Year Level · Locker number · Locker Combo</code>, ' +
+                'the columns are read by their headings.</p>' +
+                '<textarea class="lk-textarea" data-m="paste" rows="10" spellcheck="false" placeholder="Surname Name\tFirst Name\tYear Level\tLocker number\tLocker Combo\nBarden\tOliver\t7\t506\t07 33 03\n\nor:  Alex Smith 105 07 33 03\nor:  506 07 33 03"></textarea>' +
                 '<label class="lk-check-row"><input type="checkbox" data-m="addnew"> Add names that are not on the class list as new students</label>' +
                 '<label class="lk-check-row"><input type="checkbox" data-m="addlockers"> Add locker numbers that are not set up yet (to an "Other" bank)</label>' +
                 '<div class="lk-preview" data-m="preview"></div>',
@@ -2087,51 +2232,108 @@
             return idx;
         }
 
+        /* Heading names that Paste understands when the first line is a heading row */
+        var PASTE_HEADS = {
+            surname: ['surname', 'surname name', 'last name', 'lastname', 'family name'],
+            first: ['first name', 'preferred', 'firstname', 'given name', 'preferred name'],
+            name: ['name', 'student', 'student name', 'full name'],
+            year: ['year', 'year level', 'yr', 'yr level', 'year group', 'grade'],
+            locker: ['locker', 'locker number', 'locker no', 'locker #', 'locker num'],
+            combo: ['locker combo', 'combo', 'combination', 'lock combo', 'locker combination', 'lock combination']
+        };
+
+        /* Turns pasted text into items {raw, locker, combo, nameParts:[...], year}. */
+        function pasteItems(text) {
+            var lines = String(text || '').split(/\r?\n/).filter(function (l) { return l.trim(); });
+            if (!lines.length) return [];
+            var first = lines[0], delim = first.indexOf('\t') >= 0 ? '\t' : (first.indexOf(',') >= 0 ? ',' : (first.indexOf(';') >= 0 ? ';' : null));
+            var heads = delim ? first.split(delim).map(function (h) { return clean(h).toLowerCase(); }) : [];
+            var col = {};
+            Object.keys(PASTE_HEADS).forEach(function (k) {
+                heads.forEach(function (h, i) { if (col[k] == null && PASTE_HEADS[k].indexOf(h) >= 0) col[k] = i; });
+            });
+            if (col.locker != null || col.surname != null || col.first != null) {
+                /* heading row: read columns by name */
+                return lines.slice(1).map(function (line) {
+                    var f = line.split(delim).map(clean);
+                    var get = function (k) { return col[k] != null ? (f[col[k]] || '') : ''; };
+                    var parts = col.name != null && !get('first') && !get('surname') ? [get('name')] : [get('first'), get('surname')];
+                    return { raw: line.trim(), locker: get('locker'), combo: get('combo'), nameParts: parts.filter(Boolean),
+                        year: yearDigits(get('year')), swapped: false, headed: true };
+                });
+            }
+            return lines.map(function (line) {
+                var raw = line.trim();
+                var fields = raw.split(/\t|,|;/).map(clean).filter(Boolean);
+                var combo = '';
+                /* a field that looks like a combination ("07 33 03", "7-33-3") */
+                for (var i = 0; i < fields.length; i++) {
+                    if (COMBO_RE.test(fields[i]) && fields.length > 1) { combo = fields[i]; fields.splice(i, 1); break; }
+                }
+                if (fields.length === 1) {
+                    var words = fields[0].split(/\s+/);
+                    /* "Alex Smith 105 07 33 03" or "506 07 33 03": the last three 1–2 digit numbers are the combination */
+                    if (!combo && words.length >= 4 && words.slice(-3).every(function (w) { return /^\d{1,2}$/.test(w); })) {
+                        combo = words.slice(-3).join(' ');
+                        words = words.slice(0, -3);
+                    }
+                    fields = words;
+                }
+                /* the locker: a field that is a known locker, else the last number-like field */
+                var li = -1;
+                fields.forEach(function (f, i) { if (li < 0 && findLocker(f) && /\d/.test(f)) li = i; });
+                if (li < 0) for (var j = fields.length - 1; j >= 0; j--) if (/\d/.test(fields[j]) && SINGLE_RE.test(fields[j])) { li = j; break; }
+                var locker = li >= 0 ? fields[li] : '';
+                var rest = fields.filter(function (f, i) { return i !== li; });
+                /* a lone number left over (e.g. the year level 7) is not part of the name */
+                var year = '';
+                rest = rest.filter(function (f) {
+                    if (/^\d{1,2}$/.test(f)) { if (!year) year = String(+f); return false; }
+                    if (/^(?:year|yr|y)\s*\d{1,2}$/i.test(f)) { if (!year) year = yearDigits(f); return false; }
+                    return true;
+                });
+                return { raw: raw, locker: locker, combo: combo, nameParts: rest, year: year, swapped: rest.length === 2 };
+            });
+        }
+
         function parsePaste(text) {
             var addNew = mui.body.querySelector('[data-m="addnew"]').checked;
             var addLockers = mui.body.querySelector('[data-m="addlockers"]').checked;
             var idx = studentNameIndex();
             var out = { ok: [], problems: [], addNew: addNew, addLockers: addLockers };
             var usedLockers = {}, usedStudents = {};
-            String(text || '').split(/\r?\n/).forEach(function (line, n) {
-                var raw = line.trim();
-                if (!raw) return;
-                var fields = raw.split(/\t|,|;/).map(clean).filter(Boolean);
-                if (fields.length === 1) fields = raw.split(/\s+/);
-                /* the locker: a field that is a known locker, else the last number-like field */
-                var li = -1;
-                fields.forEach(function (f, i) { if (li < 0 && findLocker(f)) li = i; });
-                if (li < 0 && fields.length === 1) {
-                    /* "Alex Smith 105" squashed in one field */
-                    var words = raw.split(/\s+/);
-                    fields = words;
-                    words.forEach(function (w, i) { if (li < 0 && findLocker(w)) li = i; });
+            pasteItems(text).forEach(function (it) {
+                var raw = it.raw;
+                var name = it.nameParts.join(' ');
+                if (!it.locker) {
+                    out.problems.push({ line: raw, why: name ? 'no locker number' : 'no name or locker' });
+                    return;
                 }
-                if (li < 0) {
-                    for (var i = fields.length - 1; i >= 0; i--) if (/\d/.test(fields[i]) && SINGLE_RE.test(fields[i])) { li = i; break; }
-                }
-                if (li < 0) { out.problems.push({ line: raw, why: 'no locker number' }); return; }
-                var locker = fields[li];
-                var rest = fields.slice(0, li).concat(fields.slice(li + 1));
-                var name = rest.join(' ');
-                var l = findLocker(locker);
-                if (!l && !addLockers) { out.problems.push({ line: raw, why: 'locker ' + locker + ' is not set up' }); return; }
-                var lockerId = l ? l.id : locker;
-                if (l && state.out[l.id]) { out.problems.push({ line: raw, why: 'locker ' + l.id + ' is out of service' }); return; }
-                if (!name) { out.problems.push({ line: raw, why: 'no name' }); return; }
-                var key = norm(name), hits = idx[key];
-                /* "Smith Alex" pasted as one field also matches via the surname-first key */
-                if (!hits && rest.length === 2) hits = idx[norm(rest[1] + ' ' + rest[0])];
-                if (hits && hits.length > 1) { out.problems.push({ line: raw, why: hits.length + ' students are called ' + name }); return; }
-                var s = hits ? hits[0] : null;
-                if (!s && !addNew) { out.problems.push({ line: raw, why: '"' + name + '" is not on the class list' }); return; }
+                var l = findLocker(it.locker);
+                if (!l && !addLockers) { out.problems.push({ line: raw, why: 'locker ' + it.locker + ' is not set up' }); return; }
+                var lockerId = l ? l.id : it.locker;
                 var lk = lockerId.toLowerCase();
                 if (usedLockers[lk]) { out.problems.push({ line: raw, why: 'locker ' + lockerId + ' is pasted twice' }); return; }
-                var sk = s ? s.id : 'new:' + key;
+                if (!name) {
+                    if (!normCombo(it.combo)) { out.problems.push({ line: raw, why: 'no name' }); return; }
+                    if (!l || !state.assign[l.id]) { out.problems.push({ line: raw, why: 'nobody is in locker ' + lockerId + ' to give this combination to' }); return; }
+                    usedLockers[lk] = true;
+                    out.ok.push({ locker: lockerId, student: studentById(state.assign[l.id]), comboOnly: true, combo: it.combo, newLocker: false });
+                    return;
+                }
+                if (l && state.out[l.id]) { out.problems.push({ line: raw, why: 'locker ' + l.id + ' is out of service' }); return; }
+                var key = norm(name), hits = idx[key];
+                /* "Smith Alex" pasted as two fields also matches via the surname-first key */
+                if (!hits && it.nameParts.length === 2) hits = idx[norm(it.nameParts[1] + ' ' + it.nameParts[0])];
+                if (hits && hits.length > 1) { out.problems.push({ line: raw, why: hits.length + ' students are called ' + name }); return; }
+                var st = hits ? hits[0] : null;
+                if (!st && !addNew) { out.problems.push({ line: raw, why: '"' + name + '" is not on the class list' }); return; }
+                var sk = st ? st.id : 'new:' + key;
                 if (usedStudents[sk]) { out.problems.push({ line: raw, why: name + ' is pasted twice' }); return; }
                 usedLockers[lk] = true;
                 usedStudents[sk] = true;
-                out.ok.push({ locker: lockerId, student: s, name: name, newLocker: !l });
+                out.ok.push({ locker: lockerId, student: st, name: name, nameParts: it.nameParts, headed: it.headed,
+                    combo: it.combo, year: it.year, newLocker: !l });
             });
             return out;
         }
@@ -2140,7 +2342,10 @@
             var prev = mui.body.querySelector('[data-m="preview"]');
             var newS = p.ok.filter(function (o) { return !o.student; }).length;
             var newL = p.ok.filter(function (o) { return o.newLocker; }).length;
+            var combos = p.ok.filter(function (o) { return normCombo(o.combo); }).length;
+            var only = p.ok.filter(function (o) { return o.comboOnly; }).length;
             prev.innerHTML = '<b>' + p.ok.length + '</b> ready' +
+                (combos ? ' (' + combos + ' with a combination' + (only ? ', ' + only + ' combination only' : '') + ')' : '') +
                 (newS ? ' (' + newS + ' new student' + (newS === 1 ? '' : 's') + ')' : '') +
                 (newL ? ' (' + newL + ' new locker' + (newL === 1 ? '' : 's') + ')' : '') +
                 (p.problems.length ? ' · <b>' + p.problems.length + '</b> skipped:<div class="lk-errors">' +
@@ -2154,28 +2359,102 @@
             var p = parsePaste(mui.body.querySelector('[data-m="paste"]').value);
             if (!p.ok.length) return;
             pushUndo();
-            var allocs = [], moved = 0, bumped = 0;
+            var allocs = [], bumped = 0, combos = [];
             p.ok.forEach(function (o, i) {
-                var s = o.student;
-                if (!s) {
-                    var parts = o.name.split(/\s+/);
-                    s = newStudent(parts[0], parts.slice(1).join(' '), '', state.students.length + i);
-                    state.students.push(s);
+                if (o.comboOnly) {
+                    combos.push({ sid: o.student.id, combo: o.combo });
+                    return;
                 }
-                allocs.push({ locker: o.locker, sid: s.id });
+                var st = o.student;
+                if (!st) {
+                    /* headed rows give [first, surname]; free text is "First Surname ..." */
+                    var parts = o.headed ? o.nameParts : o.name.split(/\s+/);
+                    st = newStudent(parts[0], parts.slice(1).join(' '), '', state.students.length + i, null, o.year);
+                    state.students.push(st);
+                } else if (o.year && !st.year) {
+                    st.year = o.year;
+                }
+                allocs.push({ locker: o.locker, sid: st.id });
+                if (normCombo(o.combo)) combos.push({ sid: st.id, combo: o.combo });
             });
             /* pasted lockers win: clear them first so placeAllocations doesn't call them clashes */
             allocs.forEach(function (a) {
                 var l = findLocker(a.locker);
                 if (l && state.assign[l.id] && state.assign[l.id] !== a.sid) { delete state.assign[l.id]; bumped++; }
-                if (lockerOf(a.sid)) moved++;
             });
             var msgs = placeAllocations(allocs);
+            var cr = applyCombos(combos);
             closeModal();
             changed();
             setStatus(allocs.length + ' allocation' + (allocs.length === 1 ? '' : 's') + ' applied' +
                 (bumped ? '; ' + bumped + ' student(s) lost their locker to a pasted one' : '') +
-                (p.problems.length ? '; ' + p.problems.length + ' line(s) skipped' : '') + '. ' + msgs.join(' '), true);
+                (p.problems.length ? '; ' + p.problems.length + ' line(s) skipped' : '') + '. ' + comboMsg(cr) + msgs.join(' '), true);
+        }
+
+        /* Combos: every student with a box for their combination, in locker order (students with
+           no locker at the end); Enter moves down. */
+        function openCombos() {
+            if (!state.students.length) { setStatus('Import a class list first.'); return; }
+            var rows = [];
+            order.forEach(function (id) { if (state.assign[id]) rows.push({ id: id, st: studentById(state.assign[id]) }); });
+            state.students.filter(function (st) { return !lockerOf(st.id); }).sort(bySurname).forEach(function (st) { rows.push({ id: '', st: st }); });
+            openModal('Lock combinations',
+                '<p class="lk-help">Type each student\'s padlock combination, e.g. <code>07 33 03</code> (<code>7-33-3</code> or <code>073303</code> work too). ' +
+                'A combination stays with the student if they move lockers. ' +
+                '<b>Enter</b> or <b>↓</b> moves to the next student, <b>↑</b> goes back. Clear a box to remove a combination. ' +
+                'To paste a whole list, use <b>Paste</b> instead.</p>' +
+                '<div class="lk-bs-filter"><input type="search" data-m="filter" placeholder="Filter by locker, name or bank"></div>' +
+                '<div class="lk-bs-wrap"><table class="lk-bs"><thead><tr><th>Locker</th><th>Bank</th><th>Student</th><th>Combination</th></tr></thead><tbody>' +
+                rows.map(function (r) {
+                    var l = r.id ? findLocker(r.id) : null;
+                    return '<tr data-sid="' + esc(r.st.id) + '"><td><b>' + esc(r.id || '—') + '</b></td><td>' + esc(l ? state.banks[l.bank].name : 'No locker') + '</td><td>' +
+                        esc(fullName(r.st)) + '</td>' +
+                        '<td><input type="text" class="lk-bs-input lk-combo-input" autocomplete="off" spellcheck="false" value="' + esc(studentCombo(r.st)) + '"></td></tr>';
+                }).join('') + '</tbody></table></div>',
+                'Save', function () {
+                    pushUndo();
+                    var had = comboCount();
+                    Array.prototype.forEach.call(mui.body.querySelectorAll('.lk-bs tbody tr'), function (tr) {
+                        setStudentCombo(studentById(tr.getAttribute('data-sid')), tr.querySelector('input').value);
+                    });
+                    var n = comboCount();
+                    if (n && !had) state.display.combo = true;
+                    closeModal();
+                    changed();
+                    setStatus(n + ' student' + (n === 1 ? ' has a combination.' : 's have combinations.'));
+                }, true);
+            var inputs = Array.prototype.slice.call(mui.body.querySelectorAll('.lk-combo-input'));
+            function count() {
+                var filled = inputs.filter(function (i) { return i.value.trim(); }).length;
+                mui.msg.textContent = filled + ' of ' + inputs.length + ' students have a combination';
+            }
+            inputs.forEach(function (inp, i) {
+                inp.addEventListener('focus', function () { inp.select(); });
+                inp.addEventListener('input', count);
+                inp.addEventListener('blur', function () { inp.value = normCombo(inp.value); });
+                inp.addEventListener('keydown', function (e) {
+                    var step = (e.key === 'Enter' || e.key === 'ArrowDown') ? 1 : e.key === 'ArrowUp' ? -1 : 0;
+                    if (!step) return;
+                    e.preventDefault();
+                    inp.value = normCombo(inp.value);
+                    for (var k = i + step; k >= 0 && k < inputs.length; k += step) {
+                        if (inputs[k].closest('tr').style.display !== 'none') { inputs[k].focus(); return; }
+                    }
+                    if (step > 0) mui.ok.focus();
+                });
+            });
+            var filter = mui.body.querySelector('[data-m="filter"]');
+            filter.addEventListener('input', function () {
+                var q = norm(filter.value);
+                Array.prototype.forEach.call(mui.body.querySelectorAll('.lk-bs tbody tr'), function (tr) {
+                    tr.style.display = !q || norm(tr.textContent).indexOf(q) >= 0 ? '' : 'none';
+                });
+            });
+            count();
+            setTimeout(function () {
+                var firstBlank = inputs.filter(function (x) { return !x.value; })[0] || inputs[0];
+                if (firstBlank) firstBlank.focus();
+            }, 30);
         }
 
         /* ----- start ----- */

@@ -94,7 +94,9 @@ def _cell_text(v):
     return str(v).strip()
 
 
-def _normalise_row(row):
+def _roster_row(row):
+    """Roster row -> {lower-case heading: text}. (Was called _normalise_row, which the
+    layout-row parser below also used, so reading a :roster: file crashed the build.)"""
     return {
         str(k).strip().lower(): _cell_text(v)
         for k, v in row.items()
@@ -105,7 +107,7 @@ def _normalise_row(row):
 def _students_from_rows(rows):
     students = []
     for row in rows:
-        r = _normalise_row(row)
+        r = _roster_row(row)
         if not any(r.values()):
             continue
         first = r.get("preferred") or r.get("first name") or r.get("firstname") or "Student"
@@ -114,7 +116,10 @@ def _students_from_rows(rows):
             or str(len(students) + 1)
         )
         students.append(
-            {"firstName": first, "surname": surname, "homeroom": r.get("homeroom", "")}
+            {"firstName": first, "surname": surname,
+             "homeroom": r.get("homeroom") or r.get("home room") or r.get("home group") or r.get("form") or "",
+             # the year level goes in front of the homeroom badge, e.g. "7 H13"
+             "year": r.get("year") or r.get("year level") or r.get("yr") or r.get("year group") or r.get("grade") or ""}
         )
     return students
 

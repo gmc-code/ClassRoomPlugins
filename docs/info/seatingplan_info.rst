@@ -11,6 +11,16 @@ This guide shows how to use the seating plan and get the most out of it.
 Technical details for whoever runs the website are in
 :doc:`/info/seatingplan_dev`.
 
+All the pictures in this guide use made-up students.
+
+.. figure:: images/seatingplan/seatingplan_overview.png
+   :alt: A seating plan of 26 students in five rows of six desks
+   :width: 100%
+
+   A class seated A → Z in five rows of six desks. Each desk shows its number
+   (top left), the student's year and homeroom (**7 H13**, **8 H13**,
+   **9 H13**, top right) and is coloured by year level.
+
 ----
 
 Quick start
@@ -33,7 +43,11 @@ capitals):
 
 * **Preferred** or **First Name**: the name shown on the desk
 * **Surname** or **Last Name**
-* **Homeroom** (optional): shown as a small badge, e.g. *H11*
+* **Homeroom** (optional): shown as a small badge in the desk's top-right
+  corner, e.g. *Hughes 13* shows as **H13**
+* **Year** or **Year Level** (optional): put in front of the homeroom, so a
+  Year 7 student in Hughes 13 shows as **7 H13**. "Year 7" written in the
+  homeroom itself (*Year 7 in Hughes 13*) works too.
 
 Other columns are ignored, so an export from School Class Lists works as it
 is. The plan's title is taken from the file name (``8_Science_W9.xlsx``
@@ -52,6 +66,21 @@ suggested file name for **Export JSON** and **Save PNG**.
 The toolbar
 -----------
 
+The buttons are coloured by what they do:
+
+* **Blue**: bring a class list in (**Import Roster**).
+* **Lighter blue**: plan files (**Import JSON**, **Export JSON**).
+* **Teal**: printing and showing (**Print**, **Save PNG**, **Projector View**).
+* **Grey**: **Reset** and **Revert**.
+* **Purple** and **amber**: arranging students (**A → Z**, **Random**,
+  **Rules** …), and **red** for **Clear**.
+
+.. figure:: images/seatingplan/seatingplan_toolbar.png
+   :alt: The seating plan toolbar
+   :width: 100%
+
+   The toolbar.
+
 Top row: files and output
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -66,16 +95,6 @@ Top row: files and output
    Save the whole plan as a file. In Chrome and Edge you choose the folder
    and name; other browsers ask for a name and save to Downloads.
 
-**Reset**
-   Go back to the plan as it was first set up on the page (usually empty),
-   removing your class list, rules and changes from this browser. You are
-   asked to confirm.
-
-**Revert**
-   Go back to the last file you imported or exported, undoing everything
-   since. This is greyed out until you have imported or exported something. After an
-   **Import Roster**, it returns the class to the file's original order.
-
 **Print**
    Print this plan on one landscape page (see `Printing`_).
 
@@ -86,6 +105,16 @@ Top row: files and output
 **Projector View**
    Show only the whiteboard and desks, full screen, in large text. Press
    **Esc** or **✕ Exit projector view** to return.
+
+**Reset**
+   Go back to the plan as it was first set up on the page (usually empty),
+   removing your class list, rules and changes from this browser. You are
+   asked to confirm.
+
+**Revert**
+   Go back to the last file you imported or exported, undoing everything
+   since. This is greyed out until you have imported or exported something. After an
+   **Import Roster**, it returns the class to the file's original order.
 
 Second row: arranging students
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -139,7 +168,13 @@ Fourth row: display options
    classes.
 
 **Show Homeroom**
-   Show or hide the homeroom badge.
+   Show or hide the year and homeroom badge in each desk's top-right corner.
+
+**Year Colours**
+   Colour each desk by the student's year level, the same colours as the
+   locker tool: Year 7 blue, Year 8 green, Year 9 amber, Year 10 purple,
+   Year 11 pink, Year 12 teal. A rule colour (see `Badges and colours`_)
+   comes first. Only shown when students have a year level.
 
 **Ignore Rules**
    Arrange students without applying any rules (the rules are kept, just not
@@ -202,6 +237,13 @@ In **Tables** mode, type the seats at each table, commas between tables and
 
 Rows and tables each keep their own layout, so you can switch between them
 without losing either.
+
+.. figure:: images/seatingplan/seatingplan_tables.png
+   :alt: The same class at eight tables of four
+   :width: 100%
+
+   The same class in **Tables** mode (8 tables of 4), seated with
+   **Homeroom A → Z**, so each year (and colour) sits together.
 
 Moving students by hand
 -----------------------
@@ -293,7 +335,7 @@ Badges and colours
 
 Each student card shows small badges:
 
-* **H11**: homeroom (hide with **Show Homeroom**)
+* **7 H13** (top-right corner): year and homeroom (hide with **Show Homeroom**)
 * **⬆ Front**, **⬇ Back**, **⬅ Left**, **➡ Right**, **🪑 Empty**: the
   student has that rule; the card is blue
 * **🔗 1**, **🔗 2** …: the student's keep-together group. The card is tinted
@@ -309,6 +351,12 @@ breaking a rule.
 
 **Hide Rule Badges** hides all rule badges and group colours but keeps the
 homeroom badge.
+
+Each desk is laid out like a locker in the locker tool: the desk number in
+the top-left corner, the year and homeroom badge (**7 H13**) in the top-right
+corner, then the first name in bold and the surname underneath. With
+**Year Colours** ticked, desks without a rule colour are coloured by year
+level.
 
 Printing
 --------
