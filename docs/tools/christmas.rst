@@ -19,12 +19,12 @@ Click a picture to bring it to life.
    present.gif     | Present           | x=37 y=82 width=10
    candle.gif      | Candle            | x=56 y=84 width=8
    gingerbread.gif | Gingerbread       | x=89 y=80 width=10
-   santa_sleigh.gif  | Santa's sleigh  | x=40 y=33 width=30 move=right seconds=8
+   santa_sleigh.gif  | Santa's sleigh  | x=40 y=33 width=30 move=right seconds=8 spawn=gift.gif count=20 spread=trail
    shooting_star.gif | Shooting star   | x=72 y=8 width=13 move=left seconds=3
    elf_green.gif     | Green elf       | x=47 y=91 width=8 move=right seconds=6
-   elf_red.gif       | Red elf         | x=40 y=93 width=8 move=right seconds=6.5
+   elf_red.gif       | Red elf         | x=40 y=93 width=8 move=wave-right seconds=7
    penguin.gif       | Penguin         | x=78 y=95 width=9 move=left seconds=6
-   snowball.gif      | Snowball        | x=8 y=92 width=5 move=right seconds=7
+   snowball.gif      | Snowball        | x=8 y=92 width=5 move=hop-right seconds=7
 
 The sleigh, the shooting star, the elves, the penguin and the snowball have ``move=`` on
 their lines, so they travel across the scene when they are clicked.

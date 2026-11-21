@@ -231,6 +231,28 @@
   overflow-wrap: anywhere;
 }
 
+/* ---------------------------------------------------------------- spawned GIFs */
+
+/* Small GIFs that come out of a picture (spawn=). They sit above the pictures, ignore clicks
+   and are removed when their animation ends. */
+.gs-spawns {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.gs-spawned {
+  position: absolute;
+  display: block;
+  height: auto;
+  margin: 0;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  user-select: none;
+}
+
 /* ---------------------------------------------------------------- snow */
 
 .gs-effects {
@@ -399,6 +421,26 @@
   --gs-stage: #8fd3f5;
 }
 
+/* :theme: reef (or sceneTheme = "reef" in a kit) */
+.gifscene.gs-reef {
+  --gs-main: #0b4f6c;
+  --gs-main-light: #157a9c;
+  --gs-accent: #ff7f50;
+  --gs-highlight: #7ee8fa;
+  --gs-paper: #f0fbff;
+  --gs-stage: #0b4f8a;
+}
+
+/* :theme: toyroom (or sceneTheme = "toyroom" in a kit) */
+.gifscene.gs-toyroom {
+  --gs-main: #5b3a8c;
+  --gs-main-light: #7a52b3;
+  --gs-accent: #ef476f;
+  --gs-highlight: #ffd166;
+  --gs-paper: #fffaf0;
+  --gs-stage: #fde7d2;
+}
+
 /* ---------------------------------------------------------------- full screen, motion, print */
 
 .gifscene:fullscreen {
@@ -427,6 +469,7 @@
 @media print {
   .gs-bar,
   .gs-effects,
+  .gs-spawns,
   .gs-arrange,
   .gs-counter {
     display: none !important;

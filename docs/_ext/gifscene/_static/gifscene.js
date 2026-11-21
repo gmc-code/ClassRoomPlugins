@@ -11,7 +11,6 @@
 
   var NOTES = [523.25, 587.33, 659.25, 783.99, 880.0, 1046.5, 1174.66, 1318.51];
   var audio = null;
-  var reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function chime(index) {
     try {
@@ -50,6 +49,8 @@
   // move= values. left/right/up/down go off one side and come back in on the other.
   // wave-* bob up and down as they go, hop-* bounce along, jump leaps up and lands again.
   var MOVES = ["left", "right", "up", "down", "wave-left", "wave-right", "hop-left", "hop-right", "jump"];
+  // spread= values for spawned GIFs (see Scene.prototype.spawn).
+  var SPREADS = ["burst", "up", "down", "fountain", "trail"];
   var EFFECTS = {
     snow: { label: "❄ Snow", title: "Turn the snow on or off" },
     bubbles: { label: "○ Bubbles", title: "Turn the bubbles on or off" },
@@ -60,7 +61,9 @@
   var THEMES = {
     none: { title: "Scene", effect: "confetti", icon: "★", message: "You found them all!" },
     christmas: { title: "Christmas", effect: "snow", icon: "🎄", message: "You found them all. Merry Christmas!" },
-    beach: { title: "At the beach", effect: "bubbles", icon: "☀", message: "You found them all. Have a sunny summer holiday!" }
+    beach: { title: "At the beach", effect: "bubbles", icon: "☀", message: "You found them all. Have a sunny summer holiday!" },
+    reef: { title: "Coral reef", effect: "bubbles", icon: "🐠", message: "You found them all. What a reef!" },
+    toyroom: { title: "Toy room", effect: "confetti", icon: "🧸", message: "You found them all. Time to tidy up!" }
   };
 
   function withThemeDefaults(cfg) {
@@ -116,6 +119,11 @@
       secondsGiven: typeof it.seconds === "number",
       keep: it.keep || "",
       move: MOVES.indexOf(it.move) >= 0 ? it.move : null,
+      spawn: it.spawn ? this.url(it.spawn) : null,
+      count: typeof it.count === "number" ? clamp(Math.round(it.count), 1, 20) : 5,
+      spread: SPREADS.indexOf(it.spread) >= 0 ? it.spread : "burst",
+      spawnWidth: typeof it.spawnWidth === "number" ? it.spawnWidth : null,
+      spawnTimer: null,
       trip: null,
       ratio: it.w && it.h ? it.w / it.h : 1,
       playing: false,
@@ -188,6 +196,9 @@
       this.stage.style.setProperty("--gs-columns", cfg.columns || 4);
     }
     this.items.forEach(function (item) { self.stage.appendChild(self.buildItem(item)); });
+    this.spawnLayer = el("div", "gs-spawns");
+    this.spawnLayer.setAttribute("aria-hidden", "true");
+    this.stage.appendChild(this.spawnLayer);
     this.effectLayer = el("div", "gs-effects");
     this.effectLayer.setAttribute("aria-hidden", "true");
     this.stage.appendChild(this.effectLayer);
@@ -210,7 +221,7 @@
     window.addEventListener("resize", function () { self.fitFullscreen(); });
 
     this.updateCounter();
-    this.setEffect(!!cfg.startEffect && !reducedMotion);
+    this.setEffect(!!cfg.startEffect);
   };
 
   Scene.prototype.problem = function (text) {
@@ -323,6 +334,7 @@
     item.timed = timed;
     item.gif.src = this.freshUrl(item);
     this.travel(item, timed);
+    this.startSpawning(item);
   };
 
   // A picture with a move= setting travels when it plays (see MOVES). One lap takes item.seconds,
@@ -418,6 +430,8 @@
 
   Scene.prototype.stop = function (item) {
     clearTimeout(item.timer);
+    clearInterval(item.spawnTimer);
+    item.spawnTimer = null;
     item.playing = false;
     if (item.trip) { item.trip.cancel(); item.trip = null; }
     item.el.classList.remove("gs-playing");
@@ -434,6 +448,89 @@
   Scene.prototype.stopAll = function () {
     var self = this;
     this.items.forEach(function (item) { self.stop(item); });
+    if (this.spawnLayer) this.spawnLayer.textContent = "";
+  };
+
+  // ------------------------------------------------------------------ spawned GIFs
+
+  // spawn=small.gif makes copies of a small GIF come out of the picture when it plays.
+  // spread=burst|up|down|fountain sends count copies out at once; spread=trail drops one
+  // at a time behind the picture for as long as it plays.
+  Scene.prototype.startSpawning = function (item) {
+    var self = this;
+    clearInterval(item.spawnTimer);
+    item.spawnTimer = null;
+    // Spawning follows a click, like travelling, so it happens even when the computer is set to
+    // reduce motion (Windows: Settings > Accessibility > Visual effects > Animation effects).
+    if (!item.spawn || !this.isScene || !document.body.animate) return;
+    if (item.spread === "trail") {
+      var every = Math.max(150, item.seconds * 1000 / item.count);
+      self.spawnOne(item, 0, 0);
+      item.spawnTimer = setInterval(function () {
+        if (item.playing) self.spawnOne(item, 0, 0); else clearInterval(item.spawnTimer);
+      }, every);
+      return;
+    }
+    for (var i = 0; i < item.count; i++) this.spawnOne(item, i, i * 70);
+  };
+
+  Scene.prototype.spawnOne = function (item, i, delay) {
+    var stage = this.stage.getBoundingClientRect();
+    var box = item.el.getBoundingClientRect();
+    if (!stage.width) return;
+    // start from the middle of the picture, wherever it has travelled to
+    var x = (box.left + box.width / 2 - stage.left) / stage.width * 100;
+    var y = (box.top + box.height / 2 - stage.top) / stage.height * 100;
+    var w = item.spawnWidth || Math.max(2, round1(item.width * 0.35));
+    var img = el("img", "gs-spawned");
+    img.alt = "";
+    img.src = item.spawn;
+    img.style.left = x + "%";
+    img.style.top = y + "%";
+    img.style.width = w + "%";
+    this.spawnLayer.appendChild(img);
+
+    var W = stage.width, H = stage.height;
+    var rnd = function (a, b) { return a + Math.random() * (b - a); };
+    var frames = [], duration, easing = "linear", k, t;
+    var base = "translate(-50%, -50%) ";
+    function at(dx, dy, scale, opacity, offset) {
+      var f = { transform: base + "translate(" + Math.round(dx) + "px, " + Math.round(dy) + "px) scale(" + scale + ")", opacity: opacity };
+      if (offset !== undefined) f.offset = offset;
+      return f;
+    }
+    var spread = item.spread;
+    if (spread === "burst") {
+      var a = (i / item.count) * Math.PI * 2 + rnd(-0.3, 0.3), dist = rnd(0.12, 0.22) * W;
+      frames = [at(0, 0, 0.4, 1), at(Math.cos(a) * dist * 0.8, Math.sin(a) * dist * 0.8, 1, 1, 0.7),
+                at(Math.cos(a) * dist, Math.sin(a) * dist, 1, 0)];
+      duration = rnd(1000, 1400);
+      easing = "cubic-bezier(0.2, 0.7, 0.3, 1)";
+    } else if (spread === "up") {
+      var rise = rnd(0.3, 0.5) * H, sway = rnd(0.02, 0.05) * W, ph = rnd(0, 6);
+      for (k = 0; k <= 12; k++) {
+        t = k / 12;
+        frames.push(at(sway * Math.sin(ph + t * 7), -rise * t, 0.6 + 0.4 * Math.min(1, t * 4), t < 0.75 ? 1 : (1 - t) * 4));
+      }
+      duration = rnd(2500, 3500);
+    } else if (spread === "fountain") {
+      var dx = rnd(-0.14, 0.14) * W, peak = rnd(0.18, 0.3) * H, drop = rnd(0.1, 0.2) * H;
+      for (k = 0; k <= 16; k++) {
+        t = k / 16;
+        frames.push(at(dx * t, -peak * 4 * t * (1 - t) + drop * t * t, 1, t < 0.8 ? 1 : (1 - t) * 5));
+      }
+      duration = rnd(1300, 1700);
+    } else {
+      // down and trail: fall, speeding up, and fade out
+      var fall = (spread === "trail" ? rnd(0.12, 0.2) : rnd(0.3, 0.45)) * H, drift = rnd(-0.04, 0.04) * W;
+      for (k = 0; k <= 10; k++) {
+        t = k / 10;
+        frames.push(at(drift * t, fall * t * t, 1, t < 0.7 ? 1 : (1 - t) / 0.3));
+      }
+      duration = spread === "trail" ? rnd(1400, 1800) : rnd(1500, 2000);
+    }
+    var anim = img.animate(frames, { duration: duration, delay: delay, easing: easing, fill: "both" });
+    anim.onfinish = function () { img.remove(); };
   };
 
   Scene.prototype.markFound = function (item) {
@@ -446,7 +543,7 @@
       this.celebrated = true;
       this.message.textContent = (this.cfg.icon ? this.cfg.icon + " " : "") + this.cfg.message;
       this.message.hidden = false;
-      if (!reducedMotion) this.setEffect(true);
+      this.setEffect(true);
     }
   };
 
@@ -605,8 +702,7 @@
     this.output.value = this.items.map(function (it) {
       if (standalone) {
         return '  { file: "' + it.file + '", name: "' + it.name + '", x: ' + it.x + ", y: " + it.y +
-          ", width: " + it.width + (it.secondsGiven ? ", seconds: " + it.seconds : "") +
-          (it.move ? ', move: "' + it.move + '"' : "") + " },";
+          ", width: " + it.width + (it.keep ? ", " + it.keep : "") + " },";
       }
       return it.file + " | " + it.name + " | x=" + it.x + " y=" + it.y + " width=" + it.width +
         (it.keep ? " " + it.keep : "");
@@ -630,6 +726,15 @@
 
   // Student kit: my_scene.js makes sceneTitle, sceneBackground, myGifs and the other settings.
   // Anything it leaves out comes from the theme (see THEMES).
+  // settings the Arrange button must keep when it writes a kit line out again
+  function kitKeep(g) {
+    var out = [];
+    ["seconds", "move", "spawn", "count", "spread", "spawnWidth", "still"].forEach(function (k) {
+      if (g[k] !== undefined) out.push(k + ": " + (typeof g[k] === "string" ? JSON.stringify(g[k]) : g[k]));
+    });
+    return out.join(", ");
+  }
+
   function startKit() {
     var root = document.querySelector("div[data-gifscene-kit]");
     if (!root) return;
@@ -655,7 +760,11 @@
       message: typeof finishMessage !== "undefined" ? finishMessage : undefined,
       columns: typeof gridColumns !== "undefined" ? gridColumns : 4,
       items: myGifs.filter(function (g) { return g && g.file; }).map(function (g) {
-        return { file: g.file, src: g.file, name: g.name, x: g.x, y: g.y, width: g.width, seconds: g.seconds, still: g.still, move: g.move };
+        return {
+          file: g.file, src: g.file, name: g.name, x: g.x, y: g.y, width: g.width, seconds: g.seconds,
+          still: g.still, move: g.move, spawn: g.spawn, count: g.count, spread: g.spread, spawnWidth: g.spawnWidth,
+          keep: kitKeep(g)
+        };
       })
     });
   }

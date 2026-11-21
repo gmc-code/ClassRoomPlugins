@@ -28,12 +28,17 @@ Each content line is ``file | name | settings``. Only the file is needed.
   the scene, come back in on the other side and return home; ``wave-left``/``wave-right`` bob up
   and down as they go; ``hop-left``/``hop-right`` bounce along; ``jump`` leaps up in an arc and
   lands back in place.
+* ``spawn=small.gif`` makes copies of another GIF come out of the picture when it plays.
+  ``count`` is how many (5 if left out, up to 20), ``spread`` is how they move (``burst`` out in
+  all directions, float ``up``, fall ``down``, ``fountain`` up and over, or ``trail`` behind a
+  travelling picture, one at a time while it plays) and ``spawnwidth`` is their size as a
+  percentage of the background (a third of the picture's width if left out).
 
 With ``:background:`` the pictures are placed over the background (a scene). Without it they are
 set out in a grid of cards (``:columns:``). ``:play:`` is ``once`` (play once per click),
 ``toggle`` (click to start, click to stop) or ``hover`` (play while the mouse is over it).
 
-``:theme:`` (``christmas`` or ``beach``; neutral if left out) sets the colours and the defaults
+``:theme:`` (``christmas``, ``beach``, ``reef`` or ``toyroom``; neutral if left out) sets the colours and the defaults
 for ``:title:``, ``:effect:`` (``snow``, ``bubbles`` or ``confetti``), ``:icon:`` and
 ``:message:``. Any of those given on the directive win over the theme. ``:start-effect:`` turns
 the effect on when the page opens; it always comes on when every picture has been found.
@@ -65,10 +70,11 @@ HERE = Path(__file__).parent
 ASSETS = ("gifscene.css", "gifscene.js")
 MEDIA_DIR = "_static/gifscene-media"
 PLAY_MODES = ("once", "toggle", "hover")
-ITEM_KEYS = ("x", "y", "width", "seconds", "still", "move")
+ITEM_KEYS = ("x", "y", "width", "seconds", "still", "move", "spawn", "count", "spread", "spawnwidth")
+SPREADS = ("burst", "up", "down", "fountain", "trail")
 MOVES = ("left", "right", "up", "down", "wave-left", "wave-right", "hop-left", "hop-right", "jump")
 EFFECTS = ("snow", "bubbles", "confetti")
-THEMES = ("none", "christmas", "beach")
+THEMES = ("none", "christmas", "beach", "reef", "toyroom")
 DEFAULT_SECONDS = 3.0
 DEFAULT_MOVE_SECONDS = 6.0
 DEFAULT_JUMP_SECONDS = 1.5
@@ -206,8 +212,20 @@ class GifSceneDirective(SphinxDirective):
                 self.warn("%s: do not understand %r. Use %s." % (
                     filename, part, ", ".join(k + "=" for k in ITEM_KEYS)))
                 continue
-            if key == "still":
+            if key in ("still", "spawn"):
                 found[key] = value
+                continue
+            if key == "spread":
+                if value.lower() in SPREADS:
+                    found[key] = value.lower()
+                else:
+                    self.warn("%s: spread=%r should be one of: %s." % (filename, value, ", ".join(SPREADS)))
+                continue
+            if key == "count":
+                try:
+                    found[key] = int(_number(value, 1, 20))
+                except ValueError:
+                    self.warn("%s: count=%r should be a whole number from 1 to 20." % (filename, value))
                 continue
             if key == "move":
                 if value.lower() in MOVES:
@@ -265,7 +283,8 @@ class GifSceneDirective(SphinxDirective):
             if "seconds" in settings:
                 item["seconds"] = settings["seconds"]
             # settings the Arrange button must keep when it writes the line out again
-            keep = ["%s=%s" % (k, settings[k]) for k in ("seconds", "still", "move") if k in settings]
+            keep = ["%s=%s" % (k, settings[k])
+                    for k in ("seconds", "still", "move", "spawn", "count", "spread", "spawnwidth") if k in settings]
             if keep:
                 item["keep"] = " ".join(keep)
             item.setdefault("seconds", DEFAULT_SECONDS)
@@ -274,6 +293,17 @@ class GifSceneDirective(SphinxDirective):
                 still, _ = self._media(settings["still"], files, "still picture")
                 if still:
                     item["still"] = still
+            if "spawn" in settings:
+                spawn, _ = self._media(settings["spawn"], files, "spawned picture")
+                if spawn:
+                    item["spawn"] = spawn
+                    for key, out in (("count", "count"), ("spread", "spread"), ("spawnwidth", "spawnWidth")):
+                        if key in settings:
+                            item[out] = settings[key]
+            else:
+                for key in ("count", "spread", "spawnwidth"):
+                    if key in settings:
+                        self.warn("%s: %s= only works with spawn=." % (filename, key))
             items.append(item)
 
         if not items:
@@ -431,4 +461,4 @@ def setup(app):
     app.connect("env-merge-info", merge_docs)
     app.connect("env-get-outdated", outdated_if_assets_changed)
     app.connect("build-finished", copy_static_files)
-    return {"version": "2.0", "parallel_read_safe": True, "parallel_write_safe": True}
+    return {"version": "2.1", "parallel_read_safe": True, "parallel_write_safe": True}
