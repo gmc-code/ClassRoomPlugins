@@ -38,7 +38,7 @@ extensions = [
     "seatingplan.seatingplan",  # custom directive
     "studentgroups.studentgroups",  # custom directive
     "namepicker.namepicker",  # custom directive
-    "christmas.christmas",  # custom directive
+    "gifscene.gifscene",  # custom directive
     "lockers.lockers",  # custom directive
 ]
 

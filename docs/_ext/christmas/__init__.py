@@ -1,1 +1,0 @@
-from .christmas import setup

@@ -4,11 +4,11 @@ Christmas scene
 
 Click a picture to bring it to life.
 
-.. christmas::
+.. gifscene::
    :title: Christmas scene
    :background: christmas/background.png
    :folder: christmas
-   :snow:
+   :effect: snow
    :sound:
 
    star.gif        | Star              | x=50 y=14 width=9
@@ -37,7 +37,7 @@ As a grid
 Leave out ``:background:`` and the pictures are set out as cards. This one uses
 ``:play: toggle``, so a click starts a picture and another click stops it.
 
-.. christmas::
+.. gifscene::
    :title: Christmas cards
    :folder: christmas
    :columns: 4

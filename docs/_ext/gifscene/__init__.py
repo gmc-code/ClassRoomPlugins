@@ -1,0 +1,1 @@
+from .gifscene import setup
