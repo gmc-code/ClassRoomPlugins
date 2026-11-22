@@ -1,3 +1,0 @@
-
-
-from .seatingplan import setup
