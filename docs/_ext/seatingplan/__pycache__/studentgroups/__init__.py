@@ -1,3 +1,0 @@
-
-
-from .studentgroups import setup
