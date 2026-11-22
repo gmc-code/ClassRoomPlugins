@@ -49,19 +49,53 @@
   // move= values. left/right/up/down go off one side and come back in on the other.
   // wave-* bob up and down as they go, hop-* bounce along, jump leaps up and lands again.
   var MOVES = ["left", "right", "up", "down", "wave-left", "wave-right", "hop-left", "hop-right", "jump"];
+  // play modes, for the whole scene (:play: / playMode) or one picture (play=)
+  var PLAY_MODES = ["once", "toggle", "hover"];
   // spread= values for spawned GIFs (see Scene.prototype.spawn).
   var SPREADS = ["burst", "up", "down", "fountain", "trail"];
+  // Most copies of spawned GIFs on screen at once in one scene, so the page stays smooth.
+  var MAX_SPAWNED = 60;
+
+  // spawnWidth can be one number (every copy that size) or a range "2-5" (each copy a random size).
+  function parseRange(v) {
+    if (typeof v === "number" && v > 0) return [v, v];
+    if (Array.isArray(v) && v.length === 2) return [Math.min(v[0], v[1]), Math.max(v[0], v[1])];
+    if (typeof v === "string") {
+      var m = v.match(/^\s*([\d.]+)\s*(?:-\s*([\d.]+))?\s*$/);
+      if (m) {
+        var a = parseFloat(m[1]), b = m[2] ? parseFloat(m[2]) : a;
+        if (a > 0 && b > 0) return [Math.min(a, b), Math.max(a, b)];
+      }
+    }
+    return null;
+  }
+
+  function positive(v) { return typeof v === "number" && v > 0 ? v : null; }
   var EFFECTS = {
     snow: { label: "❄ Snow", title: "Turn the snow on or off" },
     bubbles: { label: "○ Bubbles", title: "Turn the bubbles on or off" },
-    confetti: { label: "✦ Confetti", title: "Turn the confetti on or off" }
+    confetti: { label: "✦ Confetti", title: "Turn the confetti on or off" },
+    wind: { label: "≋ Wind", title: "Turn the wind on or off" }
   };
+  // :intensity: / effectIntensity: how many pieces there are and how fast they go.
+  var INTENSITY = {
+    light: { pieces: 0.45, speed: 0.75 },
+    medium: { pieces: 1, speed: 1 },
+    heavy: { pieces: 2.2, speed: 1.5 }
+  };
+  // choices in the effect button's panel
+  var EFFECT_CHOICES = [
+    { level: "off", label: "Off" },
+    { level: "light", label: "Light ●○○" },
+    { level: "medium", label: "Medium ●●○" },
+    { level: "heavy", label: "Heavy ●●●" }
+  ];
 
   // What each theme uses for anything the page does not set itself.
   var THEMES = {
     none: { title: "Scene", effect: "confetti", icon: "★", message: "You found them all!" },
     christmas: { title: "Christmas", effect: "snow", icon: "🎄", message: "You found them all. Merry Christmas!" },
-    beach: { title: "At the beach", effect: "bubbles", icon: "☀", message: "You found them all. Have a sunny summer holiday!" },
+    beach: { title: "At the beach", effect: "wind", icon: "☀", message: "You found them all. Have a sunny summer holiday!" },
     reef: { title: "Coral reef", effect: "bubbles", icon: "🐠", message: "You found them all. What a reef!" },
     toyroom: { title: "Toy room", effect: "confetti", icon: "🧸", message: "You found them all. Time to tidy up!" }
   };
@@ -119,10 +153,15 @@
       secondsGiven: typeof it.seconds === "number",
       keep: it.keep || "",
       move: MOVES.indexOf(it.move) >= 0 ? it.move : null,
+      mode: PLAY_MODES.indexOf(it.play) >= 0 ? it.play : null,
       spawn: it.spawn ? this.url(it.spawn) : null,
       count: typeof it.count === "number" ? clamp(Math.round(it.count), 1, 20) : 5,
       spread: SPREADS.indexOf(it.spread) >= 0 ? it.spread : "burst",
-      spawnWidth: typeof it.spawnWidth === "number" ? it.spawnWidth : null,
+      spawnWidth: parseRange(it.spawnWidth),
+      every: positive(it.every),
+      spawnFor: positive(it.spawnFor),
+      life: positive(it.life),
+      distance: positive(it.distance),
       spawnTimer: null,
       trip: null,
       ratio: it.w && it.h ? it.w / it.h : 1,
@@ -145,6 +184,7 @@
     root.classList.toggle("gs-hide-names", cfg.showNames === false);
     root.classList.add("gs-" + cfg.theme);
     this.effect = cfg.effect;
+    this.intensity = INTENSITY[cfg.intensity] ? cfg.intensity : "medium";
     root.textContent = "";
 
     var head = el("div", "gs-head");
@@ -158,8 +198,36 @@
     bar.appendChild(button("▶ Play all", "Play every picture", function () { self.playAll(); }));
     bar.appendChild(button("■ Stop all", "Stop every picture", function () { self.stopAll(); }));
     var fx = EFFECTS[this.effect];
-    this.effectBtn = button(fx.label, fx.title, function () { self.setEffect(!self.effectOn); });
-    bar.appendChild(this.effectBtn);
+    // The effect button opens a small panel: Off, Light, Medium, Heavy. The button shows the
+    // current choice, e.g. "❄ Snow: Medium".
+    var fxWrap = el("span", "gs-fx-wrap");
+    this.effectBtn = button("", fx.title, function () { self.toggleEffectPanel(); });
+    this.effectBtn.setAttribute("aria-haspopup", "true");
+    this.effectBtn.setAttribute("aria-expanded", "false");
+    this.effectPanel = el("div", "gs-fx-panel");
+    this.effectPanel.hidden = true;
+    this.effectPanel.setAttribute("role", "group");
+    this.effectPanel.setAttribute("aria-label", "How much " + this.effect);
+    this.effectChoices = EFFECT_CHOICES.map(function (c) {
+      var b = button(c.label, "", function () { self.chooseEffect(c.level); });
+      b.classList.add("gs-fx-choice");
+      b.dataset.level = c.level;
+      self.effectPanel.appendChild(b);
+      return b;
+    });
+    fxWrap.appendChild(this.effectBtn);
+    fxWrap.appendChild(this.effectPanel);
+    bar.appendChild(fxWrap);
+    // close the panel when something else is clicked, or with Escape
+    document.addEventListener("click", function (e) {
+      if (!self.effectPanel.hidden && !fxWrap.contains(e.target)) self.toggleEffectPanel(false);
+    });
+    fxWrap.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && !self.effectPanel.hidden) {
+        self.toggleEffectPanel(false);
+        self.effectBtn.focus();
+      }
+    });
     this.soundBtn = button("🔔 Sound", "Turn the sound on or off", function () {
       self.soundOn = !self.soundOn;
       self.soundBtn.setAttribute("aria-pressed", self.soundOn);
@@ -271,7 +339,7 @@
       if (!item.playing) return;
       b.classList.add("gs-playing");
       clearTimeout(item.timer);
-      if (item.timed) item.timer = setTimeout(function () { self.stop(item); }, item.seconds * 1000);
+      if (item.timed) item.timer = setTimeout(function () { self.stop(item, true); }, item.seconds * 1000);
     });
     item.gif = gif;
     frame.appendChild(gif);
@@ -285,17 +353,18 @@
         .then(function (blob) { item.blob = blob; }).catch(function () {});
     }
 
+    var mode = this.modeOf(item);
     b.addEventListener("click", function () {
       if (self.arranging) { self.select(item); return; }
-      var hovering = self.mode === "hover" && window.matchMedia("(hover: hover)").matches;
-      if (self.mode === "once") self.play(item, true);
+      var hovering = mode === "hover" && window.matchMedia("(hover: hover)").matches;
+      if (mode === "once") self.play(item, true);
       else if (hovering) self.play(item, false);
       else if (item.playing) self.stop(item);
       else self.play(item, false);
       self.markFound(item);
       if (self.soundOn) chime(item.index);
     });
-    if (this.mode === "hover") {
+    if (mode === "hover") {
       b.addEventListener("pointerenter", function (e) {
         if (e.pointerType === "mouse" && !self.arranging) { self.play(item, false); self.markFound(item); }
       });
@@ -306,6 +375,11 @@
     b.addEventListener("pointerdown", function (e) { self.startDrag(item, e); });
     b.addEventListener("keydown", function (e) { self.nudge(item, e); });
     return b;
+  };
+
+  // A picture's own play= mode, or the scene's mode if it has none.
+  Scene.prototype.modeOf = function (item) {
+    return item.mode || this.mode;
   };
 
   Scene.prototype.place = function (item) {
@@ -428,10 +502,14 @@
     return frames;
   };
 
-  Scene.prototype.stop = function (item) {
+  // ended = the picture finished playing by itself. A spawnfor= stream then carries on for its
+  // own time; anything else (Stop all, a second click in toggle mode) stops it straight away.
+  Scene.prototype.stop = function (item, ended) {
     clearTimeout(item.timer);
-    clearInterval(item.spawnTimer);
-    item.spawnTimer = null;
+    if (!(ended && item.spawnFor)) {
+      clearInterval(item.spawnTimer);
+      item.spawnTimer = null;
+    }
     item.playing = false;
     if (item.trip) { item.trip.cancel(); item.trip = null; }
     item.el.classList.remove("gs-playing");
@@ -441,7 +519,7 @@
   Scene.prototype.playAll = function () {
     var self = this;
     this.items.forEach(function (item, i) {
-      setTimeout(function () { self.play(item, self.mode === "once"); self.markFound(item); }, i * 150);
+      setTimeout(function () { self.play(item, self.modeOf(item) === "once"); self.markFound(item); }, i * 150);
     });
   };
 
@@ -454,8 +532,13 @@
   // ------------------------------------------------------------------ spawned GIFs
 
   // spawn=small.gif makes copies of a small GIF come out of the picture when it plays.
-  // spread=burst|up|down|fountain sends count copies out at once; spread=trail drops one
-  // at a time behind the picture for as long as it plays.
+  //   One go:  count copies come out at once (burst, up, down, fountain).
+  //   Stream:  one copy at a time, every every= seconds. A stream is used when every= is set,
+  //            for spread=trail (count copies over the picture's seconds), or when spawnfor= is
+  //            set without every= (count copies spread over spawnfor seconds).
+  //            It lasts spawnfor= seconds, or for as long as the picture plays.
+  // life= is how long each copy takes, distance= how far it goes (percent of the scene) and
+  // spawnwidth= its size (a number, or a range like 2-5 for random sizes).
   Scene.prototype.startSpawning = function (item) {
     var self = this;
     clearInterval(item.spawnTimer);
@@ -463,25 +546,40 @@
     // Spawning follows a click, like travelling, so it happens even when the computer is set to
     // reduce motion (Windows: Settings > Accessibility > Visual effects > Animation effects).
     if (!item.spawn || !this.isScene || !document.body.animate) return;
-    if (item.spread === "trail") {
-      var every = Math.max(150, item.seconds * 1000 / item.count);
-      self.spawnOne(item, 0, 0);
-      item.spawnTimer = setInterval(function () {
-        if (item.playing) self.spawnOne(item, 0, 0); else clearInterval(item.spawnTimer);
-      }, every);
+    var gap = null;
+    if (item.every) gap = item.every * 1000;
+    else if (item.spread === "trail") gap = item.seconds * 1000 / item.count;
+    else if (item.spawnFor) gap = item.spawnFor * 1000 / item.count;
+    if (gap === null) {
+      for (var i = 0; i < item.count; i++) this.spawnOne(item, i, i * 70);
       return;
     }
-    for (var i = 0; i < item.count; i++) this.spawnOne(item, i, i * 70);
+    gap = Math.max(50, gap);
+    var stopAt = item.spawnFor ? Date.now() + item.spawnFor * 1000 : null;
+    var n = 0;
+    function tick() {
+      var done = stopAt ? Date.now() >= stopAt : !item.playing;
+      if (done) {
+        clearInterval(item.spawnTimer);
+        item.spawnTimer = null;
+        return;
+      }
+      self.spawnOne(item, n++, 0);
+    }
+    tick();
+    item.spawnTimer = setInterval(tick, gap);
   };
 
   Scene.prototype.spawnOne = function (item, i, delay) {
+    if (this.spawnLayer.childElementCount >= MAX_SPAWNED) return;
     var stage = this.stage.getBoundingClientRect();
     var box = item.el.getBoundingClientRect();
     if (!stage.width) return;
+    var rnd = function (a, b) { return a + Math.random() * (b - a); };
     // start from the middle of the picture, wherever it has travelled to
     var x = (box.left + box.width / 2 - stage.left) / stage.width * 100;
     var y = (box.top + box.height / 2 - stage.top) / stage.height * 100;
-    var w = item.spawnWidth || Math.max(2, round1(item.width * 0.35));
+    var w = item.spawnWidth ? round1(rnd(item.spawnWidth[0], item.spawnWidth[1])) : Math.max(2, round1(item.width * 0.35));
     var img = el("img", "gs-spawned");
     img.alt = "";
     img.src = item.spawn;
@@ -491,7 +589,8 @@
     this.spawnLayer.appendChild(img);
 
     var W = stage.width, H = stage.height;
-    var rnd = function (a, b) { return a + Math.random() * (b - a); };
+    // distance= (percent of the scene) sets how far the copies go, give or take 15%
+    var far = item.distance ? function () { return item.distance / 100 * rnd(0.85, 1.15); } : null;
     var frames = [], duration, easing = "linear", k, t;
     var base = "translate(-50%, -50%) ";
     function at(dx, dy, scale, opacity, offset) {
@@ -501,20 +600,21 @@
     }
     var spread = item.spread;
     if (spread === "burst") {
-      var a = (i / item.count) * Math.PI * 2 + rnd(-0.3, 0.3), dist = rnd(0.12, 0.22) * W;
+      var a = (i / item.count) * Math.PI * 2 + rnd(-0.3, 0.3), dist = (far ? far() : rnd(0.12, 0.22)) * W;
       frames = [at(0, 0, 0.4, 1), at(Math.cos(a) * dist * 0.8, Math.sin(a) * dist * 0.8, 1, 1, 0.7),
                 at(Math.cos(a) * dist, Math.sin(a) * dist, 1, 0)];
       duration = rnd(1000, 1400);
       easing = "cubic-bezier(0.2, 0.7, 0.3, 1)";
     } else if (spread === "up") {
-      var rise = rnd(0.3, 0.5) * H, sway = rnd(0.02, 0.05) * W, ph = rnd(0, 6);
+      var rise = (far ? far() : rnd(0.3, 0.5)) * H, sway = rnd(0.02, 0.05) * W, ph = rnd(0, 6);
       for (k = 0; k <= 12; k++) {
         t = k / 12;
         frames.push(at(sway * Math.sin(ph + t * 7), -rise * t, 0.6 + 0.4 * Math.min(1, t * 4), t < 0.75 ? 1 : (1 - t) * 4));
       }
       duration = rnd(2500, 3500);
     } else if (spread === "fountain") {
-      var dx = rnd(-0.14, 0.14) * W, peak = rnd(0.18, 0.3) * H, drop = rnd(0.1, 0.2) * H;
+      var peak = (far ? far() : rnd(0.18, 0.3)) * H;
+      var dx = (far ? peak / H * rnd(-0.6, 0.6) : rnd(-0.14, 0.14)) * W, drop = peak * rnd(0.4, 0.7);
       for (k = 0; k <= 16; k++) {
         t = k / 16;
         frames.push(at(dx * t, -peak * 4 * t * (1 - t) + drop * t * t, 1, t < 0.8 ? 1 : (1 - t) * 5));
@@ -522,13 +622,15 @@
       duration = rnd(1300, 1700);
     } else {
       // down and trail: fall, speeding up, and fade out
-      var fall = (spread === "trail" ? rnd(0.12, 0.2) : rnd(0.3, 0.45)) * H, drift = rnd(-0.04, 0.04) * W;
+      var fall = (far ? far() : spread === "trail" ? rnd(0.12, 0.2) : rnd(0.3, 0.45)) * H, drift = rnd(-0.04, 0.04) * W;
       for (k = 0; k <= 10; k++) {
         t = k / 10;
         frames.push(at(drift * t, fall * t * t, 1, t < 0.7 ? 1 : (1 - t) / 0.3));
       }
       duration = spread === "trail" ? rnd(1400, 1800) : rnd(1500, 2000);
     }
+    // life= (seconds) sets how long each copy takes, give or take 10%
+    if (item.life) duration = item.life * 1000 * rnd(0.9, 1.1);
     var anim = img.animate(frames, { duration: duration, delay: delay, easing: easing, fill: "both" });
     anim.onfinish = function () { img.remove(); };
   };
@@ -554,24 +656,80 @@
 
   // ------------------------------------------------------------------ effects
 
-  // The effect: snow (falls), bubbles (rise) or confetti (falls and spins).
+  // The effect: snow (falls), bubbles (rise), confetti (falls and spins) or wind (gusts of
+  // streaks and grains of sand blowing across from left to right).
+  // Open or close the effect panel (open = true/false, or leave it out to switch).
+  Scene.prototype.toggleEffectPanel = function (open) {
+    if (open === undefined) open = this.effectPanel.hidden;
+    this.effectPanel.hidden = !open;
+    this.effectBtn.setAttribute("aria-expanded", open);
+    if (open) {
+      var current = this.effectOn ? this.intensity : "off";
+      this.effectChoices.forEach(function (b) { if (b.dataset.level === current) b.focus(); });
+    }
+  };
+
+  // A choice in the panel: "off", or a level that turns the effect on at that amount.
+  Scene.prototype.chooseEffect = function (level) {
+    if (level === "off") {
+      this.setEffect(false);
+    } else if (INTENSITY[level]) {
+      this.intensity = level;
+      this.setEffect(true);
+    }
+    this.toggleEffectPanel(false);
+    this.effectBtn.focus();
+  };
+
+  // Show the current choice on the effect button and in the panel.
+  Scene.prototype.showEffectState = function () {
+    var state = this.effectOn ? this.intensity : "off";
+    var word = state.charAt(0).toUpperCase() + state.slice(1);
+    this.effectBtn.textContent = EFFECTS[this.effect].label + ": " + word;
+    this.effectBtn.title = "Choose how much " + this.effect + " (now " + state + ")";
+    this.effectChoices.forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.level === state); });
+  };
+
   Scene.prototype.setEffect = function (on) {
     this.effectOn = on;
     this.effectBtn.setAttribute("aria-pressed", on);
+    this.showEffectState();
     this.effectLayer.textContent = "";
     if (!on) return;
     var effect = this.effect;
+    var level = INTENSITY[this.intensity];
+    var count = Math.round(40 * level.pieces);
+    var i, piece, time;
+    if (effect === "wind") {
+      for (i = 0; i < count; i++) {
+        var sand = i % 3 === 0;
+        piece = el("span", "gs-piece gs-fx-wind " + (sand ? "gs-wind-sand" : "gs-wind-streak"));
+        var len = sand ? 3 + Math.random() * 3 : (60 + Math.random() * 140) * (0.8 + 0.2 * level.speed);
+        time = (sand ? 2.5 + Math.random() * 3 : 1.4 + Math.random() * 1.8) / level.speed;
+        piece.style.top = 4 + Math.random() * 92 + "%";
+        piece.style.width = len + "px";
+        piece.style.height = (sand ? len : 2 + Math.random() * 2) + "px";
+        piece.style.animationDuration = time + "s";
+        piece.style.animationDelay = -Math.random() * time + "s";
+        piece.style.setProperty("--gs-lift", (Math.random() * 40 - 20) * level.speed + "px");
+        piece.style.setProperty("--gs-o", (sand ? 0.7 : 0.55) + Math.random() * 0.3);
+        this.effectLayer.appendChild(piece);
+      }
+      return;
+    }
     var colours = ["#f43f5e", "#f59e0b", "#22c55e", "#0ea5e9", "#a855f7", "#facc15"];
-    for (var i = 0; i < 40; i++) {
-      var piece = el("span", "gs-piece gs-fx-" + effect);
+    for (i = 0; i < count; i++) {
+      piece = el("span", "gs-piece gs-fx-" + effect);
       var size = effect === "bubbles" ? 8 + Math.random() * 18 : 4 + Math.random() * 8;
+      if (effect === "snow" && this.intensity === "heavy") size *= 1.2;
+      time = (6 + Math.random() * 8) / level.speed;
       piece.style.left = Math.random() * 100 + "%";
       piece.style.width = size + "px";
       piece.style.height = (effect === "confetti" ? size * 0.5 : size) + "px";
       piece.style.opacity = 0.5 + Math.random() * 0.5;
-      piece.style.animationDuration = 6 + Math.random() * 8 + "s";
-      piece.style.animationDelay = -Math.random() * 14 + "s";
-      piece.style.setProperty("--gs-drift", (Math.random() * 60 - 30) + "px");
+      piece.style.animationDuration = time + "s";
+      piece.style.animationDelay = -Math.random() * time + "s";
+      piece.style.setProperty("--gs-drift", (Math.random() * 60 - 30) * level.speed + "px");
       if (effect === "confetti") piece.style.background = colours[i % colours.length];
       this.effectLayer.appendChild(piece);
     }
@@ -729,7 +887,7 @@
   // settings the Arrange button must keep when it writes a kit line out again
   function kitKeep(g) {
     var out = [];
-    ["seconds", "move", "spawn", "count", "spread", "spawnWidth", "still"].forEach(function (k) {
+    ["seconds", "move", "play", "spawn", "count", "spread", "spawnWidth", "every", "spawnFor", "life", "distance", "still"].forEach(function (k) {
       if (g[k] !== undefined) out.push(k + ": " + (typeof g[k] === "string" ? JSON.stringify(g[k]) : g[k]));
     });
     return out.join(", ");
@@ -754,6 +912,7 @@
       play: typeof playMode !== "undefined" ? playMode : "once",
       startEffect: typeof startEffect !== "undefined" ? startEffect : false,
       effect: typeof sceneEffect !== "undefined" ? sceneEffect : undefined,
+      intensity: typeof effectIntensity !== "undefined" ? effectIntensity : "medium",
       theme: typeof sceneTheme !== "undefined" ? sceneTheme : "",
       icon: typeof finishIcon !== "undefined" ? finishIcon : undefined,
       sound: typeof playSound !== "undefined" ? playSound : true,
@@ -762,7 +921,8 @@
       items: myGifs.filter(function (g) { return g && g.file; }).map(function (g) {
         return {
           file: g.file, src: g.file, name: g.name, x: g.x, y: g.y, width: g.width, seconds: g.seconds,
-          still: g.still, move: g.move, spawn: g.spawn, count: g.count, spread: g.spread, spawnWidth: g.spawnWidth,
+          still: g.still, move: g.move, play: g.play, spawn: g.spawn, count: g.count, spread: g.spread, spawnWidth: g.spawnWidth,
+          every: g.every, spawnFor: g.spawnFor, life: g.life, distance: g.distance,
           keep: kitKeep(g)
         };
       })
