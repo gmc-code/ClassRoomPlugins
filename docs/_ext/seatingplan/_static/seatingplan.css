@@ -441,15 +441,21 @@ html.sp-projector-open, html.sp-projector-open body { overflow: hidden; }
 .sp-rp-btns { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 3px; flex: 0 1 auto; }
 .sp-rp-gb:not(.sp-on) { min-width: 0; padding: 0 3px; }
 .sp-rp-rb, .sp-rp-gb {
-    height: 24px; min-width: 26px; padding: 0 4px; border: 1px solid #cbd5e1; border-radius: 4px;
-    background: #fff; color: #334155; font: 500 12px/1 inherit; font-family: inherit; cursor: pointer;
-    filter: grayscale(1); opacity: .55; transition: opacity .15s, background-color .15s;
+    height: 24px; min-width: 26px; padding: 0 4px; border: 1px solid #e2e8f0; border-radius: 4px;
+    background: #fff; font: 700 13px/1 inherit; font-family: inherit; cursor: pointer;
+    transition: background-color .15s, border-color .15s, color .15s;
 }
-.sp-rp-rb:hover, .sp-rp-gb:hover { opacity: 1; filter: none; border-color: #64748b; }
-.sp-rp-rb.sp-on, .sp-rp-gb.sp-on { filter: none; opacity: 1; font-weight: 700; }
-.sp-rp-rb.sp-on { background: #dbeafe; border-color: #3b82f6; }
-.sp-rp-rb.sp-rb-empty_seat { background: #fef3c7; border-color: #d97706; }
-.sp-rp-gb.sp-on { background: var(--sp-grp-bg, #dcfce7); border-color: var(--sp-grp-fg, #059669); color: var(--sp-grp-fg, #065f46); }
+/* icons always in colour; a rule that is switched on is shaded in */
+.sp-rp-rb { color: #2563eb; }                         /* ⬆ ⬇ ⬅ ➡ */
+.sp-rp-rb[data-type="EMPTY_SEAT"] { color: #b45309; }
+.sp-rp-gb { color: #475569; font-weight: 600; font-size: 12px; }
+.sp-rp-rb:hover, .sp-rp-gb:hover { border-color: #94a3b8; background: #f8fafc; }
+.sp-rp-rb.sp-on { background: #93c5fd; border: 2px solid #1d4ed8; color: #1e3a8a; }
+.sp-rp-rb.sp-on:hover { background: #60a5fa; }
+.sp-rp-rb.sp-rb-empty_seat { background: #fcd34d; border: 2px solid #b45309; color: #78350f; }
+.sp-rp-rb.sp-rb-empty_seat:hover { background: #fbbf24; }
+.sp-rp-gb.sp-on { background: var(--sp-grp-bg, #dcfce7); border: 2px solid var(--sp-grp-fg, #059669); color: var(--sp-grp-fg, #065f46); font-weight: 700; }
+.sp-rp-gb.sp-on:hover { filter: brightness(.95); }
 .sp-rp-msg { color: #b91c1c; font-weight: 600; }
 @media (max-width: 640px) {
     .sp-rp-list { column-count: 1; }
