@@ -58,6 +58,8 @@
 }
 
 /* Ensure checkbox label text is visible on dark backgrounds */
+/* the two button rows: a little tighter so each fits on one line on a laptop screen */
+.seatingplan .sp-toolbar-row:nth-child(-n+2) { gap: 6px; }
 .sp-toolbar-row--options {
   color: #f8fafc !important; /* Light text */
 }
@@ -195,9 +197,9 @@
 /* ---- Rows / Tables switch ---- */
 .seatingplan .sp-mode {
     margin-left: auto;   /* right-hand end of the toolbar row */
-    display: inline-flex; background: #0f172a; padding: 3px; border-radius: 6px; border: 1px solid #334155; gap: 2px;
+    display: inline-flex; background: #0f172a; padding: 2px; border-radius: 6px; border: 1px solid #334155; gap: 1px;
 }
-.sp-btn-mode { background: transparent; color: #94a3b8; padding: 4px 10px; font-weight: 600; }
+.sp-btn-mode { background: transparent; color: #94a3b8; padding: 3px 7px; font-weight: 600; }
 .sp-btn-mode:hover { background: #1e293b; color: #f8fafc; }
 .sp-btn-mode.sp-active { background: #0d9488; color: #fff; }
 .seatingplan .sp-checkbox-off { opacity: .45; cursor: not-allowed; }

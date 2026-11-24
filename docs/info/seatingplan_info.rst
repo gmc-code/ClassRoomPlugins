@@ -26,18 +26,18 @@ All the pictures in this guide use made-up students.
 Quick start
 -----------
 
-#. Press **Import Roster** and choose your class's Excel or CSV export.
+#. Press **Import** and choose your class's Excel or CSV export.
 #. Click the title and type the class name, e.g. *8 Science W9*.
 #. Pick a layout that matches the room, or type your own.
 #. Press **Rules** to add any seating rules.
 #. Press **A → Z**, **Random** or another sort, then drag students to fine-tune.
-#. **Print** or **Save PNG**, or press **Projector View** to show it to the class.
-#. Press **Export JSON** to keep a backup copy.
+#. **Print** or **PNG**, or press **Projector** to show it to the class.
+#. Press **Save** to keep a backup copy.
 
 Importing a class list
 ----------------------
 
-**Import Roster** reads an Excel file (``.xlsx`` or ``.xls``) or a CSV file.
+**Import** reads an Excel file (``.xlsx`` or ``.xls``) or a CSV file.
 The first row must be a header row with these columns (in any order, any
 capitals):
 
@@ -60,9 +60,9 @@ belonged to the old students; you are asked to confirm first.
 Adding more students
 ~~~~~~~~~~~~~~~~~~~~
 
-**Import Roster** replaces the students already in the plan. To keep them and
+**Import** replaces the students already in the plan. To keep them and
 add more (a late enrolment, or a second class sharing the room), use
-**Add Students** instead, with a file in the same format:
+**Add** instead, with a file in the same format:
 
 * New students go to the **Unassigned** list. Drag them to desks, or press a
   sort button to re-seat everyone.
@@ -77,19 +77,20 @@ The title
 
 Click the dark title bar to type a new title, then press **Enter** or click
 away. The title is saved, printed at the top of the page and used as the
-suggested file name for **Export JSON** and **Save PNG**.
+suggested file name for **Save** and **PNG**.
 
 The toolbar
 -----------
 
-The buttons are coloured by what they do:
+The button names are kept short so each row fits on one line; hover over a
+button to see what it does in full. The buttons are coloured by what they do:
 
-* **Blue**: bring a class list in (**Import Roster**).
-* **Lighter blue**: plan files (**Import JSON**, **Export JSON**).
-* **Teal**: printing and showing (**Print**, **Save PNG**, **Projector View**).
+* **Blue**: bring a class list in (**Import**, **Add**).
+* **Lighter blue**: plan files (**Open**, **Save**).
+* **Teal**: printing and showing (**Print**, **PNG**, **Projector**).
 * **Grey**: **Reset** and **Revert**.
 * **Purple** and **amber**: arranging students (**A → Z**, **Random**,
-  **Rules** …), and **red** for **Clear**.
+  **Rules** …), **brown** for **Lock**, and **red** for **Clear**.
 
 .. figure:: images/seatingplan/seatingplan_toolbar.png
    :alt: The seating plan toolbar
@@ -100,29 +101,29 @@ The buttons are coloured by what they do:
 Top row: files and output
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Import Roster**
+**Import**
    Load a class list, replacing the current one (see `Importing a class list`_).
 
-**Add Students**
+**Add**
    Add students from another class list without removing anyone (see
    `Adding more students`_).
 
-**Import JSON**
-   Load a plan saved with **Export JSON**: title, class list, rules, layout,
+**Open**
+   Load a plan saved with **Save**: title, class list, rules, layout,
    seats and display options all come back exactly as they were.
 
-**Export JSON**
+**Save**
    Save the whole plan as a file. In Chrome and Edge you choose the folder
    and name; other browsers ask for a name and save to Downloads.
 
 **Print**
    Print this plan on one landscape page (see `Printing`_).
 
-**Save PNG**
+**PNG**
    Save the printable plan as a picture, ready to paste into an email, a
    slide or relief-teacher notes (see `Saving as a picture`_).
 
-**Projector View**
+**Projector**
    Show only the whiteboard and desks, full screen, in large text. Press
    **Esc** or **✕ Exit projector view** to return.
 
@@ -134,7 +135,7 @@ Top row: files and output
 **Revert**
    Go back to the last file you imported or exported, undoing everything
    since. This is greyed out until you have imported or exported something. After an
-   **Import Roster**, it returns the class to the file's original order.
+   **Import**, it returns the class to the file's original order.
 
 Second row: arranging students
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -146,7 +147,7 @@ Second row: arranging students
 **A → Z** / **Z → A**
    Seat students in surname order.
 
-**TG A → Z**
+**TG**
    Group students by tutor group (TG, the Homeroom column), then by surname
    within each group.
 
@@ -157,7 +158,7 @@ Second row: arranging students
    Reverse the current order, so the student at the first desk moves to the
    last desk and so on.
 
-**Fill: First → Last** / **Fill: Last → First**
+**Fill: Front** / **Fill: Back**
    Choose whether seating starts at desk 1 (front left) or at the last desk
    (back right). Fill from the back when the class is smaller than the room
    and you want the front rows empty.
@@ -165,7 +166,7 @@ Second row: arranging students
 **Rules**
    Open the seating rules (see `Seating rules`_).
 
-**Lock Seats**
+**Lock**
    Lock desks that are out of use, so no one is seated there (see
    `Locked desks`_).
 
@@ -268,7 +269,7 @@ without losing either.
    :width: 100%
 
    The same class in **Tables** mode (8 tables of 4), seated with
-   **TG A → Z**, so each year (and colour) sits together.
+   **TG**, so each year (and colour) sits together.
 
 Moving students by hand
 -----------------------
@@ -317,8 +318,8 @@ Lock a desk that is broken, out of use or kept free, and no student will be
 seated there.
 
 * **Right-click** a desk to lock it, and right-click it again to unlock it.
-* Or press **Lock Seats**, click the desks to lock or unlock, then press
-  **Done Locking** (or :kbd:`Esc`). This also works on a touch screen.
+* Or press **Lock**, click the desks to lock or unlock, then press
+  **Done** (or :kbd:`Esc`). This also works on a touch screen.
 
 A locked desk is shaded with stripes and labelled *Locked*, on screen and on the
 printout. If a student was sitting there, they move to the **Unassigned** list.
@@ -328,7 +329,7 @@ A locked desk does count as the empty seat beside a student who has the
 *Empty seat beside* rule.
 
 Each layout keeps its own locked desks, so switching to another layout and back
-brings them back. They are saved in the browser and in **Export JSON** files.
+brings them back. They are saved in the browser and in **Save** files.
 **Reset** goes back to the desks locked on the page.
 
 Seating rules
@@ -416,7 +417,7 @@ Choose **Save as PDF** in the print box to keep a PDF.
 Saving as a picture
 ~~~~~~~~~~~~~~~~~~~
 
-**Save PNG** saves the same printable layout as a PNG image. It shows
+**PNG** saves the same printable layout as a PNG image. It shows
 exactly what **Print** would: no rule badges, group colours or row buttons,
 with **One-line Names** and **Teacher's View** applied if they are on. The
 image is high-resolution, so it stays sharp when printed or shown on a
@@ -431,7 +432,7 @@ You choose where it goes:
 * **Other browsers:** you are asked for a file name, and the picture is saved
   to your Downloads folder (or wherever your browser saves downloads).
 
-The first time you press **Save PNG**, the page downloads a small image
+The first time you press **PNG**, the page downloads a small image
 library, so an internet connection is needed. The picture itself is made in
 your browser: student names are not sent anywhere.
 
@@ -439,7 +440,7 @@ Getting the most out of it
 --------------------------
 
 **Set each class up once.** Import the class list, name the plan, choose the
-layout, add your rules, then press **Export JSON** and keep the file. After that,
+layout, add your rules, then press **Save** and keep the file. After that,
 changing the seating takes seconds.
 
 **Add rules first, then sort.** Every sort follows the rules, so add *Front row*,
@@ -455,7 +456,7 @@ apart) and handle the rest by hand.
 "next to" means next to in the real room. Students across an aisle are not
 counted as neighbours.
 
-**Fill from the back for small classes.** **Fill: Last → First** leaves the front
+**Fill from the back for small classes.** **Fill: Back** leaves the front
 rows empty, or use it with *Front row* rules so the students who need to be
 close still are.
 
@@ -472,11 +473,11 @@ one click. For a different room, keep a second plan (see
 View** so students don't see who has a rule. Tick **Teacher's View** before
 printing to get a copy that matches what you see from the front.
 
-**Share it as a picture.** **Save PNG** gives an image you can paste into an
+**Share it as a picture.** **PNG** gives an image you can paste into an
 email to a relief teacher, a slide for the first lesson, or your class notes.
 It is often quicker than printing.
 
-**Keep a copy before experimenting.** Press **Export JSON** first; **Revert**
+**Keep a copy before experimenting.** Press **Save** first; **Revert**
 brings the saved plan straight back.
 
 Saving and privacy
@@ -489,7 +490,7 @@ Saving and privacy
   server and is not copied to your other computers or browsers. It is lost
   if the browser's site data is cleared, and isn't kept at all in a private
   or incognito window.
-* **Back up with Export JSON**, and use **Import JSON** to move the plan to
+* **Back up with Save**, and use **Open** to move the plan to
   another computer or browser.
 * **Shared computers:** anyone using the same computer sign-in and browser
   can open the page and see the plan. Press **Reset** before you leave a

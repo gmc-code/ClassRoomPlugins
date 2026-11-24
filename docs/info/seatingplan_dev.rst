@@ -65,7 +65,7 @@ The ``seatingplan`` directive
       front: Priya Patel
 
 With no options and no content it renders an empty 5 × 6 plan; teachers then
-use **Import Roster**.
+use **Import**.
 
 
 Content
@@ -257,7 +257,7 @@ How seats are worked out
 
 Only students with rules are placed by the solver; everyone else fills the
 remaining desks in the chosen sort order (desks in reverse with
-**Fill: Last → First**), skipping desks reserved by *empty seat* rules.
+**Fill: Back**), skipping desks reserved by *empty seat* rules.
 
 **The room.** Each desk knows its row and column (empty floor counts towards the
 column, so desks either side of a gap are not neighbours), which run of desks it
@@ -313,7 +313,7 @@ rules, so hand-made changes are flagged too.
 Plan file and storage
 ---------------------
 
-**Export JSON**, **Import JSON** and the browser copy use:
+**Save**, **Open** and the browser copy use:
 
 .. code-block:: json
 
@@ -384,16 +384,16 @@ key). Set ``:storage-key:`` where this matters. ``localStorage`` is per origin,
 so all versions of the docs on one domain share keys. With storage blocked the
 plan works but forgets everything when the page closes.
 
-**Export JSON** uses ``showSaveFilePicker`` where available (Chrome and Edge on
+**Save** uses ``showSaveFilePicker`` where available (Chrome and Edge on
 ``https``/``localhost``), otherwise a file-name prompt and a normal download.
-**Import Roster** loads SheetJS (``xlsx@0.18.5`` from cdn.jsdelivr.net) the
+**Import** loads SheetJS (``xlsx@0.18.5`` from cdn.jsdelivr.net) the
 first time an Excel file is chosen; CSV needs no download.
 
 
-Save PNG
---------
+Saving a PNG
+------------
 
-**Save PNG** turns the plan's print section (the same ``spPrintSection()``
+**PNG** turns the plan's print section (the same ``spPrintSection()``
 output **Print** uses) into an image:
 
 #. In Chrome and Edge, ``showSaveFilePicker`` is called **first**, while the
@@ -470,7 +470,7 @@ Anything else can be targeted through the plan's own classes, e.g.
 .. note::
 
    Extra classes change the plan **on screen and in Projector View only**.
-   **Print**, **Print all my classes** and **Save PNG** use their own fixed
+   **Print**, **Print all my classes** and **PNG** use their own fixed
    print styles, so printouts and pictures look the same for every plan.
 
 
@@ -479,7 +479,7 @@ Other style hooks
 
 The root element also gets state classes: ``sp-compact``, ``sp-hide-badges``,
 ``sp-teacher-view``, ``sp-hide-row-ctrl``, ``sp-projector`` and ``sp-lock-mode``
-(while **Lock Seats** is on). Locked desks have ``sp-locked`` and a
+(while **Lock** is on). Locked desks have ``sp-locked`` and a
 ``.sp-locked-label``. Keep-together
 colours are set per card as ``--sp-grp-fg`` and ``--sp-grp-bg``. One-line names
 use ``--sp-desk-height-compact`` (default 48px) for the desk height.
@@ -491,6 +491,6 @@ Browser support
 Current Chrome, Edge, Firefox and Safari. The plan uses ``localStorage``,
 ``FileReader``, ``TextDecoder``, HTML drag and drop, ``canvas.toBlob`` and the
 Fullscreen API (projector view falls back to a full-window overlay). The
-**Save As** box for **Export JSON** and **Save PNG** is Chrome and Edge only;
+**Save As** box for **Save** and **PNG** is Chrome and Edge only;
 other browsers fall back to a download. Dragging is unreliable on
 some touch devices.

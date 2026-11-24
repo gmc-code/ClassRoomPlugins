@@ -877,23 +877,23 @@
 
                 /* Row 1: Import and export controls */
                 '<div class="sp-toolbar-row">' +
-                '<button type="button" class="sp-btn sp-btn-data" data-action="import">' +
+                '<button type="button" class="sp-btn sp-btn-data" data-action="import" title="Import a class list (replaces the current students)">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>' +
-                'Import Roster</button>' +
+                'Import</button>' +
                 '<button type="button" class="sp-btn sp-btn-data" data-action="import-add" ' +
                 'title="Add students from a class list without removing anyone">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>' +
-                'Add Students</button>' +
+                'Add</button>' +
                 '<input type="file" class="sp-file" accept=".xlsx,.xls,.csv" data-role="file">' +
 
-                '<button type="button" class="sp-btn sp-btn-file" data-action="import-json">' +
+                '<button type="button" class="sp-btn sp-btn-file" data-action="import-json" title="Open a plan saved as a JSON file">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L8.6 3.3A2 2 0 0 0 6.9 2.5H4a2 2 0 0 0-2 2v13.5a2 2 0 0 0 2 2z"/><path d="M12 10v6"/><path d="m9 13 3-3 3 3"/></svg>' +
-                'Import JSON</button>' +
+                'Open</button>' +
                 '<input type="file" class="sp-file" accept=".json" data-role="json-file">' +
 
-                '<button type="button" class="sp-btn sp-btn-file" data-action="export-json">' +
+                '<button type="button" class="sp-btn sp-btn-file" data-action="export-json" title="Save the whole plan as a JSON file">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>' +
-                'Export JSON</button>' +
+                'Save</button>' +
 
                 '<span class="sp-tsep"></span>' +
 
@@ -904,11 +904,11 @@
                 '<button type="button" class="sp-btn sp-btn-teal" data-action="png" data-role="png" ' +
                 'title="Save the printable plan as a picture (PNG)">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg>' +
-                'Save PNG</button>' +
+                'PNG</button>' +
 
-                '<button type="button" class="sp-btn sp-btn-teal" data-action="projector">' +
+                '<button type="button" class="sp-btn sp-btn-teal" data-action="projector" title="Projector View: the plan full screen in large text">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>' +
-                'Projector View</button>' +
+                'Projector</button>' +
 
                 '<span class="sp-tsep"></span>' +
 
@@ -936,9 +936,9 @@
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="M15 4h5l-5 6h5"/><path d="M15 20v-3.5a1.5 1.5 0 0 1 3 0V20"/><path d="M15 17h3"/></svg>' +
                 'Z → A</button>' +
 
-                '<button type="button" class="sp-btn sp-btn-purple" data-action="sort" data-mode="HOMEROOM">' +
+                '<button type="button" class="sp-btn sp-btn-purple" data-action="sort" data-mode="HOMEROOM" title="Sort by TG (homeroom), then surname">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M4 6h16M4 12h16M4 18h7"/></svg>' +
-                'TG A → Z</button>' +
+                'TG</button>' +
 
                 '<button type="button" class="sp-btn sp-btn-amber" data-action="sort" data-mode="RANDOM">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"/><path d="m18 2 4 4-4 4"/><path d="M2 6h1.4c1.3 0 2.5.6 3.3 1.7l6.1 8.6c.7 1.1 2 1.7 3.3 1.7H22"/><path d="m18 14 4 4-4 4"/></svg>' +
@@ -956,7 +956,7 @@
                 '<button type="button" class="sp-btn sp-btn-brown" data-action="lock-seats" data-role="lock-seats" aria-pressed="false" ' +
                 'title="Lock desks that are out of use (or right-click a desk)">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
-                '<span>Lock Seats</span></button>' +
+                '<span>Lock</span></button>' +
                 '<div class="sp-mode" role="group" aria-label="Room type">' +
                 '<button type="button" class="sp-btn sp-btn-mode" data-action="mode" data-mode="rows">Rows</button>' +
                 '<button type="button" class="sp-btn sp-btn-mode" data-action="mode" data-mode="tables">Tables</button>' +
@@ -1153,7 +1153,10 @@
         }
 
         function updateToolbar() {
-            ui.fill.textContent = state.fillFromLast ? 'Fill: Last → First' : 'Fill: First → Last';
+            ui.fill.textContent = state.fillFromLast ? 'Fill: Back' : 'Fill: Front';
+            ui.fill.title = state.fillFromLast
+                ? 'Filling from the last desk (back). Click to fill from desk 1 (front).'
+                : 'Filling from desk 1 (front). Click to fill from the last desk (back).';
             var tables = state.mode === 'tables';
             Array.prototype.forEach.call(root.querySelectorAll('[data-action="mode"]'), function (b) {
                 b.classList.toggle('sp-active', b.getAttribute('data-mode') === state.mode);
@@ -1450,10 +1453,10 @@
             if (ui['lock-seats']) {
                 ui['lock-seats'].classList.toggle('sp-active', on);
                 ui['lock-seats'].setAttribute('aria-pressed', on ? 'true' : 'false');
-                ui['lock-seats'].lastChild.textContent = on ? 'Done Locking' : 'Lock Seats';
+                ui['lock-seats'].lastChild.textContent = on ? 'Done' : 'Lock';
             }
             setStatus(on ? 'Click desks to lock or unlock them. Locked desks are left empty when students are arranged. ' +
-                           'Press Done Locking (or Esc) when finished.' : '');
+                           'Press Done (or Esc) when finished.' : '');
         }
 
         /* Rows of tables, front row first; seats numbered table by table. */
