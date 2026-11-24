@@ -2548,8 +2548,9 @@
         }
 
         /* ----- rules panel -----
-           Pick a rule from the dropdown, then tick the students it applies to.
-           One-student rules (front/back/left/right/empty) are plain ticks.
+           Every student is listed with a button for each rule. One-student rules
+           (front/back/left/right/empty) switch on and off with a click; the 🔗 / ⚠️ buttons
+           open a tick list to choose who is in a keep-together / keep-apart group.
            Keep together / Keep apart are groups: a keep-together group of 2-3 is stored as a
            chain of PAIR rules, a keep-apart group of any size as SEPARATE rules between every
            two members. Rules made here carry a `group` id so they show (and edit) as one group;
@@ -2567,7 +2568,7 @@
               help: 'No two students in a group sit next to each other, including diagonally.' }
         ];
         var OPPOSITE = { FRONT_ROW: 'BACK_ROW', BACK_ROW: 'FRONT_ROW', SIT_LEFT: 'SIT_RIGHT', SIT_RIGHT: 'SIT_LEFT' };
-        var panel = { kind: 'FRONT_ROW', search: '', onlyTicked: false, editing: null, picked: {} };
+        var panel = { kind: 'PAIR', search: '', editing: null, picked: {}, msg: '' };
 
         /* In table mode the rules mean tables rather than rows of desks. */
         var TABLE_HELP = {
@@ -2672,11 +2673,6 @@
             return g ? g.ids.filter(function (x) { return x !== id; }) : [];
         }
 
-        function countFor(kind) {
-            if (kind.group) return groupsFor(kind.type).length;
-            return state.students.filter(function (s) { return hasSingle(s.id, kind.type); }).length;
-        }
-
         function buildModal() {
             modal = make('div', 'sp-modal');
             noTranslate(modal);
@@ -2684,15 +2680,12 @@
                 '<div class="sp-modal-card sp-rp" role="dialog" aria-modal="true" aria-label="Seating rules">' +
                 '<div class="sp-modal-head"><span>Seating Rules</span>' +
                 '<button type="button" class="sp-modal-close" data-m="close" aria-label="Close">✕</button></div>' +
-                '<div class="sp-rp-top">' +
-                '<label class="sp-rp-label">Rule <select data-m="kind" aria-label="Rule"></select></label>' +
-                '<div class="sp-rp-help" data-m="help"></div>' +
-                '</div>' +
+                '<div class="sp-rp-top" data-m="top"></div>' +
                 '<div class="sp-modal-body" data-m="body"></div>' +
                 '<div class="sp-rp-foot" data-m="foot"></div>' +
                 '</div>';
             document.body.appendChild(modal);
-            ['kind', 'help', 'body', 'foot'].forEach(function (k) { mui[k] = modal.querySelector('[data-m="' + k + '"]'); });
+            ['top', 'body', 'foot'].forEach(function (k) { mui[k] = modal.querySelector('[data-m="' + k + '"]'); });
 
             modal.addEventListener('click', onPanelClick);
             modal.addEventListener('change', onPanelChange);
@@ -2702,150 +2695,165 @@
                 filterList();
             });
             document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape' && modal.classList.contains('sp-open')) closeModal();
+                if (e.key !== 'Escape' || !modal.classList.contains('sp-open')) return;
+                if (panel.editing) { panel.editing = null; renderPanel(); } else closeModal();
             });
         }
 
         function openModal() {
             panel.editing = null;
             panel.search = '';
-            panel.onlyTicked = false;
+            panel.msg = '';
             renderPanel();
             modal.classList.add('sp-open');
         }
 
         function closeModal() { if (modal) modal.classList.remove('sp-open'); }
 
-        function fillKinds() {
-            mui.kind.innerHTML = '';
-            RULE_KINDS.forEach(function (k) {
-                var n = countFor(k);
-                var opt = make('option', null, k.icon + ' ' + k.label + ' (' + n + (k.group ? (n === 1 ? ' group' : ' groups') : '') + ')');
-                opt.value = k.type;
-                mui.kind.appendChild(opt);
-            });
-            mui.kind.value = panel.kind;
+        /* "Ticked students must sit in the front row." -> "Must sit in the front row." for a button's tooltip */
+        function buttonTip(kind, on) {
+            var help = helpFor(kind).replace(/^Ticked students (must )?/, function (m, must) { return must ? 'Must ' : ''; });
+            help = help.charAt(0).toUpperCase() + help.slice(1);
+            return kind.label + (on ? ' (on): click to turn off. ' : ': click to turn on. ') + help;
         }
 
         function renderPanel() {
-            fillKinds();
-            var kind = kindInfo(panel.kind);
-            mui.help.textContent = helpFor(kind);
             mui.body.innerHTML = '';
             mui.foot.innerHTML = '';
             if (!state.students.length) {
+                mui.top.innerHTML = '';
                 mui.body.appendChild(make('div', 'sp-rp-empty', 'Import a class list first, then add rules here.'));
                 mui.foot.innerHTML = '<span></span><button type="button" class="sp-btn" data-m="close">Done</button>';
                 return;
             }
-            if (kind.group) renderGroups(kind); else renderSingle(kind);
+            if (panel.editing) { renderGroupEditor(kindInfo(panel.kind), groupsFor(panel.kind)); return; }
+            renderMain();
         }
 
-        /* --- one-student rules --- */
+        /* --- main view: every student with a button for each rule --- */
 
-        function searchRow(showTickedFilter) {
-            return '<div class="sp-rp-tools">' +
-                '<input type="search" class="sp-rp-search" data-m="search" placeholder="Search students" aria-label="Search students" value="' + esc(panel.search) + '">' +
-                (showTickedFilter
-                    ? '<label class="sp-rp-filter"><input type="checkbox" data-m="only-ticked"' + (panel.onlyTicked ? ' checked' : '') + '> Ticked only</label>'
-                    : '') +
-                '</div>';
+        function legendHtml() {
+            return '<div class="sp-rp-topline"><div class="sp-rp-legend">' + RULE_KINDS.map(function (k) {
+                return '<span title="' + esc(helpFor(k)) + '"><b>' + k.icon + '</b> ' + esc(k.label) + '</span>';
+            }).join('') + '</div>' +
+            '<input type="search" class="sp-rp-search" data-m="search" placeholder="Search students" aria-label="Search students" value="' + esc(panel.search) + '">' +
+            '</div>' +
+            '<div class="sp-rp-help">Click a button to switch that rule on or off for the student. ' +
+            '🔗 and ⚠️ open a list to choose who is in the group. Hover over a button for details.</div>';
         }
 
-        function studentRow(s, checked, note, disabled) {
-            var row = make('label', 'sp-rp-row' + (disabled ? ' sp-rp-disabled' : '') + (checked ? ' sp-rp-on' : ''));
-            row.dataset.name = (s.fullName + ' ' + (s.homeroom || '')).toLowerCase();
-            var box = make('input');
-            box.type = 'checkbox';
-            box.value = s.id;
-            box.checked = checked;
-            box.disabled = disabled;
-            row.appendChild(box);
-            row.appendChild(make('span', 'sp-rp-name', s.firstName + ' ' + s.surname));
-            if (s.homeroom) row.appendChild(make('span', 'sp-rp-hr', s.homeroom));
-            if (note) row.appendChild(make('span', 'sp-rp-note', note));
-            return row;
+        function ruleButton(s, kind) {
+            var on = hasSingle(s.id, kind.type);
+            var b = make('button', 'sp-rp-rb' + (on ? ' sp-on sp-rb-' + kind.type.toLowerCase() : ''), kind.icon);
+            b.type = 'button';
+            b.setAttribute('data-m', 'rule');
+            b.setAttribute('data-sid', s.id);
+            b.setAttribute('data-type', kind.type);
+            b.setAttribute('aria-pressed', on ? 'true' : 'false');
+            b.setAttribute('aria-label', kind.label + ' for ' + s.fullName);
+            b.title = buttonTip(kind, on);
+            return b;
         }
 
-        function renderSingle(kind) {
-            mui.body.innerHTML = searchRow(true);
-            var list = make('div', 'sp-rp-list');
+        function groupButton(s, type, g, i) {
+            var kind = kindInfo(type), sep = type === 'SEPARATE';
+            var b = make('button', 'sp-rp-gb' + (g ? ' sp-on' : ''), kind.icon + (g ? ' ' + (i + 1) : ' +'));
+            b.type = 'button';
+            b.setAttribute('data-m', 'grp');
+            b.setAttribute('data-type', type);
+            b.setAttribute('data-sid', s.id);
+            if (g) {
+                var c = groupColour(i, sep);
+                b.style.setProperty('--sp-grp-fg', c.fg);
+                b.style.setProperty('--sp-grp-bg', c.bg);
+                b.setAttribute('data-key', g.key);
+                var others = g.ids.filter(function (id) { return id !== s.id; }).map(nameOf);
+                b.title = kind.label + ' group ' + (i + 1) + ': with ' + others.join(', ') + '. Click to change the group.';
+            } else {
+                b.title = (sep ? 'Start a new keep-apart group with ' : 'Keep ') + s.firstName +
+                          (sep ? '' : ' together with others') + '. ' + helpFor(kind);
+            }
+            return b;
+        }
+
+        function renderMain() {
+            mui.top.innerHTML = legendHtml();
+            mui.body.innerHTML = '';
+            var pairGroups = groupsFor('PAIR'), sepGroups = groupsFor('SEPARATE');
+            var list = make('div', 'sp-rp-list sp-rp-main');
             list.setAttribute('data-m', 'list');
-            list.setAttribute('data-single', kind.type);
-            var opp = OPPOSITE[kind.type];
             sortedStudents().forEach(function (s) {
-                var on = hasSingle(s.id, kind.type);
-                var note = '';
-                if (!on && opp && hasSingle(s.id, opp)) {
-                    note = kindInfo(opp).icon + ' in ' + kindInfo(opp).label;
-                } else if (!on && (kind.type === 'FRONT_ROW' || kind.type === 'BACK_ROW')) {
-                    var partner = togetherWith(s.id).filter(function (id) { return hasSingle(id, opp); })[0];
-                    if (partner) note = '🔗 kept with ' + studentById(partner).firstName + ' (' + kindInfo(opp).label.toLowerCase() + ')';
-                }
-                list.appendChild(studentRow(s, on, note, !!note));
+                var row = make('div', 'sp-rp-row sp-rp-srow');
+                row.dataset.name = (s.fullName + ' ' + (s.homeroom || '')).toLowerCase();
+                var who = make('span', 'sp-rp-who');
+                who.appendChild(make('span', 'sp-rp-name', s.firstName + ' ' + s.surname));
+                if (s.homeroom) who.appendChild(make('span', 'sp-rp-hr', s.homeroom));
+                row.appendChild(who);
+                var btns = make('span', 'sp-rp-btns');
+                RULE_KINDS.forEach(function (k) { if (!k.group) btns.appendChild(ruleButton(s, k)); });
+                var pg = null, pi = -1;
+                pairGroups.forEach(function (g, i) { if (g.ids.indexOf(s.id) !== -1) { pg = g; pi = i; } });
+                btns.appendChild(groupButton(s, 'PAIR', pg, pi));
+                sepGroups.forEach(function (g, i) { if (g.ids.indexOf(s.id) !== -1) btns.appendChild(groupButton(s, 'SEPARATE', g, i)); });
+                btns.appendChild(groupButton(s, 'SEPARATE', null, -1));
+                row.appendChild(btns);
+                list.appendChild(row);
             });
             mui.body.appendChild(list);
             filterList();
-            var n = countFor(kind);
+            var singles = state.rules.filter(function (r) { return !r.student2Id && studentById(r.student1Id); }).length;
+            var summary = singles + (singles === 1 ? ' rule' : ' rules') + ' · ' +
+                pairGroups.length + ' keep-together · ' + sepGroups.length + ' keep-apart ' +
+                (sepGroups.length === 1 ? 'group' : 'groups');
             mui.foot.innerHTML =
-                '<span class="sp-rp-count">' + n + (n === 1 ? ' student' : ' students') + ' in ' + esc(kind.label) + '</span>' +
-                '<span><button type="button" class="sp-btn sp-btn-grey" data-m="clear-all"' + (n ? '' : ' disabled') + '>Clear all</button> ' +
+                '<span class="sp-rp-count">' + (panel.msg ? '<span class="sp-rp-msg">' + esc(panel.msg) + '</span>' : esc(summary)) + '</span>' +
+                '<span><button type="button" class="sp-btn sp-btn-grey" data-m="clear-all"' + (state.rules.length ? '' : ' disabled') + '>Clear all rules</button> ' +
                 '<button type="button" class="sp-btn" data-m="close">Done</button></span>';
+            panel.msg = '';
         }
 
-        function toggleSingle(id, type, on) {
-            state.rules = state.rules.filter(function (r) { return !(r.type === type && r.student1Id === id); });
-            if (on) state.rules.push(newRule(id, null, type));
+        /* Switch a one-student rule on or off. Front/Back and Left/Right switch each other off. */
+        function toggleRule(id, type) {
+            var s = studentById(id);
+            if (!s) return;
+            if (hasSingle(id, type)) {
+                state.rules = state.rules.filter(function (r) { return !(r.type === type && r.student1Id === id); });
+                afterRuleChange();
+                return;
+            }
+            var opp = OPPOSITE[type];
+            if (type === 'FRONT_ROW' || type === 'BACK_ROW') {
+                var partner = togetherWith(id).filter(function (x) { return hasSingle(x, opp); })[0];
+                if (partner) {
+                    panel.msg = s.firstName + ' is kept together with ' + studentById(partner).firstName + ', who is in the ' +
+                        kindInfo(opp).label.toLowerCase() + ', so ' + s.firstName + ' cannot be in the ' + kindInfo(type).label.toLowerCase() + '.';
+                    renderPanel();
+                    return;
+                }
+            }
+            state.rules = state.rules.filter(function (r) { return !(opp && r.type === opp && r.student1Id === id); });
+            state.rules.push(newRule(id, null, type));
             afterRuleChange();
         }
 
-        /* --- keep together / keep apart groups --- */
-
-        function renderGroups(kind) {
-            var groups = groupsFor(kind.type);
-            if (panel.editing) { renderGroupEditor(kind, groups); return; }
-            var wrap = make('div', 'sp-rp-groups');
-            if (!groups.length) {
-                wrap.appendChild(make('div', 'sp-rp-empty', 'No ' + kind.label.toLowerCase() + ' groups yet.'));
-            }
-            groups.forEach(function (g, i) {
-                var item = make('div', 'sp-rp-group ' + (kind.type === 'PAIR' ? 'sp-pair' : 'sp-sep'));
-                var gc = groupColour(i, kind.type !== 'PAIR');
-                item.style.setProperty('--sp-grp-fg', gc.fg);
-                item.style.setProperty('--sp-grp-bg', gc.bg);
-                item.appendChild(make('span', 'sp-badge sp-badge-grp ' + (kind.type === 'PAIR' ? 'sp-badge-pair' : 'sp-badge-sep'),
-                    (kind.type === 'PAIR' ? '🔗 ' : '⚠️ ') + (i + 1)));
-                var label = make('div', 'sp-rp-group-names');
-                label.appendChild(make('strong', null, 'Group ' + (i + 1) + '  '));
-                label.appendChild(document.createTextNode(g.ids.map(nameOf).join(' · ')));
-                item.appendChild(label);
-                var btns = make('span', 'sp-rp-group-btns');
-                var ed = make('button', 'sp-btn sp-btn-grey sp-rp-small', 'Edit');
-                ed.type = 'button'; ed.setAttribute('data-m', 'edit-group'); ed.setAttribute('data-key', g.key);
-                var del = make('button', 'sp-del-rule', '🗑');
-                del.type = 'button'; del.setAttribute('data-m', 'delete-group'); del.setAttribute('data-key', g.key);
-                del.setAttribute('aria-label', 'Delete group ' + (i + 1));
-                btns.appendChild(ed); btns.appendChild(del);
-                item.appendChild(btns);
-                wrap.appendChild(item);
-            });
-            mui.body.appendChild(wrap);
-            mui.foot.innerHTML =
-                '<button type="button" class="sp-btn sp-btn-teal" data-m="new-group">+ New group</button>' +
-                '<button type="button" class="sp-btn" data-m="close">Done</button>';
-        }
+        /* --- keep together / keep apart: tick who is in a group --- */
 
         function renderGroupEditor(kind, groups) {
             var editing = panel.editing;
             var own = editing.key ? groups.filter(function (g) { return g.key === editing.key; })[0] : null;
+            var ownIdx = own ? groups.indexOf(own) : -1;
             var ownIds = own ? own.ids : [];
             var pickedIds = Object.keys(panel.picked).filter(function (id) { return panel.picked[id]; });
             var max = maxFor(kind);
             var full = max && pickedIds.length >= max;
 
-            mui.body.innerHTML =
-                '<div class="sp-rp-edit-title">' + (own ? 'Edit group' : 'New group') + ' — tick ' +
-                (max ? '2 to ' + max + ' students' : '2 or more students') + '</div>' + searchRow(false);
+            mui.top.innerHTML = '<div class="sp-rp-edit-title">' + kind.icon + ' ' + esc(kind.label) + ' — ' +
+                (own ? 'group ' + (ownIdx + 1) : 'new group') + '</div>' +
+                '<div class="sp-rp-help">' + esc(helpFor(kind)) + ' Tick ' +
+                (max ? '2 to ' + max + ' students' : '2 or more students') + '.</div>';
+            mui.body.innerHTML = '<div class="sp-rp-tools">' +
+                '<input type="search" class="sp-rp-search" data-m="search" placeholder="Search students" aria-label="Search students" value="' + esc(panel.search) + '">' +
+                '</div>';
             var list = make('div', 'sp-rp-list');
             list.setAttribute('data-m', 'list');
             list.setAttribute('data-group', kind.type);
@@ -2878,83 +2886,104 @@
             var n = pickedIds.length;
             mui.foot.innerHTML =
                 '<span class="sp-rp-count">' + n + ' ticked' + (full ? ' (most allowed)' : '') + '</span>' +
-                '<span><button type="button" class="sp-btn sp-btn-grey" data-m="cancel-group">Cancel</button> ' +
+                '<span>' + (own ? '<button type="button" class="sp-btn sp-btn-red" data-m="delete-group">Delete group</button> ' : '') +
+                '<button type="button" class="sp-btn sp-btn-grey" data-m="cancel-group">Cancel</button> ' +
                 '<button type="button" class="sp-btn" data-m="save-group"' + (n >= 2 ? '' : ' disabled') + '>Save group</button></span>';
         }
 
-        function startGroupEdit(key) {
+        function startGroupEdit(type, key, seedId) {
+            panel.kind = type;
             panel.picked = {};
             panel.search = '';
             if (key) {
-                var g = groupsFor(panel.kind).filter(function (x) { return x.key === key; })[0];
+                var g = groupsFor(type).filter(function (x) { return x.key === key; })[0];
                 if (!g) return;
                 g.ids.forEach(function (id) { panel.picked[id] = true; });
                 panel.editing = { key: key, ruleIds: g.ruleIds };
             } else {
+                if (seedId) panel.picked[seedId] = true;
                 panel.editing = { key: null, ruleIds: [] };
             }
             renderPanel();
         }
 
+        /* Replace the group's rules in place, so it keeps its number (and colour). */
         function saveGroup() {
             var type = panel.kind;
             var ids = sortedStudents().map(function (s) { return s.id; }).filter(function (id) { return panel.picked[id]; });
             if (ids.length < 2) return;
             var drop = {};
             panel.editing.ruleIds.forEach(function (id) { drop[id] = true; });
+            var at = -1;
+            state.rules.forEach(function (r, i) { if (at === -1 && drop[r.id]) at = i; });
             state.rules = state.rules.filter(function (r) { return !drop[r.id]; });
+            if (at === -1 || at > state.rules.length) at = state.rules.length;
             var groupId = 'g-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+            var added = [];
             function add(a, b) {
                 if (linked(a, b, type)) return;      // already covered by another group
                 var r = newRule(a, b, type);
                 r.group = groupId;
-                state.rules.push(r);
+                added.push(r);
             }
             if (type === 'PAIR') {
                 for (var i = 1; i < ids.length; i++) add(ids[i - 1], ids[i]);   // a line: A-B, B-C
             } else {
                 for (var a = 0; a < ids.length; a++) for (var b = a + 1; b < ids.length; b++) add(ids[a], ids[b]);
             }
+            Array.prototype.splice.apply(state.rules, [at, 0].concat(added));
             panel.editing = null;
             afterRuleChange();
         }
 
-        function deleteGroup(key) {
-            var g = groupsFor(panel.kind).filter(function (x) { return x.key === key; })[0];
-            if (!g) return;
+        function deleteGroup() {
             var drop = {};
-            g.ruleIds.forEach(function (id) { drop[id] = true; });
+            panel.editing.ruleIds.forEach(function (id) { drop[id] = true; });
             state.rules = state.rules.filter(function (r) { return !drop[r.id]; });
+            panel.editing = null;
             afterRuleChange();
         }
 
         /* --- shared --- */
+
+        function studentRow(s, checked, note, disabled) {
+            var row = make('label', 'sp-rp-row' + (disabled ? ' sp-rp-disabled' : '') + (checked ? ' sp-rp-on' : ''));
+            row.dataset.name = (s.fullName + ' ' + (s.homeroom || '')).toLowerCase();
+            var box = make('input');
+            box.type = 'checkbox';
+            box.value = s.id;
+            box.checked = checked;
+            box.disabled = disabled;
+            row.appendChild(box);
+            row.appendChild(make('span', 'sp-rp-name', s.firstName + ' ' + s.surname));
+            if (s.homeroom) row.appendChild(make('span', 'sp-rp-hr', s.homeroom));
+            if (note) row.appendChild(make('span', 'sp-rp-note', note));
+            return row;
+        }
 
         function filterList() {
             var list = mui.body.querySelector('[data-m="list"]');
             if (!list) return;
             var q = panel.search.trim().toLowerCase();
             Array.prototype.forEach.call(list.children, function (row) {
-                var box = row.querySelector('input');
-                var hide = (q && row.dataset.name.indexOf(q) === -1) ||
-                           (panel.onlyTicked && list.hasAttribute('data-single') && !box.checked);
-                row.style.display = hide ? 'none' : '';
+                row.style.display = q && row.dataset.name.indexOf(q) === -1 ? 'none' : '';
             });
         }
 
         function onPanelClick(e) {
             if (e.target === modal) { closeModal(); return; }
             var btn = e.target.closest('[data-m]');
-            if (!btn || btn.tagName === 'SELECT' || btn.tagName === 'INPUT') return;
+            if (!btn || btn.tagName === 'INPUT') return;
             switch (btn.getAttribute('data-m')) {
                 case 'close': closeModal(); break;
+                case 'rule': toggleRule(btn.getAttribute('data-sid'), btn.getAttribute('data-type')); break;
+                case 'grp': startGroupEdit(btn.getAttribute('data-type'), btn.getAttribute('data-key'), btn.getAttribute('data-sid')); break;
                 case 'clear-all':
-                    state.rules = state.rules.filter(function (r) { return r.type !== panel.kind; });
+                    if (!window.confirm('Remove every seating rule for this class?')) return;
+                    state.rules = [];
                     afterRuleChange();
                     break;
-                case 'new-group': startGroupEdit(null); break;
-                case 'edit-group': startGroupEdit(btn.getAttribute('data-key')); break;
-                case 'delete-group': deleteGroup(btn.getAttribute('data-key')); break;
+                case 'delete-group': deleteGroup(); break;
                 case 'cancel-group': panel.editing = null; renderPanel(); break;
                 case 'save-group': saveGroup(); break;
             }
@@ -2962,23 +2991,10 @@
 
         function onPanelChange(e) {
             var t = e.target;
-            var role = t.getAttribute('data-m');
-            if (role === 'kind') {
-                panel.kind = t.value; panel.editing = null; panel.search = ''; panel.onlyTicked = false;
-                renderPanel();
-                return;
-            }
-            if (role === 'only-ticked') { panel.onlyTicked = t.checked; filterList(); return; }
             var list = t.closest('[data-m="list"]');
-            if (!list || t.type !== 'checkbox') return;
-            if (list.hasAttribute('data-single')) {
-                toggleSingle(t.value, list.getAttribute('data-single'), t.checked);
-            } else {
-                panel.picked[t.value] = t.checked;
-                var keepSearch = panel.search;
-                renderPanel();
-                panel.search = keepSearch;
-            }
+            if (!list || t.type !== 'checkbox' || !list.hasAttribute('data-group')) return;
+            panel.picked[t.value] = t.checked;
+            renderPanel();
         }
 
         function newRule(s1, s2, type) {

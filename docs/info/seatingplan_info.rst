@@ -335,35 +335,42 @@ brings them back. They are saved in the browser and in **Save** files.
 Seating rules
 -------------
 
-Press **Rules**, choose a rule from the drop-down, then tick the students it
-applies to. Changes are saved straight away; press **Done** to close.
+Press **Rules** to see every student with a row of buttons, one for each
+rule. A button that is switched on is coloured; the others are faded. Changes
+are saved straight away; press **Done** to close. **Search students** finds a
+name in a big class, and hovering over a button explains it.
 
 **⬆ Front row** / **⬇ Back row**
-   Ticked students sit in the front (or back) row.
+   The student sits in the front (or back) row. Switching one on switches
+   the other off.
 
 **⬅ Left side** / **➡ Right side**
-   Ticked students sit at the left (or right) end of a row. Left and right
-   are the *students'* left and right, facing the whiteboard.
+   The student sits at the left (or right) end of a row. Left and right are
+   the *students'* left and right, facing the whiteboard. Switching one on
+   switches the other off.
 
 **🪑 Empty seat beside**
-   Ticked students get an empty desk next to them. That desk is kept free, so
-   it counts towards the room's capacity.
+   The student gets an empty desk next to them. That desk is kept free, so it
+   counts towards the room's capacity.
 
 **🔗 Keep together**
-   Press **+ New group** and tick 2–4 students who should sit side by side.
+   Students in a group sit side by side. Press **🔗 +** on a student's row,
+   tick the 2–4 students who should sit together, and press **Save group**.
    A pair is placed on a shared pair of desks (desks 1–2, 3–4 …) where
-   possible; 3 sit on neighbouring desks; 4 fill two pairs of desks. A
-   student can only be in one keep-together group.
+   possible; 3 sit on neighbouring desks; 4 fill two pairs of desks. Group
+   members show a coloured **🔗 1**, **🔗 2** … button, matching the badge on
+   their desk card. A student can only be in one keep-together group.
 
 **⚠️ Keep apart**
-   Press **+ New group** and tick 2 or more students. No two of them sit
-   next to each other, including diagonally. A student can be in several
-   keep-apart groups.
+   No two students in a group sit next to each other, including diagonally.
+   Press **⚠️ +** on a student's row to start a group, tick 2 or more
+   students and press **Save group**. A student can be in several keep-apart
+   groups, so their row can show **⚠️ 1**, **⚠️ 2** … and always a **⚠️ +**.
 
-Use **Edit** or the bin to change or delete a group, and **Clear all** to
-remove a one-student rule from everyone. Students who can't be added (e.g.
-someone in the front row being put with someone in the back row) are greyed
-out with the reason beside their name.
+Press a numbered group button to change who is in that group, or **Delete
+group** to remove it. Students who can't be added (e.g. someone in the front
+row being put with someone in the back row) are greyed out with the reason
+beside their name. **Clear all rules** removes every rule, after asking.
 
 In **Tables** mode, the rules apply to tables instead: *front row* means a
 table in the front row of tables, *keep together* means the same table (up

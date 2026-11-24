@@ -351,6 +351,9 @@ Plan file and storage
 * Rule types: ``FRONT_ROW``, ``BACK_ROW``, ``SIT_LEFT``, ``SIT_RIGHT``,
   ``EMPTY_SEAT`` (``student2Id`` null), ``PAIR`` and ``SEPARATE``. ``group``
   groups rules in the Rules panel.
+  Groups are numbered (and coloured) in the order their first rule appears in
+  ``rules``; editing a group in the Rules panel replaces its rules in place, so
+  it keeps its number.
 
 **Import checks:** ``students`` and ``layout`` must be lists and the layout must
 be valid; in tables mode ``tables`` must be valid too. Students without an id,
