@@ -470,4 +470,6 @@ html.sp-projector-open, html.sp-projector-open body { overflow: hidden; }
 .seatingplan.sp-lock-mode .sp-desk { cursor: pointer; }
 .seatingplan.sp-lock-mode .sp-desk:hover { box-shadow: 0 0 0 3px #f59e0b; }
 .seatingplan.sp-lock-mode .sp-card { cursor: pointer; }
-.seatingplan .sp-btn[data-action="lock-seats"].sp-active { background: #d97706; }
+.sp-btn-brown { background: #92400e; }   .sp-btn-brown:hover { background: #78350f; }
+/* while Lock Seats is on: darker brown with a light ring, so it is clearly pressed */
+.seatingplan .sp-btn-brown.sp-active { background: #5c2a0b; box-shadow: 0 0 0 2px #fbbf24; }

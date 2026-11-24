@@ -43,8 +43,9 @@ capitals):
 
 * **Preferred** or **First Name**: the name shown on the desk
 * **Surname** or **Last Name**
-* **Homeroom** (optional): shown as a small badge in the desk's top-right
-  corner, e.g. *Hughes 13* shows as **H13**
+* **Homeroom** (optional), also read from **TG**, **Tutor Group** or
+  **House**: shown as a small badge in the desk's top-right corner, e.g.
+  *Hughes 13* shows as **H13**
 * **Year** or **Year Level** (optional): put in front of the homeroom, so a
   Year 7 student in Hughes 13 shows as **7 H13**. "Year 7" written in the
   homeroom itself (*Year 7 in Hughes 13*) works too.
@@ -55,6 +56,21 @@ becomes *8 Science W9*), and you can click it to change it.
 
 Importing a new class list **removes the existing rules**, because they
 belonged to the old students; you are asked to confirm first.
+
+Adding more students
+~~~~~~~~~~~~~~~~~~~~
+
+**Import Roster** replaces the students already in the plan. To keep them and
+add more (a late enrolment, or a second class sharing the room), use
+**Add Students** instead, with a file in the same format:
+
+* New students go to the **Unassigned** list. Drag them to desks, or press a
+  sort button to re-seat everyone.
+* Students already seated stay where they are, and the rules, locked desks and
+  title are kept.
+* Anyone already in the plan (same first name and surname, capitals don't
+  matter) is not added twice. If the file gives them a different homeroom or
+  TG, theirs is updated.
 
 The title
 ---------
@@ -85,7 +101,11 @@ Top row: files and output
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Import Roster**
-   Load a class list (see `Importing a class list`_).
+   Load a class list, replacing the current one (see `Importing a class list`_).
+
+**Add Students**
+   Add students from another class list without removing anyone (see
+   `Adding more students`_).
 
 **Import JSON**
    Load a plan saved with **Export JSON**: title, class list, rules, layout,
@@ -126,8 +146,9 @@ Second row: arranging students
 **A → Z** / **Z → A**
    Seat students in surname order.
 
-**Homeroom A → Z**
-   Group students by homeroom, then by surname within each homeroom.
+**TG A → Z**
+   Group students by tutor group (TG, the Homeroom column), then by surname
+   within each group.
 
 **Random**
    Seat students in a random order. Press again for a new arrangement.
@@ -247,7 +268,7 @@ without losing either.
    :width: 100%
 
    The same class in **Tables** mode (8 tables of 4), seated with
-   **Homeroom A → Z**, so each year (and colour) sits together.
+   **TG A → Z**, so each year (and colour) sits together.
 
 Moving students by hand
 -----------------------

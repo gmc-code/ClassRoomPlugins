@@ -135,7 +135,8 @@ def _students_from_rows(rows):
         )
         students.append(
             {"firstName": first, "surname": surname,
-             "homeroom": r.get("homeroom") or r.get("home room") or r.get("home group") or r.get("form") or "",
+             "homeroom": r.get("homeroom") or r.get("home room") or r.get("home group") or r.get("form")
+                         or r.get("tg") or r.get("tutor group") or r.get("house") or "",
              # the year level goes in front of the homeroom badge, e.g. "7 H13"
              "year": r.get("year") or r.get("year level") or r.get("yr") or r.get("year group") or r.get("grade") or ""}
         )

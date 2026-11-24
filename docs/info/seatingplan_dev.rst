@@ -123,7 +123,9 @@ Options
    * - ``:roster:``
      - —
      - ``.xlsx``/``.csv`` file relative to the page; registered as a
-       dependency. Content students are added after it.
+       dependency. Content students are added after it. The homeroom comes
+       from **Homeroom**, **Home Group**, **Form**, **TG**, **Tutor Group** or
+       **House**, the first one present.
    * - ``:title:``
      - Seating Plan
      - Starting title.

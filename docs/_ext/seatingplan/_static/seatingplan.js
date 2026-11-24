@@ -608,7 +608,8 @@
                 firstName: first,
                 surname: surname,
                 fullName: first + ' ' + surname,
-                homeroom: formatHomeroom(r['homeroom'] || r['home room'] || r['home group'] || r['homegroup'] || r['form'],
+                homeroom: formatHomeroom(r['homeroom'] || r['home room'] || r['home group'] || r['homegroup'] || r['form'] ||
+                    r['tg'] || r['tutor group'] || r['tutorgroup'] || r['house'],
                     r['year'] || r['year level'] || r['yr'] || r['yr level'] || r['year group'] || r['grade'])
             });
         });
@@ -879,6 +880,10 @@
                 '<button type="button" class="sp-btn sp-btn-data" data-action="import">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>' +
                 'Import Roster</button>' +
+                '<button type="button" class="sp-btn sp-btn-data" data-action="import-add" ' +
+                'title="Add students from a class list without removing anyone">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>' +
+                'Add Students</button>' +
                 '<input type="file" class="sp-file" accept=".xlsx,.xls,.csv" data-role="file">' +
 
                 '<button type="button" class="sp-btn sp-btn-file" data-action="import-json">' +
@@ -933,7 +938,7 @@
 
                 '<button type="button" class="sp-btn sp-btn-purple" data-action="sort" data-mode="HOMEROOM">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M4 6h16M4 12h16M4 18h7"/></svg>' +
-                'Homeroom A → Z</button>' +
+                'TG A → Z</button>' +
 
                 '<button type="button" class="sp-btn sp-btn-amber" data-action="sort" data-mode="RANDOM">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"/><path d="m18 2 4 4-4 4"/><path d="M2 6h1.4c1.3 0 2.5.6 3.3 1.7l6.1 8.6c.7 1.1 2 1.7 3.3 1.7H22"/><path d="m18 14 4 4-4 4"/></svg>' +
@@ -948,7 +953,7 @@
                 '<button type="button" class="sp-btn sp-btn-amber" data-action="rules">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><line x1="4" x2="20" y1="21" y2="21"/><line x1="4" x2="8" y1="14" y2="14"/><line x1="12" x2="20" y1="14" y2="14"/><line x1="16" x2="20" y1="7" y2="7"/><line x1="4" x2="12" y1="7" y2="7"/><circle cx="10" cy="14" r="2"/><circle cx="14" cy="7" r="2"/></svg>' +
                 'Rules</button>' +
-                '<button type="button" class="sp-btn sp-btn-grey" data-action="lock-seats" data-role="lock-seats" aria-pressed="false" ' +
+                '<button type="button" class="sp-btn sp-btn-brown" data-action="lock-seats" data-role="lock-seats" aria-pressed="false" ' +
                 'title="Lock desks that are out of use (or right-click a desk)">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
                 '<span>Lock Seats</span></button>' +
@@ -1189,7 +1194,8 @@
                     break;
                 case 'rules': openModal(); break;
                 case 'lock-seats': setLockMode(!lockMode); break;
-                case 'import': ui.file.click(); break;
+                case 'import': rosterMode = 'replace'; ui.file.click(); break;
+                case 'import-add': rosterMode = 'add'; ui.file.click(); break;
                 case 'export-json': exportJson(); break;
                 case 'import-json': ui['json-file'].click(); break;
                 case 'sort': autoArrange(t.getAttribute('data-mode')); break;
@@ -2354,7 +2360,54 @@
             return String(name || '').replace(/\.[^.]+$/, '').replace(/_+/g, ' ').replace(/\s+/g, ' ').trim();
         }
 
+        var rosterMode = 'replace';   /* Import Roster replaces the class; Add Students adds to it */
+
+        function nameKey(s) { return (clean(s.firstName) + ' ' + clean(s.surname)).toLowerCase().replace(/\s+/g, ' '); }
+
+        /* Add Students: new students go to Unassigned; everyone already seated stays put and
+           rules are kept. A student already on the list (same first name and surname, capitals
+           don't matter) is not added twice; their homeroom is updated from the file instead. */
+        function addRows(rows) {
+            var incoming = rowsToStudents(rows);
+            if (!incoming.length) {
+                setStatus('No students found in that file. It needs a header row with Preferred (or First Name), Surname (or Last Name) and optionally Homeroom or TG.');
+                return;
+            }
+            var byName = {};
+            state.students.forEach(function (s) { byName[nameKey(s)] = s; });
+            var nextId = 0;
+            state.students.forEach(function (s) {
+                var m = /^student-(\d+)$/.exec(s.id);
+                if (m) nextId = Math.max(nextId, +m[1] + 1);
+            });
+            var added = [], updated = 0;
+            incoming.forEach(function (s) {
+                var key = nameKey(s), old = byName[key];
+                if (old) {
+                    if (s.homeroom && s.homeroom !== old.homeroom) { old.homeroom = s.homeroom; updated++; }
+                    return;
+                }
+                while (studentById('student-' + nextId)) nextId++;
+                s.id = 'student-' + nextId++;
+                state.students.push(s);
+                byName[key] = s;
+                added.push(s);
+            });
+            added.forEach(function (s) { ui.pool.appendChild(createCard(s, false)); });
+            refreshCards();
+            validate();
+            updateCount();
+            save();
+            var msg = added.length
+                ? 'Added ' + added.length + (added.length === 1 ? ' student' : ' students') + ' to Unassigned. ' +
+                  'Drag them to desks, or sort to re-seat everyone.'
+                : 'No new students: everyone in that file is already on the list.';
+            if (updated) msg += ' Updated the homeroom of ' + updated + (updated === 1 ? ' student.' : ' students.');
+            setStatus(msg);
+        }
+
         function applyRows(rows, fileName) {
+            if (rosterMode === 'add' && state.students.length) { addRows(rows); return; }
             if (state.students.length && state.rules.length) {
                 if (!window.confirm('Importing a new class list will clear the existing seating rules. Continue?')) return;
             }
