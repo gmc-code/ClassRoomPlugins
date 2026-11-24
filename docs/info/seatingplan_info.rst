@@ -144,6 +144,10 @@ Second row: arranging students
 **Rules**
    Open the seating rules (see `Seating rules`_).
 
+**Lock Seats**
+   Lock desks that are out of use, so no one is seated there (see
+   `Locked desks`_).
+
 **Rows** / **Tables**
    Switch between rows of desks and groups of tables (see `Layouts`_).
 
@@ -284,6 +288,27 @@ there now breaks one (e.g. a *Left side* student who is now on the right).
 
 Untick **Row Controls** to hide all three buttons. They never appear in
 **Projector View**, in **Tables** mode or on printouts.
+
+Locked desks
+------------
+
+Lock a desk that is broken, out of use or kept free, and no student will be
+seated there.
+
+* **Right-click** a desk to lock it, and right-click it again to unlock it.
+* Or press **Lock Seats**, click the desks to lock or unlock, then press
+  **Done Locking** (or :kbd:`Esc`). This also works on a touch screen.
+
+A locked desk is shaded with stripes and labelled *Locked*, on screen and on the
+printout. If a student was sitting there, they move to the **Unassigned** list.
+Sorting, **Random**, the row buttons and dragging all skip locked desks.
+
+A locked desk does count as the empty seat beside a student who has the
+*Empty seat beside* rule.
+
+Each layout keeps its own locked desks, so switching to another layout and back
+brings them back. They are saved in the browser and in **Export JSON** files.
+**Reset** goes back to the desks locked on the page.
 
 Seating rules
 -------------

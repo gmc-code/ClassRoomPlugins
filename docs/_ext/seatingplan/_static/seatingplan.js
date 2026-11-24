@@ -101,6 +101,8 @@
         '.sp-grid{display:flex;flex-direction:column;gap:12px}' +
         '.sp-row{display:grid;gap:10px}' +
         '.sp-gap{min-width:0}' +
+        '.sp-desk.sp-locked{background:repeating-linear-gradient(45deg,#fff,#fff 5px,#ddd 5px,#ddd 10px);border-style:dashed}' +
+        '.sp-locked-label{font-size:11px;font-style:italic;color:#444}' +
         '.sp-desk{border:1px solid #000;border-radius:5px;min-height:80px;box-sizing:border-box;padding:2px 0;position:relative;display:flex;align-items:center;justify-content:center;min-width:0;break-inside:avoid}' +
         '.sp-desk-num{position:absolute;top:2px;left:6px;font-size:10px;color:#000}' +
         '.sp-card{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;width:96%}' +
@@ -411,7 +413,10 @@
             return arr;
         }
 
-        var domains = vars.map(function (v) { return desks.filter(function (d) { return unaryOk(v, d); }); });
+        /* a locked desk takes no student, but can be the empty seat beside one */
+        var domains = vars.map(function (v) {
+            return desks.filter(function (d) { return (!d.locked || v.owner) && unaryOk(v, d); });
+        });
         for (var q = 0; q < domains.length; q++) if (!domains[q].length) return null;
 
         var asg = vars.map(function () { return -1; });
@@ -623,8 +628,10 @@
             tables: configTables(),
             fillFromLast: cfg.fill === 'last',
             sortMode: cfg.sort || 'DEFAULT',
+            locks: {},      /* locked desk numbers, kept per layout: { layoutKey: [3, 7] } */
             display: {}
         };
+        var lockMode = false;   /* "Lock Seats" on: clicking a desk locks or unlocks it */
         var DISPLAY_TOGGLES = {
             surnameInitial: 'toggle-surname-initial',
             homeroom: 'toggle-homeroom',
@@ -645,6 +652,30 @@
 
         function configTables() {
             return (cfg.tables && parseTables(tablesKey(cfg.tables))) || parseTables(DEFAULT_TABLES);
+        }
+
+        /* ----- locked desks -----
+           Locks belong to a layout, so each layout remembers its own locked desks and
+           switching layouts back and forth keeps them. */
+        function layoutKey(mode, layout, tables) {
+            if (mode === 'tables') return 't:' + tablesKey(tables);
+            var rows = parseLayout((layout || []).join(',')) || layout || [];
+            return 'r:' + rows.join(',');
+        }
+        function currentLayoutKey() { return layoutKey(state.mode, state.layout, state.tables); }
+        function lockedNums() { return state.locks[currentLayoutKey()] || []; }
+        function deskNum(d) { return +d.querySelector('.sp-desk-num').textContent; }
+        function isLocked(d) { return d.classList.contains('sp-locked'); }
+
+        function cleanLocks(obj) {
+            var out = {};
+            if (!obj || typeof obj !== 'object') return out;
+            Object.keys(obj).forEach(function (k) {
+                if (!Array.isArray(obj[k])) return;
+                var nums = obj[k].map(Number).filter(function (n) { return n >= 1 && n === Math.floor(n); });
+                if (nums.length) out[k] = nums;
+            });
+            return out;
         }
 
         function displayFromConfig() {
@@ -676,6 +707,10 @@
                     homeroom: formatHomeroom(s.homeroom, s.year)
                 };
             });
+            state.locks = {};
+            if (Array.isArray(cfg.locked) && cfg.locked.length) {
+                state.locks[layoutKey(cfg.mode === 'tables' ? 'tables' : 'rows', cfg.layout, configTables())] = cfg.locked.slice();
+            }
             state.rules = (cfg.rules || []).map(function (r, i) {
                 var rule = {
                     id: 'rule-cfg-' + i,
@@ -700,7 +735,7 @@
                 localStorage.setItem(storageKey, JSON.stringify({
                     title: currentTitle, students: state.students, rules: state.rules, display: state.display,
                     layout: state.layout, mode: state.mode, tables: state.tables,
-                    sortMode: state.sortMode, fillFromLast: state.fillFromLast,
+                    sortMode: state.sortMode, fillFromLast: state.fillFromLast, locks: state.locks,
                     placement: ui.grid ? currentPlacement() : (savedPlacement || [])
                 }));
             } catch (e) { /* storage blocked */ }
@@ -723,6 +758,7 @@
                     if (d.mode === 'tables' || d.mode === 'rows') state.mode = d.mode;
                     if (typeof d.sortMode === 'string') state.sortMode = d.sortMode;
                     if (typeof d.fillFromLast === 'boolean') state.fillFromLast = d.fillFromLast;
+                    if (d.locks) state.locks = cleanLocks(d.locks);
                     if (Array.isArray(d.placement) && d.placement.length) savedPlacement = d.placement;
                     if (d.display && typeof d.display === 'object') {
                         Object.keys(state.display).forEach(function (k) {
@@ -912,6 +948,10 @@
                 '<button type="button" class="sp-btn sp-btn-amber" data-action="rules">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><line x1="4" x2="20" y1="21" y2="21"/><line x1="4" x2="8" y1="14" y2="14"/><line x1="12" x2="20" y1="14" y2="14"/><line x1="16" x2="20" y1="7" y2="7"/><line x1="4" x2="12" y1="7" y2="7"/><circle cx="10" cy="14" r="2"/><circle cx="14" cy="7" r="2"/></svg>' +
                 'Rules</button>' +
+                '<button type="button" class="sp-btn sp-btn-grey" data-action="lock-seats" data-role="lock-seats" aria-pressed="false" ' +
+                'title="Lock desks that are out of use (or right-click a desk)">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
+                '<span>Lock Seats</span></button>' +
                 '<div class="sp-mode" role="group" aria-label="Room type">' +
                 '<button type="button" class="sp-btn sp-btn-mode" data-action="mode" data-mode="rows">Rows</button>' +
                 '<button type="button" class="sp-btn sp-btn-mode" data-action="mode" data-mode="tables">Tables</button>' +
@@ -981,7 +1021,7 @@
                 '<div class="sp-grid" data-role="grid"></div></div>' +
                 '</div>';
 
-            ['title', 'revert', 'layouts', 'custom-layout', 'fill', 'file', 'json-file', 'toggle-surname-initial', 'toggle-homeroom', 'toggle-ignore-rules', 'toggle-oneline', 'toggle-hide-badges', 'toggle-limit-width', 'toggle-teacher-view', 'toggle-row-controls', 'toggle-year-colours', 'png', 'status', 'count', 'pool', 'grid'].forEach(function (r) {
+            ['title', 'revert', 'lock-seats', 'layouts', 'custom-layout', 'fill', 'file', 'json-file', 'toggle-surname-initial', 'toggle-homeroom', 'toggle-ignore-rules', 'toggle-oneline', 'toggle-hide-badges', 'toggle-limit-width', 'toggle-teacher-view', 'toggle-row-controls', 'toggle-year-colours', 'png', 'status', 'count', 'pool', 'grid'].forEach(function (r) {
                 ui[r] = root.querySelector('[data-role="' + r + '"]');
             });
 
@@ -1027,6 +1067,7 @@
             document.addEventListener('keydown', function (e) {
                 if (e.key === 'Escape' && root.classList.contains('sp-projector')) exitProjector();
                 if (e.key === 'Escape') cancelSwap();
+                if (e.key === 'Escape' && lockMode) setLockMode(false);
             });
             ui.pool.addEventListener('dragover', function (e) { e.preventDefault(); });
             ui.pool.addEventListener('drop', onPoolDrop);
@@ -1147,6 +1188,7 @@
                     autoArrange(state.sortMode);
                     break;
                 case 'rules': openModal(); break;
+                case 'lock-seats': setLockMode(!lockMode); break;
                 case 'import': ui.file.click(); break;
                 case 'export-json': exportJson(); break;
                 case 'import-json': ui['json-file'].click(); break;
@@ -1346,7 +1388,66 @@
             desk.addEventListener('dragover', onDeskDragOver);
             desk.addEventListener('dragleave', onDeskDragLeave);
             desk.addEventListener('drop', onDeskDrop);
+            /* right-click (or click with Lock Seats on) locks or unlocks the desk */
+            desk.addEventListener('contextmenu', function (e) { e.preventDefault(); toggleLock(desk); });
+            desk.addEventListener('click', function (e) {
+                if (!lockMode) return;
+                e.preventDefault();
+                e.stopPropagation();
+                toggleLock(desk);
+            }, true);
             return desk;
+        }
+
+        /* Shade the desks locked in the current layout. */
+        function markLocks() {
+            var nums = {};
+            lockedNums().forEach(function (n) { nums[n] = true; });
+            getDesks().forEach(function (d) {
+                var on = !!nums[deskNum(d)];
+                d.classList.toggle('sp-locked', on);
+                d.title = on ? 'Locked: right-click to unlock' : '';
+                var label = d.querySelector('.sp-locked-label');
+                if (on && !label) d.appendChild(make('span', 'sp-locked-label', '🔒 Locked'));
+                if (!on && label) label.remove();
+            });
+        }
+
+        function toggleLock(desk) {
+            var n = deskNum(desk), key = currentLayoutKey();
+            var nums = lockedNums().slice();
+            if (isLocked(desk)) {
+                nums = nums.filter(function (x) { return x !== n; });
+                setStatus('Desk ' + n + ' unlocked.');
+            } else {
+                nums.push(n);
+                nums.sort(function (a, b) { return a - b; });
+                var card = desk.querySelector('.sp-card'), moved = '';
+                if (card) {
+                    var s = studentById(card.dataset.sid);
+                    if (s) { renderCard(card, s, false); moved = ' ' + s.fullName + ' moved to Unassigned.'; }
+                    ui.pool.appendChild(card);
+                    desk.classList.remove('sp-occupied');
+                }
+                setStatus('Desk ' + n + ' locked: no one will be seated there.' + moved);
+            }
+            if (nums.length) state.locks[key] = nums; else delete state.locks[key];
+            markLocks();
+            validate();
+            updateCount();
+            save();
+        }
+
+        function setLockMode(on) {
+            lockMode = on;
+            root.classList.toggle('sp-lock-mode', on);
+            if (ui['lock-seats']) {
+                ui['lock-seats'].classList.toggle('sp-active', on);
+                ui['lock-seats'].setAttribute('aria-pressed', on ? 'true' : 'false');
+                ui['lock-seats'].lastChild.textContent = on ? 'Done Locking' : 'Lock Seats';
+            }
+            setStatus(on ? 'Click desks to lock or unlock them. Locked desks are left empty when students are arranged. ' +
+                           'Press Done Locking (or Esc) when finished.' : '');
         }
 
         /* Rows of tables, front row first; seats numbered table by table. */
@@ -1387,6 +1488,7 @@
                 });
                 ui.grid.appendChild(trow);
             });
+            markLocks();
         }
 
         function initGrid() {
@@ -1431,6 +1533,7 @@
                 ui.grid.appendChild(line);
             });
             applyRowWidths();
+            markLocks();
         }
 
         /* ----- row controls: flip a row end to end, swap two rows -----
@@ -1458,7 +1561,7 @@
 
         /* Desks in row r, left to right (students' view). */
         function desksInRow(r) {
-            return Array.prototype.slice.call(ui.grid.querySelectorAll('.sp-desk[data-row="' + r + '"]'));
+            return Array.prototype.slice.call(ui.grid.querySelectorAll('.sp-desk[data-row="' + r + '"]:not(.sp-locked)'));
         }
 
         function cardsIn(desks) {
@@ -1602,7 +1705,7 @@
         function deskInfo(d, i) {
             var ds = d.dataset;
             return {
-                index: i, row: +ds.row, col: +ds.col, seg: +ds.seg || 0, blk: +ds.blk || 0,
+                index: i, row: +ds.row, col: +ds.col, locked: isLocked(d), seg: +ds.seg || 0, blk: +ds.blk || 0,
                 table: ds.table != null ? +ds.table : null,
                 trow: +ds.trow, tpos: +ds.tpos, tlast: +ds.tlast
             };
@@ -1692,6 +1795,11 @@
             var id = draggingId || e.dataTransfer.getData('text/plain');
             var dragged = cardFor(id);
             if (!dragged) return;
+            if (isLocked(target)) {
+                draggingId = null;
+                setStatus('Desk ' + deskNum(target) + ' is locked. Right-click it to unlock it first.');
+                return;
+            }
             var student = studentById(id);
             var source = dragged.parentElement;
             var existing = target.querySelector('.sp-card');
@@ -1831,7 +1939,7 @@
 
         function unseatedMessage(n) {
             return n + (n === 1 ? ' student is' : ' students are') + ' still unseated: there are not enough desks ' +
-                '(seats kept empty by rules use up desks too). Choose a larger layout or remove an empty-seat rule.';
+                '(locked desks and seats kept empty by rules use up desks too). Choose a larger layout, unlock a desk or remove an empty-seat rule.';
         }
 
         function describeRule(r) {
@@ -1954,7 +2062,7 @@
             var next = 0;
             list.forEach(function (s) {
                 if (seated[s.id]) return;
-                while (next < capacity && (seatedByDesk[next] || reservedDesks[next])) next++;
+                while (next < capacity && (seatedByDesk[next] || reservedDesks[next] || isLocked(desks[next]))) next++;
                 if (next < capacity) { seatedByDesk[next] = s; seated[s.id] = true; next++; }
             });
 
@@ -2038,6 +2146,7 @@
                 students: state.students,
                 rules: state.rules,
                 display: state.display,
+                locks: state.locks,
                 placement: placement
             };
             return payload;
@@ -2161,6 +2270,7 @@
             state.layout = layout;
             if (tables) state.tables = tables;
             state.mode = data.mode === 'tables' ? 'tables' : 'rows';
+            if (data.locks) state.locks = cleanLocks(data.locks);   /* older files: keep the current locks */
             state.students = students;
             state.rules = Array.isArray(data.rules) ? data.rules : [];
             if (data.fillFromLast != null) state.fillFromLast = !!data.fillFromLast;
@@ -2194,7 +2304,7 @@
                     if (!s || placed[s.id]) return;
                     placed[s.id] = true;
                     var d = item.deskIndex != null ? desks[item.deskIndex] : null;
-                    if (d && !d.querySelector('.sp-card')) {
+                    if (d && !isLocked(d) && !d.querySelector('.sp-card')) {
                         d.classList.add('sp-occupied');
                         var cols = parseInt(d.dataset.cols, 10) || 6;
                         d.appendChild(createCard(s, true, cols));

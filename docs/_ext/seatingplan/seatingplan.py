@@ -50,6 +50,24 @@ RULE_TYPES = {
     "empty": "EMPTY_SEAT",
 }
 SINGLE_STUDENT_RULES = ("front", "back", "left", "right", "empty")
+# "locked: 3, 7, 12-14" - desks that are out of use (same idea as the lockers tool's "out:" line)
+LOCKED_LINE_RE = re.compile(r"^(?:locked|lock|out|unavailable)\s*:\s*(.+)$", re.IGNORECASE)
+
+
+def _parse_desk_numbers(text):
+    """'3, 7, 12-14' -> ([3, 7, 12, 13, 14], []); anything that is not a desk number or
+    range is returned in the second list and skipped."""
+    nums, bad = set(), []
+    for item in re.split(r"[,\s]+", text.strip()):
+        if not item:
+            continue
+        m = re.fullmatch(r"(\d+)\s*(?:-\s*(\d+))?", item)
+        a, b = (int(m.group(1)), int(m.group(2) or m.group(1))) if m else (0, 0)
+        if not m or a < 1 or b < a or b - a > 500:
+            bad.append(item)
+            continue
+        nums.update(range(a, b + 1))
+    return sorted(nums), bad
 
 
 # ----------------------------------------------------------------------------
@@ -233,6 +251,7 @@ class SeatingPlanDirective(SphinxDirective):
         "limit-desk-width": directives.flag,
         "teacher-view": directives.flag,
         "hide-row-controls": directives.flag,
+        "locked": directives.unchanged,
         "storage-key": directives.unchanged,
         "class": directives.class_option,
     }
@@ -287,10 +306,15 @@ class SeatingPlanDirective(SphinxDirective):
             else:
                 students.extend(_students_from_rows(rows))
 
+        locked_specs = [self.options["locked"]] if self.options.get("locked") else []
         rule_lines = []
         for line in self.content:
             line = line.strip()
             if not line or line.startswith("#"):
+                continue
+            match = LOCKED_LINE_RE.match(line)
+            if match:
+                locked_specs.append(match.group(1))
                 continue
             match = RULE_RE.match(line)
             if match:
@@ -358,6 +382,24 @@ class SeatingPlanDirective(SphinxDirective):
                 rules.append(rule)
 
         _note_doc(env)
+        # locked desks, by desk number in the directive's own layout
+        if mode == "tables":
+            seat_count = sum({"4": 4, "6w": 6, "6d": 6}[t] for row in tables for t in row)
+        else:
+            seat_count = sum(_normalise_row(str(r))[1] for r in layout)
+        locked = set()
+        for spec in locked_specs:
+            nums, bad = _parse_desk_numbers(spec)
+            locked.update(nums)
+            if bad:
+                self._warn("locked desks: skipped %s, which %s not a desk number or range like "
+                           "'3, 7, 12-14'." % (", ".join(repr(b) for b in bad), "is" if len(bad) == 1 else "are"))
+        too_big = sorted(n for n in locked if n > seat_count)
+        if too_big:
+            self._warn("locked desk%s %s ignored: this layout only has %d desks."
+                       % ("s" if len(too_big) > 1 else "", ", ".join(map(str, too_big)), seat_count))
+        locked = sorted(n for n in locked if n <= seat_count)
+
         node = seatingplan()
         node["config"] = {
             "id": storage_id,
@@ -366,6 +408,7 @@ class SeatingPlanDirective(SphinxDirective):
             "mode": mode,
             "tables": tables,
             "tablesPerRow": per_row,
+            "locked": locked,
             "fill": self.options.get("fill", "first"),
             "sort": {
                 "none": "DEFAULT", "az": "AZ", "za": "ZA",

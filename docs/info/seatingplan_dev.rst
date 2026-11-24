@@ -90,6 +90,11 @@ Single-student rules
 ``separate:``
    2 or more names. Creates a ``SEPARATE`` rule for every pair.
 
+``locked:``
+   Desk numbers to lock, e.g. ``locked: 3, 7, 12-14`` (also accepted as
+   ``lock:``, ``out:`` or ``unavailable:``, as in the lockers tool). Same as the
+   ``:locked:`` option; both can be used and are combined.
+
 Names are matched case-insensitively with spaces collapsed. A rule line with
 three or more names gets a group id (``"g"``), so it shows as one group in the
 Rules panel.
@@ -138,6 +143,11 @@ Options
    * - ``:hide-row-controls:``
      - off
      - Flag. Start with **Row Controls** off.
+   * - ``:locked:``
+     - —
+     - Desk numbers to lock in this layout, e.g. ``3, 7, 12-14``. Desks are
+       numbered as shown on the plan (row by row from the front, or table by
+       table).
    * - ``:storage-key:``
      - ``<docname>#<n>``
      - Browser storage id (see `Browser storage`_).
@@ -172,7 +182,9 @@ Reported as Sphinx warnings at the directive; the build continues:
 * roster can't be read;
 * two students with the same name (rules use the first);
 * a rule naming an unknown student, with the wrong number of names, or naming
-  someone twice → that rule line is skipped.
+  someone twice → that rule line is skipped;
+* a locked desk that is not a number or range, or is beyond the last desk →
+  that desk is skipped.
 
 
 The ``seatingplan-print`` directive
@@ -275,6 +287,10 @@ table's position in that row.
        3 on neighbouring desks; 4 fill two adjacent blocks
      - Same table
 
+**Locked desks** take no student: they are left out of every ruled student's
+domain and skipped when the rest are filled in. An *empty seat* placeholder may
+use a locked desk, so a locked desk next to a student meets that rule.
+
 **The search.** Each ruled student (plus a placeholder for each reserved empty
 desk) is a variable whose domain is the desks meeting its single-student rules.
 A depth-first search with forward checking picks the variable with the fewest
@@ -317,6 +333,7 @@ Plan file and storage
      "display": {"surnameInitial": false, "homeroom": true, "ignoreRules": false,
                  "oneLine": true, "hideBadges": false, "limitWidth": false,
                  "teacherView": true, "rowControls": true},
+     "locks": {"r:6,6,6,6,6": [3, 12], "t:4,4,4,4 / 4,4,4,4": [1]},
      "placement": [{"deskIndex": 0, "studentId": "student-13"},
                    {"deskIndex": null, "studentId": "student-20"}]
    }
@@ -326,6 +343,9 @@ Plan file and storage
 * ``deskIndex`` counts desks as they are built, from 0: row by row from the
   front row (left to right), or table by table. It does not change with
   **Fill** or **Teacher's View**. ``null`` means *Unassigned*.
+* ``locks`` holds locked desk numbers (1-based, as shown on the plan) for each
+  layout: ``r:`` plus the rows for rows of desks, ``t:`` plus the tables. Files
+  without ``locks`` leave the current locks as they are.
 * Rule types: ``FRONT_ROW``, ``BACK_ROW``, ``SIT_LEFT``, ``SIT_RIGHT``,
   ``EMPTY_SEAT`` (``student2Id`` null), ``PAIR`` and ``SEPARATE``. ``group``
   groups rules in the Rules panel.
@@ -456,7 +476,9 @@ Other style hooks
 ~~~~~~~~~~~~~~~~~
 
 The root element also gets state classes: ``sp-compact``, ``sp-hide-badges``,
-``sp-teacher-view``, ``sp-hide-row-ctrl`` and ``sp-projector``. Keep-together
+``sp-teacher-view``, ``sp-hide-row-ctrl``, ``sp-projector`` and ``sp-lock-mode``
+(while **Lock Seats** is on). Locked desks have ``sp-locked`` and a
+``.sp-locked-label``. Keep-together
 colours are set per card as ``--sp-grp-fg`` and ``--sp-grp-bg``. One-line names
 use ``--sp-desk-height-compact`` (default 48px) for the desk height.
 
