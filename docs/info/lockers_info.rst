@@ -23,6 +23,10 @@ All the pictures in this guide use made-up students.
 Quick start
 -----------
 
+These steps use the button names in the **Full** view. In **Simple**, the
+same steps are numbered **1** to **4** on the toolbar (see
+`The Simple toolbar`_).
+
 #. Press **Lockers** and type the locker numbers, e.g. ``101-160``.
 #. Press **Import** and choose the class's Excel or CSV export, or press
    **Paste** and paste the class list from a spreadsheet.
@@ -37,8 +41,94 @@ Quick start
    surname order with their locker).
 #. Press **Save** to keep a backup copy.
 
-The toolbar
-~~~~~~~~~~~
+The Simple toolbar
+~~~~~~~~~~~~~~~~~~
+
+In Simple, the toolbar is one row of four numbered steps. Work from left to
+right, from **1** to **4**. **Find**, **Open**, **Save** and **Undo** sit at
+the right end. Hover over a button to see what it does.
+
+.. figure:: images/lockers/lockers_simple_toolbar.png
+   :alt: The Simple toolbar: four numbered steps, with Find, Open, Save and Undo at the right, and the hint strip showing that year levels are on
+   :width: 100%
+
+   The Simple toolbar. The yellow strip shows that some lockers are kept for a year level.
+
+1 · Students
+^^^^^^^^^^^^
+
+**Paste names**
+   Copy the class from Excel, Google Sheets or the school system, press
+   **Paste names** and paste (**Ctrl+V**). Year levels, locker numbers and
+   combinations in the list come too (see `Pasting a class list`_). If there
+   are students already, choose **Replace the students** or **Add to the
+   list**.
+
+**Import file**
+   Choose an Excel or CSV class list. It replaces the students (see
+   `Importing a class list`_).
+
+2 · Lockers
+^^^^^^^^^^^
+
+**Set up lockers**
+   Type the locker numbers, e.g. ``101-160``, and group them into banks and
+   areas (see `Setting up the lockers`_).
+
+3 · Give out lockers
+^^^^^^^^^^^^^^^^^^^^
+
+**A–Z**
+   Give the free lockers out in surname order.
+
+**Random**
+   Give the free lockers out in a random order.
+
+Both only give lockers to students who don't have one; everyone else keeps
+their locker. They skip lockers that are out of service and keep to any
+year levels (see `Keeping lockers for a year level`_). To give everyone a new
+locker, switch to Full and untick **Keep**.
+
+4 · Print
+^^^^^^^^^
+
+**Map**
+   A map of the lockers with names.
+
+**List**
+   The students in surname order with their locker numbers.
+
+Find, Open, Save and Undo
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Find**
+   Type part of a name or a locker number to find it (see
+   `Finding a student or locker`_).
+
+**Open**
+   Open a file saved with **Save**.
+
+**Save**
+   Save everything as a file, as a backup or to move it to another computer.
+
+**Undo**
+   Take back the last change.
+
+Giving out lockers by hand
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Click a locker and type a few letters of a name, then press **Enter**, or
+drag a name from the *No locker* list onto a locker. Right-click a broken
+locker to mark it out of service.
+
+Under the toolbar, a pale yellow strip gives a reminder of how to give out lockers by hand.
+When a setting from Full is in use, the strip also shows it, for example
+*Year levels on: 60 lockers kept for a year*, with a **Change in Full** link.
+
+The Full toolbar
+~~~~~~~~~~~~~~~~
+
+Everything below is in the **Full** view.
 
 The toolbar has four rows: files, printing and **Undo** on the first;
 **Set up** (**Lockers**, **Year levels**), **Enter** (**By Student**,
@@ -59,21 +149,19 @@ The buttons are coloured by what they do:
 Hover over any button to see what it does.
 
 .. figure:: images/lockers/lockers_toolbar.png
-   :alt: The toolbar
+   :alt: The Full toolbar of the lockers tool
    :width: 100%
 
-   The toolbar.
+   The Full toolbar.
 
 Simple and Full controls
 ------------------------
 
 The switch at the top right chooses how many controls you see:
 
-* **Simple** shows the main steps in order, with big buttons:
-  students (**Paste names**, **Import file**), **Set up lockers**, giving
-  out lockers (**A–Z**, **Random**), printing (**Map**, **List**), plus
-  **Find**, **Open**, **Save** and **Undo**.
-* **Full** shows every control.
+* **Simple** shows the main steps in order, with big buttons. See
+  `The Simple toolbar`_.
+* **Full** shows every control. See `The Full toolbar`_.
 
 The tool remembers your choice on this computer, so it opens the same way
 next time. Each tool remembers its own choice, so you can use Full in one

@@ -1508,39 +1508,36 @@
                 '<div class="sg-toolbar">' +
                 /* Row 1 */
                 '<div class="sg-toolbar-row">' +
-                '<button type="button" class="sg-btn" data-action="import">' +
+                '<button type="button" class="sg-btn" data-action="import" title="Load a class list from Excel or CSV, replacing the current one">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sg-btn-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>' +
-                'Import Roster</button>' +
+                'Import</button>' +
                 '<input type="file" class="sg-file" accept=".xlsx,.xls,.csv" data-role="file">' +
                 '<button type="button" class="sg-btn" data-action="paste-roster" title="Paste a class list copied from Excel, Google Sheets or a school system">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sg-btn-icon"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>' +
-                'Paste Roster</button>' +
-
-                '<button type="button" class="sg-btn sg-btn-teal" data-action="import-json">' +
+                'Paste</button>' +
+                '<span class="sg-tsep"></span>' +
+                '<button type="button" class="sg-btn sg-btn-file" data-action="import-json" title="Open a planner saved with Save, or a class from a seating plan">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sg-btn-icon"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L8.6 3.3A2 2 0 0 0 6.9 2.5H4a2 2 0 0 0-2 2v13.5a2 2 0 0 0 2 2z"/><path d="M12 10v6"/><path d="m9 13 3-3 3 3"/></svg>' +
-                'Import JSON</button>' +
+                'Open</button>' +
                 '<input type="file" class="sg-file" accept=".json" data-role="json-file">' +
-
-                '<button type="button" class="sg-btn sg-btn-teal" data-action="export-json">' +
+                '<button type="button" class="sg-btn sg-btn-file" data-action="export-json" title="Save the whole planner as a file">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sg-btn-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>' +
-                'Export JSON</button>' +
-
+                'Save</button>' +
+                '<span class="sg-tsep"></span>' +
+                '<button type="button" class="sg-btn sg-btn-teal" data-action="print" title="Print the groups">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sg-btn-icon"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>' +
+                'Print</button>' +
+                '<button type="button" class="sg-btn sg-btn-teal" data-action="projector" title="Show just the groups, full screen, in large text">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sg-btn-icon"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>' +
+                'Projector</button>' +
+                '<span class="sg-tsep"></span>' +
                 '<button type="button" class="sg-btn sg-btn-grey" data-action="reset">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sg-btn-icon"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>' +
                 'Reset</button>' +
-
                 '<button type="button" class="sg-btn sg-btn-grey" data-action="revert" data-role="revert" disabled ' +
                 'title="Nothing imported yet">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sg-btn-icon"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>' +
                 'Revert</button>' +
-
-                '<button type="button" class="sg-btn sg-btn-teal" data-action="print">' +
-                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sg-btn-icon"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>' +
-                'Print</button>' +
-
-                '<button type="button" class="sg-btn sg-btn-teal" data-action="projector">' +
-                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sg-btn-icon"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>' +
-                'Projector View</button>' +
                 '</div>' +
 
                 /* Row 2: Added Homeroom A -> Z sort button */
@@ -1557,13 +1554,13 @@
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sg-btn-icon"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="M15 4h5l-5 6h5"/><path d="M15 20v-3.5a1.5 1.5 0 0 1 3 0V20"/><path d="M15 17h3"/></svg>' +
                 'Z → A</button>' +
 
-                '<button type="button" class="sg-btn sg-btn-purple" data-action="sort" data-mode="HOMEROOM">' +
+                '<button type="button" class="sg-btn sg-btn-purple" data-action="sort" data-mode="HOMEROOM" title="Fill the groups by homeroom, then surname">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sg-btn-icon"><path d="M4 6h16M4 12h16M4 18h7"/></svg>' +
-                'Homeroom A → Z</button>' +
+                'Homeroom</button>' +
 
-                '<button type="button" class="sg-btn sg-btn-amber" data-action="sort" data-mode="RANDOM">' +
+                '<button type="button" class="sg-btn sg-btn-amber" data-action="sort" data-mode="RANDOM" title="Make new groups in a random order">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sg-btn-icon"><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"/><path d="m18 2 4 4-4 4"/><path d="M2 6h1.4c1.3 0 2.5.6 3.3 1.7l6.1 8.6c.7 1.1 2 1.7 3.3 1.7H22"/><path d="m18 14 4 4-4 4"/></svg>' +
-                'Random Grouping</button>' +
+                'Random</button>' +
 
                 '<button type="button" class="sg-btn sg-btn-teal" data-action="rules">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sg-btn-icon"><line x1="4" x2="20" y1="21" y2="21"/><line x1="4" x2="8" y1="14" y2="14"/><line x1="12" x2="20" y1="14" y2="14"/><line x1="16" x2="20" y1="7" y2="7"/><line x1="4" x2="12" y1="7" y2="7"/><circle cx="10" cy="14" r="2"/><circle cx="14" cy="7" r="2"/></svg>' +
@@ -3614,8 +3611,8 @@
                 step(4, 'Show it', '#059669',
                     b('print', 'sg-btn-teal', 'Print') + b('projector', 'sg-btn-teal', 'Projector')) +
                 '<span class="cc-spacer"></span><div class="cc-end">' +
-                b('import-json', 'sg-btn-teal', 'Open', ' title="Open groups saved as a file"') +
-                b('export-json', 'sg-btn-teal', 'Save', ' title="Save the whole planner as a file"') + '</div>';
+                b('import-json', 'sg-btn-file', 'Open', ' title="Open groups saved as a file"') +
+                b('export-json', 'sg-btn-file', 'Save', ' title="Save the whole planner as a file"') + '</div>';
             window.ClassroomControls.attach({
                 root: root, tool: 'studentgroups', setting: cfg.controls,
                 toolbar: root.querySelector('.sg-toolbar'),

@@ -20,7 +20,7 @@ Getting started
 ---------------
 
 #. **Load your class.** If the picker already shows names, skip this step.
-   Otherwise press **Roster** and choose your class list, or press **Paste**
+   Otherwise press **Import** and choose your class list, or press **Paste**
    and paste the names from a spreadsheet (see `Class lists`_). The picker is named after the file; click the title to
    change it.
 #. **Choose how many** under **Pick** (1–10).
@@ -34,7 +34,7 @@ do.
 Class lists
 -----------
 
-**Roster** reads an Excel (``.xlsx``, ``.xls``) or ``.csv`` file whose
+**Import** reads an Excel (``.xlsx``, ``.xls``) or ``.csv`` file whose
 first row is headings. These headings are recognised (any case):
 
 * **Preferred** or **First Name**: the name shown on the card
@@ -44,7 +44,7 @@ first row is headings. These headings are recognised (any case):
 Other columns are ignored. Importing a new class list clears the picks and the
 history; you're asked first if there is a history to lose.
 
-**Already set up a class in another tool?** **Import** also accepts a file
+**Already set up a class in another tool?** **Open** also accepts a file
 saved from the **student groups** planner or the **seating plan**. The picker
 takes the class and its title, and from student groups also who is away. Your
 picker settings stay as they are. This is the quickest way to use the same class
@@ -81,11 +81,9 @@ Simple and Full controls
 
 The switch at the top right chooses how many controls you see:
 
-* **Simple** shows the main steps in order, with big buttons:
-  your class (**Paste names**, **Import file**), **How many** to pick,
-  **Who's here** today, showing it (**Projector**, **Print**), plus
-  **Open** and **Save**. The **Pick!** button is the same in both.
-* **Full** shows every control.
+* **Simple** shows the main steps in order, with big buttons. See
+  `The Simple toolbar`_.
+* **Full** shows every control. See `The Full toolbar`_.
 
 The tool remembers your choice on this computer, so it opens the same way
 next time. Each tool remembers its own choice, so you can use Full in one
@@ -100,8 +98,85 @@ For page authors: the ``:controls:`` option sets the view. ``simple`` or
 ``full`` fixes the view and hides the switch; ``choice`` (the default) lets
 each teacher choose.
 
-The toolbar
------------
+The Simple toolbar
+------------------
+
+In Simple, the toolbar is one row of four numbered steps. Work from left to
+right, from **1** to **4**. **Open** and **Save** sit at the right end. The
+big **Pick!** button below the toolbar is the same in both views. Hover over
+a button to see what it does.
+
+.. figure:: images/namepicker/namepicker_simple_toolbar.png
+   :alt: The Simple toolbar: four numbered steps, with Open and Save at the right, and the hint strip underneath
+   :width: 100%
+
+   The Simple toolbar. The Pick! button sits below it, as in Full.
+
+1 · Your class
+~~~~~~~~~~~~~~
+
+**Paste names**
+   Copy the class from Excel, Google Sheets or the school system, press
+   **Paste names** and paste (**Ctrl+V**). A heading row is optional.
+
+**Import file**
+   Choose an Excel or CSV class list. It replaces the class (see
+   `Class lists`_).
+
+2 · How many
+~~~~~~~~~~~~
+
+The how-many menu
+   How many students each **Pick!** chooses, from *Pick 1* to *Pick 10*.
+
+3 · Today
+~~~~~~~~~
+
+**Who's here**
+   Opens the class list. Untick anyone who is away; they are left out of the
+   picking until you tick them again (see `Who is here`_).
+
+4 · Show it
+~~~~~~~~~~~
+
+**Projector**
+   Show only the title, the **Pick!** button and the cards, full screen. Press
+   **Esc** to return (see `Projector view`_).
+
+**Print**
+   The last pick as a large numbered list, e.g. for a speaking order.
+
+Open and Save
+~~~~~~~~~~~~~
+
+**Open**
+   Open a picker saved with **Save**, or a class from Student Groups or a
+   Seating Plan file.
+
+**Save**
+   Save the whole picker as a file, as a backup or to move it to another
+   computer.
+
+Picking
+~~~~~~~
+
+Press **Pick!** to choose. **Put Back** returns the picked names to the class
+if you need to pick again (see `Put Back`_).
+
+Under the toolbar, a pale yellow strip gives a reminder of how to pick.
+When a setting from Full is in use, the strip also shows it, for example
+*3 away today · No repeats is on*, with a **Change in Full** link.
+
+The Full toolbar
+----------------
+
+Everything below is in the **Full** view.
+
+.. figure:: images/namepicker/namepicker_toolbar.png
+   :alt: The Full toolbar of the name picker
+   :width: 100%
+
+   The Full toolbar.
 
 .. list-table::
    :header-rows: 1
@@ -109,24 +184,24 @@ The toolbar
 
    * - Button
      - What it does
-   * - **Roster**
+   * - **Import**
      - Imports a class list from Excel or CSV.
    * - **Paste**
      - Pastes a class list copied from a spreadsheet (see `Pasting a class list`_).
-   * - **Import** / **Export**
+   * - **Open** / **Save**
      - Opens or saves the whole picker as a JSON file (see `Saving and opening`_).
+   * - **Print**
+     - Prints the last pick as a large numbered list.
+   * - **Projector**
+     - Just the title, the Pick button and the cards, full-screen.
    * - **Reset**
      - Goes back to the page's own class list and settings.
    * - **Revert**
      - Goes back to the last file you opened or saved.
-   * - **Print**
-     - Prints the last pick as a large numbered list.
    * - **Class**
      - The class list: mark who is here today (see `Who is here`_).
    * - **History**
      - Every pick so far, and how often each student has been picked.
-   * - **Projector**
-     - Just the title, the Pick button and the cards, full-screen.
    * - **Pick** 1–10
      - How many students to pick at once.
    * - **Order**
@@ -231,7 +306,7 @@ picking anyone.
   the list, set its strength, then choose **Random** again.
 
 Each style remembers its own strength. The strengths and the styles ticked for
-Random are saved with the picker and in **Export**.
+Random are saved with the picker and in **Save**.
 
 **Checkboxes:**
 
@@ -341,11 +416,11 @@ Saving and opening
 history and every setting are kept in that browser, so the page reopens as you
 left it.
 
-**Export** saves everything as a file. In Chrome and Edge a *Save As* box
+**Save** saves everything as a file. In Chrome and Edge a *Save As* box
 lets you choose the folder and name; other browsers ask for a file name and
 download it.
 
-**Import** opens a saved file, or a class from the student groups or
+**Open** opens a saved file, or a class from the student groups or
 seating plan tools. The file is checked first, and a message says what was
 loaded, e.g. *Imported 8J.json: 27 students (2 away), 14 rounds of picks in the
 history.* Damaged files and files from other tools are turned away with a
@@ -381,7 +456,7 @@ Getting the most out of it
   seating plan, export it, and import that file here.
 * **Check the spread.** Glance at **History → Times picked** at the end of a
   week to see who has hardly been picked.
-* **Keep a backup.** **Export** at the end of term keeps the history.
+* **Keep a backup.** **Save** at the end of term keeps the history.
 
 
 Privacy
@@ -390,7 +465,7 @@ Privacy
 * Class lists, picks and history stay **in this browser on this computer**.
   They are not sent to any server or copied to your other devices.
 * They are lost if the browser's site data is cleared, and aren't kept at all in
-  a private or incognito window. **Export** is your backup.
+  a private or incognito window. **Save** is your backup.
 * On a shared computer, anyone using the same browser can see the class. Press
   **Reset** before you leave.
 * **Exported files contain student names.** Keep them where you keep other class
@@ -415,4 +490,4 @@ Importing an Excel file fails
    connection. Save the sheet as CSV instead.
 
 My picks didn't follow me to another computer
-   Everything is saved per browser. Use **Export** and **Import**.
+   Everything is saved per browser. Use **Save** and **Open**.

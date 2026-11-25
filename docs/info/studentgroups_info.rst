@@ -18,13 +18,13 @@ Getting started
 ---------------
 
 1. **Load your class.** If the planner already shows your students, skip this
-   step. Otherwise press **Import Roster** and choose your class list (an Excel
-   or CSV file), or press **Paste Roster** and paste the names from a
+   step. Otherwise press **Import** and choose your class list (an Excel
+   or CSV file), or press **Paste** and paste the names from a
    spreadsheet (see `Class lists`_). The planner is named after the file, e.g.
    *8_Science_P3.xlsx* becomes "8 Science P3". Click the title to change it.
 2. **Choose a group size.** Click a number under **Group Size**.
-3. **Make the groups.** Press **Random Grouping** for a fresh mix, or **A → Z**,
-   **Z → A** or **Homeroom A → Z** to fill the groups in order. Press Random
+3. **Make the groups.** Press **Random** for a fresh mix, or **A → Z**,
+   **Z → A** or **Homeroom** to fill the groups in order. Press Random
    Grouping again for a different mix.
 4. **Adjust by hand.** Drag a student onto another student to swap them, onto
    an empty place to move them, or to *Unassigned* to take them out of the
@@ -37,7 +37,7 @@ can do.
 Class lists
 -----------
 
-**Import Roster** reads an Excel (``.xlsx``, ``.xls``) or ``.csv`` file. The
+**Import** reads an Excel (``.xlsx``, ``.xls``) or ``.csv`` file. The
 first row must be headings. These headings are recognised (any case):
 
 .. list-table::
@@ -63,7 +63,7 @@ Pasting a class list
 
 Instead of importing a file, you can copy the names straight from a
 spreadsheet. Select the cells in Excel, Google Sheets, Word or the school
-system, copy them (**Ctrl+C**), press **Paste Roster** and paste (**Ctrl+V**) into the
+system, copy them (**Ctrl+C**), press **Paste** and paste (**Ctrl+V**) into the
 box. A heading row is optional, and these all work:
 
 * columns with headings, such as ``Preferred``, ``Surname``, ``Homeroom``
@@ -89,11 +89,9 @@ Simple and Full controls
 
 The switch at the top right chooses how many controls you see:
 
-* **Simple** shows the main steps in order, with big buttons:
-  your class (**Paste names**, **Import file**), the **Group size**,
-  making groups (**Random**, **A → Z**, **Who's away**), showing them
-  (**Print**, **Projector**), plus **Open** and **Save**.
-* **Full** shows every control.
+* **Simple** shows the main steps in order, with big buttons. See
+  `The Simple toolbar`_.
+* **Full** shows every control. See `The Full toolbar`_.
 
 The tool remembers your choice on this computer, so it opens the same way
 next time. Each tool remembers its own choice, so you can use Full in one
@@ -108,8 +106,90 @@ For page authors: the ``:controls:`` option sets the view. ``simple`` or
 ``full`` fixes the view and hides the switch; ``choice`` (the default) lets
 each teacher choose.
 
-The toolbar at a glance
------------------------
+The Simple toolbar
+------------------
+
+In Simple, the toolbar is one row of four numbered steps. Work from left to
+right, from **1** to **4**. **Open** and **Save** sit at the right end. Hover
+over a button to see what it does.
+
+.. figure:: images/studentgroups/studentgroups_simple_toolbar.png
+   :alt: The Simple toolbar: four numbered steps, with Open and Save at the right, and the hint strip underneath
+   :width: 100%
+
+   The Simple toolbar, with the Simple | Full switch at the top right.
+
+1 · Your class
+~~~~~~~~~~~~~~
+
+**Paste names**
+   Copy the class from Excel, Google Sheets or the school system, press
+   **Paste names** and paste (**Ctrl+V**). A heading row is optional.
+
+**Import file**
+   Choose an Excel or CSV class list. It replaces the class (see
+   `Class lists`_).
+
+2 · Group size
+~~~~~~~~~~~~~~
+
+The group size menu
+   How many students in each group: *Groups of 2*, *Groups of 3* and so on.
+   It says *Custom sizes* when sizes were set in Full (see `Group sizes`_).
+
+3 · Make groups
+~~~~~~~~~~~~~~~
+
+**Random**
+   Make new groups in a random order. Press it again for different groups.
+
+**A → Z**
+   Make groups in surname order.
+
+**Who's away**
+   Tick off students who are away today. They are left out of the groups
+   (see `Attendance`_).
+
+Both **Random** and **A → Z** follow any rules set up in Full (see `Rules`_).
+
+4 · Show it
+~~~~~~~~~~~
+
+**Print**
+   A printable copy of the groups, in landscape.
+
+**Projector**
+   Show the groups full screen, in large text. Press **Esc** to return.
+
+Open and Save
+~~~~~~~~~~~~~
+
+**Open**
+   Open groups saved with **Save**.
+
+**Save**
+   Save the whole planner as a file, as a backup or to move it to another
+   computer.
+
+Moving students
+~~~~~~~~~~~~~~~
+
+Drag a name into another group to move that student.
+
+Under the toolbar, a pale yellow strip gives a reminder of how to move students.
+When a setting from Full is in use, the strip also shows it, for example
+*2 rules still apply · 3 away today*, with a **Change in Full** link.
+
+The Full toolbar
+----------------
+
+Everything below is in the **Full** view.
+
+.. figure:: images/studentgroups/studentgroups_toolbar.png
+   :alt: The Full toolbar of student groups
+   :width: 100%
+
+   The Full toolbar.
 
 .. list-table::
    :header-rows: 1
@@ -117,27 +197,27 @@ The toolbar at a glance
 
    * - Button
      - What it does
-   * - **Import Roster**
+   * - **Import**
      - Loads a class list from Excel or CSV.
-   * - **Paste Roster**
+   * - **Paste**
      - Pastes a class list copied from a spreadsheet (see `Pasting a class list`_).
-   * - **Import JSON** / **Export JSON**
+   * - **Open** / **Save**
      - Opens or saves a whole plan (see `Saving and opening plans`_).
+   * - **Print**
+     - Prints the groups.
+   * - **Projector**
+     - Shows just the groups, full-screen, in large text.
    * - **Reset**
      - Goes back to the page's own class list and starting settings.
    * - **Revert**
      - Goes back to the last file you opened or saved.
-   * - **Print**
-     - Prints the groups.
-   * - **Projector View**
-     - Shows just the groups, full-screen, in large text.
    * - **Clear**
      - Empties every group into *Unassigned*, ready to place students by hand.
    * - **A → Z** / **Z → A**
      - Fills the groups in surname order.
-   * - **Homeroom A → Z**
+   * - **Homeroom**
      - Fills the groups homeroom by homeroom.
-   * - **Random Grouping**
+   * - **Random**
      - Shuffles the class into new groups.
    * - **Rules**
      - Keep students together or apart (see `Rules`_).
@@ -231,7 +311,7 @@ Hover over a student in a group and click the 🔓 padlock. They are now locked 
 that place: the card gets an amber outline and a 🔒. The padlock beside a
 group's name locks or unlocks the whole group.
 
-Locked students stay exactly where they are when you press Random Grouping,
+Locked students stay exactly where they are when you press **Random**,
 A → Z or a size button, and everyone else is rearranged around them. This is
 useful when you have placed a few students carefully and want the rest
 shuffled.
@@ -321,7 +401,7 @@ Click a group's name on the plan to rename it (press Enter to finish), or open
 
 Your saved role sets and name lists are kept in the browser, so they don't
 follow you to another computer. The roles and names a plan is using are saved
-with it when you press **Export JSON**.
+with it when you press **Save**.
 
 
 Display options
@@ -363,7 +443,7 @@ are then cut short. The stacked layout doesn't have this problem.
 Projector view and printing
 ---------------------------
 
-**Projector View** fills the screen with just the groups and the role key, in
+**Projector** fills the screen with just the groups and the role key, in
 large text. Press **✕ Exit projector view** or Esc to leave.
 
 **Print** opens a printable copy in landscape, with the title, the role key,
@@ -382,11 +462,11 @@ Saving and opening plans
 group, names, roles, attendance, locks and display options) is kept in that
 browser, so the page reopens exactly as you left it.
 
-**Export JSON** saves the whole plan as a file. In Chrome and Edge a *Save As*
+**Save** saves the whole plan as a file. In Chrome and Edge a *Save As*
 box lets you choose the folder and name; other browsers ask for a file name and
 download it. Use this to keep a plan, move it to another computer, or share it.
 
-**Import JSON** opens a saved plan, on this page or another. The file is checked
+**Open** opens a saved plan, on this page or another. The file is checked
 before anything changes, and a message says what was loaded, for example
 *Imported 8J.json: 27 students, 10 rules, groups of 4 and the saved groups.*
 Damaged files and files from other tools are turned away with a reason.
@@ -403,7 +483,7 @@ kept.
 Using a seating plan
 ~~~~~~~~~~~~~~~~~~~~
 
-**Import JSON** also opens a file saved from the seating plan:
+**Open** also opens a file saved from the seating plan:
 
 * In **tables** layouts, each table becomes a group, so students who sit
   together stay together.
@@ -419,16 +499,16 @@ Getting the most out of it
 
 **Set each class up once.** At the start of term, import the class list, add
 the rules you always need (who must be kept apart, who works well together),
-choose your roles, then press **Export JSON** and keep the file. Each lesson
+choose your roles, then press **Save** and keep the file. Each lesson
 afterwards only takes a click or two.
 
 **A typical lesson:**
 
 #. Open the page. Your groups are as you left them.
 #. Press **Attendance**, tick anyone away, then press **Regroup**.
-#. Press **Random Grouping** for new groups, or keep last lesson's groups.
+#. Press **Random** for new groups, or keep last lesson's groups.
 #. Press **Rotate Roles** so everyone gets a different job.
-#. Tick **Hide Rule Badges**, then press **Projector View**.
+#. Tick **Hide Rule Badges**, then press **Projector**.
 
 **Ideas that work well:**
 
@@ -437,7 +517,7 @@ afterwards only takes a click or two.
 * **Reliable partners.** Use *Keep together* for a student who needs a buddy,
   such as a new student or an EAL/D student with a translator friend.
 * **Hand-picked leaders.** Drag your chosen leaders into the first place of each
-  group and lock them (🔓). Random Grouping then shuffles everyone else around
+  group and lock them (🔓). **Random** then shuffles everyone else around
   them, and with roles on, each leader gets the first role.
 * **Practical work.** Use the *Science lab* role set with groups of 4 or 5, so
   every student has a job (equipment, safety, recording, reporting).
@@ -451,7 +531,7 @@ afterwards only takes a click or two.
 * **Table cards.** Print the groups with **Number Students** and **Large Icons**
   on and put the page on the front bench, so students can find their group and
   role without asking.
-* **Keep a copy before experimenting.** Press **Export JSON** first; **Revert**
+* **Keep a copy before experimenting.** Press **Save** first; **Revert**
   brings the saved groups straight back.
 
 
@@ -461,7 +541,7 @@ Privacy
 * Class lists, rules and groups stay **in this browser on this computer**. They
   are not sent to any server and are not copied to your other devices.
 * They are lost if the browser's site data is cleared, and aren't kept at all in
-  a private or incognito window. **Export JSON** is your backup.
+  a private or incognito window. **Save** is your backup.
 * On a shared computer, anyone using the same sign-in and browser can open the
   page and see your groups. Press **Reset** before you leave.
 * **Exported files contain student names.** Store them where you keep other
@@ -473,7 +553,7 @@ Tips
 
 * **Several classes on one page.** Each planner remembers its own groups.
 * **Moving to another computer.** Plans are remembered per browser. Use
-  **Export JSON**, then **Import JSON** on the other computer.
+  **Save**, then **Open** on the other computer.
 * **Importing Excel** needs an internet connection the first time, to load the
   Excel reader. CSV files work offline.
 * **Before projecting**, tick **Hide Rule Badges** so students don't see who is
@@ -493,7 +573,7 @@ A rule isn't being followed
    **Ignore Rules** isn't ticked.
 
 My groups didn't follow me to another computer
-   Plans are remembered per browser. Use **Export JSON** and **Import JSON**.
+   Plans are remembered per browser. Use **Save** and **Open**.
 
 I want to start again
    **Reset** returns to the page's own class list. **Clear** just empties the

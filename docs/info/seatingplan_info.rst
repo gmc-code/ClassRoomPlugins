@@ -26,6 +26,10 @@ All the pictures in this guide use made-up students.
 Quick start
 -----------
 
+These steps use the button names in the **Full** view. In **Simple**, the
+same steps are numbered **1** to **4** on the toolbar (see
+`The Simple toolbar`_).
+
 #. Press **Import** and choose your class's Excel or CSV export, or press
    **Paste** and paste the names from a spreadsheet.
 #. Click the title and type the class name, e.g. *8 Science W9*.
@@ -114,12 +118,9 @@ Simple and Full controls
 
 The switch at the top right chooses how many controls you see:
 
-* **Simple** shows the main steps in order, with big buttons:
-  your class (**Paste names**, **Import file**), the room (**Rows** or
-  **Tables** and a layout menu), seating everyone (**A → Z**, **Random**),
-  showing it (**Print**, **Projector**), plus **Open**, **Save** and
-  **Undo**.
-* **Full** shows every control.
+* **Simple** shows the main steps in order, with big buttons. See
+  `The Simple toolbar`_.
+* **Full** shows every control. See `The Full toolbar`_.
 
 The tool remembers your choice on this computer, so it opens the same way
 next time. Each tool remembers its own choice, so you can use Full in one
@@ -134,8 +135,92 @@ For page authors: the ``:controls:`` option sets the view. ``simple`` or
 ``full`` fixes the view and hides the switch; ``choice`` (the default) lets
 each teacher choose.
 
-The toolbar
------------
+The Simple toolbar
+------------------
+
+In Simple, the toolbar is one row of four numbered steps. Work from left to
+right, from **1** to **4**. **Open**, **Save** and **Undo** sit at the right
+end. Hover over a button to see what it does.
+
+.. figure:: images/seatingplan/seatingplan_simple_toolbar.png
+   :alt: The Simple toolbar: four numbered steps, with Open, Save and Undo at the right, and the hint strip underneath
+   :width: 100%
+
+   The Simple toolbar, with the Simple | Full switch at the top right.
+
+1 · Your class
+~~~~~~~~~~~~~~
+
+**Paste names**
+   Copy the class from Excel, Google Sheets or the school system, press
+   **Paste names** and paste (**Ctrl+V**). A heading row is optional (see
+   `Pasting a class list`_). If the plan already has students, choose
+   **Replace the class** or **Add to the class**.
+
+**Import file**
+   Choose an Excel or CSV class list. It replaces the class (see
+   `Importing a class list`_).
+
+2 · Room
+~~~~~~~~
+
+**Rows** or **Tables**
+   The kind of room: rows of desks, or tables that groups sit around.
+
+The layout menu
+   How the desks are laid out, e.g. *5x6* or *6,8,8,6* for rows, or a number
+   of tables. It says *Custom layout* when a layout was typed in Full (see
+   `Layouts`_).
+
+3 · Seat everyone
+~~~~~~~~~~~~~~~~~
+
+**A → Z**
+   Seat the class in surname order.
+
+**Random**
+   Seat the class in a random order. Press it again for a different order.
+
+Both follow any rules and locked desks set up in Full.
+
+4 · Show it
+~~~~~~~~~~~
+
+**Print**
+   A printable copy of the plan.
+
+**Projector**
+   Show only the whiteboard and desks, full screen, in large text. Press
+   **Esc** to return.
+
+Open, Save and Undo
+~~~~~~~~~~~~~~~~~~~
+
+**Open**
+   Open a plan saved with **Save**.
+
+**Save**
+   Save the whole plan as a file, as a backup or to move it to another
+   computer.
+
+**Undo**
+   Take back the last change: moving or seating students, a new layout, an
+   import. Press it again to go further back (up to 40 steps).
+
+Moving students
+~~~~~~~~~~~~~~~
+
+Drag a name onto a desk to move the student there; if the desk is taken, the
+two students swap. Right-click a desk to lock it.
+
+Under the toolbar, a pale yellow strip gives a reminder of how to move and lock students.
+When a setting from Full is in use, the strip also shows it, for example
+*2 rules still apply*, with a **Change in Full** link.
+
+The Full toolbar
+----------------
+
+Everything below is in the **Full** view.
 
 The button names are kept short so each row fits on one line; hover over a
 button to see what it does in full. The buttons are coloured by what they do:
@@ -148,10 +233,10 @@ button to see what it does in full. The buttons are coloured by what they do:
   **Rules** …), **brown** for **Lock**, and **red** for **Clear**.
 
 .. figure:: images/seatingplan/seatingplan_toolbar.png
-   :alt: The seating plan toolbar
+   :alt: The Full toolbar of the seating plan
    :width: 100%
 
-   The toolbar.
+   The Full toolbar.
 
 Top row: files and output
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -373,7 +458,7 @@ Flipping and swapping do not check the rules: a desk turns red if a student
 there now breaks one (e.g. a *Left side* student who is now on the right).
 
 Untick **Row Controls** to hide all three buttons. They never appear in
-**Projector View**, in **Tables** mode or on printouts.
+**Projector**, in **Tables** mode or on printouts.
 
 Locked desks
 ------------

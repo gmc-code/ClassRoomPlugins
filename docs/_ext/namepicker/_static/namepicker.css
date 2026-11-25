@@ -63,6 +63,8 @@
 .np-btn-amber { background: #d97706; } .np-btn-amber:hover { background: #b45309; }
 .np-btn-purple { background: #7c3aed; } .np-btn-purple:hover { background: #6d28d9; }
 .np-btn-teal { background: #0d9488; } .np-btn-teal:hover { background: #0f766e; }
+.np-btn-file { background: #0284c7; } .np-btn-file:hover { background: #0369a1; }
+.np-tsep { width: 1px; height: 22px; align-self: center; background: #334155; margin: 0 2px; }
 .np-btn-red { background: #dc2626; } .np-btn-red:hover { background: #b91c1c; }
 
 .namepicker .np-range { width: 170px; max-width: 45vw; accent-color: #38bdf8; cursor: pointer; }

@@ -63,7 +63,7 @@ The directive
       Sam Jones, 7B
 
 With no options and no content it renders an empty picker; teachers then use
-**Import Roster**.
+**Import**.
 
 **Content:** one student per line, ``First Surname, Homeroom``. The first word
 is the first name and the rest the surname (which may be empty); the homeroom is
@@ -166,7 +166,7 @@ Excel reads the first sheet; whole-number floats such as ``11.0`` become ``11``.
 Homerooms are shortened in the browser to the first character plus the last two
 digits (``H-Room 211`` → ``H11``).
 
-**Import Roster** in the browser reads the same columns. Excel files load
+**Import** in the browser reads the same columns. Excel files load
 SheetJS (``xlsx@0.18.5`` from cdn.jsdelivr.net) on first use.
 
 
@@ -341,7 +341,7 @@ the first click, as browsers require.
 JSON file format
 ----------------
 
-**Export JSON** and the browser copy use this shape (``version`` 2):
+**Save** and the browser copy use this shape (``version`` 2):
 
 .. code-block:: json
 
@@ -414,7 +414,7 @@ key). Set ``:storage-key:`` where this matters. ``localStorage`` is per origin,
 so all versions of the docs on one domain share keys. With storage blocked the
 picker works but forgets everything when the page closes.
 
-**Export JSON** uses ``showSaveFilePicker`` where available (Chrome and Edge on
+**Save** uses ``showSaveFilePicker`` where available (Chrome and Edge on
 ``https``/``localhost``), otherwise a file-name prompt and a normal download.
 
 

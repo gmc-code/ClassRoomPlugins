@@ -30,18 +30,18 @@ What this means in practice:
   page, and every plan reopens exactly as you left it, with each student on
   the same desk.
 * **Each computer and browser is separate.** Plans made in Chrome on your
-  laptop won't appear in Edge. Use **Export JSON** and **Import JSON** to move them (see
+  laptop won't appear in Edge. Use **Save** and **Open** to move them (see
   `Backing up and moving your plans`_).
 * **Plans can be lost.** They disappear if the browser's site data or
   history is cleared, if you use a private or incognito window, or if the
-  computer is reset or replaced. **Export JSON** is your only backup.
+  computer is reset or replaced. **Save** is your only backup.
 
 One page, twelve plans
 ----------------------
 
 * **Each plan is independent.** Importing, sorting, adding rules or changing
   the layout in *Plan 3* never touches *Plan 4*. Each has its own **Reset**,
-  **Revert**, **Print**, **Save PNG** and **Projector View**.
+  **Revert**, **Print**, **PNG** and **Projector**.
 * **Each plan is saved separately**, with its own class list, rules, layout,
   seats and display options.
 * **Plans you haven't used stay empty** and are left out when printing. Use
@@ -80,8 +80,8 @@ Copying a class into a second plan
 
 To reuse a class you have already set up, rules and all:
 
-#. In the finished plan, press **Export JSON** and save the file.
-#. In an empty plan, press **Import JSON** and choose that file. You now have
+#. In the finished plan, press **Save** and save the file.
+#. In an empty plan, press **Open** and choose that file. You now have
    an exact copy.
 #. Change the title, e.g. add the room name.
 #. Choose the layout for the other room (or switch to **Tables**). The
@@ -91,7 +91,7 @@ To reuse a class you have already set up, rules and all:
 The two plans are now separate: changes to one never affect the other. If
 you later add a rule or a new student, add it in each plan for that class.
 
-To start a second plan from scratch instead, press **Import Roster** in an
+To start a second plan from scratch instead, press **Import** in an
 empty plan and choose the class list again (this brings no rules across).
 
 Setting up your classes
@@ -99,14 +99,14 @@ Setting up your classes
 
 Do this once per class, at the start of the year or term:
 
-#. Find the next empty plan and press **Import Roster**. Choose the class's
+#. Find the next empty plan and press **Import**. Choose the class's
    Excel export from School Class Lists.
 #. Click the plan's title and type the class name, e.g. *8 Science W9*
    (importing sets the title to the file's name). Add the room if the class
    has more than one plan.
 #. Choose a layout to match the room.
 #. Add any **Rules**, then sort, shuffle rows or drag students into place.
-#. Press **Export JSON** to keep a backup.
+#. Press **Save** to keep a backup.
 
 Printing all your plans
 -----------------------
@@ -119,7 +119,7 @@ to keep one PDF of every plan.
 
 To print a single plan, use the **Print** button in that plan. To save one
 plan as a picture (e.g. for an email to a relief teacher), use its
-**Save PNG** button: Chrome and Edge let you choose the folder and file name,
+**PNG** button: Chrome and Edge let you choose the folder and file name,
 other browsers ask for a name and save to Downloads. See
 :doc:`/info/seatingplan_info` for details.
 
@@ -128,11 +128,11 @@ Backing up and moving your plans
 
 Because your plans exist only in this browser, back them up:
 
-* **Back up:** press **Export JSON** in each plan you use. Keep the files
+* **Back up:** press **Save** in each plan you use. Keep the files
   together, e.g. in a *Seating plans* folder in your school OneDrive. Export
   again after changes, and when your classes change.
 * **Move to another computer or browser:** open this page there and press
-  **Import JSON** in an empty plan, one file per plan. Everything comes back:
+  **Open** in an empty plan, one file per plan. Everything comes back:
   title, class list, rules, layout, seats and display options.
 * **Undo changes to a plan:** **Revert** goes back to the last file imported
   or exported in that plan.
@@ -141,12 +141,12 @@ Changing plans
 --------------
 
 * **Replace a class** (new semester, new class list): in that plan, press
-  **Import Roster** with the new file. This removes the old rules. Export the
+  **Import** with the new file. This removes the old rules. Export the
   old class first if you may want it again.
 * **Empty a plan:** press **Reset** in that plan. The plan is emptied in this
   browser only; any exported JSON file is unaffected.
-* **Move a plan to a different slot:** **Export JSON** from one plan,
-  **Import JSON** into the other, then **Reset** the first.
+* **Move a plan to a different slot:** **Save** from one plan,
+  **Open** into the other, then **Reset** the first.
 
 Getting the most out of it
 --------------------------
@@ -162,7 +162,7 @@ Getting the most out of it
 * **Use Revert as an undo.** Export before trying a new arrangement; if it
   doesn't work, **Revert** brings the saved one back.
 * **Print all at the start of term** and keep the copies in your relief folder,
-  so a relief teacher knows where everyone sits. Or use **Save PNG** in each
+  so a relief teacher knows where everyone sits. Or use **PNG** in each
   plan and keep the pictures in a shared relief folder.
 * **Before projecting a plan**, tick **Hide Rule Badges** in that plan so
   students don't see who has a rule.

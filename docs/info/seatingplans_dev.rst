@@ -48,9 +48,9 @@ A page like this needs nothing beyond the ``seatingplan`` extension:
   ``:controls: simple`` or ``:controls: full`` keeps its fixed view. While the
   page has this switch, the plans don't show their first-visit tip.
 * Each plan is an independent instance with its own storage, Reset, Revert,
-  Print, Save PNG and Projector View. No data is shared between them.
+  **Print**, **PNG** and **Projector**. No data is shared between them.
 * The plans have no content, so each starts empty (5 × 6 rows, or 8 tables of
-  4 in tables mode) and teachers load their own class with **Import Roster**.
+  4 in tables mode) and teachers load their own class with **Import**.
 * ``:skip-empty:`` makes **Print all my classes** leave out unused plans. Each
   plan prints on its own landscape sheet with the fixed print styles.
 * The *Plan 1* … *Plan 12* headings are ordinary section titles, so they give
@@ -102,7 +102,7 @@ tool on the site (seating plans, student groups, the noise monitor). A plan with
 30 students, rules and seats is usually 10–20 KB, plus the same again for its
 Revert copy, so twelve full plans use well under 1 MB. If storage fills or is
 blocked, plans keep working but stop being saved; nothing warns the teacher, so
-remind them to use **Export JSON**.
+remind them to use **Save**.
 
 
 Privacy notes for the site
@@ -112,7 +112,7 @@ Privacy notes for the site
   requests for it. The plans load two libraries from cdn.jsdelivr.net, each
   only when first needed: the Excel reader (SheetJS, ``xlsx@0.18.5``) the first
   time a teacher imports an ``.xlsx`` or ``.xls`` file, and the image maker
-  (``html2canvas@1.4.1``) the first time they press **Save PNG**. Neither
+  (``html2canvas@1.4.1``) the first time they press **PNG**. Neither
   receives any class data. If that CDN is blocked, CSV import and **Print**
   still work.
 * Exported JSON files and saved pictures contain names and homerooms. Point

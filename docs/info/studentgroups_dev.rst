@@ -69,7 +69,7 @@ The ``studentgroups`` directive
       pair: Priya Patel | Maya Singh
 
 With no options and no content it renders an empty planner; teachers then use
-**Import Roster**.
+**Import**.
 
 
 Content
@@ -207,7 +207,7 @@ The header row is matched case-insensitively. Recognised columns:
 * **Homeroom** is shortened in the browser to its first character plus the last
   two digits (``H-Room 211`` → ``H11``).
 
-**Import Roster** in the browser reads the same columns. CSV is parsed by the
+**Import** in the browser reads the same columns. CSV is parsed by the
 script itself; ``.xlsx``/``.xls`` loads SheetJS
 (``xlsx@0.18.5`` from cdn.jsdelivr.net) the first time it is needed, so Excel
 import needs internet access.
@@ -324,7 +324,7 @@ Arranging (sort buttons, size changes, Regroup) is done by a pure function,
 #. **Everyone else** fills the remaining places in the chosen sort order,
    always into the group that would be least full afterwards, as a share of
    its size. Groups of mixed sizes therefore fill in proportion to their size.
-   With **Random Grouping**, ties are broken at random.
+   With **Random**, ties are broken at random.
 
 Then locked students go back into their exact slot, and the others fill the
 group's free slots in order. Students who don't fit go to *Unassigned*.
@@ -345,7 +345,7 @@ student in position *k* of *m* gets ``roles[(k − roleOffset) mod m]``.
 JSON file format
 ----------------
 
-**Export JSON** (and the browser copy) uses this shape; ``version`` is
+**Save** (and the browser copy) uses this shape; ``version`` is
 currently 2:
 
 .. code-block:: json
@@ -455,7 +455,7 @@ a server.
 * If storage is blocked (some privacy modes), the planner still works but
   forgets everything when the page closes; Revert stays disabled.
 
-**Export JSON** uses the File System Access API (``showSaveFilePicker``) where
+**Save** uses the File System Access API (``showSaveFilePicker``) where
 available (Chrome and Edge on ``https``/``localhost``), falling back to a
 file-name prompt and a normal download.
 
@@ -509,7 +509,7 @@ Restyle one planner with ``:class:`` and your own stylesheet:
 
 .. note::
 
-   Styling applies on screen and in Projector View only. **Print** and the
+   Styling applies on screen and in the projector view only. **Print** and the
    print-all button use their own fixed print styles, so printouts look the
    same for every planner.
 

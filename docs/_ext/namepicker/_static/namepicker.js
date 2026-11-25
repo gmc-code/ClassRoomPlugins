@@ -1405,43 +1405,35 @@
                 '<button type="button" class="np-projector-exit" data-action="projector-exit">✕ Exit projector view</button>' +
                 '<div class="np-toolbar">' +
                 '<div class="np-toolbar-row">' +
-                '<button type="button" class="np-btn" data-action="import" title="Import Roster: load a class list from Excel or CSV">' +
+                '<button type="button" class="np-btn" data-action="import" title="Load a class list from Excel or CSV, replacing the current one">' +
                 icon('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>') +
-                'Roster</button>' +
+                'Import</button>' +
                 '<input type="file" class="np-file" accept=".xlsx,.xls,.csv" data-role="file">' +
                 '<button type="button" class="np-btn" data-action="paste-roster" title="Paste a class list copied from Excel, Google Sheets or a school system">' +
                 icon('<rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>') +
                 'Paste</button>' +
-
-                '<button type="button" class="np-btn np-btn-teal" data-action="import-json" title="Import JSON: open a saved name picker, or a class from student groups or a seating plan">' +
+                '<span class="np-tsep"></span>' +
+                '<button type="button" class="np-btn np-btn-file" data-action="import-json" title="Open a picker saved with Save, or a class from student groups or a seating plan">' +
                 icon('<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L8.6 3.3A2 2 0 0 0 6.9 2.5H4a2 2 0 0 0-2 2v13.5a2 2 0 0 0 2 2z"/><path d="M12 10v6"/><path d="m9 13 3-3 3 3"/>') +
-                'Import</button>' +
+                'Open</button>' +
                 '<input type="file" class="np-file" accept=".json" data-role="json-file">' +
-
-                '<button type="button" class="np-btn np-btn-teal" data-action="export-json" title="Export JSON: save the whole picker as a file">' +
+                '<button type="button" class="np-btn np-btn-file" data-action="export-json" title="Save the whole picker as a file">' +
                 icon('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>') +
-                'Export</button>' +
-
-                '<button type="button" class="np-btn np-btn-grey" data-action="reset" title="Reset: go back to the class list and settings written on the page">' +
-                icon('<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>') +
-                'Reset</button>' +
-
-                '<button type="button" class="np-btn np-btn-grey" data-action="revert" data-role="revert" disabled title="Revert: nothing imported yet">' +
-                icon('<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>') +
-                'Revert</button>' +
-
+                'Save</button>' +
+                '<span class="np-tsep"></span>' +
                 '<button type="button" class="np-btn np-btn-teal" data-action="print" title="Print the last pick">' +
                 icon('<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/>') +
                 'Print</button>' +
-                '<button type="button" class="np-btn np-btn-teal" data-action="projector" title="Projector View: full screen, large cards">' +
+                '<button type="button" class="np-btn np-btn-teal" data-action="projector" title="Show the Pick! button and cards full screen, in large text">' +
                 icon('<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/>') +
                 'Projector</button>' +
-
-
-
-
-
-
+                '<span class="np-tsep"></span>' +
+                '<button type="button" class="np-btn np-btn-grey" data-action="reset" title="Go back to the class list and settings written on the page">' +
+                icon('<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>') +
+                'Reset</button>' +
+                '<button type="button" class="np-btn np-btn-grey" data-action="revert" data-role="revert" disabled title="Revert: nothing imported yet">' +
+                icon('<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>') +
+                'Revert</button>' +
                 '</div>' +
 
                 '<div class="np-toolbar-row">' +
@@ -1506,7 +1498,7 @@
                 'title="That pick doesn\'t count: put these students back in the hat">↩ Put Back</button>' +
                 '</div>' +
                 '<div class="np-stage" data-role="stage"></div>' +
-                '<div class="np-empty" data-role="empty">No names yet. Use Roster or Paste, or add names to the directive.</div>' +
+                '<div class="np-empty" data-role="empty">No names yet. Use Import or Paste, or add names to the directive.</div>' +
                 '<div class="np-result" data-role="result" aria-live="polite"></div>' +
                 '<div class="np-info" data-role="info"></div>' +
                 '</div>';
@@ -2325,7 +2317,7 @@
             var body = modal.body, top = body.scrollTop;
             body.innerHTML = '';
             if (!state.students.length) {
-                body.appendChild(make('div', 'np-rp-empty', 'No students yet. Use Import Roster first.'));
+                body.appendChild(make('div', 'np-rp-empty', 'No students yet. Use Import or Paste first.'));
             } else {
                 body.innerHTML = '<div class="np-rp-tools"><input type="search" class="np-rp-search" data-m="search" ' +
                     'placeholder="Search students" aria-label="Search students" value="' + esc(search) + '"></div>';
@@ -2591,7 +2583,7 @@
             if (!hist) {
                 hist = makePanel('Pick History', 'np-hist');
                 hist.top.innerHTML = '<div class="np-rp-help">Every pick, newest first, and how many times each student ' +
-                    'has been picked. The history is kept with the class and saved in Export JSON.</div>';
+                    'has been picked. The history is kept with the class and saved with Save.</div>';
                 hist.modal.addEventListener('click', function (e) {
                     var b = e.target.closest('[data-h]');
                     if (!b) return;
@@ -2659,8 +2651,8 @@
                 step(4, 'Show it', '#059669',
                     b('projector', 'np-btn-teal', 'Projector') + b('print', 'np-btn-teal', 'Print')) +
                 '<span class="cc-spacer"></span><div class="cc-end">' +
-                b('import-json', 'np-btn-teal', 'Open', ' title="Open a saved name picker, or a class from student groups or a seating plan"') +
-                b('export-json', 'np-btn-teal', 'Save', ' title="Save the whole picker as a file"') + '</div>';
+                b('import-json', 'np-btn-file', 'Open', ' title="Open a saved name picker, or a class from student groups or a seating plan"') +
+                b('export-json', 'np-btn-file', 'Save', ' title="Save the whole picker as a file"') + '</div>';
             window.ClassroomControls.attach({
                 root: root, tool: 'namepicker', setting: cfg.controls,
                 toolbar: root.querySelector('.np-toolbar'),
