@@ -263,6 +263,7 @@ class StudentGroupsDirective(SphinxDirective):
         "group-names": directives.unchanged,
         "roster": directives.path,
         "title": directives.unchanged,
+        "controls": directives.unchanged,
         "sort": _choice("none", "az", "za", "homeroom", "random"),
         "one-line": directives.flag,
         "surname-initial": directives.flag,
@@ -426,6 +427,7 @@ class StudentGroupsDirective(SphinxDirective):
         node["config"] = {
             "id": storage_id,
             "title": self.options.get("title", "Student Groups"),
+            "controls": (self.options.get("controls") or "choice").strip().lower(),
             "groupSize": group_size,
             "groupSizes": group_sizes,
             "roles": roles,

@@ -574,6 +574,210 @@
     window.ClassroomPaste = { version: 1, open: open, parse: function (text, opt) { return build(text, opt || {}, { delim: 'auto' }); } };
 })();
 /* ===== end ClassroomPaste ===== */
+/* ===== ClassroomControls v1: Simple / Full controls for the classroom tools =====
+   Shared by seatingplan, lockers, studentgroups and namepicker. The same block is copied into
+   each directive's .js so every directive still works on its own; whichever loads first defines
+   window.ClassroomControls and the others reuse it. Keep the copies identical.
+
+   Simple: one row of numbered steps with big buttons, for teachers new to the tool.
+   Full:   every control (the tool's own toolbar rows).
+   A Simple | Full switch sits top right. Each tool remembers its own choice in the browser
+   (localStorage 'classroomControls:<tool>'); a first visit starts in Simple. The directive's
+   :controls: option can instead fix the view to simple or full and hide the switch.
+   Simple only hides controls: rules, locks, year levels … keep working, and a note says when
+   one is in use.
+
+   ClassroomControls.attach({
+       root, tool: 'seatingplan', setting: cfg.controls,      // 'simple' | 'full' | 'choice'
+       toolbar: element,                                       // the tool's toolbar; its rows become Full-only
+       simple: html,                                           // the Simple bar (use step() for each step)
+       hint: 'Drag a name onto a desk …',                      // one line shown under the Simple bar
+       note: function () { return '2 rules still apply'; },   // hidden settings in use ('' = none)
+       proxies: [{ sel: '[data-cc="room"]', buttons: function () { return nodeList; }, active: 'sp-active' }],
+       onMode: function (mode) {}
+   }) -> { mode(), sync() }
+   Buttons in the Simple bar use the tool's own data-action values, so the tool's click handler
+   runs them; their disabled state follows the matching Full button. */
+(function () {
+    'use strict';
+    if (window.ClassroomControls && window.ClassroomControls.version >= 1) return;
+
+    var CSS =
+        '.cc-root{position:relative}' +
+        '.cc-pill{position:absolute;top:4px;right:8px;z-index:3;display:flex;background:#1e293b;border:1px solid #334155;border-radius:999px;padding:2px}' +
+        '.cc-pill button{font:inherit;font-size:12px;font-weight:600;line-height:1;border:0;border-radius:999px;padding:5px 12px;background:transparent;color:#cbd5e1;cursor:pointer}' +
+        '.cc-pill button:hover{color:#fff}' +
+        '.cc-pill button[aria-pressed="true"]{background:#fff;color:#0f172a}' +
+        '.cc-pill button:focus-visible{outline:2px solid #60a5fa;outline-offset:1px}' +
+        '.cc-root.cc-has-pill>[data-role="title"]{padding-right:150px}' +
+        '.cc-root.cc-simple .cc-full-only{display:none!important}' +
+        '.cc-root:not(.cc-simple) .cc-simplebar,.cc-root:not(.cc-simple) .cc-note{display:none!important}' +
+        '.cc-simplebar{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px 0;width:100%;align-self:stretch}' +
+        '.cc-step{display:flex;flex-direction:column;gap:5px;padding:0 12px;border-right:1px solid #334155}' +
+        '.cc-step:last-of-type{border-right:0}' +
+        '.cc-step-label{font-size:12px;font-weight:600;color:#94a3b8;white-space:nowrap;display:flex;align-items:center;gap:6px}' +
+        '.cc-num{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;color:#fff;font-size:11px;font-weight:700}' +
+        '.cc-step-body{display:flex;flex-wrap:wrap;gap:6px;align-items:center}' +
+        '.cc-spacer{flex:1 1 0}' +
+        '.cc-end{display:flex;flex-wrap:wrap;gap:6px;align-items:flex-end;padding:0 8px}' +
+        '.cc-simplebar .cc-big{min-height:40px;font-size:14px!important;padding-left:14px!important;padding-right:14px!important}' +
+        '.cc-select{min-height:40px;font:inherit;font-size:14px;font-weight:600;color:#f8fafc;background:#0f172a;border:1px solid #475569;border-radius:6px;padding:0 8px;max-width:220px;cursor:pointer}' +
+        '.cc-select:focus-visible{outline:2px solid #60a5fa;outline-offset:1px}' +
+        '.cc-find{display:flex;align-items:center;gap:6px;min-height:40px;background:#0f172a;border:1px solid #334155;border-radius:6px;padding:0 10px;color:#64748b}' +
+        '.cc-find input{background:transparent;border:0;color:#f8fafc;width:110px;font:inherit;font-size:14px;outline:none}' +
+        '.cc-note{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;background:#fffbeb;border-bottom:1px solid #fde68a;padding:7px 14px;font-size:13px;color:#78350f}' +
+        '.cc-note-hint{flex:1 1 300px}' +
+        '.cc-chip{background:#fef3c7;border:1px solid #f59e0b;border-radius:999px;padding:1px 10px;font-weight:600;white-space:nowrap}' +
+        '.cc-link{font:inherit;font-weight:600;color:#1d4ed8;background:none;border:0;padding:0;cursor:pointer;text-decoration:underline}' +
+        '.cc-tip{display:flex;align-items:center;gap:10px;background:#eff6ff;border-bottom:1px solid #bfdbfe;padding:7px 14px;font-size:13px;color:#1e3a8a}' +
+        '.cc-tip span{flex:1}' +
+        '.cc-tip button{font:inherit;background:none;border:0;color:#1e3a8a;cursor:pointer;font-size:16px;line-height:1;padding:0 4px}' +
+        '.sp-projector .cc-pill,.sp-projector .cc-note,.sp-projector .cc-tip,.sg-projector .cc-pill,.sg-projector .cc-note,.sg-projector .cc-tip,' +
+        '.np-projector .cc-pill,.np-projector .cc-note,.np-projector .cc-tip{display:none!important}' +
+        '@media print{.cc-pill,.cc-note,.cc-tip,.cc-simplebar{display:none!important}}' +
+        '@media (max-width:700px){.cc-step{border-right:0;padding:0 6px}.cc-root.cc-has-pill>[data-role="title"]{padding-right:14px;padding-top:34px}}';
+
+    function injectCss() {
+        if (document.getElementById('cc-css')) return;
+        var st = document.createElement('style');
+        st.id = 'cc-css';
+        st.textContent = CSS;
+        document.head.appendChild(st);
+    }
+    function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+    function put(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage blocked */ } }
+    function esc(s) {
+        return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
+    }
+
+    /* one numbered step of the Simple bar */
+    function step(n, label, colour, body) {
+        return '<div class="cc-step"><div class="cc-step-label"><span class="cc-num" style="background:' + colour + '">' + n + '</span>' +
+            esc(label) + '</div><div class="cc-step-body">' + body + '</div></div>';
+    }
+
+    function attach(o) {
+        injectCss();
+        var root = o.root, tool = o.tool, key = 'classroomControls:' + tool;
+        var setting = String(o.setting || 'choice').toLowerCase();
+        var fixed = setting === 'simple' || setting === 'full';
+        var stored = get(key);
+        var mode = fixed ? setting : (stored === 'full' || stored === 'simple' ? stored : 'simple');
+        root.classList.add('cc-root');
+
+        /* the tool's own rows become Full-only; the Simple bar goes in first */
+        Array.prototype.forEach.call(o.toolbar.children, function (row) { row.classList.add('cc-full-only'); });
+        o.toolbar.insertAdjacentHTML('afterbegin', '<div class="cc-simplebar">' + o.simple + '</div>');
+        var bar = o.toolbar.firstElementChild;
+        o.toolbar.insertAdjacentHTML('afterend', '<div class="cc-note" data-cc-note hidden></div>');
+        var noteEl = o.toolbar.nextElementSibling;
+
+        var pill = null, tip = null;
+        if (!fixed) {
+            root.classList.add('cc-has-pill');
+            root.insertAdjacentHTML('afterbegin',
+                '<div class="cc-pill" role="group" aria-label="Controls" title="Simple: the main steps. Full: every control. Remembered on this computer.">' +
+                '<button type="button" data-cc-mode="simple">Simple</button><button type="button" data-cc-mode="full">Full</button></div>');
+            pill = root.firstElementChild;
+            if (!stored && !get(key + ':tip')) {
+                noteEl.insertAdjacentHTML('afterend', '<div class="cc-tip" data-cc-tip><span>This is the <b>Simple</b> view with the main steps. ' +
+                    'For everything else, choose <b>Full</b> at the top right. Your choice is remembered next time.</span>' +
+                    '<button type="button" data-cc-tip-close aria-label="Close tip">×</button></div>');
+                tip = noteEl.nextElementSibling;
+            }
+        }
+
+        function closeTip() {
+            if (tip && tip.parentNode) tip.parentNode.removeChild(tip);
+            tip = null;
+            put(key + ':tip', '1');
+        }
+
+        function counterpart(b) {
+            var a = b.getAttribute('data-action'), m = b.getAttribute('data-mode');
+            var sel = '.cc-full-only [data-action="' + a + '"]' + (m ? '[data-mode="' + m + '"]' : '');
+            return o.toolbar.querySelector(sel);
+        }
+
+        function syncProxies() {
+            (o.proxies || []).forEach(function (p) {
+                var sel = bar.querySelector(p.sel);
+                if (!sel) return;
+                var btns = Array.prototype.slice.call(p.buttons() || []);
+                var labels = btns.map(function (b) { return b.textContent.trim(); });
+                var active = -1;
+                btns.forEach(function (b, i) { if (b.classList.contains(p.active)) active = i; });
+                var sig = labels.join('\u0001') + '|' + (active < 0);
+                if (sel.getAttribute('data-sig') !== sig) {
+                    sel.innerHTML = (active < 0 ? '<option value="">' + esc(p.none || 'Custom') + '</option>' : '') +
+                        labels.map(function (l, i) { return '<option value="' + i + '">' + esc((p.prefix || '') + l) + '</option>'; }).join('');
+                    sel.setAttribute('data-sig', sig);
+                }
+                sel.value = active < 0 ? '' : String(active);
+            });
+        }
+
+        function sync() {
+            Array.prototype.forEach.call(bar.querySelectorAll('[data-action]'), function (b) {
+                var c = counterpart(b);
+                if (c) {
+                    b.disabled = !!c.disabled;
+                    if (c.title && !b.title) b.title = c.title;
+                    ['sp-active', 'lk-active', 'sg-active', 'np-active'].forEach(function (cls) { b.classList.toggle(cls, c.classList.contains(cls)); });
+                }
+            });
+            syncProxies();
+            if (pill) Array.prototype.forEach.call(pill.querySelectorAll('[data-cc-mode]'), function (b) {
+                b.setAttribute('aria-pressed', b.getAttribute('data-cc-mode') === mode ? 'true' : 'false');
+            });
+            var n = o.note ? o.note() : '';
+            noteEl.innerHTML = '<span class="cc-note-hint">' + esc(o.hint || '') + '</span>' +
+                (n ? '<span class="cc-chip">' + esc(n) + '</span>' + (fixed ? '' : '<button type="button" class="cc-link" data-cc-mode="full">Change in Full</button>') : '');
+            noteEl.hidden = !(o.hint || n);
+            if (o.afterSync) o.afterSync(bar);
+        }
+
+        function apply(m, remember) {
+            mode = m === 'full' ? 'full' : 'simple';
+            root.classList.toggle('cc-simple', mode === 'simple');
+            if (remember && !fixed) { put(key, mode); closeTip(); }
+            sync();
+            if (o.onMode) o.onMode(mode);
+        }
+
+        var queued = false;
+        function later() {
+            if (queued) return;
+            queued = true;
+            setTimeout(function () { queued = false; sync(); }, 0);
+        }
+        root.addEventListener('click', function (e) {
+            var m = e.target.closest && e.target.closest('[data-cc-mode]');
+            if (m && root.contains(m)) { apply(m.getAttribute('data-cc-mode'), true); return; }
+            if (e.target.closest && e.target.closest('[data-cc-tip-close]')) { closeTip(); return; }
+            later();
+        });
+        root.addEventListener('change', function (e) {
+            var s = e.target.closest && e.target.closest('select[data-cc]');
+            if (s && bar.contains(s)) {
+                (o.proxies || []).forEach(function (p) {
+                    if (!s.matches(p.sel) || s.value === '') return;
+                    var b = (p.buttons() || [])[+s.value];
+                    if (b) b.click();
+                });
+            }
+            later();
+        });
+        /* other changes (imports, drags, dialogs) */
+        document.addEventListener('click', later, true);
+
+        apply(mode, false);
+        return { mode: function () { return mode; }, sync: sync, bar: bar };
+    }
+
+    window.ClassroomControls = { version: 1, attach: attach, step: step };
+})();
+/* ===== end ClassroomControls ===== */
 
 /* seatingplan directive: client-side behaviour. Each .seatingplan[data-seatingplan] gets its own instance. */
 (function () {
@@ -1307,16 +1511,72 @@
         var persistReady = false;   /* false while the page is starting up or resetting */
         var savedPlacement = null;  /* seats read from storage at start-up */
 
+        function savePayload() {
+            var currentTitle = ui.title ? ui.title.textContent.trim() : state.title;
+            return {
+                title: currentTitle, students: state.students, rules: state.rules, display: state.display,
+                layout: state.layout, mode: state.mode, tables: state.tables,
+                sortMode: state.sortMode, fillFromLast: state.fillFromLast, locks: state.locks,
+                placement: ui.grid ? currentPlacement() : (savedPlacement || [])
+            };
+        }
+
         function save() {
+            var snap = JSON.stringify(savePayload());
+            noteForUndo(snap);
+            try { localStorage.setItem(storageKey, snap); } catch (e) { /* storage blocked */ }
+        }
+
+        /* ----- Undo: every saved change (seats, layout, rules, imports, title …) can be taken back.
+           Saves made while one click is being handled count as one step. ----- */
+        var UNDO_MAX = 40;
+        var undoStack = [], lastSnap = null, undoBusy = false, undoTick = false;
+
+        function noteForUndo(snap) {
+            if (!undoBusy && persistReady && lastSnap !== null && snap !== lastSnap && !undoTick) {
+                undoStack.push(lastSnap);
+                if (undoStack.length > UNDO_MAX) undoStack.shift();
+                undoTick = true;
+                setTimeout(function () { undoTick = false; }, 0);
+            }
+            lastSnap = snap;
+            updateUndoButton();
+        }
+
+        function updateUndoButton() {
+            if (!ui.undo) return;
+            ui.undo.disabled = !undoStack.length;
+            ui.undo.title = undoStack.length ? 'Undo the last change' : 'Nothing to undo yet';
+        }
+
+        function undo() {
+            if (!undoStack.length) return;
+            var d;
+            try { d = JSON.parse(undoStack.pop()); } catch (e) { updateUndoButton(); return; }
+            undoBusy = true;
             try {
-                var currentTitle = ui.title ? ui.title.textContent.trim() : state.title;
-                localStorage.setItem(storageKey, JSON.stringify({
-                    title: currentTitle, students: state.students, rules: state.rules, display: state.display,
-                    layout: state.layout, mode: state.mode, tables: state.tables,
-                    sortMode: state.sortMode, fillFromLast: state.fillFromLast, locks: state.locks,
-                    placement: ui.grid ? currentPlacement() : (savedPlacement || [])
-                }));
-            } catch (e) { /* storage blocked */ }
+                if (d.title) { state.title = d.title; if (ui.title) ui.title.textContent = d.title; }
+                state.students = Array.isArray(d.students) ? d.students : [];
+                state.rules = Array.isArray(d.rules) ? d.rules : [];
+                if (Array.isArray(d.layout)) state.layout = d.layout;
+                if (Array.isArray(d.tables)) state.tables = d.tables;
+                state.mode = d.mode === 'tables' ? 'tables' : 'rows';
+                if (typeof d.sortMode === 'string') state.sortMode = d.sortMode;
+                state.fillFromLast = !!d.fillFromLast;
+                state.locks = d.locks ? cleanLocks(d.locks) : {};
+                if (d.display) Object.keys(state.display).forEach(function (k) {
+                    if (typeof d.display[k] === 'boolean') state.display[k] = d.display[k];
+                });
+                syncDisplayControls();
+                showLayoutInBox();
+                updateToolbar();
+                if (!placeStudents(d.placement)) autoArrange(state.sortMode);
+                if (modal && modal.classList.contains('sp-open')) renderPanel();
+                save();
+            } finally { undoBusy = false; }
+            lastSnap = JSON.stringify(savePayload());
+            updateUndoButton();
+            setStatus('Undone.' + (undoStack.length ? '' : ' Nothing more to undo.'));
         }
 
         /* Seats changed (drag, sort, layout, import ...): keep them, unless still starting up. */
@@ -1493,6 +1753,9 @@
 
                 '<span class="sp-tsep"></span>' +
 
+                '<button type="button" class="sp-btn sp-btn-grey" data-action="undo" data-role="undo" disabled title="Nothing to undo yet">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>' +
+                'Undo</button>' +
                 '<button type="button" class="sp-btn sp-btn-grey" data-action="reset">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sp-btn-icon"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>' +
                 'Reset</button>' +
@@ -1607,7 +1870,7 @@
                 '<div class="sp-grid" data-role="grid"></div></div>' +
                 '</div>';
 
-            ['title', 'revert', 'lock-seats', 'layouts', 'custom-layout', 'fill', 'file', 'json-file', 'toggle-surname-initial', 'toggle-homeroom', 'toggle-ignore-rules', 'toggle-oneline', 'toggle-hide-badges', 'toggle-limit-width', 'toggle-teacher-view', 'toggle-row-controls', 'toggle-year-colours', 'png', 'status', 'count', 'pool', 'grid'].forEach(function (r) {
+            ['title', 'undo', 'revert', 'lock-seats', 'layouts', 'custom-layout', 'fill', 'file', 'json-file', 'toggle-surname-initial', 'toggle-homeroom', 'toggle-ignore-rules', 'toggle-oneline', 'toggle-hide-badges', 'toggle-limit-width', 'toggle-teacher-view', 'toggle-row-controls', 'toggle-year-colours', 'png', 'status', 'count', 'pool', 'grid'].forEach(function (r) {
                 ui[r] = root.querySelector('[data-role="' + r + '"]');
             });
 
@@ -1787,6 +2050,7 @@
                 case 'reverse': reverseSeating(); break;
                 case 'clear': clearSeats(); break;
                 case 'reset': resetToPage(); break;
+                case 'undo': undo(); break;
                 case 'revert': revertToImport(); break;
                 case 'print': printPlan(); break;
                 case 'png': savePng(); break;
@@ -2679,7 +2943,8 @@
         }
 
         function resetToPage() {
-            if (!window.confirm('Reset this plan to the roster and rules written on the page? Your imported roster and rules will be removed.')) return;
+            if (!window.confirm('Reset this plan to the roster and rules written on the page? Your imported roster and rules will be removed. (Undo brings them back.)')) return;
+            var before = lastSnap;
             try { localStorage.removeItem(storageKey); } catch (e) { /* ignore */ }
             clearImportSnapshot();
             defaultsFromConfig();
@@ -2692,6 +2957,9 @@
             persistReady = false;   /* the page's own plan: nothing to remember yet */
             autoArrange(cfg.sort || 'DEFAULT');
             persistReady = true;
+            if (before) { undoStack.push(before); if (undoStack.length > UNDO_MAX) undoStack.shift(); }
+            lastSnap = JSON.stringify(savePayload());
+            updateUndoButton();
         }
 
         /* ----- JSON export & import ----- */
@@ -3616,6 +3884,43 @@
             }
         }
 
+        /* ----- Simple / Full controls (see ClassroomControls) ----- */
+
+        function attachControls() {
+            var step = window.ClassroomControls.step;
+            function b(action, cls, label, extra) {
+                return '<button type="button" class="sp-btn ' + cls + ' cc-big" data-action="' + action + '"' + (extra || '') + '>' + label + '</button>';
+            }
+            var simple =
+                step(1, 'Your class', '#2563eb',
+                    b('paste-roster', 'sp-btn-data', 'Paste names', ' title="Paste the class list copied from Excel, Google Sheets or the school system"') +
+                    b('import', 'sp-btn-data', 'Import file', ' title="Choose an Excel or CSV class list"')) +
+                step(2, 'Room', '#0d9488',
+                    '<div class="sp-mode" role="group" aria-label="Room type">' +
+                    b('mode', 'sp-btn-mode', 'Rows', ' data-mode="rows"') + b('mode', 'sp-btn-mode', 'Tables', ' data-mode="tables"') + '</div>' +
+                    '<select class="cc-select" data-cc="room" aria-label="Room layout" title="How the desks are laid out"></select>') +
+                step(3, 'Seat everyone', '#7c3aed',
+                    b('sort', 'sp-btn-purple', 'A → Z', ' data-mode="AZ"') + b('sort', 'sp-btn-amber', 'Random', ' data-mode="RANDOM"')) +
+                step(4, 'Show it', '#059669',
+                    b('print', 'sp-btn-teal', 'Print') + b('projector', 'sp-btn-teal', 'Projector')) +
+                '<span class="cc-spacer"></span><div class="cc-end">' +
+                b('import-json', 'sp-btn-file', 'Open', ' title="Open a plan saved as a file"') +
+                b('export-json', 'sp-btn-file', 'Save', ' title="Save the whole plan as a file"') +
+                b('undo', 'sp-btn-grey', 'Undo') + '</div>';
+            window.ClassroomControls.attach({
+                root: root, tool: 'seatingplan', setting: cfg.controls,
+                toolbar: root.querySelector('.sp-toolbar'),
+                simple: simple,
+                hint: 'Drag a name onto a desk to move or swap students. Right-click a desk to lock it.',
+                note: function () {
+                    var n = state.display.ignoreRules ? 0 : state.rules.length;
+                    return n ? n + (n === 1 ? ' rule still applies' : ' rules still apply') : '';
+                },
+                proxies: [{ sel: '[data-cc="room"]', active: 'sp-active', none: 'Custom layout',
+                    buttons: function () { return ui.layouts.querySelectorAll('[data-action="layout"]'); } }]
+            });
+        }
+
         /* ----- start ----- */
 
         defaultsFromConfig();
@@ -3628,6 +3933,9 @@
         if (!(savedPlacement && placeStudents(savedPlacement))) autoArrange(state.sortMode);
         savedPlacement = null;
         persistReady = true;
+        lastSnap = JSON.stringify(savePayload());
+        updateUndoButton();
+        attachControls();
     }
 
     /* One print window; each plan on its own page. */

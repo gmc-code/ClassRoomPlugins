@@ -242,6 +242,7 @@ class SeatingPlanDirective(SphinxDirective):
         "tables-per-row": directives.positive_int,
         "roster": directives.path,
         "title": directives.unchanged,
+        "controls": directives.unchanged,
         "fill": _choice("first", "last"),
         "sort": _choice("none", "az", "za", "homeroom", "random"),
         "one-line": directives.flag,
@@ -405,6 +406,7 @@ class SeatingPlanDirective(SphinxDirective):
         node["config"] = {
             "id": storage_id,
             "title": self.options.get("title", ""),
+            "controls": (self.options.get("controls") or "choice").strip().lower(),
             "layout": layout,
             "mode": mode,
             "tables": tables,

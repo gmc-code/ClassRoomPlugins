@@ -84,6 +84,30 @@ round. Names typed in capitals (``SMITH``) are changed to ``Smith``.
 
 
 
+Simple and Full controls
+------------------------
+
+The switch at the top right chooses how many controls you see:
+
+* **Simple** shows the main steps in order, with big buttons:
+  your class (**Paste names**, **Import file**), the **Group size**,
+  making groups (**Random**, **A → Z**, **Who's away**), showing them
+  (**Print**, **Projector**), plus **Open** and **Save**.
+* **Full** shows every control.
+
+The tool remembers your choice on this computer, so it opens the same way
+next time. Each tool remembers its own choice, so you can use Full in one
+tool and Simple in another. The first time you open a tool it starts in
+Simple, with a tip pointing to Full.
+
+Switching only hides controls; nothing is turned off. Settings you made in
+Full keep working in Simple, and an amber note says when one is in use
+(for example *2 rules still apply*), with a **Change in Full** link.
+
+For page authors: the ``:controls:`` option sets the view. ``simple`` or
+``full`` fixes the view and hides the switch; ``choice`` (the default) lets
+each teacher choose.
+
 The toolbar at a glance
 -----------------------
 

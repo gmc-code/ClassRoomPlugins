@@ -229,6 +229,7 @@ class LockersDirective(SphinxDirective):
     optional_arguments = 0
     option_spec = {
         "title": directives.unchanged,
+        "controls": directives.unchanged,
         "lockers": directives.unchanged,
         "tiers": _tiers,
         "order": _choice("down", "across"),
@@ -361,6 +362,7 @@ class LockersDirective(SphinxDirective):
         node["config"] = {
             "id": storage_id,
             "title": self.options.get("title", ""),
+            "controls": (self.options.get("controls") or "choice").strip().lower(),
             "banks": banks,
             "tiers": self.options.get("tiers", 1),
             "order": self.options.get("order", "down"),

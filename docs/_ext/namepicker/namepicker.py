@@ -182,6 +182,7 @@ class NamePickerDirective(SphinxDirective):
         "order": _choice("random", "az", "za", "homeroom"),
         "roster": directives.path,
         "title": directives.unchanged,
+        "controls": directives.unchanged,
         "no-repeat": directives.flag,
         "surname-initial": directives.flag,
         "hide-homeroom": directives.flag,
@@ -277,6 +278,7 @@ class NamePickerDirective(SphinxDirective):
         node["config"] = {
             "id": storage_id,
             "title": self.options.get("title", "Name Picker"),
+            "controls": (self.options.get("controls") or "choice").strip().lower(),
             "count": pick_count,
             "duration": duration,
             "easing": easing,

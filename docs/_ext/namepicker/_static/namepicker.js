@@ -574,6 +574,210 @@
     window.ClassroomPaste = { version: 1, open: open, parse: function (text, opt) { return build(text, opt || {}, { delim: 'auto' }); } };
 })();
 /* ===== end ClassroomPaste ===== */
+/* ===== ClassroomControls v1: Simple / Full controls for the classroom tools =====
+   Shared by seatingplan, lockers, studentgroups and namepicker. The same block is copied into
+   each directive's .js so every directive still works on its own; whichever loads first defines
+   window.ClassroomControls and the others reuse it. Keep the copies identical.
+
+   Simple: one row of numbered steps with big buttons, for teachers new to the tool.
+   Full:   every control (the tool's own toolbar rows).
+   A Simple | Full switch sits top right. Each tool remembers its own choice in the browser
+   (localStorage 'classroomControls:<tool>'); a first visit starts in Simple. The directive's
+   :controls: option can instead fix the view to simple or full and hide the switch.
+   Simple only hides controls: rules, locks, year levels … keep working, and a note says when
+   one is in use.
+
+   ClassroomControls.attach({
+       root, tool: 'seatingplan', setting: cfg.controls,      // 'simple' | 'full' | 'choice'
+       toolbar: element,                                       // the tool's toolbar; its rows become Full-only
+       simple: html,                                           // the Simple bar (use step() for each step)
+       hint: 'Drag a name onto a desk …',                      // one line shown under the Simple bar
+       note: function () { return '2 rules still apply'; },   // hidden settings in use ('' = none)
+       proxies: [{ sel: '[data-cc="room"]', buttons: function () { return nodeList; }, active: 'sp-active' }],
+       onMode: function (mode) {}
+   }) -> { mode(), sync() }
+   Buttons in the Simple bar use the tool's own data-action values, so the tool's click handler
+   runs them; their disabled state follows the matching Full button. */
+(function () {
+    'use strict';
+    if (window.ClassroomControls && window.ClassroomControls.version >= 1) return;
+
+    var CSS =
+        '.cc-root{position:relative}' +
+        '.cc-pill{position:absolute;top:4px;right:8px;z-index:3;display:flex;background:#1e293b;border:1px solid #334155;border-radius:999px;padding:2px}' +
+        '.cc-pill button{font:inherit;font-size:12px;font-weight:600;line-height:1;border:0;border-radius:999px;padding:5px 12px;background:transparent;color:#cbd5e1;cursor:pointer}' +
+        '.cc-pill button:hover{color:#fff}' +
+        '.cc-pill button[aria-pressed="true"]{background:#fff;color:#0f172a}' +
+        '.cc-pill button:focus-visible{outline:2px solid #60a5fa;outline-offset:1px}' +
+        '.cc-root.cc-has-pill>[data-role="title"]{padding-right:150px}' +
+        '.cc-root.cc-simple .cc-full-only{display:none!important}' +
+        '.cc-root:not(.cc-simple) .cc-simplebar,.cc-root:not(.cc-simple) .cc-note{display:none!important}' +
+        '.cc-simplebar{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px 0;width:100%;align-self:stretch}' +
+        '.cc-step{display:flex;flex-direction:column;gap:5px;padding:0 12px;border-right:1px solid #334155}' +
+        '.cc-step:last-of-type{border-right:0}' +
+        '.cc-step-label{font-size:12px;font-weight:600;color:#94a3b8;white-space:nowrap;display:flex;align-items:center;gap:6px}' +
+        '.cc-num{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;color:#fff;font-size:11px;font-weight:700}' +
+        '.cc-step-body{display:flex;flex-wrap:wrap;gap:6px;align-items:center}' +
+        '.cc-spacer{flex:1 1 0}' +
+        '.cc-end{display:flex;flex-wrap:wrap;gap:6px;align-items:flex-end;padding:0 8px}' +
+        '.cc-simplebar .cc-big{min-height:40px;font-size:14px!important;padding-left:14px!important;padding-right:14px!important}' +
+        '.cc-select{min-height:40px;font:inherit;font-size:14px;font-weight:600;color:#f8fafc;background:#0f172a;border:1px solid #475569;border-radius:6px;padding:0 8px;max-width:220px;cursor:pointer}' +
+        '.cc-select:focus-visible{outline:2px solid #60a5fa;outline-offset:1px}' +
+        '.cc-find{display:flex;align-items:center;gap:6px;min-height:40px;background:#0f172a;border:1px solid #334155;border-radius:6px;padding:0 10px;color:#64748b}' +
+        '.cc-find input{background:transparent;border:0;color:#f8fafc;width:110px;font:inherit;font-size:14px;outline:none}' +
+        '.cc-note{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;background:#fffbeb;border-bottom:1px solid #fde68a;padding:7px 14px;font-size:13px;color:#78350f}' +
+        '.cc-note-hint{flex:1 1 300px}' +
+        '.cc-chip{background:#fef3c7;border:1px solid #f59e0b;border-radius:999px;padding:1px 10px;font-weight:600;white-space:nowrap}' +
+        '.cc-link{font:inherit;font-weight:600;color:#1d4ed8;background:none;border:0;padding:0;cursor:pointer;text-decoration:underline}' +
+        '.cc-tip{display:flex;align-items:center;gap:10px;background:#eff6ff;border-bottom:1px solid #bfdbfe;padding:7px 14px;font-size:13px;color:#1e3a8a}' +
+        '.cc-tip span{flex:1}' +
+        '.cc-tip button{font:inherit;background:none;border:0;color:#1e3a8a;cursor:pointer;font-size:16px;line-height:1;padding:0 4px}' +
+        '.sp-projector .cc-pill,.sp-projector .cc-note,.sp-projector .cc-tip,.sg-projector .cc-pill,.sg-projector .cc-note,.sg-projector .cc-tip,' +
+        '.np-projector .cc-pill,.np-projector .cc-note,.np-projector .cc-tip{display:none!important}' +
+        '@media print{.cc-pill,.cc-note,.cc-tip,.cc-simplebar{display:none!important}}' +
+        '@media (max-width:700px){.cc-step{border-right:0;padding:0 6px}.cc-root.cc-has-pill>[data-role="title"]{padding-right:14px;padding-top:34px}}';
+
+    function injectCss() {
+        if (document.getElementById('cc-css')) return;
+        var st = document.createElement('style');
+        st.id = 'cc-css';
+        st.textContent = CSS;
+        document.head.appendChild(st);
+    }
+    function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+    function put(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage blocked */ } }
+    function esc(s) {
+        return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
+    }
+
+    /* one numbered step of the Simple bar */
+    function step(n, label, colour, body) {
+        return '<div class="cc-step"><div class="cc-step-label"><span class="cc-num" style="background:' + colour + '">' + n + '</span>' +
+            esc(label) + '</div><div class="cc-step-body">' + body + '</div></div>';
+    }
+
+    function attach(o) {
+        injectCss();
+        var root = o.root, tool = o.tool, key = 'classroomControls:' + tool;
+        var setting = String(o.setting || 'choice').toLowerCase();
+        var fixed = setting === 'simple' || setting === 'full';
+        var stored = get(key);
+        var mode = fixed ? setting : (stored === 'full' || stored === 'simple' ? stored : 'simple');
+        root.classList.add('cc-root');
+
+        /* the tool's own rows become Full-only; the Simple bar goes in first */
+        Array.prototype.forEach.call(o.toolbar.children, function (row) { row.classList.add('cc-full-only'); });
+        o.toolbar.insertAdjacentHTML('afterbegin', '<div class="cc-simplebar">' + o.simple + '</div>');
+        var bar = o.toolbar.firstElementChild;
+        o.toolbar.insertAdjacentHTML('afterend', '<div class="cc-note" data-cc-note hidden></div>');
+        var noteEl = o.toolbar.nextElementSibling;
+
+        var pill = null, tip = null;
+        if (!fixed) {
+            root.classList.add('cc-has-pill');
+            root.insertAdjacentHTML('afterbegin',
+                '<div class="cc-pill" role="group" aria-label="Controls" title="Simple: the main steps. Full: every control. Remembered on this computer.">' +
+                '<button type="button" data-cc-mode="simple">Simple</button><button type="button" data-cc-mode="full">Full</button></div>');
+            pill = root.firstElementChild;
+            if (!stored && !get(key + ':tip')) {
+                noteEl.insertAdjacentHTML('afterend', '<div class="cc-tip" data-cc-tip><span>This is the <b>Simple</b> view with the main steps. ' +
+                    'For everything else, choose <b>Full</b> at the top right. Your choice is remembered next time.</span>' +
+                    '<button type="button" data-cc-tip-close aria-label="Close tip">×</button></div>');
+                tip = noteEl.nextElementSibling;
+            }
+        }
+
+        function closeTip() {
+            if (tip && tip.parentNode) tip.parentNode.removeChild(tip);
+            tip = null;
+            put(key + ':tip', '1');
+        }
+
+        function counterpart(b) {
+            var a = b.getAttribute('data-action'), m = b.getAttribute('data-mode');
+            var sel = '.cc-full-only [data-action="' + a + '"]' + (m ? '[data-mode="' + m + '"]' : '');
+            return o.toolbar.querySelector(sel);
+        }
+
+        function syncProxies() {
+            (o.proxies || []).forEach(function (p) {
+                var sel = bar.querySelector(p.sel);
+                if (!sel) return;
+                var btns = Array.prototype.slice.call(p.buttons() || []);
+                var labels = btns.map(function (b) { return b.textContent.trim(); });
+                var active = -1;
+                btns.forEach(function (b, i) { if (b.classList.contains(p.active)) active = i; });
+                var sig = labels.join('\u0001') + '|' + (active < 0);
+                if (sel.getAttribute('data-sig') !== sig) {
+                    sel.innerHTML = (active < 0 ? '<option value="">' + esc(p.none || 'Custom') + '</option>' : '') +
+                        labels.map(function (l, i) { return '<option value="' + i + '">' + esc((p.prefix || '') + l) + '</option>'; }).join('');
+                    sel.setAttribute('data-sig', sig);
+                }
+                sel.value = active < 0 ? '' : String(active);
+            });
+        }
+
+        function sync() {
+            Array.prototype.forEach.call(bar.querySelectorAll('[data-action]'), function (b) {
+                var c = counterpart(b);
+                if (c) {
+                    b.disabled = !!c.disabled;
+                    if (c.title && !b.title) b.title = c.title;
+                    ['sp-active', 'lk-active', 'sg-active', 'np-active'].forEach(function (cls) { b.classList.toggle(cls, c.classList.contains(cls)); });
+                }
+            });
+            syncProxies();
+            if (pill) Array.prototype.forEach.call(pill.querySelectorAll('[data-cc-mode]'), function (b) {
+                b.setAttribute('aria-pressed', b.getAttribute('data-cc-mode') === mode ? 'true' : 'false');
+            });
+            var n = o.note ? o.note() : '';
+            noteEl.innerHTML = '<span class="cc-note-hint">' + esc(o.hint || '') + '</span>' +
+                (n ? '<span class="cc-chip">' + esc(n) + '</span>' + (fixed ? '' : '<button type="button" class="cc-link" data-cc-mode="full">Change in Full</button>') : '');
+            noteEl.hidden = !(o.hint || n);
+            if (o.afterSync) o.afterSync(bar);
+        }
+
+        function apply(m, remember) {
+            mode = m === 'full' ? 'full' : 'simple';
+            root.classList.toggle('cc-simple', mode === 'simple');
+            if (remember && !fixed) { put(key, mode); closeTip(); }
+            sync();
+            if (o.onMode) o.onMode(mode);
+        }
+
+        var queued = false;
+        function later() {
+            if (queued) return;
+            queued = true;
+            setTimeout(function () { queued = false; sync(); }, 0);
+        }
+        root.addEventListener('click', function (e) {
+            var m = e.target.closest && e.target.closest('[data-cc-mode]');
+            if (m && root.contains(m)) { apply(m.getAttribute('data-cc-mode'), true); return; }
+            if (e.target.closest && e.target.closest('[data-cc-tip-close]')) { closeTip(); return; }
+            later();
+        });
+        root.addEventListener('change', function (e) {
+            var s = e.target.closest && e.target.closest('select[data-cc]');
+            if (s && bar.contains(s)) {
+                (o.proxies || []).forEach(function (p) {
+                    if (!s.matches(p.sel) || s.value === '') return;
+                    var b = (p.buttons() || [])[+s.value];
+                    if (b) b.click();
+                });
+            }
+            later();
+        });
+        /* other changes (imports, drags, dialogs) */
+        document.addEventListener('click', later, true);
+
+        apply(mode, false);
+        return { mode: function () { return mode; }, sync: sync, bar: bar };
+    }
+
+    window.ClassroomControls = { version: 1, attach: attach, step: step };
+})();
+/* ===== end ClassroomControls ===== */
 
 (function () {
     'use strict';
@@ -2384,6 +2588,42 @@
                 '<button type="button" class="np-btn" data-p="close">Done</button></span>';
         }
 
+        /* ----- Simple / Full controls (see ClassroomControls) ----- */
+
+        function attachControls() {
+            var step = window.ClassroomControls.step;
+            function b(action, cls, label, extra) {
+                return '<button type="button" class="np-btn ' + cls + ' cc-big" data-action="' + action + '"' + (extra || '') + '>' + label + '</button>';
+            }
+            var simple =
+                step(1, 'Your class', '#2563eb',
+                    b('paste-roster', '', 'Paste names', ' title="Paste the class list copied from Excel, Google Sheets or the school system"') +
+                    b('import', '', 'Import file', ' title="Choose an Excel or CSV class list"')) +
+                step(2, 'How many', '#0d9488',
+                    '<select class="cc-select" data-cc="count" aria-label="How many students to pick"></select>') +
+                step(3, 'Today', '#7c3aed',
+                    b('class-list', 'np-btn-purple', 'Who\'s here', ' title="Tick off who is away today"')) +
+                step(4, 'Show it', '#059669',
+                    b('projector', 'np-btn-teal', 'Projector') + b('print', 'np-btn-teal', 'Print')) +
+                '<span class="cc-spacer"></span><div class="cc-end">' +
+                b('import-json', 'np-btn-teal', 'Open', ' title="Open a saved name picker, or a class from student groups or a seating plan"') +
+                b('export-json', 'np-btn-teal', 'Save', ' title="Save the whole picker as a file"') + '</div>';
+            window.ClassroomControls.attach({
+                root: root, tool: 'namepicker', setting: cfg.controls,
+                toolbar: root.querySelector('.np-toolbar'),
+                simple: simple,
+                hint: 'Press Pick! to choose. Put Back returns the names if you need to pick again.',
+                note: function () {
+                    var bits = [], a = state.students.filter(function (s) { return state.absent[s.id]; }).length;
+                    if (a) bits.push(a + ' away today');
+                    if (state.noRepeat) bits.push('No repeats is on');
+                    return bits.join(' · ');
+                },
+                proxies: [{ sel: '[data-cc="count"]', active: 'np-active', prefix: 'Pick ',
+                    buttons: function () { return ui.counts.querySelectorAll('[data-action="count"]'); } }]
+            });
+        }
+
         defaultsFromConfig();
         load();
         build();
@@ -2391,7 +2631,10 @@
         updateControls();
         updateRevertButton();
         renderIdle();
+        attachControls();
     }
+
+
 
     function init() {
         Array.prototype.forEach.call(document.querySelectorAll('.namepicker[data-namepicker]'), function (el) {
