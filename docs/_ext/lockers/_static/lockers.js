@@ -602,6 +602,7 @@
         '.lk-pcell{direction:ltr;border:1px solid #000;border-radius:3px;padding:2px 4px;min-height:44px;font-size:11px;break-inside:avoid}' +
         '.lk-pcell b{display:block;font-size:10px;color:#333}' +
         '.lk-pcell .n{font-weight:700}' +
+        '.lk-pcell .ry{display:block;font-size:10px;color:#555}' +
         '.lk-pcell .cb{display:block;font-family:Consolas,monospace;font-size:10px;letter-spacing:.5px}' +
         '.lk-pcell .bd{float:right;font-size:9px;font-weight:700;border:1px solid #999;border-radius:2px;padding:0 2px;margin-left:3px}' +
         '.lk-pcell.out{background:repeating-linear-gradient(45deg,#fff,#fff 4px,#ddd 4px,#ddd 8px);color:#444}' +
@@ -1065,6 +1066,7 @@
                 students: [],
                 assign: {},     /* locker id -> student id */
                 out: {},        /* locker id -> true when out of service */
+                reserve: {},    /* locker id -> year level ('7') the locker is kept for */
                 keepExisting: true,
                 display: {
                     homeroom: !(cfg.display && cfg.display.homeroom === false),
@@ -1079,6 +1081,11 @@
             (cfg.unavailable || []).forEach(function (id) {
                 var l = findLocker(id);
                 if (l) state.out[l.id] = true;
+            });
+            /* year 7: 101-140, Corridor B  (from the directive) */
+            (cfg.years || []).forEach(function (r) {
+                var y = yearDigits(r.year);
+                if (y) resolveLockers(r.spec).ids.forEach(function (id) { state.reserve[id] = y; });
             });
             var extra = [];
             (cfg.students || []).forEach(function (s, i) {
@@ -1242,6 +1249,7 @@
             /* forget allocations and flags for lockers that no longer exist */
             Object.keys(state.assign).forEach(function (id) { if (!lockerIndex[id.toLowerCase()]) delete state.assign[id]; });
             Object.keys(state.out).forEach(function (id) { if (!lockerIndex[id.toLowerCase()]) delete state.out[id]; });
+            if (state.reserve) Object.keys(state.reserve).forEach(function (id) { if (!lockerIndex[id.toLowerCase()]) delete state.reserve[id]; });
             if (state.sel && !lockerIndex[state.sel.toLowerCase()]) state.sel = null;
         }
 
@@ -1327,7 +1335,7 @@
             return JSON.stringify({
                 title: state.title, banks: state.banks, tiers: state.tiers, order: state.order,
                 side: state.side, row: state.row,
-                students: state.students, assign: state.assign, out: state.out,
+                students: state.students, assign: state.assign, out: state.out, reserve: state.reserve,
                 keepExisting: state.keepExisting, display: state.display
             });
         }
@@ -1350,7 +1358,12 @@
             });
             state.assign = {};
             state.out = {};
+            state.reserve = {};
             rebuildIndex();
+            Object.keys(d.reserve || {}).forEach(function (id) {
+                var l = findLocker(id), y = yearDigits(d.reserve[id]);
+                if (l && y) state.reserve[l.id] = y;
+            });
             Object.keys(d.assign || {}).forEach(function (id) {
                 var l = findLocker(id);
                 if (l && studentById(d.assign[id])) state.assign[l.id] = d.assign[id];
@@ -1447,15 +1460,22 @@
                 '<span class="lk-sep"></span>' +
                 btn('undo', 'lk-btn-grey', 'undo', 'Undo', ' data-role="undo" disabled') +
                 btn('reset', 'lk-btn-grey', 'reset', 'Reset', ' title="Go back to how this page was first set up"') +
-                '<div class="lk-search">' + icon('search') +
-                '<input type="search" data-role="search" placeholder="Find…" title="Find a student, locker number, year (y7) or homeroom" aria-label="Find a student or locker"></div>' +
                 '</div>' +
+                /* Row 2: setting up the lockers and typing allocations in */
                 '<div class="lk-toolbar-row">' +
+                '<span class="lk-label">Set up:</span>' +
                 btn('setup', 'lk-btn-amber', 'locker', 'Lockers', ' title="Set up the locker numbers, banks and areas"') +
+                btn('years', 'lk-btn-amber', 'rows', 'Year levels', ' title="Keep lockers for a year level, e.g. Year 7: 101-160. A–Z, Homeroom and Random then only put Year 7 students in them."') +
+                '<span class="lk-sep"></span>' +
+                '<span class="lk-label">Enter:</span>' +
                 btn('by-student', 'lk-btn-purple', 'keyboard', 'By Student', ' title="Type each student\'s locker number down a list"') +
                 btn('paste', 'lk-btn-purple', 'paste', 'Paste lockers', ' title="Paste locker numbers and combinations for students already on the list, e.g. from Excel"') +
                 btn('combos', 'lk-btn-purple', 'keyboard', 'Combos', ' title="Type each student\'s padlock combination down a list"') +
-                '<span class="lk-sep"></span>' +
+                '<div class="lk-search">' + icon('search') +
+                '<input type="search" data-role="search" placeholder="Find…" title="Find a student, locker number, year (y7) or homeroom" aria-label="Find a student or locker"></div>' +
+                '</div>' +
+                /* Row 3: automatic allocation and end-of-year removal */
+                '<div class="lk-toolbar-row">' +
                 '<span class="lk-label">Allocate:</span>' +
                 btn('auto', 'lk-btn-purple', 'az', 'A–Z', ' data-mode="AZ" title="Fill free lockers in surname order"') +
                 btn('auto', 'lk-btn-purple', 'rows', 'Homeroom', ' data-mode="HOMEROOM" title="Fill free lockers group by group, using whatever the Badge shows"') +
@@ -1468,6 +1488,7 @@
                 btn('remove-year', 'lk-btn-red lk-btn-remove', '', 'Y9', ' data-year="9" data-role="remove-y9" title="Remove every Year 9 student (e.g. at the end of the year): they come off the list and their lockers become free"') +
                 btn('remove-year', 'lk-btn-red lk-btn-remove', '', 'Y12', ' data-year="12" data-role="remove-y12" title="Remove every Year 12 student (e.g. at the end of the year): they come off the list and their lockers become free"') +
                 '</div>' +
+                /* Row 4: how the banks are drawn and what each locker shows */
                 '<div class="lk-toolbar-row lk-toolbar-row--options">' +
                 '<span class="lk-label" title="How many lockers high each bank is">Tiers:</span><div class="lk-seg" data-role="tiers">' +
                 [1, 2, 3, 4, 5, 6].map(function (n) { return '<button type="button" class="lk-btn lk-btn-seg" data-action="tiers" data-n="' + n + '">' + n + '</button>'; }).join('') +
@@ -1767,7 +1788,8 @@
                 '<div><b>' + Math.max(0, free) + '</b> free</div>' +
                 (outN ? '<div><b>' + outN + '</b> out of service</div>' : '') +
                 '<div><b>' + state.students.length + '</b> students</div>' +
-                (waiting.length > free && state.students.length ? '<div class="lk-warn">Not enough free lockers for everyone</div>' : '');
+                (waiting.length > free && state.students.length ? '<div class="lk-warn">Not enough free lockers for everyone</div>' : '') +
+                yearStats();
 
             var legend = yearLegend();
             if (legend && order.length) canvas.insertBefore(legend, canvas.firstChild);
@@ -1809,8 +1831,44 @@
                 sel('order', 'Numbers run', [['', 'Toolbar (' + (state.order === 'down' ? 'down' : 'across') + ')'], ['down', 'Down ↓'], ['across', 'Across →']]) +
                 sel('side', 'First locker', [['', 'Toolbar (' + state.side + ')'], ['left', 'Left'], ['right', 'Right']]) +
                 sel('row', 'First row', [['', 'Toolbar (' + state.row + ')'], ['top', 'Top'], ['bottom', 'Bottom']]) +
-                '<label class="lk-bs-opt">Area <input type="text" data-bank-opt="area" data-bank="' + bi + '" value="' + esc(bank.area || '') + '" placeholder="none"></label>';
+                '<label class="lk-bs-opt">Area <input type="text" data-bank-opt="area" data-bank="' + bi + '" value="' + esc(bank.area || '') + '" placeholder="none"></label>' +
+                bankYearSelect(bi);
             return p;
+        }
+
+        /* ⚙ Year level: keeps every locker in the bank (or in one row of it) for one year, or for anyone */
+        function bankYearSelect(bi) {
+            var years = {};
+            [7, 8, 9, 10, 11, 12].forEach(function (y) { years[y] = true; });
+            state.students.forEach(function (st) { if (st.year) years[st.year] = true; });
+            Object.keys(state.reserve).forEach(function (id) { years[state.reserve[id]] = true; });
+            var base = [['', 'Anyone']].concat(Object.keys(years).sort(numSort).map(function (y) { return [y, 'Year ' + y]; }));
+            function current(ids) {
+                var seen = {};
+                ids.forEach(function (id) { seen[state.reserve[id] || ''] = true; });
+                var vals = Object.keys(seen);
+                return vals.length === 1 ? vals[0] : 'mixed';
+            }
+            function select(ids, attrs, title) {
+                var cur = current(ids), opts = cur === 'mixed' ? [['mixed', 'Mixed']].concat(base) : base;
+                return '<select ' + attrs + ' title="' + esc(title) + '">' +
+                    opts.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (o[0] === cur ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') +
+                    '</select>';
+            }
+            var html = '<label class="lk-bs-opt">Year level ' +
+                select(state._bankIds[bi] || [], 'data-bank-opt="year" data-bank="' + bi + '"', 'Keep every locker in this bank for one year level') + '</label>';
+            var n = bankRowCount(bi);
+            if (n > 1) {
+                html += '<span class="lk-bs-rows"><span class="lk-bs-rows-label">Rows:</span>';
+                for (var r = 1; r <= n; r++) {
+                    var lbl = rowLabel(r, n);
+                    html += '<label class="lk-bs-opt">' + lbl.charAt(0).toUpperCase() + lbl.slice(1) + ' ' +
+                        select(bankRowIds(bi, r), 'data-bank-opt="yearrow" data-row="' + r + '" data-bank="' + bi + '"',
+                            'Keep ' + theRow(r, n) + ' of this bank for one year level') + '</label>';
+                }
+                html += '</span>';
+            }
+            return html;
         }
 
         function onBankOpt(e) {
@@ -1821,6 +1879,17 @@
             if (!bank) return;
             var v = el.value.trim();
             if (key === 'name' && !v) { el.value = bank.name; return; }
+            if (key === 'year' || key === 'yearrow') {
+                if (v === 'mixed') return;
+                var bix = state.banks.indexOf(bank), r = +el.getAttribute('data-row') || 0;
+                var ids = key === 'yearrow' ? bankRowIds(bix, r) : (state._bankIds[bix] || []);
+                var what = key === 'yearrow' ? theRow(r, bankRowCount(bix), true) + ' of ' + bank.name : bank.name;
+                pushUndo();
+                ids.forEach(function (id) { if (v) state.reserve[id] = v; else delete state.reserve[id]; });
+                changed();
+                setStatus(v ? what + ' is kept for Year ' + v + '.' : what + ' is for anyone.');
+                return;
+            }
             pushUndo();
             bank[key] = key === 'tiers' ? (parseInt(v, 10) || 0) : v;
             if (key === 'area') {
@@ -1869,6 +1938,22 @@
             } else {
                 cell.classList.add('lk-free');
                 cell.title = 'Locker ' + id + ' is free. Click, then type a name. Right-click: out of service.';
+            }
+            var ry = state.reserve[id];
+            if (ry && !state.out[id]) {
+                var rc = yearColour(ry) || ['#f1f5f9', '#64748b'];
+                cell.classList.add('lk-res');
+                cell.style.setProperty('--lk-res-bg', rc[0]);
+                cell.style.setProperty('--lk-res-bd', rc[1]);
+                if (!s) {
+                    cell.appendChild(make('div', 'lk-res-label', 'Year ' + ry));
+                    cell.title = 'Locker ' + id + ' is free, kept for Year ' + ry + '. Click, then type a name. Right-click: out of service.';
+                } else if (String(s.year) !== ry) {
+                    cell.classList.add('lk-res-clash');
+                    cell.title += '\nThis locker is kept for Year ' + ry + (s.year ? '; ' + s.firstName + ' is in Year ' + s.year : '') + '.';
+                } else {
+                    cell.title += '\nKept for Year ' + ry + '.';
+                }
             }
             var cb = comboOf(id);
             if (cb) cell.title += '\nCombination: ' + cb;
@@ -1937,7 +2022,7 @@
             } else if (state.assign[id]) {
                 cur.textContent = 'Now: ' + fullName(studentById(state.assign[id]));
             } else {
-                cur.textContent = 'Free';
+                cur.textContent = state.reserve[id] ? 'Free · Year ' + state.reserve[id] : 'Free';
             }
             ui['entry-out'].textContent = id && state.out[id] ? 'Back in' : 'Out';
             if (document.activeElement !== ui['entry-combo']) ui['entry-combo'].value = id ? comboOf(id) : '';
@@ -2077,6 +2162,7 @@
             var msg = fullName(s) + ' → locker ' + id + '.';
             if (prevLocker && prevLocker !== id) msg += ' (Moved from ' + prevLocker + '.)';
             if (prevOwner && prevOwner.id !== sid) msg += ' ' + fullName(prevOwner) + ' now has no locker.';
+            msg += yearClash(id, s);
             setStatus(msg);
             hideSuggestions();
             render();
@@ -2138,6 +2224,8 @@
             if (other && from) state.assign[from] = other;   /* swap */
             dragId = null;
             changed();
+            var warn = yearClash(target, studentById(sid)) + (other && from ? yearClash(from, studentById(other)) : '');
+            if (warn) setStatus(warn.trim());
         }
 
         /* ----- toolbar ----- */
@@ -2166,6 +2254,7 @@
             else if (a === 'undo') undo();
             else if (a === 'reset') resetAll();
             else if (a === 'setup') openSetup();
+            else if (a === 'years') openYears();
             else if (a === 'by-student') openByStudent();
             else if (a === 'paste') openPaste();
             else if (a === 'paste-roster') openPasteRoster();
@@ -2243,12 +2332,256 @@
                 return x.localeCompare(y, undefined, { numeric: true, sensitivity: 'base' }) || bySurname(a, b);
             });
             else students.sort(bySurname);
-            var free = order.filter(function (id) { return !state.out[id] && !state.assign[id]; });
-            var n = Math.min(free.length, students.length);
-            for (var i = 0; i < n; i++) state.assign[free[i]] = students[i].id;
+            /* Lockers kept for a year level only go to that year. Students of a year with kept lockers
+               fill those first, then any locker not kept for a year; everyone else only gets those. */
+            var open = [], kept = {};
+            order.forEach(function (id) {
+                if (state.out[id] || state.assign[id]) return;
+                var y = state.reserve[id];
+                if (y) (kept[y] = kept[y] || []).push(id); else open.push(id);
+            });
+            var n = 0, overflow = {}, waiting = {};
+            students.forEach(function (st) {
+                var y = String(st.year || ''), pool = y && kept[y];
+                var id = pool && pool.length ? pool.shift() : open.shift();
+                if (id) {
+                    state.assign[id] = st.id;
+                    n++;
+                    if (y && yearHasLockers(y) && !state.reserve[id]) overflow[y] = (overflow[y] || 0) + 1;
+                } else waiting[y || '?'] = (waiting[y || '?'] || 0) + 1;
+            });
             changed();
-            setStatus(n + ' student' + (n === 1 ? '' : 's') + ' given lockers' +
-                (students.length > n ? '; ' + (students.length - n) + ' still need one (not enough free lockers).' : '.'));
+            var left = students.length - n, notes = [];
+            Object.keys(overflow).sort(numSort).forEach(function (y) {
+                notes.push(overflow[y] + ' Year ' + y + ' student' + (overflow[y] === 1 ? '' : 's') + ' went in lockers not kept for a year (Year ' + y + '\'s lockers are full)');
+            });
+            if (left) {
+                var spareKept = Object.keys(kept).filter(function (y) { return kept[y].length; });
+                notes.push(left + ' still need one' + (spareKept.length
+                    ? ' (the free lockers left are kept for ' + spareKept.sort(numSort).map(function (y) { return 'Year ' + y; }).join(', ') + ')'
+                    : ' (not enough free lockers)'));
+            }
+            setStatus(n + ' student' + (n === 1 ? '' : 's') + ' given lockers' + (notes.length ? '. ' + notes.join('. ') + '.' : '.'), !!notes.length);
+        }
+
+        /* ----- year levels: lockers kept for one year ----- */
+
+        function numSort(a, b) { return (+a || 99) - (+b || 99) || String(a).localeCompare(String(b)); }
+        function yearHasLockers(y) {
+            for (var id in state.reserve) if (state.reserve[id] === String(y)) return true;
+            return false;
+        }
+
+        /* " (Locker 105 is kept for Year 7.)" when a student of another year is put in it */
+        function yearClash(id, st) {
+            var y = state.reserve[id];
+            if (!y || !st || String(st.year) === y) return '';
+            return ' Note: locker ' + id + ' is kept for Year ' + y + (st.year ? ', and ' + st.firstName + ' is in Year ' + st.year : '') + '.';
+        }
+
+        /* Row r (1 = top, as on screen) of bank bi. A 1-high bank is one row. */
+        function bankRowIds(bi, r) {
+            var ids = state._bankIds[bi] || [], bank = state.banks[bi];
+            var tiers = bankTiers(bank);
+            if (tiers <= 1) return r === 1 ? ids.slice() : [];
+            var lay = bankLayout(ids.length, tiers, bankOrder(bank), bankSide(bank), bankRow(bank));
+            return ids.filter(function (id, i) { return lay.pos[i].r === r; });
+        }
+        function bankRowCount(bi) { return Math.max(1, bankTiers(state.banks[bi])); }
+        /* "top", "bottom", "top row", "row 2", "middle" -> row number in bank bi (0 if none) */
+        function rowNumber(word, bi) {
+            var w = String(word || '').toLowerCase().replace(/\s+row$/, '').trim(), n = bankRowCount(bi);
+            if (w === 'top') return 1;
+            if (w === 'bottom') return n;
+            if (w === 'middle' && n % 2 === 1) return (n + 1) / 2;
+            var m = /^row\s*(\d)$/.exec(w);
+            return m && +m[1] >= 1 && +m[1] <= n ? +m[1] : 0;
+        }
+        var ROW_WORD_RE = /^(.*?)\s*\b(top(?:\s+row)?|bottom(?:\s+row)?|middle(?:\s+row)?|row\s*\d)$/i;
+
+        /* "Corridor B, 101-140, A1, Gym top, bottom" -> locker ids. Bank and area names work as well
+           as numbers; "top", "bottom", "middle" or "row 2" after a name means just that row of it,
+           and on its own means that row of every bank. */
+        function resolveLockers(spec) {
+            var ids = [], unknown = [], seen = {};
+            function add(id) { if (!seen[id]) { seen[id] = true; ids.push(id); } }
+            String(spec || '').split(',').forEach(function (item) {
+                item = item.trim();
+                if (!item) return;
+                var k = item.toLowerCase(), found = false;
+                state.banks.forEach(function (b, bi) {
+                    if (b.name.toLowerCase() === k || (b.area && b.area.toLowerCase() === k)) {
+                        (state._bankIds[bi] || []).forEach(add);
+                        found = true;
+                    }
+                });
+                if (found) return;
+                var rm = ROW_WORD_RE.exec(item);
+                if (rm) {
+                    var where = rm[1].trim().toLowerCase(), rowWord = rm[2], matched = false, any = false;
+                    state.banks.forEach(function (b, bi) {
+                        if (where && b.name.toLowerCase() !== where && !(b.area && b.area.toLowerCase() === where)) return;
+                        matched = true;
+                        if (!where && bankRowCount(bi) === 1) return;   /* "top" on its own: banks with rows only */
+                        var r = rowNumber(rowWord, bi);
+                        if (r) { bankRowIds(bi, r).forEach(add); any = true; }
+                    });
+                    if (matched) { if (!any) unknown.push(item + ' (no such row)'); return; }
+                }
+                var r = expandSpec(item);
+                if (r.error) { unknown.push(item); return; }
+                var missing = [];
+                r.ids.forEach(function (id) { var l = findLocker(id); if (l) add(l.id); else missing.push(id); });
+                if (missing.length) unknown.push(missing.length === r.ids.length ? item : missing.slice(0, 3).join(', ') + (missing.length > 3 ? '…' : ''));
+            });
+            return { ids: ids, unknown: unknown };
+        }
+
+        /* the kept lockers written as text, a line per year: whole banks by name, else ranges */
+        function yearsToText() {
+            var byYear = {};
+            Object.keys(state.reserve).forEach(function (id) { (byYear[state.reserve[id]] = byYear[state.reserve[id]] || {})[id] = true; });
+            return Object.keys(byYear).sort(numSort).map(function (y) {
+                var mine = byYear[y], parts = [];
+                state._bankIds.forEach(function (ids, bi) {
+                    var inBank = ids.filter(function (id) { return mine[id]; });
+                    if (!inBank.length) return;
+                    var bname = state.banks[bi].name, plainName = !/[,:]/.test(bname);
+                    if (inBank.length === ids.length && plainName) { parts.push(bname); return; }
+                    /* whole rows: "Corridor A top" */
+                    var nRows = bankRowCount(bi);
+                    if (plainName && nRows > 1) {
+                        var taken = {};
+                        for (var r = 1; r <= nRows; r++) {
+                            var rowIds = bankRowIds(bi, r);
+                            if (rowIds.length && rowIds.every(function (id) { return mine[id]; })) {
+                                parts.push(bname + ' ' + rowLabel(r, nRows));
+                                rowIds.forEach(function (id) { taken[id] = true; });
+                            }
+                        }
+                        inBank = inBank.filter(function (id) { return !taken[id]; });
+                    }
+                    var run = null;
+                    function flush() { if (run) parts.push(run.a === run.b ? run.a : run.a + '-' + run.b); run = null; }
+                    inBank.forEach(function (id) {
+                        var m = /^([A-Za-z]*)(\d+)$/.exec(id);
+                        if (run && m && run.p === m[1] && +m[2] === run.n + 1 && m[2].length === run.w) { run.b = id; run.n++; return; }
+                        flush();
+                        run = m ? { a: id, b: id, p: m[1], n: +m[2], w: m[2].length } : { a: id, b: id, p: null, n: NaN, w: 0 };
+                    });
+                    flush();
+                });
+                return 'Year ' + y + ': ' + parts.join(', ');
+            }).join('\n');
+        }
+
+        function rowLabel(r, n) { return r === 1 ? 'top' : r === n ? 'bottom' : 'row ' + r; }
+        /* "the top row" / "row 2" (cap: "The top row" / "Row 2") */
+        function theRow(r, n, cap) {
+            var l = rowLabel(r, n), t = /^row/.test(l) ? l : 'the ' + l + ' row';
+            return cap ? t.charAt(0).toUpperCase() + t.slice(1) : t;
+        }
+
+        /* "Year 7: 101-160" lines -> {map: id -> year, lines: [{year, n, unknown}], errors, overlaps} */
+        function parseYearsText(text) {
+            var res = { map: {}, lines: [], errors: [], overlaps: 0 };
+            String(text || '').split(/\r?\n|;/).forEach(function (line) {
+                line = line.trim();
+                if (!line || line.charAt(0) === '#') return;
+                var m = /^(?:year|yr|y|grade)?\s*(\d{1,2})\s*[:=\-–]?\s+(.+)$/i.exec(line) || /^(?:year|yr|y|grade)?\s*(\d{1,2})\s*:\s*(.+)$/i.exec(line);
+                if (!m) { res.errors.push('"' + line + '": start the line with the year, e.g. Year 7: 101-160'); return; }
+                var y = String(+m[1]), r = resolveLockers(m[2]);
+                r.ids.forEach(function (id) {
+                    if (res.map[id] && res.map[id] !== y) res.overlaps++;
+                    res.map[id] = y;
+                });
+                res.lines.push({ year: y, n: r.ids.length, unknown: r.unknown });
+                if (r.unknown.length) res.errors.push('Year ' + y + ': not found: ' + r.unknown.join(', '));
+            });
+            return res;
+        }
+
+        function openYears() {
+            if (!order.length) { setStatus('Set up the lockers first.'); return; }
+            openModal('Year levels',
+                '<p class="lk-help">Keep lockers for a year level: one line per year, then the lockers. Use bank or area names, ' +
+                'ranges such as <code>101-160</code>, or single lockers, separated by commas. ' +
+                'For one row of a bank, add <code>top</code>, <code>bottom</code> or <code>row 2</code> after its name ' +
+                '(<code>Corridor A top</code>); on its own, <code>top</code> means the top row of every bank. ' +
+                '<b>A–Z</b>, <b>Homeroom</b> and <b>Random</b> then put only that year\'s students in those lockers. ' +
+                'Students in a year with no kept lockers (or whose kept lockers are full) go in lockers that are not kept for a year.</p>' +
+                '<textarea class="lk-textarea" data-m="years" rows="8" spellcheck="false" placeholder="Year 7: Corridor A bottom, 101-160\nYear 8: 201-260\nYear 12: Corridor A top, Gym"></textarea>' +
+                '<div class="lk-preview" data-m="preview"></div>' +
+                '<p class="lk-help">Delete a line to stop keeping those lockers. You can also set a whole bank, or each of its rows, from its ⚙ button. ' +
+                'Students already in lockers stay where they are; untick <b>Keep</b> and allocate again to move everyone.</p>',
+                'Apply', applyYears, true);
+            var ta = mui.body.querySelector('[data-m="years"]');
+            ta.value = yearsToText();
+            var preview = mui.body.querySelector('[data-m="preview"]');
+            function show() {
+                var p = parseYearsText(ta.value), counts = {}, need = {};
+                Object.keys(p.map).forEach(function (id) { counts[p.map[id]] = (counts[p.map[id]] || 0) + 1; });
+                state.students.forEach(function (st) { if (st.year) need[st.year] = (need[st.year] || 0) + 1; });
+                var years = Object.keys(counts).sort(numSort);
+                var total = Object.keys(p.map).length;
+                preview.innerHTML = years.length
+                    ? '<b>' + total + '</b> of ' + order.length + ' lockers kept: ' + years.map(function (y) {
+                        var short = need[y] && need[y] > counts[y];
+                        return '<span' + (short ? ' class="lk-warn-text"' : '') + '>Year ' + esc(y) + ' ' + counts[y] + ' locker' + (counts[y] === 1 ? '' : 's') +
+                            (need[y] ? ' for ' + need[y] + ' student' + (need[y] === 1 ? '' : 's') : '') + '</span>';
+                    }).join(' · ') + '. <b>' + (order.length - total) + '</b> for anyone.' +
+                    (p.overlaps ? '<div class="lk-help">' + p.overlaps + ' locker(s) are on more than one line: the later line wins.</div>' : '')
+                    : 'No lockers kept for a year level: every locker is for anyone.';
+                if (p.errors.length) preview.innerHTML += '<div class="lk-errors">' + p.errors.map(esc).join('<br>') + '</div>';
+                if (!hasYears() && years.length) preview.innerHTML += '<div class="lk-errors">No students have a year level yet. Import or Add a class list with a Year column.</div>';
+            }
+            ta.addEventListener('input', show);
+            show();
+            setTimeout(function () { ta.focus(); }, 30);
+        }
+
+        function applyYears() {
+            var p = parseYearsText(mui.body.querySelector('[data-m="years"]').value);
+            pushUndo();
+            state.reserve = p.map;
+            closeModal();
+            changed();
+            var n = Object.keys(p.map).length, clash = clashCount();
+            setStatus((n ? n + ' locker' + (n === 1 ? ' is' : 's are') + ' kept for a year level.' : 'No lockers are kept for a year level now.') +
+                (clash ? ' ' + clash + ' student' + (clash === 1 ? ' is' : 's are') + ' already in a locker kept for another year (outlined in red). ' +
+                    'Untick Keep and allocate again to move them.' : ''), true);
+        }
+
+        function clashCount() {
+            var n = 0;
+            Object.keys(state.assign).forEach(function (id) {
+                var y = state.reserve[id], st = studentById(state.assign[id]);
+                if (y && st && String(st.year) !== y) n++;
+            });
+            return n;
+        }
+
+        /* side panel lines: Year 7: 60 lockers, 12 free, 58 students */
+        function yearStats() {
+            var kept = {}, freeK = {}, need = {};
+            Object.keys(state.reserve).forEach(function (id) {
+                if (state.out[id]) return;
+                var y = state.reserve[id];
+                kept[y] = (kept[y] || 0) + 1;
+                if (!state.assign[id]) freeK[y] = (freeK[y] || 0) + 1;
+            });
+            var years = Object.keys(kept).sort(numSort);
+            if (!years.length) return '';
+            state.students.forEach(function (st) { if (st.year) need[st.year] = (need[st.year] || 0) + 1; });
+            var clash = clashCount();
+            return '<div class="lk-stats-years">' + years.map(function (y) {
+                var c = yearColour(y) || ['#f1f5f9', '#64748b'];
+                var short = (need[y] || 0) > kept[y];
+                return '<div title="' + kept[y] + ' lockers kept for Year ' + y + ', ' + (freeK[y] || 0) + ' still free; ' + (need[y] || 0) + ' Year ' + y + ' students' +
+                    (short ? '. Not enough: the rest go in lockers that are not kept for a year.' : '') + '">' +
+                    '<span class="lk-yr-dot" style="background:' + c[0] + ';border-color:' + c[1] + '"></span>' +
+                    '<b>Y' + esc(y) + '</b> ' + kept[y] + ' kept · ' + (freeK[y] || 0) + ' free' + (short ? ' <span class="lk-warn-text">(' + need[y] + ' students)</span>' : '') + '</div>';
+            }).join('') + (clash ? '<div class="lk-warn">' + clash + ' in another year\'s locker</div>' : '') + '</div>';
         }
 
         function clearAll() {
@@ -2628,7 +2961,8 @@
                     body += '<div class="lk-pcell' + (state.out[id] ? ' out' : '') + '"' + at + '>' +
                         (s && !state.out[id] && badgeOf(s) ? '<small class="bd">' + esc(badgeOf(s)) + '</small>' : '') +
                         '<b>' + esc(id) + '</b>' +
-                        (state.out[id] ? 'Out of service' : s ? '<span class="n">' + esc(s.firstName) + '</span> ' + esc(displaySurname(s)) : '') +
+                        (state.out[id] ? 'Out of service' : s ? '<span class="n">' + esc(s.firstName) + '</span> ' + esc(displaySurname(s))
+                            : state.reserve[id] ? '<i class="ry">Year ' + esc(state.reserve[id]) + '</i>' : '') +
                         (state.display.combo && s && !state.out[id] ? '<span class="cb">' + (comboOf(id) ? esc(comboOf(id)) : '&nbsp;') + '</span>' : '') + '</div>';
                 });
                 body += '</div></div>';
@@ -2774,13 +3108,15 @@
                 ' in lockers you are removing and will have no locker. Carry on?')) return;
             pushUndo();
             /* keep allocations whose locker still exists, even if its capitals changed */
-            var oldAssign = state.assign, oldOut = state.out;
+            var oldAssign = state.assign, oldOut = state.out, oldReserve = state.reserve;
             state.banks = p.banks.map(cleanBank);
             state.assign = {};
             state.out = {};
+            state.reserve = {};
             rebuildIndex();
             Object.keys(oldAssign).forEach(function (id) { var l = findLocker(id); if (l) state.assign[l.id] = oldAssign[id]; });
             Object.keys(oldOut).forEach(function (id) { var l = findLocker(id); if (l) state.out[l.id] = true; });
+            Object.keys(oldReserve).forEach(function (id) { var l = findLocker(id); if (l) state.reserve[l.id] = oldReserve[id]; });
             closeModal();
             changed();
             setStatus(order.length + ' lockers set up.' + (lost.length ? ' ' + lost.length + ' student(s) now need a locker.' : ''));

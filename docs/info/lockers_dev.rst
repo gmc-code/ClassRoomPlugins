@@ -54,6 +54,7 @@ The ``lockers`` directive
 
       bank: Gym: G1-G24
       unavailable: 112, 118-120
+      year 7: Corridor A, 201-210
 
 Options
 ~~~~~~~
@@ -111,6 +112,16 @@ Content lines
 
 ``unavailable: ranges`` (also ``out:`` or ``broken:``)
    Lockers that start out of service.
+
+``year N: lockers`` (also ``yr N:`` or ``yN:``)
+   Keeps lockers for year level *N*: bank or area names, ranges and single
+   lockers, separated by commas. ``Corridor A top``, ``Corridor A bottom`` or
+   ``Corridor A row 2`` is one row of a bank (as shown on screen, row 1 at the
+   top); ``top`` or ``bottom`` on its own is that row of every bank more than
+   one locker high. A–Z, Homeroom and Random only put Year *N*
+   students in them. Names are matched in the page (lockers.js), so the build
+   doesn't check them; unknown ones are listed in the page's **Year levels**
+   dialog.
 
 Lines starting with ``#`` are ignored.
 
@@ -172,9 +183,16 @@ change, and **Save** writes the same object:
                     "combo": "07 33 03", "extra": { "TG": "7A", "House": "Red" } }],
      "assign": { "101": "s…" },
      "out": { "112": true },
+     "reserve": { "101": "7", "102": "7" },
      "keepExisting": true,
      "display": { "homeroom": true, "field": "yearroom", "surnameInitial": false }
    }
+
+``reserve`` maps a locker id to the year level it is kept for (set by **Year
+levels**, a bank's ⚙ Year level, or ``year N:`` lines in the directive).
+``autoAllocate()`` fills each year's kept lockers with that year's students
+first, then lockers with no entry; a kept locker is never given to another
+year by the automatic allocation.
 
 ``year`` (digits only, e.g. ``"7"``) and ``homeroom`` (e.g. ``"H13"``) are
 stored separately by ``parseHomeroom(hr, year)``. The year comes from a

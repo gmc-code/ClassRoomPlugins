@@ -40,6 +40,12 @@ Quick start
 The toolbar
 ~~~~~~~~~~~
 
+The toolbar has four rows: files, printing and **Undo** on the first;
+**Set up** (**Lockers**, **Year levels**), **Enter** (**By Student**,
+**Paste lockers**, **Combos**) and **Find** on the second; **Allocate** and
+**Remove** on the third; and how the banks are drawn and what each locker
+shows on the fourth.
+
 The buttons are coloured by what they do:
 
 * **Blue**: bring students in (**Import**, **Add**, **Paste**).
@@ -47,7 +53,7 @@ The buttons are coloured by what they do:
 * **Teal**: printing (**Print**, **Map**, **List**).
 * **Grey**: **Undo** and **Reset**.
 * **Amber** and **purple**: setting up and allocating (**Lockers**,
-  **By Student**, **Paste lockers**, **Combos**, **A–Z**, **Random** …), and **red**
+  **Year levels**, **By Student**, **Paste lockers**, **Combos**, **A–Z**, **Random** …), and **red**
   for **Clear** and **Remove: Y9 / Y12**.
 
 Hover over any button to see what it does.
@@ -181,6 +187,59 @@ Out-of-service lockers
 **Right-click** a locker (or select it and press **Out of service**) to mark
 it broken or unavailable. It is shaded, skipped by the automatic allocation
 and by the quick entry bar. Right-click it again to bring it back.
+
+Keeping lockers for a year level
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To keep a corridor for Year 7s, or a bank for Year 12s, press **Year levels**
+and write one line per year, then the lockers. Bank and area names work as
+well as numbers:
+
+.. code-block:: text
+
+   Year 7: Corridor A, 101-160
+   Year 8: 201-260
+   Year 12: Gym
+
+For just one row of a bank, add ``top``, ``bottom`` or ``row 2`` (counted
+from the top) after the bank's name. On its own, ``top`` or ``bottom`` means
+that row of every bank that has rows:
+
+.. code-block:: text
+
+   Year 12: Corridor A top, Corridor B top
+   Year 7: Corridor A bottom, Corridor B bottom
+   Year 10: Corridor C row 2
+
+The preview shows how many lockers each year has and how many students are in
+that year, in red if there are not enough. Delete a line to stop keeping those
+lockers. To keep a whole bank for one year more quickly, press the bank's
+**⚙** and choose its **Year level**. A bank more than one locker high also
+has a menu for each row (**Top**, **Row 2** … **Bottom**), so you can give the
+top row to Year 12s and the bottom row to Year 7s.
+
+Rows are the rows as they look on screen. The year stays with the lockers, not
+the row: if you later change a bank's height or numbering, the same locker
+numbers are still kept, even though they may now be in a different row.
+
+Lockers kept for a year have a coloured stripe along the top in that year's
+colour. Free ones are tinted and say *Year 7*. The side panel lists each year's
+kept lockers and how many are still free.
+
+When you press **A–Z**, **Homeroom** or **Random**:
+
+* Students go in lockers kept for their year first.
+* If their year's lockers are full, or their year has none, they go in
+  lockers that are not kept for any year. The status line tells you when this
+  happens.
+* A locker kept for one year never gets a student from another year.
+* Students with no year level only get lockers that are not kept for a year,
+  so the class list needs a **Year** column (see `Importing a class list`_).
+
+You can still type or drag any student into any locker. If a student goes in
+a locker kept for another year, the status line says so and the locker is
+outlined in red dashes. Changing the year levels doesn't move anyone already
+in a locker: untick **Keep** and allocate again to move everyone.
 
 Importing a class list
 ----------------------
@@ -351,7 +410,8 @@ Clicking names and dragging
 Allocate A → Z, Homeroom or Random
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-These fill the free lockers in number order, skipping out-of-service ones:
+These fill the free lockers in number order, skipping out-of-service ones
+and keeping to any year levels (see `Keeping lockers for a year level`_):
 
 * **A–Z**: by surname, then first name
 * **Homeroom** (or **TG**, **House** ...): by whatever the **Badge** shows,

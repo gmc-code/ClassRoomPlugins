@@ -14,6 +14,7 @@ or auto-allocating.
         Priya Patel, N12 = 106
 
         unavailable: 112, 118-120
+        year 7: Corridor A, 201-210
 
 After a bank's ranges, ``| options`` give it its own shape: ``2 high``,
 ``down``/``across``, ``right`` (numbers start at the right-hand end) and
@@ -21,6 +22,11 @@ After a bank's ranges, ``| options`` give it its own shape: ``2 high``,
 ``:tiers:`` and ``:order:`` set the defaults for every bank. In the content,
 ``[Corridor A]`` (or ``area: Corridor A``) starts an area: the banks after it
 are shown side by side under that heading.
+
+``year 7: Corridor A, 201-210`` keeps lockers for a year level (bank or area
+names, ranges or single lockers; ``Corridor A top``, ``Corridor A bottom`` or
+``Corridor A row 2`` for one row): A–Z, Homeroom and Random only put Year 7
+students in them. Teachers can change this on the page with **Year levels**.
 
 Locker ranges: ``101-140``, ``A1-A30`` (or ``A1-30``), ``001-060`` (keeps the
 zeros) or single numbers, separated by commas. Banks are separated by ``;`` in
@@ -56,6 +62,7 @@ RANGE_RE = re.compile(r"^([A-Za-z]*)(\d+)\s*[-–]\s*([A-Za-z]*)(\d+)$")
 SINGLE_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9./]*$")
 BANK_LINE_RE = re.compile(r"^bank\s*:\s*(.+)$", re.IGNORECASE)
 AREA_LINE_RE = re.compile(r"^(?:area\s*:\s*(.+)|\[(.*)\])$", re.IGNORECASE)
+YEAR_LINE_RE = re.compile(r"^(?:year|yr|y)\s*(\d{1,2})\s*:\s*(.+)$", re.IGNORECASE)
 OUT_LINE_RE = re.compile(r"^(?:unavailable|out|broken)\s*:\s*(.+)$", re.IGNORECASE)
 
 
@@ -246,6 +253,7 @@ class LockersDirective(SphinxDirective):
         bank_texts = [("", b) for b in self.options.get("lockers", "").split(";") if b.strip()]
         area = ""
         out_specs = []
+        year_specs = []
         students = []
 
         roster = self.options.get("roster")
@@ -277,6 +285,11 @@ class LockersDirective(SphinxDirective):
             m = OUT_LINE_RE.match(line)
             if m:
                 out_specs.append(m.group(1))
+                continue
+            m = YEAR_LINE_RE.match(line)
+            if m:
+                # bank/area names are resolved in lockers.js, so the spec is passed on as written
+                year_specs.append({"year": str(int(m.group(1))), "spec": m.group(2).strip()})
                 continue
             body, _, locker = line.rpartition("=") if "=" in line else (line, "", "")
             name, _, homeroom = body.partition(",")
@@ -354,6 +367,7 @@ class LockersDirective(SphinxDirective):
             "start": self.options.get("start", "left"),
             "firstRow": self.options.get("first-row", "top"),
             "unavailable": unavailable,
+            "years": year_specs,
             "display": {
                 "surnameInitial": "surname-initial" in self.options,
                 "homeroom": "hide-homeroom" not in self.options,
