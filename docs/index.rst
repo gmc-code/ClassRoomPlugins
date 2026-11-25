@@ -17,20 +17,6 @@ These docs provide details on sphinx extensions and how to use them. The extensi
 
 .. toctree::
     :maxdepth: 2
-    :caption: User guides:
-
-    info/seatingplan_info.rst
-    info/seatingplans_info.rst
-    info/lockers_info.rst
-
-    info/studentgroups_info.rst
-    info/namepicker_info.rst
-
-    info/noisemonitor_info.rst
-
-
-.. toctree::
-    :maxdepth: 2
     :caption: Classroom Tools:
 
     tools/seatingplan.rst
@@ -42,6 +28,22 @@ These docs provide details on sphinx extensions and how to use them. The extensi
 
     tools/noisemonitor.rst
     tools/christmas.rst
+
+
+
+.. toctree::
+    :maxdepth: 2
+    :caption: User guides:
+
+    info/seatingplan_info.rst
+    info/seatingplans_info.rst
+    info/lockers_info.rst
+
+    info/studentgroups_info.rst
+    info/namepicker_info.rst
+
+    info/noisemonitor_info.rst
+
 
 
 .. toctree::

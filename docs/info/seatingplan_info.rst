@@ -26,7 +26,8 @@ All the pictures in this guide use made-up students.
 Quick start
 -----------
 
-#. Press **Import** and choose your class's Excel or CSV export.
+#. Press **Import** and choose your class's Excel or CSV export, or press
+   **Paste** and paste the names from a spreadsheet.
 #. Click the title and type the class name, e.g. *8 Science W9*.
 #. Pick a layout that matches the room, or type your own.
 #. Press **Rules** to add any seating rules.
@@ -72,6 +73,35 @@ add more (a late enrolment, or a second class sharing the room), use
   matter) is not added twice. If the file gives them a different homeroom or
   TG, theirs is updated.
 
+Pasting a class list
+~~~~~~~~~~~~~~~~~~~~
+
+Instead of importing a file, you can copy the names straight from a
+spreadsheet. Select the cells in Excel, Google Sheets, Word or the school
+system, copy them (**Ctrl+C**), press **Paste** and paste (**Ctrl+V**) into the
+box. A heading row is optional, and these all work:
+
+* columns with headings, such as ``Preferred``, ``Surname``, ``Homeroom``
+  (the same headings as an imported file, plus ``Name``, ``Given Name``,
+  ``TG``, ``Form`` and others)
+* columns **without** headings: the tool works out which column is which from
+  what is in it (``7B`` is a homeroom, ``7`` is a year level, a column in
+  capitals or in A–Z order is the surname)
+* one name per line: ``Alex Smith``, ``SMITH Alex``, ``Smith, Alex``, or
+  ``Alex Smith 7B`` with the homeroom on the end
+* a nickname in brackets, ``Alexander (Alex) Smith``, uses the nickname
+
+The dialog shows how many students it found, a menu above each column saying
+what it thinks the column is, and the names as they will appear. Change a menu
+if a guess is wrong, untick **First row is headings** if your first row is a
+student, or press **⇄ Swap first name / surname** if they come out the wrong way
+round. Names typed in capitals (``SMITH``) are changed to ``Smith``.
+
+When the plan already has students, the dialog has two buttons:
+**Replace the class** (like **Import**) and **Add to the class** (like
+**Add**, see `Adding more students`_). A pasted list doesn't change the plan's
+title.
+
 The title
 ---------
 
@@ -85,7 +115,7 @@ The toolbar
 The button names are kept short so each row fits on one line; hover over a
 button to see what it does in full. The buttons are coloured by what they do:
 
-* **Blue**: bring a class list in (**Import**, **Add**).
+* **Blue**: bring a class list in (**Import**, **Add**, **Paste**).
 * **Lighter blue**: plan files (**Open**, **Save**).
 * **Teal**: printing and showing (**Print**, **PNG**, **Projector**).
 * **Grey**: **Reset** and **Revert**.
@@ -107,6 +137,10 @@ Top row: files and output
 **Add**
    Add students from another class list without removing anyone (see
    `Adding more students`_).
+
+**Paste**
+   Paste a class list copied from a spreadsheet, to replace the class or add to
+   it (see `Pasting a class list`_).
 
 **Open**
    Load a plan saved with **Save**: title, class list, rules, layout,

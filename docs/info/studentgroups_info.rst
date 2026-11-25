@@ -19,7 +19,8 @@ Getting started
 
 1. **Load your class.** If the planner already shows your students, skip this
    step. Otherwise press **Import Roster** and choose your class list (an Excel
-   or CSV file, see `Class lists`_). The planner is named after the file, e.g.
+   or CSV file), or press **Paste Roster** and paste the names from a
+   spreadsheet (see `Class lists`_). The planner is named after the file, e.g.
    *8_Science_P3.xlsx* becomes "8 Science P3". Click the title to change it.
 2. **Choose a group size.** Click a number under **Group Size**.
 3. **Make the groups.** Press **Random Grouping** for a fresh mix, or **A → Z**,
@@ -57,6 +58,31 @@ first row must be headings. These headings are recognised (any case):
 Empty rows are skipped. Importing a new class list clears any rules (you are
 asked first) and puts everyone back in the groups.
 
+Pasting a class list
+~~~~~~~~~~~~~~~~~~~~
+
+Instead of importing a file, you can copy the names straight from a
+spreadsheet. Select the cells in Excel, Google Sheets, Word or the school
+system, copy them (**Ctrl+C**), press **Paste Roster** and paste (**Ctrl+V**) into the
+box. A heading row is optional, and these all work:
+
+* columns with headings, such as ``Preferred``, ``Surname``, ``Homeroom``
+  (the same headings as an imported file, plus ``Name``, ``Given Name``,
+  ``TG``, ``Form`` and others)
+* columns **without** headings: the tool works out which column is which from
+  what is in it (``7B`` is a homeroom, ``7`` is a year level, a column in
+  capitals or in A–Z order is the surname)
+* one name per line: ``Alex Smith``, ``SMITH Alex``, ``Smith, Alex``, or
+  ``Alex Smith 7B`` with the homeroom on the end
+* a nickname in brackets, ``Alexander (Alex) Smith``, uses the nickname
+
+The dialog shows how many students it found, a menu above each column saying
+what it thinks the column is, and the names as they will appear. Change a menu
+if a guess is wrong, untick **First row is headings** if your first row is a
+student, or press **⇄ Swap first name / surname** if they come out the wrong way
+round. Names typed in capitals (``SMITH``) are changed to ``Smith``.
+
+
 
 The toolbar at a glance
 -----------------------
@@ -69,6 +95,8 @@ The toolbar at a glance
      - What it does
    * - **Import Roster**
      - Loads a class list from Excel or CSV.
+   * - **Paste Roster**
+     - Pastes a class list copied from a spreadsheet (see `Pasting a class list`_).
    * - **Import JSON** / **Export JSON**
      - Opens or saves a whole plan (see `Saving and opening plans`_).
    * - **Reset**

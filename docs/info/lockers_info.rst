@@ -24,13 +24,14 @@ Quick start
 -----------
 
 #. Press **Lockers** and type the locker numbers, e.g. ``101-160``.
-#. Press **Import** and choose the class's Excel or CSV export.
+#. Press **Import** and choose the class's Excel or CSV export, or press
+   **Paste** and paste the class list from a spreadsheet.
 #. Allocate lockers, using whichever way suits:
 
    * **A–Z**, **Homeroom** or **Random** to fill the lockers in order, or
    * click a locker, type a few letters of a name and press **Enter**, or
    * **By Student** to type numbers down a list, or
-   * **Paste** to paste a list from Excel or an email.
+   * **Paste lockers** to paste a list from Excel or an email.
 
 #. **Map** (a map of the lockers) or **List** (names in
    surname order with their locker).
@@ -41,12 +42,12 @@ The toolbar
 
 The buttons are coloured by what they do:
 
-* **Blue**: bring students in (**Import**, **Add**).
+* **Blue**: bring students in (**Import**, **Add**, **Paste**).
 * **Lighter blue**: files (**Open**, **Save**, **Export**).
 * **Teal**: printing (**Print**, **Map**, **List**).
 * **Grey**: **Undo** and **Reset**.
 * **Amber** and **purple**: setting up and allocating (**Lockers**,
-  **By Student**, **Paste**, **Combos**, **A–Z**, **Random** …), and **red**
+  **By Student**, **Paste lockers**, **Combos**, **A–Z**, **Random** …), and **red**
   for **Clear** and **Remove: Y9 / Y12**.
 
 Hover over any button to see what it does.
@@ -212,6 +213,37 @@ with a file that has names and a **Year** column.
 
 A file saved with **Export** (either layout) can be imported again this way.
 
+Pasting a class list
+~~~~~~~~~~~~~~~~~~~~
+
+Instead of importing a file, you can copy the names straight from a
+spreadsheet. Select the cells in Excel, Google Sheets, Word or the school
+system, copy them (**Ctrl+C**), press **Paste** and paste (**Ctrl+V**) into the
+box. A heading row is optional, and these all work:
+
+* columns with headings, such as ``Preferred``, ``Surname``, ``Homeroom``
+  (the same headings as an imported file, plus ``Name``, ``Given Name``,
+  ``TG``, ``Form`` and others), ``Locker number`` and ``Locker Combo``; other headed
+  columns such as **TG** or **House** are kept, as with an imported file
+* columns **without** headings: the tool works out which column is which from
+  what is in it (``7B`` is a homeroom, ``7`` is a year level, a column in
+  capitals or in A–Z order is the surname)
+* one name per line: ``Alex Smith``, ``SMITH Alex``, ``Smith, Alex``, or
+  ``Alex Smith 7B`` with the homeroom on the end
+* a nickname in brackets, ``Alexander (Alex) Smith``, uses the nickname
+
+The dialog shows how many students it found, a menu above each column saying
+what it thinks the column is, and the names as they will appear. Change a menu
+if a guess is wrong, untick **First row is headings** if your first row is a
+student, or press **⇄ Swap first name / surname** if they come out the wrong way
+round. Names typed in capitals (``SMITH``) are changed to ``Smith``.
+
+Locker numbers (``506``) and combinations (``07 33 03``) are recognised without
+headings too. When students are already here, the dialog has two buttons:
+**Replace the students** (like **Import**) and **Add to the list** (like
+**Add**, see `Adding more students`_). To paste lockers for students who are
+already on the list, use **Paste lockers** instead (see `Paste lockers`_).
+
 Adding more students
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -373,8 +405,10 @@ without a locker.
    By Student: the cursor starts at the first student without a locker.
 
 
-Paste (allocations from Excel or a list)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Paste lockers
+~~~~~~~~~~~~~
+
+The purple **Paste lockers** button pastes allocations from Excel or a list.
 
 Paste lines that each have a name and a locker number, in either order. All of
 these work:

@@ -20,8 +20,8 @@ Getting started
 ---------------
 
 #. **Load your class.** If the picker already shows names, skip this step.
-   Otherwise press **Roster** and choose your class list (see
-   `Class lists`_). The picker is named after the file; click the title to
+   Otherwise press **Roster** and choose your class list, or press **Paste**
+   and paste the names from a spreadsheet (see `Class lists`_). The picker is named after the file; click the title to
    change it.
 #. **Choose how many** under **Pick** (1–10).
 #. Press **Pick!** The stack spins and lands on your students. Press
@@ -51,6 +51,31 @@ picker settings stay as they are. This is the quickest way to use the same class
 in every tool.
 
 
+Pasting a class list
+~~~~~~~~~~~~~~~~~~~~
+
+Instead of importing a file, you can copy the names straight from a
+spreadsheet. Select the cells in Excel, Google Sheets, Word or the school
+system, copy them (**Ctrl+C**), press **Paste** and paste (**Ctrl+V**) into the
+box. A heading row is optional, and these all work:
+
+* columns with headings, such as ``Preferred``, ``Surname``, ``Homeroom``
+  (the same headings as an imported file, plus ``Name``, ``Given Name``,
+  ``TG``, ``Form`` and others)
+* columns **without** headings: the tool works out which column is which from
+  what is in it (``7B`` is a homeroom, ``7`` is a year level, a column in
+  capitals or in A–Z order is the surname)
+* one name per line: ``Alex Smith``, ``SMITH Alex``, ``Smith, Alex``, or
+  ``Alex Smith 7B`` with the homeroom on the end
+* a nickname in brackets, ``Alexander (Alex) Smith``, uses the nickname
+
+The dialog shows how many students it found, a menu above each column saying
+what it thinks the column is, and the names as they will appear. Change a menu
+if a guess is wrong, untick **First row is headings** if your first row is a
+student, or press **⇄ Swap first name / surname** if they come out the wrong way
+round. Names typed in capitals (``SMITH``) are changed to ``Smith``.
+
+
 The toolbar
 -----------
 
@@ -62,6 +87,8 @@ The toolbar
      - What it does
    * - **Roster**
      - Imports a class list from Excel or CSV.
+   * - **Paste**
+     - Pastes a class list copied from a spreadsheet (see `Pasting a class list`_).
    * - **Import** / **Export**
      - Opens or saves the whole picker as a JSON file (see `Saving and opening`_).
    * - **Reset**

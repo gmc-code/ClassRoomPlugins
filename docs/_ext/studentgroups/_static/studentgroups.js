@@ -1,3 +1,580 @@
+/* ===== ClassroomPaste v1: paste a class list copied from a spreadsheet =====
+   Shared by the classroom directives (namepicker, studentgroups, seatingplan, lockers). The same block is
+   copied into each directive's .js so every directive still works on its own; whichever loads first
+   defines window.ClassroomPaste and the others reuse it. Keep the copies identical.
+
+   Understands:
+   - columns copied from Excel / Google Sheets / Word tables (tab separated), CSV or semicolon text,
+     or one student per line;
+   - with or without a heading row (Preferred, First Name, Surname, Name, Homeroom, TG, Year, ...);
+   - names in separate columns, or one column as "Alex Smith", "SMITH Alex", "Smith, Alex",
+     "Smith Alex" (sorted by surname), "Alexander (Alex) Smith";
+   - homeroom / year level / locker / combination columns recognised from what is in them.
+   Every column's guess can be changed in the dialog before the list is used.
+
+   ClassroomPaste.open({
+       title: 'Paste a class list',
+       lockers: false,          // offer Locker number and Locker combination columns
+       extra: false,            // offer "Keep as extra info" for columns with no heading
+       keepNameless: false,     // pass on rows without a name (lockers: locker + combination only)
+       actions: [{ value: 'replace', label: 'Use this list', primary: true }],
+       onApply: function (rows, action, info) { ... return false to keep the dialog open }
+   });
+   rows are objects keyed like a spreadsheet heading row: 'First Name', 'Surname', 'Homeroom',
+   'Year Level', 'Locker number', 'Locker Combo', plus any other headed column under its own heading. */
+(function () {
+    'use strict';
+    if (window.ClassroomPaste && window.ClassroomPaste.version >= 1) return;
+
+    var ROLES = {
+        first: 'First name',
+        firstalt: 'First name (if no preferred)',
+        surname: 'Surname',
+        full: 'Full name (First Surname)',
+        fullrev: 'Full name (Surname First)',
+        homeroom: 'Homeroom / TG',
+        year: 'Year level',
+        locker: 'Locker number',
+        combo: 'Locker combination',
+        keep: 'Keep as extra info',
+        ignore: 'Ignore'
+    };
+    var KEYS = { first: 'First Name', surname: 'Surname', homeroom: 'Homeroom', year: 'Year Level',
+        locker: 'Locker number', combo: 'Locker Combo' };
+
+    /* heading text -> role. 'preferred' beats a legal first name when both are there. */
+    var HEADS = {
+        preferred: ['preferred', 'preferred name', 'preferred first name', 'known as', 'nickname'],
+        first: ['first name', 'firstname', 'first', 'given name', 'given names', 'forename', 'forenames', 'legal first name'],
+        surname: ['surname', 'surname name', 'last name', 'lastname', 'last', 'family name', 'family names', 'legal surname'],
+        full: ['name', 'names', 'student', 'students', 'student name', 'student names', 'full name', 'pupil', 'learner'],
+        fullrev: ['surname, first name', 'surname first name', 'surname, preferred', 'surname preferred', 'name (surname first)'],
+        homeroom: ['homeroom', 'home room', 'home group', 'homegroup', 'form', 'form group', 'tg', 'tutor group',
+            'tutorgroup', 'pc', 'pc group', 'pastoral care', 'pastoral group', 'roll class', 'roll group', 'mentor group', 'care group'],
+        year: ['year', 'year level', 'yr', 'yr level', 'year group', 'grade', 'yl', 'level'],
+        locker: ['locker', 'locker number', 'locker no', 'locker no.', 'locker #', 'locker num'],
+        combo: ['locker combo', 'combo', 'combination', 'lock combo', 'locker combination', 'lock combination']
+    };
+    var PARTICLES = ['van', 'von', 'der', 'den', 'de', 'del', 'della', 'da', 'di', 'du', 'dos', 'das', 'le', 'la', 'st', 'st.', 'ter', 'ten', 'bin', 'binti', 'al', 'el', 'ben', 'mac'];
+
+    var COMBO_RE = /^\d{1,2}\s*[\s\-:.\/]\s*\d{1,2}\s*[\s\-:.\/]\s*\d{1,2}$/;
+    var YEAR_RE = /^(?:y(?:ea)?r?\.?\s*|grade\s*)?(\d{1,2})$/i;
+    var HOMEROOM_RE = /^(?:\d{1,2}\s?[.\-\/]?\s?[A-Za-z][A-Za-z0-9]{0,4}|[A-Za-z]{1,4}\s?[.\-]?\s?\d{1,2}[A-Za-z]?)$/;
+    var LOCKER_RE = /^[A-Za-z]{0,3}[\s\-]?\d{1,4}[A-Za-z]?$/;
+
+    function clean(v) {
+        return v == null ? '' : String(v).replace(/[   ]/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+    function headKey(h) { return clean(h).toLowerCase().replace(/[:*]+$/, '').trim(); }
+    function esc(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+    }
+    function isCaps(w) { return /[A-Z]/.test(w) && w.length > 1 && w === w.toUpperCase() && !/\d/.test(w); }
+    /* SMITH -> Smith, O'NEIL -> O'Neil, SMITH-JONES -> Smith-Jones, MCDONALD -> McDonald */
+    function tidyCase(w) {
+        if (!isCaps(w)) return w;
+        return w.toLowerCase().replace(/(^|[\s\-'’])([a-z])/g, function (m, a, b) { return a + b.toUpperCase(); })
+            .replace(/\bMc([a-z])/g, function (m, a) { return 'Mc' + a.toUpperCase(); });
+    }
+    function tidyName(s) { return clean(s).split(' ').map(tidyCase).join(' '); }
+    /* "Alexander (Alex)" -> "Alex" */
+    function preferredOf(first) {
+        var m = /\(([^)]+)\)/.exec(first);
+        return m ? clean(m[1]) : clean(first.replace(/\(\s*\)/g, ''));
+    }
+    function headRole(h) {
+        var k = headKey(h);
+        if (!k) return null;
+        for (var r in HEADS) if (HEADS[r].indexOf(k) >= 0) return r;
+        return null;
+    }
+    function frac(vals, test) {
+        if (!vals.length) return 0;
+        var n = 0;
+        vals.forEach(function (v) { if (test(v)) n++; });
+        return n / vals.length;
+    }
+    /* how many neighbouring pairs are in A-Z order */
+    function sortedness(vals) {
+        if (vals.length < 4) return 0;
+        var ok = 0;
+        for (var i = 1; i < vals.length; i++) if (vals[i - 1].toLowerCase().localeCompare(vals[i].toLowerCase()) <= 0) ok++;
+        return ok / (vals.length - 1);
+    }
+    function yearOf(v) {
+        var m = YEAR_RE.exec(clean(v));
+        if (!m) return '';
+        var n = +m[1];
+        return n >= 1 && n <= 13 ? String(n) : '';
+    }
+
+    /* ---------- splitting the text ---------- */
+
+    function lines(text) { return String(text || '').split(/\r\n|\r|\n/).filter(function (l) { return l.trim(); }); }
+
+    function detectDelim(text) {
+        var ls = lines(text).slice(0, 60);
+        if (!ls.length) return 'line';
+        var n = ls.length;
+        var count = function (ch) { return ls.filter(function (l) { return l.indexOf(ch) >= 0; }).length; };
+        if (count('\t') >= Math.max(1, n * 0.5)) return 'tab';
+        if (count(';') >= n * 0.8) return 'semi';
+        if (count(',') >= n * 0.8) {
+            /* "Smith, Alex" on every line is a list of names, not two CSV columns, unless a heading says so */
+            var heads = ls[0].split(',').map(headRole).filter(Boolean);
+            var nameStyle = ls.every(function (l) { return (l.match(/,/g) || []).length === 1 && /,\s/.test(l) && !/\d/.test(l); });
+            if (nameStyle && heads.length < 2) return 'line';
+            return 'comma';
+        }
+        return 'line';
+    }
+
+    function splitRows(text, delim) {
+        if (delim === 'line') return lines(text).map(function (l) { return [l]; });
+        var d = delim === 'tab' ? '\t' : delim === 'semi' ? ';' : ',';
+        var rows = [], row = [], field = '', q = false, s = String(text || '');
+        for (var i = 0; i < s.length; i++) {
+            var c = s.charAt(i);
+            if (q) {
+                if (c === '"') { if (s.charAt(i + 1) === '"') { field += '"'; i++; } else q = false; }
+                else field += c;
+            } else if (c === '"' && field.trim() === '') { q = true; field = ''; }
+            else if (c === d) { row.push(field); field = ''; }
+            else if (c === '\n' || c === '\r') {
+                if (c === '\r' && s.charAt(i + 1) === '\n') i++;
+                row.push(field); rows.push(row); row = []; field = '';
+            } else field += c;
+        }
+        if (field !== '' || row.length) { row.push(field); rows.push(row); }
+        rows = rows.map(function (r) { return r.map(clean); })
+            .filter(function (r) { return r.some(function (c) { return c !== ''; }); });
+        /* drop columns that are empty all the way down (e.g. a blank column between) */
+        var width = rows.reduce(function (m, r) { return Math.max(m, r.length); }, 0);
+        var keep = [];
+        for (var c2 = 0; c2 < width; c2++) if (rows.some(function (r) { return r[c2]; })) keep.push(c2);
+        return rows.map(function (r) { return keep.map(function (k) { return r[k] || ''; }); });
+    }
+
+    function looksLikeHeading(row) {
+        var roles = row.map(headRole);
+        var named = roles.filter(function (r) { return r === 'first' || r === 'preferred' || r === 'surname' || r === 'full' || r === 'fullrev'; });
+        var any = roles.filter(Boolean);
+        return named.length >= 1 || any.length >= 2;
+    }
+
+    /* ---------- guessing what each column is ---------- */
+
+    function guessRole(vals, opt) {
+        vals = vals.filter(Boolean);
+        if (!vals.length) return 'ignore';
+        if (frac(vals, function (v) { return /@/.test(v); }) > 0.5) return 'ignore';
+        if (opt.lockers && frac(vals, function (v) { return COMBO_RE.test(v); }) > 0.6) return 'combo';
+        if (frac(vals, function (v) { var y = yearOf(v); return y && +y >= 3; }) > 0.85) return 'year';
+        if (frac(vals, function (v) { return /^\d{5,}$/.test(v); }) > 0.6) return 'ignore';
+        if (opt.lockers && frac(vals, function (v) { return LOCKER_RE.test(v) && /\d/.test(v); }) > 0.7) return 'locker';
+        if (frac(vals, function (v) { return HOMEROOM_RE.test(v); }) > 0.7) return 'homeroom';
+        if (frac(vals, function (v) { return /^(m|f|x|male|female|other)$/i.test(v); }) > 0.8) return 'ignore';
+        if (frac(vals, function (v) { return /\d/.test(v); }) > 0.5) return 'ignore';
+        if (frac(vals, function (v) { return /[\s,]/.test(v); }) > 0.5) return fullOrder(vals);
+        return 'word';
+    }
+
+    /* One column of whole names: which way round? */
+    function fullOrder(vals) {
+        if (frac(vals, function (v) { return /,/.test(v); }) > 0.5) return 'fullrev';
+        var firstWords = vals.map(function (v) { return v.split(/[\s,]+/)[0]; });
+        var lastWords = vals.map(function (v) { var w = v.split(/\s+/); return w[w.length - 1]; });
+        if (frac(firstWords, isCaps) > 0.6 && frac(lastWords, isCaps) < 0.3) return 'fullrev';
+        var sf = sortedness(firstWords), sl = sortedness(lastWords);
+        /* class lists are usually sorted by surname */
+        if (sf >= 0.85 && sf > sl + 0.15) return 'fullrev';
+        return 'full';
+    }
+
+    function guessRoles(rows, headed, opt) {
+        var width = rows.reduce(function (m, r) { return Math.max(m, r.length); }, 0);
+        var body = headed ? rows.slice(1) : rows;
+        var col = function (i) { return body.map(function (r) { return r[i] || ''; }); };
+        var roles = [], i;
+        if (headed) {
+            var heads = rows[0];
+            for (i = 0; i < width; i++) roles.push(headRole(heads[i]) || (heads[i] ? 'keep' : guessRole(col(i), opt)));
+            var pi = roles.indexOf('preferred');
+            if (pi >= 0) {
+                roles = roles.map(function (r) { return r === 'first' ? 'firstalt' : r; });
+                roles[pi] = 'first';
+            }
+        } else if (width === 1 && opt.lineMode) {
+            /* one per line: names, perhaps with a homeroom or year on the end ("Alex Smith 7B") */
+            var names = col(0).map(function (v) {
+                return clean(v.replace(/\b(?:year|yr|grade)\s*\d{1,2}\b/ig, ' ').split(' ').filter(function (b) { return !/\d/.test(b); }).join(' '));
+            }).filter(Boolean);
+            roles.push(frac(names, function (v) { return /[\s,]/.test(v); }) > 0.5 ? fullOrder(names) : 'first');
+        } else {
+            for (i = 0; i < width; i++) roles.push(guessRole(col(i), opt));
+        }
+        /* single-word name columns */
+        var words = [];
+        roles.forEach(function (r, k) { if (r === 'word') words.push(k); });
+        var hasFirst = roles.indexOf('first') >= 0, hasSur = roles.indexOf('surname') >= 0;
+        var hasFull = roles.indexOf('full') >= 0 || roles.indexOf('fullrev') >= 0;
+        if (words.length && hasFull && !hasFirst && !hasSur) {
+            words.forEach(function (k) { roles[k] = 'ignore'; });
+        } else if (words.length) {
+            var need = [];
+            if (!hasSur) need.push('surname');
+            if (!hasFirst) need.push('first');
+            if (need.length === 2 && words.length >= 2) {
+                /* pick the surname column: written in capitals, or the list is sorted by it */
+                var best = words[1], a = col(words[0]), b = col(words[1]);
+                var ca = frac(a.filter(Boolean), isCaps), cb = frac(b.filter(Boolean), isCaps);
+                var sa = sortedness(a.filter(Boolean)), sb = sortedness(b.filter(Boolean));
+                if (ca > 0.6 && cb < 0.6) best = words[0];
+                else if (cb > 0.6 && ca < 0.6) best = words[1];
+                else if (sa >= 0.85 && sa > sb + 0.15) best = words[0];
+                roles[best] = 'surname';
+                var other = best === words[0] ? words[1] : words[0];
+                roles[other] = 'first';
+                words.forEach(function (k) { if (roles[k] === 'word') roles[k] = 'ignore'; });
+            } else {
+                words.forEach(function (k) { roles[k] = need.length ? need.pop() : 'ignore'; });
+                /* a lone single-word column is most likely first names */
+                if (words.length === 1 && !hasFirst && roles[words[0]] === 'surname' && !hasSur) roles[words[0]] = 'first';
+            }
+        }
+        if (!opt.lockers) roles = roles.map(function (r) { return r === 'locker' || r === 'combo' ? 'ignore' : r; });
+        return roles;
+    }
+
+    /* ---------- names ---------- */
+
+    function splitFull(v, surnameFirst) {
+        v = clean(v);
+        var out = { first: '', surname: '', homeroom: '', year: '' };
+        if (!v) return out;
+        /* "Smith, Alex" is always surname first */
+        var comma = v.indexOf(',');
+        if (comma > 0) {
+            out.surname = tidyName(v.slice(0, comma));
+            out.first = preferredOf(tidyName(v.slice(comma + 1)));
+            return out;
+        }
+        var w = v.split(' ');
+        if (w.length === 1) { out.first = tidyCase(w[0]); return out; }
+        /* SMITH Alex / Alex SMITH: the words in capitals are the surname */
+        var caps = w.map(isCaps);
+        var nCaps = caps.filter(Boolean).length;
+        if (nCaps && nCaps < w.length) {
+            out.surname = w.filter(function (x, i) { return caps[i]; }).map(tidyCase).join(' ');
+            out.first = preferredOf(w.filter(function (x, i) { return !caps[i]; }).join(' '));
+            return out;
+        }
+        w = w.map(tidyCase);
+        var cut;
+        if (surnameFirst) {
+            cut = 1;
+            while (cut < w.length - 1 && PARTICLES.indexOf(w[cut - 1].toLowerCase()) >= 0) cut++;
+            out.surname = w.slice(0, cut).join(' ');
+            out.first = preferredOf(w.slice(cut).join(' '));
+        } else {
+            cut = w.length - 1;
+            while (cut > 1 && PARTICLES.indexOf(w[cut - 1].toLowerCase()) >= 0) cut--;
+            /* "Alexander (Alex) Smith": keep the bracket with the first name */
+            out.first = preferredOf(w.slice(0, cut).join(' '));
+            out.surname = w.slice(cut).join(' ');
+        }
+        return out;
+    }
+
+    /* One-per-line text: "Alex Smith 7B" -> name + homeroom, "Alex Smith Year 8" -> name + year */
+    function splitLine(v, surnameFirst) {
+        v = clean(v).replace(/[()\[\]]/g, function (c) { return c === '(' || c === ')' ? c : ' '; });
+        var bits = v.split(' '), keep = [], homeroom = '', year = '';
+        for (var i = 0; i < bits.length; i++) {
+            var b = bits[i];
+            if (/^(year|yr|grade)$/i.test(b) && /^\d{1,2}$/.test(bits[i + 1] || '')) { year = String(+bits[i + 1]); i++; continue; }
+            if (/\d/.test(b) && !/^\(.*\)$/.test(b)) {
+                var y = yearOf(b);
+                if (y && !year) year = y;
+                else if (!homeroom) homeroom = b.replace(/^[(\-]+|[)\-]+$/g, '');
+                continue;
+            }
+            keep.push(b);
+        }
+        var out = splitFull(keep.join(' ').replace(/\s+,/g, ','), surnameFirst);
+        out.homeroom = homeroom;
+        out.year = year;
+        return out;
+    }
+
+    /* ---------- turning the table into rows ---------- */
+
+    function build(text, opt, over) {
+        var delim = over.delim && over.delim !== 'auto' ? over.delim : detectDelim(text);
+        var rows = splitRows(text, delim);
+        var res = { delim: delim, rows: [], students: 0, table: rows, headed: false, roles: [], width: 0 };
+        if (!rows.length) return res;
+        var width = rows.reduce(function (m, r) { return Math.max(m, r.length); }, 0);
+        res.width = width;
+        res.headed = over.headed != null ? over.headed : looksLikeHeading(rows[0]);
+        var roles = guessRoles(rows, res.headed, { lockers: opt.lockers, lineMode: delim === 'line' });
+        if (over.roles && over.roles.length === width) roles = over.roles.slice();
+        res.roles = roles;
+        var heads = res.headed ? rows[0] : [];
+        var body = res.headed ? rows.slice(1) : rows;
+        body.forEach(function (r) {
+            var o = {}, first = '', alt = '', sur = '', parts;
+            roles.forEach(function (role, i) {
+                var v = r[i] || '';
+                if (!v) return;
+                if (role === 'first' && width === 1 && delim === 'line') {
+                    parts = splitLine(v, false);
+                    if (!first) first = parts.first;
+                    if (parts.homeroom && !o.Homeroom) o.Homeroom = parts.homeroom;
+                    if (parts.year && !o['Year Level']) o['Year Level'] = parts.year;
+                } else if (role === 'first') { if (!first) first = preferredOf(tidyName(v)); }
+                else if (role === 'firstalt') { if (!alt) alt = preferredOf(tidyName(v)); }
+                else if (role === 'surname') { if (!sur) sur = tidyName(v); }
+                else if (role === 'full' || role === 'fullrev') {
+                    parts = width === 1 && delim === 'line' ? splitLine(v, role === 'fullrev') : splitFull(v, role === 'fullrev');
+                    if (!first) first = parts.first;
+                    if (!sur) sur = parts.surname;
+                    if (parts.homeroom && !o.Homeroom) o.Homeroom = parts.homeroom;
+                    if (parts.year && !o['Year Level']) o['Year Level'] = parts.year;
+                } else if (role === 'year') o['Year Level'] = yearOf(v) || v;
+                else if (role === 'locker') o['Locker number'] = v.replace(/\.0$/, '');
+                else if (KEYS[role]) o[KEYS[role]] = v;
+                else if (role === 'keep') o[clean(heads[i]) || ('Column ' + (i + 1))] = v;
+            });
+            first = first || alt;
+            if (first) o['First Name'] = first;
+            if (sur) o.Surname = sur;
+            var named = !!(first || sur);
+            if (!named && !(opt.keepNameless && Object.keys(o).length)) return;
+            if (named) res.students++;
+            res.rows.push(o);
+        });
+        return res;
+    }
+
+    /* ---------- the dialog ---------- */
+
+    var CSS =
+        '.cpaste-overlay{position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:16px;font-family:inherit}' +
+        '.cpaste-box{background:#fff;color:#0f172a;border-radius:10px;width:min(820px,100%);max-height:calc(100vh - 32px);display:flex;flex-direction:column;box-shadow:0 20px 50px rgba(0,0,0,.35);overflow:hidden;font-size:14px;line-height:1.4}' +
+        '.cpaste-head{background:#0f172a;color:#fff;padding:10px 14px;display:flex;align-items:center;gap:8px}' +
+        '.cpaste-head h3{margin:0;font-size:16px;font-weight:600;flex:1;color:#fff;border:0;padding:0}' +
+        '.cpaste-x{background:none;border:0;color:#cbd5e1;font-size:22px;line-height:1;cursor:pointer;padding:0 4px}.cpaste-x:hover{color:#fff}' +
+        '.cpaste-body{padding:12px 14px;overflow:auto;display:flex;flex-direction:column;gap:10px}' +
+        '.cpaste-help{margin:0;color:#475569;font-size:13px}.cpaste-help code{background:#f1f5f9;padding:0 4px;border-radius:3px;font-size:12px;white-space:nowrap}' +
+        '.cpaste-ta{width:100%;box-sizing:border-box;min-height:120px;resize:vertical;font:13px/1.4 ui-monospace,Consolas,monospace;border:1px solid #cbd5e1;border-radius:6px;padding:8px;tab-size:16;color:#0f172a;background:#fff}' +
+        '.cpaste-ta:focus{outline:2px solid #3b82f6;outline-offset:-1px;border-color:#3b82f6}' +
+        '.cpaste-opts{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;font-size:13px;color:#334155}' +
+        '.cpaste-opts label{display:inline-flex;align-items:center;gap:5px;cursor:pointer;margin:0}' +
+        '.cpaste-opts select,.cpaste-table select{font:inherit;font-size:12px;padding:2px 4px;border:1px solid #cbd5e1;border-radius:4px;background:#fff;color:#0f172a;max-width:100%}' +
+        '.cpaste-found{font-weight:600;color:#0f172a}.cpaste-found.cpaste-none{color:#b45309;font-weight:500}' +
+        '.cpaste-wrap{overflow:auto;border:1px solid #e2e8f0;border-radius:6px;max-height:220px}' +
+        '.cpaste-table{border-collapse:collapse;font-size:12px;width:100%;margin:0}' +
+        '.cpaste-table th,.cpaste-table td{border:0;border-bottom:1px solid #e2e8f0;border-right:1px solid #f1f5f9;padding:3px 6px;text-align:left;white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis;background:none}' +
+        '.cpaste-table thead th{position:sticky;top:0;background:#f8fafc;z-index:1}' +
+        '.cpaste-table tr.cpaste-headrow td{font-weight:600;color:#64748b;background:#f8fafc;font-style:italic}' +
+        '.cpaste-table td.cpaste-off{color:#cbd5e1}' +
+        '.cpaste-chips{display:flex;flex-wrap:wrap;gap:4px}' +
+        '.cpaste-chip{background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a;border-radius:999px;padding:1px 8px;font-size:12px}' +
+        '.cpaste-chip small{color:#64748b;margin-left:4px}.cpaste-more{font-size:12px;color:#64748b;align-self:center}' +
+        '.cpaste-foot{display:flex;gap:8px;justify-content:flex-end;align-items:center;padding:10px 14px;border-top:1px solid #e2e8f0;background:#f8fafc;flex-wrap:wrap}' +
+        '.cpaste-msg{flex:1;color:#b91c1c;font-size:13px;min-width:120px}' +
+        '.cpaste-btn{font:inherit;font-size:13px;border-radius:5px;padding:6px 14px;cursor:pointer;border:1px solid #cbd5e1;background:#fff;color:#0f172a}' +
+        '.cpaste-btn:hover{background:#f1f5f9}' +
+        '.cpaste-btn.cpaste-primary{background:#3b82f6;border-color:#3b82f6;color:#fff;font-weight:600}.cpaste-btn.cpaste-primary:hover{background:#2563eb}' +
+        '.cpaste-btn:disabled{opacity:.45;cursor:default}';
+
+    function injectCss() {
+        if (document.getElementById('cpaste-css')) return;
+        var st = document.createElement('style');
+        st.id = 'cpaste-css';
+        st.textContent = CSS;
+        document.head.appendChild(st);
+    }
+
+    function open(opt) {
+        opt = opt || {};
+        injectCss();
+        var actions = opt.actions && opt.actions.length ? opt.actions : [{ value: 'replace', label: 'Use this list', primary: true }];
+        var roleList = ['first', 'firstalt', 'surname', 'full', 'fullrev', 'homeroom', 'year']
+            .concat(opt.lockers ? ['locker', 'combo'] : []).concat(['keep', 'ignore']);
+        var over = { delim: 'auto', headed: null, roles: null };
+        var res = null, lastText = null;
+
+        var ov = document.createElement('div');
+        ov.className = 'cpaste-overlay';
+        ov.innerHTML =
+            '<div class="cpaste-box" role="dialog" aria-modal="true" aria-label="' + esc(opt.title || 'Paste a class list') + '">' +
+            '<div class="cpaste-head"><h3>' + esc(opt.title || 'Paste a class list') + '</h3>' +
+            '<button type="button" class="cpaste-x" data-c="close" title="Close" aria-label="Close">×</button></div>' +
+            '<div class="cpaste-body">' +
+            '<p class="cpaste-help">Select the names in Excel, Google Sheets, Word or the school system, copy (Ctrl+C), then paste here (Ctrl+V). ' +
+            'A heading row is optional. Names can be in separate first name and surname columns, or one column such as ' +
+            '<code>Alex Smith</code>, <code>SMITH Alex</code> or <code>Smith, Alex</code>. Homeroom' +
+            (opt.lockers ? ', year level, locker number and combination' : ' and year level') + ' columns are picked up too.</p>' +
+            '<textarea class="cpaste-ta" data-c="text" spellcheck="false" placeholder="Paste here&#10;&#10;e.g.&#10;Preferred&#9;Surname&#9;Homeroom&#10;Alex&#9;Smith&#9;7B&#10;&#10;or just one name per line"></textarea>' +
+            '<div class="cpaste-opts">' +
+            '<span class="cpaste-found" data-c="found"></span>' +
+            '<label><input type="checkbox" data-c="headed"> First row is headings</label>' +
+            '<label>Columns: <select data-c="delim">' +
+            '<option value="auto">Detect</option><option value="tab">Tabs (spreadsheet)</option><option value="comma">Commas</option>' +
+            '<option value="semi">Semicolons</option><option value="line">One name per line</option></select></label>' +
+            '<button type="button" class="cpaste-btn" data-c="swap" title="Swap the first name and surname columns">⇄ Swap first name / surname</button>' +
+            '</div>' +
+            '<div class="cpaste-wrap" data-c="wrap" hidden><table class="cpaste-table" data-c="table"></table></div>' +
+            '<div class="cpaste-chips" data-c="chips"></div>' +
+            '</div>' +
+            '<div class="cpaste-foot"><span class="cpaste-msg" data-c="msg"></span>' +
+            '<button type="button" class="cpaste-btn" data-c="close">Cancel</button>' +
+            actions.map(function (a, i) {
+                return '<button type="button" class="cpaste-btn' + (a.primary ? ' cpaste-primary' : '') + '" data-act="' +
+                    i + '"' + (a.title ? ' title="' + esc(a.title) + '"' : '') + ' disabled>' + esc(a.label) + '</button>';
+            }).join('') +
+            '</div></div>';
+        var q = function (c) { return ov.querySelector('[data-c="' + c + '"]'); };
+        var ta = q('text');
+        var host = document.fullscreenElement || document.webkitFullscreenElement || document.body;
+        host.appendChild(ov);
+        var prevFocus = document.activeElement;
+
+        function close() {
+            document.removeEventListener('keydown', onKey, true);
+            if (ov.parentNode) ov.parentNode.removeChild(ov);
+            if (prevFocus && prevFocus.focus) try { prevFocus.focus(); } catch (e) { /* gone */ }
+        }
+
+        function render() {
+            var text = ta.value;
+            if (text !== lastText) { over.roles = null; over.headed = null; lastText = text; }
+            res = build(text, opt, over);
+            q('headed').checked = res.headed;
+            q('delim').value = over.delim;
+            var found = q('found');
+            var colTxt = res.delim === 'line' ? 'one per line' : res.width + (res.width === 1 ? ' column' : ' columns');
+            if (!text.trim()) { found.textContent = ''; found.className = 'cpaste-found'; }
+            else if (res.students) {
+                found.textContent = res.students + (res.students === 1 ? ' student' : ' students') + ' found (' + colTxt +
+                    (res.headed ? ', heading row' : ', no headings') + ')';
+                found.className = 'cpaste-found';
+            } else {
+                found.textContent = res.rows.length ? res.rows.length + ' rows with no names (' + colTxt + ')'
+                    : 'No names found yet. Check which column holds the names.';
+                found.className = 'cpaste-found cpaste-none';
+            }
+            q('swap').hidden = !(res.roles.indexOf('first') >= 0 && res.roles.indexOf('surname') >= 0) &&
+                !(res.roles.indexOf('full') >= 0 || res.roles.indexOf('fullrev') >= 0);
+            /* the table: a role picker over each column, then the first rows */
+            var wrap = q('wrap'), tbl = q('table');
+            wrap.hidden = !res.table.length;
+            if (res.table.length) {
+                var h = '<thead><tr>';
+                res.roles.forEach(function (role, i) {
+                    h += '<th><select data-col="' + i + '" aria-label="Column ' + (i + 1) + '">' + roleList.map(function (r) {
+                        return '<option value="' + r + '"' + (r === role ? ' selected' : '') + '>' + esc(ROLES[r]) + '</option>';
+                    }).join('') + '</select></th>';
+                });
+                h += '</tr></thead><tbody>';
+                res.table.slice(0, 9).forEach(function (r, ri) {
+                    var isHead = res.headed && ri === 0;
+                    h += '<tr' + (isHead ? ' class="cpaste-headrow"' : '') + '>';
+                    for (var c = 0; c < res.width; c++) {
+                        var off = !isHead && res.roles[c] === 'ignore';
+                        h += '<td' + (off ? ' class="cpaste-off"' : '') + ' title="' + esc(r[c] || '') + '">' + esc(r[c] || '') + '</td>';
+                    }
+                    h += '</tr>';
+                });
+                if (res.table.length > 9) h += '<tr><td colspan="' + res.width + '" class="cpaste-off">… ' + (res.table.length - 9) + ' more rows</td></tr>';
+                tbl.innerHTML = h + '</tbody>';
+            }
+            /* how the students will come out */
+            var shown = res.rows.filter(function (o) { return o['First Name'] || o.Surname; });
+            q('chips').innerHTML = shown.slice(0, 14).map(function (o) {
+                var extra = [o.Homeroom, o['Year Level'] ? 'Yr ' + o['Year Level'] : '', o['Locker number'] ? '#' + o['Locker number'] : '']
+                    .filter(Boolean).join(' · ');
+                return '<span class="cpaste-chip">' + esc(((o['First Name'] || '') + ' ' + (o.Surname || '')).trim()) +
+                    (extra ? '<small>' + esc(extra) + '</small>' : '') + '</span>';
+            }).join('') + (shown.length > 14 ? '<span class="cpaste-more">and ' + (shown.length - 14) + ' more</span>' : '');
+            var okay = res.students > 0 || (opt.keepNameless && res.rows.length > 0);
+            Array.prototype.forEach.call(ov.querySelectorAll('[data-act]'), function (b) { b.disabled = !okay; });
+            q('msg').textContent = '';
+        }
+
+        function apply(idx) {
+            if (!res || !(res.students || (opt.keepNameless && res.rows.length))) return;
+            var a = actions[idx] || actions[0];
+            var ok;
+            try {
+                ok = opt.onApply ? opt.onApply(res.rows.slice(), a.value, { students: res.students, headed: res.headed, delim: res.delim }) : true;
+            } catch (err) { q('msg').textContent = err && err.message ? err.message : String(err); return; }
+            if (typeof ok === 'string') { q('msg').textContent = ok; return; }
+            if (ok !== false) close();
+        }
+
+        function onKey(e) {
+            if (!ov.parentNode) return;
+            if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); }
+            else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                var p = 0;
+                actions.forEach(function (a, i) { if (a.primary) p = i; });
+                apply(p);
+            }
+        }
+        document.addEventListener('keydown', onKey, true);
+
+        ta.addEventListener('input', render);
+        q('headed').addEventListener('change', function () {
+            over.headed = q('headed').checked;
+            over.roles = null;
+            lastText = ta.value;
+            render();
+        });
+        q('delim').addEventListener('change', function () {
+            over.delim = q('delim').value;
+            over.roles = null; over.headed = null;
+            lastText = ta.value;
+            render();
+        });
+        q('swap').addEventListener('click', function () {
+            if (!res) return;
+            over.roles = res.roles.map(function (r) {
+                return r === 'first' ? 'surname' : r === 'surname' ? 'first' : r === 'full' ? 'fullrev' : r === 'fullrev' ? 'full' : r;
+            });
+            lastText = ta.value;
+            render();
+        });
+        ov.addEventListener('change', function (e) {
+            var s = e.target.closest && e.target.closest('select[data-col]');
+            if (!s || !res) return;
+            over.roles = res.roles.slice();
+            over.roles[+s.getAttribute('data-col')] = s.value;
+            lastText = ta.value;
+            render();
+        });
+        ov.addEventListener('click', function (e) {
+            if (e.target === ov) return;   /* clicking outside does nothing: a paste is easy to lose */
+            if (e.target.closest('[data-c="close"]')) close();
+            var b = e.target.closest('[data-act]');
+            if (b && !b.disabled) apply(+b.getAttribute('data-act'));
+        });
+
+        if (opt.text) ta.value = opt.text;
+        render();
+        setTimeout(function () { ta.focus(); }, 30);
+        return { close: close };
+    }
+
+    window.ClassroomPaste = { version: 1, open: open, parse: function (text, opt) { return build(text, opt || {}, { delim: 'auto' }); } };
+})();
+/* ===== end ClassroomPaste ===== */
+
 (function () {
     'use strict';
 
@@ -678,6 +1255,9 @@
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sg-btn-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>' +
                 'Import Roster</button>' +
                 '<input type="file" class="sg-file" accept=".xlsx,.xls,.csv" data-role="file">' +
+                '<button type="button" class="sg-btn" data-action="paste-roster" title="Paste a class list copied from Excel, Google Sheets or a school system">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sg-btn-icon"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>' +
+                'Paste Roster</button>' +
 
                 '<button type="button" class="sg-btn sg-btn-teal" data-action="import-json">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sg-btn-icon"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L8.6 3.3A2 2 0 0 0 6.9 2.5H4a2 2 0 0 0-2 2v13.5a2 2 0 0 0 2 2z"/><path d="M12 10v6"/><path d="m9 13 3-3 3 3"/></svg>' +
@@ -970,6 +1550,7 @@
                 case 'rotate-roles': rotateRoles(); break;
                 case 'rules': openModal(); break;
                 case 'import': ui.file.click(); break;
+                case 'paste-roster': openPasteRoster(); break;
                 case 'export-json': exportJson(); break;
                 case 'import-json': ui['json-file'].click(); break;
                 case 'sort': autoArrange(t.getAttribute('data-mode')); break;
@@ -1870,7 +2451,20 @@
             return String(name || '').replace(/\.[^.]+$/, '').replace(/_+/g, ' ').replace(/\s+/g, ' ').trim();
         }
 
-        function applyRows(rows, fileName) {
+        /* Paste Roster: a class list copied from a spreadsheet, with or without headings (see ClassroomPaste) */
+        function openPasteRoster() {
+            window.ClassroomPaste.open({
+                title: 'Paste a class list',
+                actions: [{ value: 'replace', label: 'Use this class list', primary: true }],
+                onApply: function (rows) {
+                    var before = state.students;
+                    applyRows(rows, '', true);
+                    return state.students !== before;
+                }
+            });
+        }
+
+        function applyRows(rows, fileName, pasted) {
             if (state.students.length && state.rules.length) {
                 if (!window.confirm('Importing a new class list will clear the existing grouping rules. Continue?')) return;
             }
@@ -1883,7 +2477,7 @@
             state.students = students;
             state.absent = {};
             state.locks = {};
-            var newTitle = titleFromFileName(fileName);
+            var newTitle = pasted ? '' : titleFromFileName(fileName);
             if (newTitle) {
                 state.title = newTitle;
                 if (ui.title) ui.title.textContent = newTitle;
@@ -1891,12 +2485,13 @@
             save();
             autoArrange(state.sortMode);
             /* Revert puts the class back in the file's own order */
-            storeImportSnapshot('roster', fileName, {
+            storeImportSnapshot('roster', pasted ? 'the pasted class list' : fileName, {
                 app: FILE_APP, version: FILE_VERSION, title: state.title, groupSize: state.groupSize, groupSizes: state.groupSizes,
                 sortMode: 'DEFAULT', students: students, rules: [], groupCustomNames: {}, placement: []
             });
             if (!ui.status.classList.contains('sg-show')) {
-                setStatus('Imported ' + plural(students.length, 'student') + ' from ' + fileName + '.');
+                setStatus(pasted ? 'Pasted ' + plural(students.length, 'student') + '.'
+                    : 'Imported ' + plural(students.length, 'student') + ' from ' + fileName + '.');
             }
         }
 
