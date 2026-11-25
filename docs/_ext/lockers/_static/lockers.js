@@ -684,13 +684,13 @@
         if (!fixed) {
             root.classList.add('cc-has-pill');
             root.insertAdjacentHTML('afterbegin',
-                '<div class="cc-pill" role="group" aria-label="Controls" title="Simple: the main steps. Full: every control. Remembered on this computer.">' +
+                '<div class="cc-pill" role="group" aria-label="Controls" title="Simple: the main steps. Full: every control. Remembered in this browser on this computer.">' +
                 '<button type="button" data-cc-mode="simple">Simple</button><button type="button" data-cc-mode="full">Full</button></div>');
             pill = root.firstElementChild;
             var pageSwitch = document.querySelector('.cc-allswitch[data-cc-tool="' + tool + '"]');
             if (!stored && !get(key + ':tip') && !pageSwitch) {
                 noteEl.insertAdjacentHTML('afterend', '<div class="cc-tip" data-cc-tip><span>This is the <b>Simple</b> view with the main steps. ' +
-                    'For everything else, choose <b>Full</b> at the top right. Your choice is remembered next time.</span>' +
+                    'For everything else, choose <b>Full</b> at the top right. Your choice is remembered in this browser on this computer.</span>' +
                     '<button type="button" data-cc-tip-close aria-label="Close tip">×</button></div>');
                 tip = noteEl.nextElementSibling;
             }
@@ -818,7 +818,7 @@
             el.innerHTML = '<span class="cc-all-label">' + esc(label) + '</span>' +
                 '<span class="cc-pill" role="group" aria-label="' + esc(label) + '">' +
                 '<button type="button" data-cc-all="simple">Simple</button><button type="button" data-cc-all="full">Full</button></span>' +
-                '<span class="cc-all-hint">Simple: the main steps. Full: every control. Remembered on this computer.</span>';
+                '<span class="cc-all-hint">Simple: the main steps. Full: every control. Remembered in this browser on this computer.</span>';
             el.addEventListener('click', function (e) {
                 var b = e.target.closest && e.target.closest('[data-cc-all]');
                 if (b) setAll(tool, b.getAttribute('data-cc-all'));

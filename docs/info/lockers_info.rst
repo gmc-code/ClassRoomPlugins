@@ -5,8 +5,8 @@ Locker Allocation user guide
 The locker tool keeps track of which student has which locker. You set up the
 locker numbers once, load a class list, then allocate lockers by typing,
 pasting, dragging or with one click. Everything happens in your browser:
-student names are never sent anywhere, and your work is saved on this computer
-as you go.
+student names are never sent anywhere, and your work is saved in this browser
+on this computer as you go.
 
 Technical details for whoever runs the website are in :doc:`/info/lockers_dev`.
 
@@ -163,9 +163,11 @@ The switch at the top right chooses how many controls you see:
   `The Simple toolbar`_.
 * **Full** shows every control. See `The Full toolbar`_.
 
-The tool remembers your choice on this computer, so it opens the same way
-next time. Each tool remembers its own choice, so you can use Full in one
-tool and Simple in another. The first time you open a tool it starts in
+The tool remembers your choice in this browser on this computer, so it
+opens the same way next time you use that browser. A different browser
+(e.g. Edge instead of Chrome), a private window or another computer
+starts in Simple again. Each tool remembers its own choice, so you can use
+Full in one tool and Simple in another. The first time you open a tool it starts in
 Simple, with a tip pointing to Full.
 
 Switching only hides controls; nothing is turned off. Settings you made in

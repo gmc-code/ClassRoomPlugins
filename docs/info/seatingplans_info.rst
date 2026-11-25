@@ -55,8 +55,8 @@ Simple or Full for every plan
 The **Controls for all my classes** switch at the top of the page changes
 every plan between **Simple** (the main steps, with big buttons) and **Full**
 (every control) at once. The switch at the top right of each plan does the
-same, so the plans always match. Your choice is remembered on this computer
-for next time. See *Simple and Full controls* in
+same, so the plans always match. Your choice is remembered in this browser
+on this computer for next time. See *Simple and Full controls* in
 :doc:`/info/seatingplan_info` for what each view shows.
 
 More than one plan for the same class
