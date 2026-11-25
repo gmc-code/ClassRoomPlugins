@@ -20,6 +20,9 @@ A page like this needs nothing beyond the ``seatingplan`` extension:
    Class seating plans
    ===================
 
+   .. seatingplan-controls::
+      :label: Controls for all my classes
+
    .. seatingplan-print::
       :label: Print all my classes
       :skip-empty:
@@ -38,6 +41,12 @@ A page like this needs nothing beyond the ``seatingplan`` extension:
 
    .. ... and so on to Plan 12
 
+* ``seatingplan-controls`` draws one **Simple | Full** switch for every plan on
+  the page (``:label:`` sets its text). It uses the same remembered setting as
+  each plan's own switch (``classroomControls:seatingplan`` in the browser),
+  and every plan on the page follows any of them. A plan with
+  ``:controls: simple`` or ``:controls: full`` keeps its fixed view. While the
+  page has this switch, the plans don't show their first-visit tip.
 * Each plan is an independent instance with its own storage, Reset, Revert,
   Print, Save PNG and Projector View. No data is shared between them.
 * The plans have no content, so each starts empty (5 × 6 rows, or 8 tables of

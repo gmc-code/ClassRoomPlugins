@@ -574,7 +574,7 @@
     window.ClassroomPaste = { version: 1, open: open, parse: function (text, opt) { return build(text, opt || {}, { delim: 'auto' }); } };
 })();
 /* ===== end ClassroomPaste ===== */
-/* ===== ClassroomControls v1: Simple / Full controls for the classroom tools =====
+/* ===== ClassroomControls v2: Simple / Full controls for the classroom tools =====
    Shared by seatingplan, lockers, studentgroups and namepicker. The same block is copied into
    each directive's .js so every directive still works on its own; whichever loads first defines
    window.ClassroomControls and the others reuse it. Keep the copies identical.
@@ -585,7 +585,9 @@
    (localStorage 'classroomControls:<tool>'); a first visit starts in Simple. The directive's
    :controls: option can instead fix the view to simple or full and hide the switch.
    Simple only hides controls: rules, locks, year levels … keep working, and a note says when
-   one is in use.
+   one is in use. Every copy of a tool on one page (e.g. the twelve plans on a seating plans
+   page) switches together. An element <div class="cc-allswitch" data-cc-tool="seatingplan"
+   data-cc-label="…"></div> on the page becomes one switch for all of them.
 
    ClassroomControls.attach({
        root, tool: 'seatingplan', setting: cfg.controls,      // 'simple' | 'full' | 'choice'
@@ -600,7 +602,8 @@
    runs them; their disabled state follows the matching Full button. */
 (function () {
     'use strict';
-    if (window.ClassroomControls && window.ClassroomControls.version >= 1) return;
+    if (window.ClassroomControls && window.ClassroomControls.version >= 2) return;
+    var registry = {};   /* tool -> [instance] for every copy on the page */
 
     var CSS =
         '.cc-root{position:relative}' +
@@ -634,7 +637,12 @@
         '.cc-tip button{font:inherit;background:none;border:0;color:#1e3a8a;cursor:pointer;font-size:16px;line-height:1;padding:0 4px}' +
         '.sp-projector .cc-pill,.sp-projector .cc-note,.sp-projector .cc-tip,.sg-projector .cc-pill,.sg-projector .cc-note,.sg-projector .cc-tip,' +
         '.np-projector .cc-pill,.np-projector .cc-note,.np-projector .cc-tip{display:none!important}' +
-        '@media print{.cc-pill,.cc-note,.cc-tip,.cc-simplebar{display:none!important}}' +
+        '.cc-allswitch{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.3;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;background:#0f172a;color:#f8fafc;border-radius:8px;padding:10px 14px;margin:0 0 18px;font-size:14px}' +
+        '.cc-allswitch .cc-pill{position:static}' +
+        '.cc-allswitch .cc-pill button{font-size:14px;padding:8px 18px}' +
+        '.cc-all-label{font-weight:600}' +
+        '.cc-all-hint{color:#94a3b8;font-size:13px}' +
+        '@media print{.cc-pill,.cc-note,.cc-tip,.cc-simplebar,.cc-allswitch{display:none!important}}' +
         '@media (max-width:700px){.cc-step{border-right:0;padding:0 6px}.cc-root.cc-has-pill>[data-role="title"]{padding-right:14px;padding-top:34px}}';
 
     function injectCss() {
@@ -679,7 +687,8 @@
                 '<div class="cc-pill" role="group" aria-label="Controls" title="Simple: the main steps. Full: every control. Remembered on this computer.">' +
                 '<button type="button" data-cc-mode="simple">Simple</button><button type="button" data-cc-mode="full">Full</button></div>');
             pill = root.firstElementChild;
-            if (!stored && !get(key + ':tip')) {
+            var pageSwitch = document.querySelector('.cc-allswitch[data-cc-tool="' + tool + '"]');
+            if (!stored && !get(key + ':tip') && !pageSwitch) {
                 noteEl.insertAdjacentHTML('afterend', '<div class="cc-tip" data-cc-tip><span>This is the <b>Simple</b> view with the main steps. ' +
                     'For everything else, choose <b>Full</b> at the top right. Your choice is remembered next time.</span>' +
                     '<button type="button" data-cc-tip-close aria-label="Close tip">×</button></div>');
@@ -737,13 +746,18 @@
             if (o.afterSync) o.afterSync(bar);
         }
 
-        function apply(m, remember) {
+        function show(m) {
             mode = m === 'full' ? 'full' : 'simple';
             root.classList.toggle('cc-simple', mode === 'simple');
-            if (remember && !fixed) { put(key, mode); closeTip(); }
             sync();
             if (o.onMode) o.onMode(mode);
         }
+        function apply(m, remember) {
+            if (remember && !fixed) { setAll(tool, m); return; }
+            show(m);
+        }
+        var inst = { fixed: fixed, show: show, closeTip: closeTip };
+        (registry[tool] = registry[tool] || []).push(inst);
 
         var queued = false;
         function later() {
@@ -772,10 +786,49 @@
         document.addEventListener('click', later, true);
 
         apply(mode, false);
+        buildPageSwitches(tool, mode);
         return { mode: function () { return mode; }, sync: sync, bar: bar };
     }
 
-    window.ClassroomControls = { version: 1, attach: attach, step: step };
+    /* Simple or Full for every copy of a tool on the page, remembered for next time */
+    function setAll(tool, m) {
+        m = m === 'full' ? 'full' : 'simple';
+        put('classroomControls:' + tool, m);
+        put('classroomControls:' + tool + ':tip', '1');
+        (registry[tool] || []).forEach(function (i) {
+            i.closeTip();
+            if (!i.fixed) i.show(m);
+        });
+        markPageSwitches(tool, m);
+    }
+
+    function markPageSwitches(tool, m) {
+        Array.prototype.forEach.call(document.querySelectorAll('.cc-allswitch[data-cc-tool="' + tool + '"] [data-cc-all]'), function (b) {
+            b.setAttribute('aria-pressed', b.getAttribute('data-cc-all') === m ? 'true' : 'false');
+        });
+    }
+
+    /* <div class="cc-allswitch" data-cc-tool="seatingplan" data-cc-label="…"> -> one switch for all */
+    function buildPageSwitches(tool, m) {
+        injectCss();
+        Array.prototype.forEach.call(document.querySelectorAll('.cc-allswitch[data-cc-tool="' + tool + '"]'), function (el) {
+            if (el.getAttribute('data-cc-ready')) return;
+            el.setAttribute('data-cc-ready', '1');
+            var label = el.getAttribute('data-cc-label') || 'Controls for every plan on this page';
+            el.innerHTML = '<span class="cc-all-label">' + esc(label) + '</span>' +
+                '<span class="cc-pill" role="group" aria-label="' + esc(label) + '">' +
+                '<button type="button" data-cc-all="simple">Simple</button><button type="button" data-cc-all="full">Full</button></span>' +
+                '<span class="cc-all-hint">Simple: the main steps. Full: every control. Remembered on this computer.</span>';
+            el.addEventListener('click', function (e) {
+                var b = e.target.closest && e.target.closest('[data-cc-all]');
+                if (b) setAll(tool, b.getAttribute('data-cc-all'));
+            });
+        });
+        var stored = get('classroomControls:' + tool);
+        markPageSwitches(tool, stored === 'full' || stored === 'simple' ? stored : m);
+    }
+
+    window.ClassroomControls = { version: 2, attach: attach, step: step, setAll: setAll };
 })();
 /* ===== end ClassroomControls ===== */
 

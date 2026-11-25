@@ -466,6 +466,35 @@ class SeatingPlanPrintDirective(SphinxDirective):
         return [node]
 
 
+class seatingplan_controls(nodes.General, nodes.Element):
+    pass
+
+
+class SeatingPlanControlsDirective(SphinxDirective):
+    """One Simple | Full switch for every seating plan on the page.
+
+        .. seatingplan-controls::
+           :label: Controls for all my classes
+
+    Choosing Simple or Full here switches every plan on the page at once and is
+    remembered in the teacher's browser (the same setting as each plan's own switch).
+    Plans with :controls: simple or :controls: full keep their fixed view.
+    """
+
+    has_content = False
+    option_spec = {
+        "label": directives.unchanged,
+        "class": directives.class_option,
+    }
+
+    def run(self):
+        _note_doc(self.env)
+        node = seatingplan_controls()
+        node["label"] = self.options.get("label") or "Controls for all the plans on this page"
+        node["classes"] = self.options.get("class", [])
+        return [node]
+
+
 # ----------------------------------------------------------------------------
 # Visitors
 # ----------------------------------------------------------------------------
@@ -501,6 +530,19 @@ def visit_seatingplan_print_html(self, node):
 
 
 def depart_seatingplan_print_html(self, node):
+    self.body.append("</div>")
+
+
+def visit_seatingplan_controls_html(self, node):
+    classes = " ".join(["cc-allswitch", "seatingplan-controls"] + list(node.get("classes", [])))
+    # seatingplan.js turns this into the switch (ClassroomControls)
+    self.body.append(
+        '<div class="%s" data-cc-tool="seatingplan" data-cc-label="%s">'
+        % (classes, html.escape(node["label"], quote=True))
+    )
+
+
+def depart_seatingplan_controls_html(self, node):
     self.body.append("</div>")
 
 
@@ -607,7 +649,16 @@ def setup(app):
         texinfo=(skip_seatingplan, None),
     )
     app.add_directive("seatingplan", SeatingPlanDirective)
+    app.add_node(
+        seatingplan_controls,
+        html=(visit_seatingplan_controls_html, depart_seatingplan_controls_html),
+        latex=(skip_seatingplan, None),
+        text=(skip_seatingplan, None),
+        man=(skip_seatingplan, None),
+        texinfo=(skip_seatingplan, None),
+    )
     app.add_directive("seatingplan-print", SeatingPlanPrintDirective)
+    app.add_directive("seatingplan-controls", SeatingPlanControlsDirective)
     app.add_css_file("seatingplan.css")
     app.add_js_file("seatingplan.js", defer="defer")
     app.connect("builder-inited", copy_static_files_early)

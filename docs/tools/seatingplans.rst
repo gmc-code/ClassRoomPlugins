@@ -7,6 +7,9 @@ so the page reopens exactly as you left it. See
 :doc:`/info/seatingplans_info` for working with several classes, and
 :doc:`/info/seatingplan_info` for full details of each plan.
 
+.. seatingplan-controls::
+    :label: Controls for all my classes
+
 .. seatingplan-print::
     :label: Print all my classes
     :title: Seating Plans
