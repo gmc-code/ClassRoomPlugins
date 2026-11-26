@@ -236,14 +236,16 @@ brackets. Banks in an area sit side by side, like the real lockers.
   bottom row.
 * After the ``|``, each bank can have its own shape:
 
-  ========================  ==============================================
-  Option                    Meaning
-  ========================  ==============================================
-  ``2 high`` (1 to 6)       how many lockers tall the bank is
-  ``down`` / ``across``     numbers go down each column, or along each row
-  ``right``                 first locker at the right-hand end
-  ``bottom``                first locker in the bottom row
-  ========================  ==============================================
+  ==============================  ==========================================================
+  Option                          Meaning
+  ==============================  ==========================================================
+  ``2 high`` (1 to 6)             how many lockers tall the bank is
+  ``down`` / ``across``           numbers go down each column, or along each row
+  ``right``                       first locker at the right-hand end
+  ``bottom``                      first locker in the bottom row
+  ``odd-top`` / ``even-top``      2-high banks: odd (or even) numbers always in the top row
+                                  (see `Odd or even numbers on top`_)
+  ==============================  ==========================================================
 
   Anything you leave out follows the toolbar (**Tiers**, **Run**,
   **Start**).
@@ -274,6 +276,28 @@ locker you remove has a student in it, you're asked first, and the student
 goes back on the *No locker* list. A typing mistake, or a locker that is
 already in another bank, shows a message and changes nothing. **Undo** takes
 back the change.
+
+Odd or even numbers on top
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In many corridors the lockers are numbered in pairs, with odd numbers on top
+and even numbers underneath (or the other way round). If a 2-high bank starts
+on the "wrong" number, for example ``549-544``, the normal layout puts the
+lockers out of step with the real ones.
+
+Set **Top row** in the bank's **⚙** panel to **Odd numbers** or **Even
+numbers**. The lockers then pair up by number: each column holds a matching
+pair, odd (or even) numbers are always in the top row, and a missing locker
+leaves a gap. ``549-544`` with odd numbers on top looks like this:
+
+.. code-block:: text
+
+   [    ] [545] [547] [549]
+   [544] [546] [548] [    ]
+
+**Top row** appears for banks that are 2 high. **Follow the numbers** goes
+back to the normal layout. In the Set Up Lockers box, the same choice is
+``| odd-top`` or ``| even-top`` after the bank's numbers.
 
 
 Removing lockers

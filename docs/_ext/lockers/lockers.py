@@ -18,7 +18,9 @@ or auto-allocating.
 
 After a bank's ranges, ``| options`` give it its own shape: ``2 high``,
 ``down``/``across``, ``right`` (numbers start at the right-hand end) and
-``bottom`` (first locker in the bottom row). ``:start:``, ``:first-row:``,
+``bottom`` (first locker in the bottom row), and for a 2-high bank
+``odd-top`` or ``even-top`` (odd or even numbers always in the top row, each
+column a numbered pair, whichever number the bank starts on). ``:start:``, ``:first-row:``,
 ``:tiers:`` and ``:order:`` set the defaults for every bank. In the content,
 ``[Corridor A]`` (or ``area: Corridor A``) starts an area: the banks after it
 are shown side by side under that heading.
@@ -100,7 +102,7 @@ def expand_spec(spec):
 def _bank_opts(text):
     """'2 high across right' -> {'tiers': 2, 'order': 'across', 'side': 'right', 'row': ''}.
     Kept in step with parseBankOpts() in lockers.js."""
-    o = {"tiers": 0, "order": "", "side": "", "row": ""}
+    o = {"tiers": 0, "order": "", "side": "", "row": "", "top": ""}
     t = re.sub(r"\btiers?\s*(\d)", r"\1high", text.lower())
     t = re.sub(r"(\d)\s*(high|tiers?)\b", r"\1high", t)
     for word in re.split(r"[\s,]+", t.strip()):
@@ -111,10 +113,12 @@ def _bank_opts(text):
             o["row"] = word
         elif word in ("down", "across"):
             o["order"] = word
+        elif re.fullmatch(r"(odd|even)-?top", word):
+            o["top"] = re.sub(r"-?top$", "", word)
         elif m and 1 <= int(m.group(1)) <= 6:
             o["tiers"] = int(m.group(1))
         elif word:
-            raise ValueError("unknown option %r (use e.g. 2 high, across, down, right, bottom)" % word)
+            raise ValueError("unknown option %r (use e.g. 2 high, across, down, right, bottom, odd-top)" % word)
     return o
 
 

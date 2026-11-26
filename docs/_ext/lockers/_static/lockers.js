@@ -1040,7 +1040,7 @@
             var name = '', spec = line, colon = line.indexOf(':');
             if (colon >= 0) { name = line.slice(0, colon).trim(); spec = line.slice(colon + 1).trim(); }
             var o = parseBankOpts(opts);
-            if (o.bad.length) errors.push((name || 'Line ' + (i + 1)) + ': unknown option "' + o.bad.join(' ') + '" (use e.g. 2 high, across, down, right, bottom)');
+            if (o.bad.length) errors.push((name || 'Line ' + (i + 1)) + ': unknown option "' + o.bad.join(' ') + '" (use e.g. 2 high, across, down, right, bottom, odd-top)');
             var res = expandSpec(spec);
             if (res.error) { errors.push((name || 'Line ' + (i + 1)) + ': ' + res.error); return; }
             if (!res.ids.length) { errors.push((name || 'Line ' + (i + 1)) + ': no lockers'); return; }
@@ -1054,7 +1054,7 @@
                 total++;
             });
             banks.push({ name: name || 'Bank ' + (banks.length + 1), spec: spec, ids: ids, side: o.side, row: o.row,
-                tiers: o.tiers, order: o.order, area: area });
+                tiers: o.tiers, order: o.order, top: o.top, area: area });
         });
         if (dupes.length) errors.push('Listed more than once (only the first is used): ' + dupes.slice(0, 8).join(', ') + (dupes.length > 8 ? '…' : ''));
         if (total >= MAX_LOCKERS) errors.push('At most ' + MAX_LOCKERS + ' lockers; the rest are left out.');
@@ -1064,13 +1064,14 @@
     /* "2 high across right" -> {tiers: 2, order: 'across', side: 'right', row: '', bad: []}.
        Height can be written "2 high", "2high", "tiers 2" or "2 tiers". Kept in step with lockers.py. */
     function parseBankOpts(text) {
-        var o = { side: '', row: '', tiers: 0, order: '', bad: [] };
+        var o = { side: '', row: '', tiers: 0, order: '', top: '', bad: [] };
         var t = String(text || '').toLowerCase().replace(/\btiers?\s*(\d)/g, '$1high').replace(/(\d)\s*(high|tiers?)\b/g, '$1high');
         t.split(/[\s,]+/).filter(Boolean).forEach(function (w) {
             var m = w.match(/^(\d)high$/);
             if (w === 'left' || w === 'right') o.side = w;
             else if (w === 'top' || w === 'bottom') o.row = w;
             else if (w === 'down' || w === 'across') o.order = w;
+            else if (/^(odd|even)-?top$/.test(w)) o.top = w.replace(/-?top$/, '');   /* "odd-top": odd numbers in the top row */
             else if (m && +m[1] >= 1 && +m[1] <= 6) o.tiers = +m[1];
             else o.bad.push(w);
         });
@@ -1084,14 +1085,16 @@
             row: b.row === 'top' || b.row === 'bottom' ? b.row : '',
             tiers: t >= 1 && t <= 6 ? t : 0,
             order: b.order === 'down' || b.order === 'across' ? b.order : '',
+            top: b.top === 'odd' || b.top === 'even' ? b.top : '',
             area: clean(b.area) };
     }
 
     /* Grid position of locker i of n. Numbers run down each column (or across each row),
        starting from the left or right side and the top or bottom row. Returns
        {cols, rows, pos: [{c, r}]} with 1-based grid lines; tiers 1 gives one wrapping row (pos null). */
-    function bankLayout(n, tiers, order, side, row) {
+    function bankLayout(n, tiers, order, side, row, ids, top) {
         if (tiers <= 1) return { cols: 0, rows: 1, pos: null };
+        if (top && tiers === 2 && ids) { var par = parityLayout(ids, top, side); if (par) return par; }
         var cols = Math.ceil(n / tiers), pos = [];
         for (var i = 0; i < n; i++) {
             var c, r;
@@ -1104,11 +1107,34 @@
         return { cols: cols, rows: tiers, pos: pos };
     }
 
+    /* 2-high bank with "odd-top" / "even-top": lockers pair up by number, so odd (or even) numbers are
+       always in the top row and each column holds a matching pair, whatever number the bank starts on.
+       544-549 odd-top -> [ _ |545|547|549] over [544|546|548| _ ]. Columns follow the bank's own order
+       (a range counting down runs the other way); side 'right' starts at the right-hand end.
+       Returns null (normal layout) for lockers without a number or two lockers in one spot. */
+    function parityLayout(ids, top, side) {
+        var nums = ids.map(function (id) { var m = String(id).match(/(\d+)\D*$/); return m ? +m[1] : null; });
+        if (nums.some(function (v) { return v === null; })) return null;
+        var colOf = {}, cols = 0, used = {}, pos = [];
+        for (var i = 0; i < ids.length; i++) {
+            var v = nums[i];
+            var key = top === 'odd' ? Math.ceil(v / 2) : Math.floor(v / 2);
+            if (!(key in colOf)) colOf[key] = cols++;
+            var r = (v % 2 === 1) === (top === 'odd') ? 1 : 2;
+            var spot = colOf[key] + ':' + r;
+            if (used[spot]) return null;
+            used[spot] = true;
+            pos.push({ c: colOf[key], r: r });
+        }
+        pos.forEach(function (p) { p.c = (side === 'right' ? cols - 1 - p.c : p.c) + 1; });
+        return { cols: cols, rows: 2, pos: pos };
+    }
+
     function banksToText(banks) {
         var lines = [], area = '';
         banks.forEach(function (b) {
             if ((b.area || '') !== area) { area = b.area || ''; lines.push('[' + area + ']'); }
-            var opts = [b.tiers ? b.tiers + ' high' : '', b.order, b.side, b.row].filter(Boolean).join(' ');
+            var opts = [b.tiers ? b.tiers + ' high' : '', b.order, b.side, b.row, b.top ? b.top + '-top' : ''].filter(Boolean).join(' ');
             lines.push((b.name ? b.name + ': ' : '') + b.spec + (opts ? ' | ' + opts : ''));
         });
         return lines.join('\n');
@@ -2015,7 +2041,7 @@
                 box.appendChild(head);
                 if (openBank === bi) box.appendChild(bankSettings(bank, bi));
                 var grid = make('div', 'lk-grid');
-                var lay = bankLayout(ids.length, tiers, ord, side, row);
+                var lay = bankLayout(ids.length, tiers, ord, side, row, ids, bank.top);
                 gridStyle(grid, lay, side);
                 ids.forEach(function (id, i) {
                     var cell = cellFor(id);
@@ -2103,6 +2129,10 @@
                 sel('order', 'Numbers run', [['', 'Toolbar (' + (state.order === 'down' ? 'down' : 'across') + ')'], ['down', 'Down ↓'], ['across', 'Across →']]) +
                 sel('side', 'First locker', [['', 'Toolbar (' + state.side + ')'], ['left', 'Left'], ['right', 'Right']]) +
                 sel('row', 'First row', [['', 'Toolbar (' + state.row + ')'], ['top', 'Top'], ['bottom', 'Bottom']]) +
+                (bankTiers(bank) === 2 || bank.top
+                    ? sel('top', 'Top row', [['', 'Follow the numbers'], ['odd', 'Odd numbers'], ['even', 'Even numbers']]).replace('<label class="lk-bs-opt">',
+                        '<label class="lk-bs-opt" title="Line up a 2-high bank by number: odd (or even) numbers always in the top row, each column a pair, wherever the numbers start.">')
+                    : '') +
                 '<label class="lk-bs-opt">Area <input type="text" data-bank-opt="area" data-bank="' + bi + '" value="' + esc(bank.area || '') + '" placeholder="none"></label>' +
                 bankYearSelect(bi);
             return p;
@@ -2709,7 +2739,7 @@
             var ids = state._bankIds[bi] || [], bank = state.banks[bi];
             var tiers = bankTiers(bank);
             if (tiers <= 1) return r === 1 ? ids.slice() : [];
-            var lay = bankLayout(ids.length, tiers, bankOrder(bank), bankSide(bank), bankRow(bank));
+            var lay = bankLayout(ids.length, tiers, bankOrder(bank), bankSide(bank), bankRow(bank), ids, bank.top);
             return ids.filter(function (id, i) { return lay.pos[i].r === r; });
         }
         function bankRowCount(bi) { return Math.max(1, bankTiers(state.banks[bi])); }
@@ -3376,7 +3406,7 @@
                     if (bi) body += '</div>';
                     body += (bank.area ? '<h2 class="lk-parea">' + esc(bank.area) + '</h2>' : '') + '<div class="lk-pareabanks">';
                 }
-                var lay = bankLayout(ids.length, bankTiers(bank), bankOrder(bank), side, bankRow(bank));
+                var lay = bankLayout(ids.length, bankTiers(bank), bankOrder(bank), side, bankRow(bank), ids, bank.top);
                 var style = lay.pos ? 'grid-template-columns:repeat(' + lay.cols + ',27mm);grid-template-rows:repeat(' + lay.rows + ',auto)'
                     : 'grid-template-columns:repeat(' + Math.min(9, ids.length) + ',27mm)' + (side === 'right' ? ';direction:rtl' : '');
                 body += '<div class="lk-pbank"><h3>' + esc(bank.name) + '</h3><div class="lk-pgrid" style="' + style + '">';

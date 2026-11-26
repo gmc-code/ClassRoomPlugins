@@ -66,7 +66,10 @@ Options
    Banks separated by ``;``. Each bank is ``Name: ranges`` or just ``ranges``
    (named *Bank 1*, *Bank 2* ...), optionally followed by ``| options``:
    ``N high`` (also ``Nhigh``, ``tiers N``), ``down``/``across``,
-   ``left``/``right`` and ``top``/``bottom`` override ``:tiers:``,
+   ``odd-top``/``even-top`` (2-high banks: ``parityLayout()`` pairs lockers by
+   number, so odd or even numbers are always in the top row and gaps are left
+   for missing lockers; column order follows the bank's own order, flipped for
+   ``right``), and ``left``/``right`` and ``top``/``bottom`` override ``:tiers:``,
    ``:order:``, ``:start:`` and ``:first-row:`` for that bank, e.g.
    ``A3: 543-550 | 2 high right``.
 
