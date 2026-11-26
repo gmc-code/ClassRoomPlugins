@@ -3105,7 +3105,7 @@
         }
 
         /* School system list, one row per allocated locker:
-           Locker ID;Location / room;Surname, firstname;Tutor group
+           Locker ID | Location / room | Surname, firstname | Tutor group
            Location / room is the bank's area (or its name when it has no area), or always the bank's name. */
         function schoolRows(o) {
             var list = [];
@@ -3127,13 +3127,11 @@
             return rows;
         }
 
-        /* rows -> text with ; between columns (a value holding ; " or a line break is quoted) */
-        function semicolonText(rows) {
+        /* rows -> tab-separated lines, so a paste into Excel puts each value in its own column
+           (a tab or line break inside a value becomes a space) */
+        function tabText(rows) {
             return rows.map(function (r) {
-                return r.map(function (v) {
-                    v = String(v == null ? '' : v);
-                    return /[;"\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
-                }).join(';');
+                return r.map(function (v) { return String(v == null ? '' : v).replace(/[\t\r\n]+/g, ' '); }).join('\t');
             }).join('\r\n');
         }
 
@@ -3202,13 +3200,6 @@
                     });
                 });
             }
-            if (format === 'semicolon') {
-                /* the school-system list: semicolons, UTF-8 without a BOM so the first heading reads cleanly */
-                var sc = semicolonText(rows);
-                return saveFile(name + '.csv', 'CSV file', 'text/csv', '.csv', function () {
-                    return Promise.resolve(new Blob([sc + '\r\n'], { type: 'text/csv' }));
-                });
-            }
             var text = rows.map(function (r) { return r.map(csvCell).join(','); }).join('\r\n');
             /* BOM so Excel opens accented names correctly */
             return saveFile(name + '.csv', 'CSV file', 'text/csv', '.csv', function () {
@@ -3230,16 +3221,17 @@
                 '<div class="lk-x-group"><b>Columns</b>' +
                 radio('layout', 'simple', 'Simple list: <code>Surname Name</code>, <code>First Name</code>, <code>Year Level</code>, <code>Locker number</code> (and <code>Locker Combo</code>)', o.layout) +
                 radio('layout', 'full', 'Full locker list: every locker with bank, combination, name, year, homeroom, other details and status', o.layout) +
-                radio('layout', 'school', 'School system list: <code>Locker ID;Location / room;Surname, firstname;Tutor group</code>, one line per allocated locker', o.layout) +
+                radio('layout', 'school', 'School system list: <code>Locker ID</code>, <code>Location / room</code>, <code>Surname, firstname</code>, <code>Tutor group</code>, one row per allocated locker', o.layout) +
                 '</div>' +
                 '<div class="lk-x-group lk-x-school"><b>School system list options</b>' +
                 '<label class="lk-check-row">Location / room <select data-m="location">' +
                 '<option value="area">Area (bank name if the bank has no area)</option><option value="bank">Bank name</option></select></label>' +
                 '<label class="lk-check-row">Order by <select data-m="schoolSort"><option value="locker">Locker number</option><option value="surname">Surname</option></select></label>' +
                 '<div class="lk-x-preview" data-m="preview" aria-label="First lines of the list"></div>' +
-                '<div class="lk-x-copyrow"><button type="button" class="lk-btn lk-btn-teal" data-m="copy" title="Copy the lines without the heading row, ready to paste into the school system">' +
+                '<div class="lk-x-copyrow"><button type="button" class="lk-btn lk-btn-teal" data-m="copy" title="Copy the rows without the heading row, ready to paste into Excel">' +
                 icon('paste') + 'Copy without headings</button><span class="lk-x-copied" data-m="copied" role="status"></span></div>' +
-                '<p class="lk-help">Download saves a <code>.csv</code> file with semicolons between the columns and a heading row.</p>' +
+                '<p class="lk-help">Copy puts the rows on the clipboard with tabs between the columns: paste into Excel and each value goes in its own column. ' +
+                'Download saves them with the heading row, as the file type below.</p>' +
                 '</div>' +
                 '<div class="lk-x-group lk-x-simple"><b>Simple list options</b>' +
                 '<label class="lk-check-row">Year Level as <select data-m="yearWord"><option value="0">7</option><option value="1">Year 7</option></select></label>' +
@@ -3261,7 +3253,7 @@
                     if (school && rows.length < 2) { mui.msg.textContent = 'No lockers are allocated yet.'; return; }
                     var name = fileSlug(state.title, 'lockers') + (c.layout === 'full' ? '' : school ? '_allocation' : '_list');
                     mui.ok.disabled = true;
-                    downloadRows(rows, name, school ? 'semicolon' : c.format).then(function (saved) {
+                    downloadRows(rows, name, c.format).then(function (saved) {
                         mui.ok.disabled = false;
                         if (!saved) return;   /* cancelled: leave the dialog open */
                         closeModal();
@@ -3291,13 +3283,13 @@
                 var layout = mui.body.querySelector('input[name="lk-x-layout"]:checked').value;
                 mui.body.querySelector('.lk-x-simple').style.display = layout === 'simple' ? '' : 'none';
                 mui.body.querySelector('.lk-x-school').style.display = layout === 'school' ? '' : 'none';
-                mui.body.querySelector('.lk-x-filetype').style.display = layout === 'school' ? 'none' : '';
                 q('copied').textContent = '';
                 if (layout === 'school') {
                     var rows = schoolRows({ location: q('location').value, sort: q('schoolSort').value });
-                    var lines = semicolonText(rows.slice(0, 4)).split('\r\n');
-                    q('preview').textContent = rows.length < 2 ? 'No lockers are allocated yet.'
-                        : lines.join('\n') + (rows.length > 4 ? '\n… ' + (rows.length - 4) + ' more' : '');
+                    q('preview').innerHTML = rows.length < 2 ? 'No lockers are allocated yet.'
+                        : '<table><thead><tr>' + rows[0].map(function (h) { return '<th>' + esc(h) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+                          rows.slice(1, 4).map(function (r) { return '<tr>' + r.map(function (v) { return '<td>' + esc(v) + '</td>'; }).join('') + '</tr>'; }).join('') +
+                          '</tbody></table>' + (rows.length > 4 ? '<div class="lk-x-more">… ' + (rows.length - 4) + ' more</div>' : '');
                     q('copy').disabled = rows.length < 2;
                 }
             }
@@ -3310,9 +3302,9 @@
                 if (rows.length < 2) return;
                 state.display.exportPrefs = c;
                 save();
-                copyText(semicolonText(rows.slice(1))).then(function () {
+                copyText(tabText(rows.slice(1))).then(function () {
                     var n = rows.length - 1;
-                    q('copied').textContent = 'Copied ' + n + ' line' + (n === 1 ? '' : 's') + '. Paste with Ctrl+V.';
+                    q('copied').textContent = 'Copied ' + n + ' row' + (n === 1 ? '' : 's') + '. Paste into Excel with Ctrl+V.';
                     setStatus('Copied ' + n + ' locker allocation' + (n === 1 ? '' : 's') + ' to the clipboard (no headings).');
                 }).catch(function (err) {
                     q('copied').textContent = err && err.message ? err.message : 'Copying did not work. Download the file instead.';

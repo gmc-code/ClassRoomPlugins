@@ -763,14 +763,15 @@ with no new window or tab, so pop-up blockers don't get in the way. Choose
      name, year, homeroom, every other detail, status), then students with
      no locker.
 
-   * **School system list**: one line per allocated locker, with semicolons
-     between the columns, in this layout:
+   * **School system list**: one row per allocated locker, in these four
+     columns:
 
-     .. code-block:: text
-
-        Locker ID;Location / room;Surname, firstname;Tutor group
-        101;Science block;Smith, Alex;7B
-        102;Science block;Jones, Sam;7A
+     =========  ===============  ==================  ===========
+     Locker ID  Location / room  Surname, firstname  Tutor group
+     =========  ===============  ==================  ===========
+     101        Science block    Smith, Alex         7B
+     102        Science block    Jones, Sam          7A
+     =========  ===============  ==================  ===========
 
      Free lockers and lockers that are out of service are left out.
      *Location / room* is the bank's area, or the bank's name if it has no
@@ -778,10 +779,11 @@ with no new window or tab, so pop-up blockers don't get in the way. Choose
      lines by locker number or by surname. *Tutor group* is the homeroom
      exactly as it was in the class list (e.g. *7B*).
 
-     The dialog shows the first few lines. **Copy without headings** puts
-     the lines on the clipboard without the heading row, ready to paste
-     (**Ctrl+V**) into the school system. **Download** saves the same lines
-     as a ``.csv`` file with the heading row.
+     The dialog shows the first few rows. **Copy without headings** puts
+     the rows on the clipboard without the heading row, with tabs between the
+     columns: click a cell in Excel and paste (**Ctrl+V**), and each value
+     goes in its own column. **Download** saves the rows with the heading row,
+     as Excel or CSV like the other lists.
 
    After **Download**, choose where to save it: in Chrome and Edge a Save As
    box lets you pick the folder and file name; other browsers ask for a name
