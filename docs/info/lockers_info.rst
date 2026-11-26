@@ -98,8 +98,8 @@ locker, switch to Full and untick **Keep**.
 **List**
    The students in surname order with their locker numbers.
 
-Find, Open, Save and Undo
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Find, Open, Save, Undo and Full width
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Find**
    Type part of a name or a locker number to find it (see
@@ -113,6 +113,9 @@ Find, Open, Save and Undo
 
 **Undo**
    Take back the last change.
+
+**Full width**
+   Use the whole browser window for the lockers (see `Full width`_).
 
 Giving out lockers by hand
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -141,7 +144,7 @@ The buttons are coloured by what they do:
 * **Blue**: bring students in (**Import**, **Add**, **Paste**).
 * **Lighter blue**: files (**Open**, **Save**, **Export**).
 * **Teal**: printing (**Print**, **Map**, **List**).
-* **Grey**: **Undo** and **Reset**.
+* **Grey**: **Undo**, **Reset** and **Full width**.
 * **Amber** and **purple**: setting up and allocating (**Lockers**,
   **Year levels**, **By Student**, **Paste lockers**, **Combos**, **A–Z**, **Random** …), and **red**
   for **Clear** and **Remove: Y9 / Y12**.
@@ -812,6 +815,15 @@ with no new window or tab, so pop-up blockers don't get in the way. Choose
 **Reset**
    Goes back to how the page was first set up, removing your work from this
    browser. Undo can still bring it back until you leave the page.
+
+Full width
+----------
+
+**Full width** spreads the lockers across the whole browser window, covering
+the menu and page around them, so more lockers fit on the screen. All the
+buttons work as usual. Press **Normal width** (the same button) to go back to
+the page. The setting is remembered in this browser on this computer, so the
+tool opens the same way next time. Printing is not affected.
 
 Display options
 ---------------

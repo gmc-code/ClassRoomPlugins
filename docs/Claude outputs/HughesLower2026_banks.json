@@ -1,0 +1,3249 @@
+{
+  "title": "H13",
+  "banks": [
+    {
+      "name": "Hughes 11",
+      "spec": "29-46, 50-55",
+      "side": "",
+      "row": "",
+      "tiers": 0,
+      "order": "",
+      "area": "MP1"
+    },
+    {
+      "name": "Hughes 12",
+      "spec": "111-126, 128-135",
+      "side": "",
+      "row": "",
+      "tiers": 0,
+      "order": "",
+      "area": "MQ34"
+    },
+    {
+      "name": "stairs",
+      "spec": "543-550",
+      "side": "",
+      "row": "",
+      "tiers": 0,
+      "order": "",
+      "area": "E26"
+    },
+    {
+      "name": "wall_mid",
+      "spec": "495-500",
+      "side": "",
+      "row": "",
+      "tiers": 0,
+      "order": "",
+      "area": "E26"
+    },
+    {
+      "name": "wall_left",
+      "spec": "489-494",
+      "side": "",
+      "row": "",
+      "tiers": 0,
+      "order": "",
+      "area": "E26"
+    },
+    {
+      "name": "wall_right",
+      "spec": "501-506",
+      "side": "",
+      "row": "",
+      "tiers": 0,
+      "order": "",
+      "area": "E26"
+    },
+    {
+      "name": "E22 left",
+      "spec": "513-518",
+      "side": "",
+      "row": "",
+      "tiers": 0,
+      "order": "",
+      "area": "E22"
+    },
+    {
+      "name": "E22 right",
+      "spec": "379-380",
+      "side": "",
+      "row": "",
+      "tiers": 0,
+      "order": "",
+      "area": "E22"
+    },
+    {
+      "name": "Hughes 14",
+      "spec": "300-315, 317-324",
+      "side": "",
+      "row": "",
+      "tiers": 0,
+      "order": "",
+      "area": "MQ26"
+    },
+    {
+      "name": "Hughes 15",
+      "spec": "519-525, 527-534, 537-542, 571, 573",
+      "side": "",
+      "row": "",
+      "tiers": 0,
+      "order": "",
+      "area": "E35"
+    },
+    {
+      "name": "Hughes 16",
+      "spec": "8, 12, 435-437, 439-447, 449, 451-457",
+      "side": "",
+      "row": "",
+      "tiers": 0,
+      "order": "",
+      "area": "MP4"
+    },
+    {
+      "name": "Hughes 17",
+      "spec": "48, 56-60, 62-67, 471-477, 479-482",
+      "side": "",
+      "row": "",
+      "tiers": 0,
+      "order": "",
+      "area": "MP2"
+    },
+    {
+      "name": "Hughes 14",
+      "spec": "478",
+      "side": "",
+      "row": "",
+      "tiers": 0,
+      "order": "",
+      "area": "MP2"
+    },
+    {
+      "name": "Hughes 18",
+      "spec": "47, 459-464, 466-468, 470, 1578-1580, 1582-1589",
+      "side": "",
+      "row": "",
+      "tiers": 0,
+      "order": "",
+      "area": "MP3"
+    },
+    {
+      "name": "Hughes 19",
+      "spec": "Q21-Q36, Q38-Q40, 1574-1576",
+      "side": "",
+      "row": "",
+      "tiers": 0,
+      "order": "",
+      "area": "MQ24"
+    }
+  ],
+  "tiers": 2,
+  "order": "down",
+  "side": "right",
+  "row": "top",
+  "students": [
+    {
+      "id": "smwmvlph8-0-1e88",
+      "firstName": "Oliver",
+      "surname": "Barden",
+      "year": "7",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "85868",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "85868@parade.vic.edu.au",
+        "Room": "E26"
+      },
+      "combo": "needs new lock",
+      "tg": "Hughes 13"
+    },
+    {
+      "id": "smwmvlph8-1-at24",
+      "firstName": "Sebastian",
+      "surname": "Boca",
+      "year": "8",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "91249",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "91249@parade.vic.edu.au"
+      },
+      "tg": "Hughes 13"
+    },
+    {
+      "id": "smwmvlph8-2-8yth",
+      "firstName": "Oliver",
+      "surname": "Brown",
+      "year": "7",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "85911",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "85911@parade.vic.edu.au",
+        "Room": "E26"
+      },
+      "combo": "34 20 30",
+      "tg": "Hughes 13"
+    },
+    {
+      "id": "smwmvlph8-3-d4o1",
+      "firstName": "Cooper",
+      "surname": "Collett",
+      "year": "8",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "81398",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "81398@parade.vic.edu.au",
+        "Room": "E26"
+      },
+      "combo": "14 04 14",
+      "tg": "Hughes 13"
+    },
+    {
+      "id": "smwmvlph8-4-3aye",
+      "firstName": "Keegan",
+      "surname": "Douglas",
+      "year": "8",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "82049",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "82049@parade.vic.edu.au",
+        "Room": "E26"
+      },
+      "combo": "08 18 36",
+      "tg": "Hughes 13"
+    },
+    {
+      "id": "smwmvlph8-5-b3dv",
+      "firstName": "Daniel",
+      "surname": "Ebrahim",
+      "year": "7",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "86887",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "86887@parade.vic.edu.au",
+        "Room": "E26"
+      },
+      "combo": "00 26 12",
+      "tg": "Hughes 13"
+    },
+    {
+      "id": "smwmvlph8-6-v0h",
+      "firstName": "Harrison",
+      "surname": "Evans",
+      "year": "7",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "86907",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "86907@parade.vic.edu.au",
+        "Room": "E26"
+      },
+      "combo": "08 34 00",
+      "tg": "Hughes 13"
+    },
+    {
+      "id": "smwmvlph8-7-2vab",
+      "firstName": "Zachary",
+      "surname": "Glembin",
+      "year": "8",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "81484",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "81484@parade.vic.edu.au",
+        "Room": "E26"
+      },
+      "combo": "24 38 08",
+      "tg": "Hughes 13"
+    },
+    {
+      "id": "smwmvlph8-8-dv1r",
+      "firstName": "River",
+      "surname": "Josevski",
+      "year": "7",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "87150",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "87150@parade.vic.edu.au",
+        "Room": "E26"
+      },
+      "combo": "15 01 11",
+      "tg": "Hughes 13"
+    },
+    {
+      "id": "smwmvlph8-9-4amp",
+      "firstName": "Koby",
+      "surname": "Parker",
+      "year": "8",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "81652",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "81652@parade.vic.edu.au",
+        "Room": "E26"
+      },
+      "combo": "36 38 24",
+      "tg": "Hughes 13"
+    },
+    {
+      "id": "smwmvlph8-10-65hp",
+      "firstName": "Dominic",
+      "surname": "Raso",
+      "year": "8",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "82585",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "82585@parade.vic.edu.au",
+        "Room": "E26"
+      },
+      "combo": "22 04 10",
+      "tg": "Hughes 13"
+    },
+    {
+      "id": "smwmvlph8-11-hphd",
+      "firstName": "Kobe",
+      "surname": "Rossignuolo",
+      "year": "8",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "85220",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "85220@parade.vic.edu.au",
+        "Room": "E26"
+      },
+      "combo": "25 27 37",
+      "tg": "Hughes 13"
+    },
+    {
+      "id": "smwmvlph8-12-1nha",
+      "firstName": "Thomas",
+      "surname": "Saunders",
+      "year": "8",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "82508",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "82508@parade.vic.edu.au",
+        "Room": "E26"
+      },
+      "tg": "Hughes 13",
+      "combo": "needs new lock"
+    },
+    {
+      "id": "smwmvlph8-13-f5us",
+      "firstName": "Ashvin",
+      "surname": "Sivakaran",
+      "year": "8",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "74089",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "74089@parade.vic.edu.au",
+        "Room": "E26"
+      },
+      "combo": "38 00 22",
+      "tg": "Hughes 13"
+    },
+    {
+      "id": "smwmvlph8-14-km6f",
+      "firstName": "Bentley",
+      "surname": "Skinner",
+      "year": "8",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "85008",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "85008@parade.vic.edu.au",
+        "Room": "E26"
+      },
+      "combo": "18 04 38",
+      "tg": "Hughes 13"
+    },
+    {
+      "id": "smwmvlph8-15-e9of",
+      "firstName": "Jasper",
+      "surname": "Smale",
+      "year": "7",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "87563",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "87563@parade.vic.edu.au",
+        "Room": "E26"
+      },
+      "combo": "05 31 05",
+      "tg": "Hughes 13"
+    },
+    {
+      "id": "smwmwi7e5-16-26wd",
+      "firstName": "Tejaz",
+      "surname": "Abarajitha",
+      "year": "9",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "79342",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "79342@parade.vic.edu.au",
+        "Room": "E26"
+      },
+      "combo": "02 24 18",
+      "tg": "Hughes 13"
+    },
+    {
+      "id": "smwmwi7e5-19-4zqk",
+      "firstName": "Lucas",
+      "surname": "Bland",
+      "year": "9",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "79224",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "79224@parade.vic.edu.au",
+        "Room": "E26"
+      },
+      "combo": "23 13 19",
+      "tg": "Hughes 13"
+    },
+    {
+      "id": "smwmwi7e5-23-cx5a",
+      "firstName": "Jacob",
+      "surname": "Carr",
+      "year": "9",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "78854",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "78854@parade.vic.edu.au",
+        "Room": "E26"
+      },
+      "combo": "05 07 13",
+      "tg": "Hughes 13"
+    },
+    {
+      "id": "smwmwi7e5-25-7dsg",
+      "firstName": "Archie",
+      "surname": "Celotti",
+      "year": "9",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "79391",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "79391@parade.vic.edu.au",
+        "Room": "E26"
+      },
+      "combo": "23 01 31",
+      "tg": "Hughes 13"
+    },
+    {
+      "id": "smwmwi7e5-28-2zam",
+      "firstName": "Sam",
+      "surname": "Contessa",
+      "year": "9",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "79085",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "79085@parade.vic.edu.au",
+        "Room": "E26"
+      },
+      "combo": "10 00 22",
+      "tg": "Hughes 13"
+    },
+    {
+      "id": "smwmwi7e5-30-brjf",
+      "firstName": "Eamon",
+      "surname": "Crotty",
+      "year": "9",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "78923",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "78923@parade.vic.edu.au",
+        "Room": "E26"
+      },
+      "combo": "33 35 29",
+      "tg": "Hughes 13"
+    },
+    {
+      "id": "smwmwi7e5-35-ej43",
+      "firstName": "Aidan",
+      "surname": "Gauci",
+      "year": "9",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "79048",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "79048@parade.vic.edu.au",
+        "Room": "E26"
+      },
+      "combo": "15 33 19",
+      "tg": "Hughes 13"
+    },
+    {
+      "id": "smwmwi7e5-39-8eej",
+      "firstName": "Henry",
+      "surname": "Parker",
+      "year": "9",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "78550",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "78550@parade.vic.edu.au",
+        "Room": "E26"
+      },
+      "combo": "05 27 37",
+      "tg": "Hughes 13"
+    },
+    {
+      "id": "smwmwi7e5-45-jrqv",
+      "firstName": "Ruthresh",
+      "surname": "Senthil Kumar",
+      "year": "9",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "83211",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "83211@parade.vic.edu.au",
+        "Room": "E26"
+      },
+      "combo": "35 21 07",
+      "tg": "Hughes 13"
+    },
+    {
+      "id": "smwvwfs2i-28-f401",
+      "firstName": "Leo",
+      "surname": "Carson-Gueli",
+      "year": "9",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "92543",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "92543@parade.vic.edu.au"
+      },
+      "tg": "Hughes 13"
+    },
+    {
+      "id": "smwvwfs2i-36-7hnq",
+      "firstName": "Asher",
+      "surname": "Marganis",
+      "year": "8",
+      "homeroom": "H13",
+      "extra": {
+        "UID": "91677",
+        "Gender": "M",
+        "House": "Hughes Lower Bundoora",
+        "Email": "91677@parade.vic.edu.au"
+      },
+      "tg": "Hughes 13"
+    },
+    {
+      "combo": "10 32 18",
+      "year": "7",
+      "extra": {
+        "Room": "MP1",
+        "UID": "85661"
+      },
+      "id": "smwx8lc03-28-aqtc",
+      "firstName": "Haru",
+      "surname": "Acton",
+      "homeroom": "H11",
+      "tg": "Hughes 11"
+    },
+    {
+      "combo": "Key",
+      "year": "9",
+      "extra": {
+        "Room": "MP1",
+        "UID": "78353"
+      },
+      "id": "smwx8lc03-30-ff4e",
+      "firstName": "Lucas",
+      "surname": "Amos",
+      "homeroom": "H11",
+      "tg": "Hughes 11"
+    },
+    {
+      "combo": "17 24 17",
+      "year": "9",
+      "extra": {
+        "Room": "MQ26",
+        "UID": "78526"
+      },
+      "id": "smwx8lc03-32-402u",
+      "firstName": "Kobe",
+      "surname": "Anderson",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "24 10 04",
+      "year": "7",
+      "extra": {
+        "Room": "MP1",
+        "UID": "85736"
+      },
+      "id": "smwx8lc03-34-2z02",
+      "firstName": "Joshua",
+      "surname": "Ang",
+      "homeroom": "H11",
+      "tg": "Hughes 11"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP1",
+        "UID": "81733"
+      },
+      "id": "smwx8lc03-36-ey3r",
+      "firstName": "Benjamin",
+      "surname": "Angelucci",
+      "homeroom": "H11",
+      "tg": "Hughes 11"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP1",
+        "UID": "78648"
+      },
+      "id": "smwx8lc03-38-7op1",
+      "firstName": "Darius",
+      "surname": "Anthony",
+      "homeroom": "H11",
+      "tg": "Hughes 11"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP1",
+        "UID": "82497"
+      },
+      "id": "smwx8lc03-40-f7eu",
+      "firstName": "Luca",
+      "surname": "Antonelli",
+      "homeroom": "H11",
+      "tg": "Hughes 11"
+    },
+    {
+      "combo": "38 24 06",
+      "year": "7",
+      "extra": {
+        "Room": "MP1",
+        "UID": "85769"
+      },
+      "id": "smwx8lc04-42-af1z",
+      "firstName": "Hugo",
+      "surname": "Aquilina",
+      "homeroom": "H11",
+      "tg": "Hughes 11"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP3",
+        "UID": "77202"
+      },
+      "id": "smwx8lc04-44-d7az",
+      "firstName": "Leon",
+      "surname": "Arena",
+      "homeroom": "H18",
+      "tg": "Hughes 18"
+    },
+    {
+      "combo": "28 10 24",
+      "year": "7",
+      "extra": {
+        "Room": "MQ34",
+        "UID": "85797"
+      },
+      "id": "smwx8lc04-46-jsxw",
+      "firstName": "Sheldon",
+      "surname": "Au",
+      "homeroom": "H12",
+      "tg": "Hughes 12"
+    },
+    {
+      "combo": "26 12 26",
+      "year": "7",
+      "extra": {
+        "Room": "MP4",
+        "UID": "85859"
+      },
+      "id": "smwx8lc04-48-a7rx",
+      "firstName": "Jacob",
+      "surname": "Bajema",
+      "homeroom": "H16",
+      "tg": "Hughes 16"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MQ34",
+        "UID": "81231"
+      },
+      "id": "smwx8lc04-51-aflf",
+      "firstName": "Cooper",
+      "surname": "Bartlett",
+      "homeroom": "H12",
+      "tg": "Hughes 12"
+    },
+    {
+      "combo": "15 21 30",
+      "year": "9",
+      "extra": {
+        "Room": "MQ26",
+        "UID": "79177"
+      },
+      "id": "smwx8lc04-53-a0wh",
+      "firstName": "Kyan",
+      "surname": "Beattie",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "20 06 36",
+      "year": "7",
+      "extra": {
+        "Room": "MQ34",
+        "UID": "85870"
+      },
+      "id": "smwx8lc04-55-j5nv",
+      "firstName": "Noah",
+      "surname": "Beattie",
+      "homeroom": "H12",
+      "tg": "Hughes 12"
+    },
+    {
+      "combo": "37 03 09",
+      "year": "8",
+      "extra": {
+        "Room": "MP1",
+        "UID": "81348"
+      },
+      "id": "smwx8lc04-57-17qf",
+      "firstName": "Neil",
+      "surname": "Bellubbi",
+      "homeroom": "H11",
+      "tg": "Hughes 11"
+    },
+    {
+      "combo": "35 25 35",
+      "year": "9",
+      "extra": {
+        "Room": "MQ26",
+        "UID": "79186"
+      },
+      "id": "smwx8lc04-59-c9if",
+      "firstName": "Marcus",
+      "surname": "Bencich",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "32 18 00",
+      "year": "7",
+      "extra": {
+        "Room": "E35",
+        "UID": "85876"
+      },
+      "id": "smwx8lc04-61-7mb5",
+      "firstName": "Jaxson",
+      "surname": "Bennett",
+      "homeroom": "H15",
+      "tg": "Hughes 15"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MQ24",
+        "UID": "81352"
+      },
+      "id": "smwx8lc04-63-5mxd",
+      "firstName": "Leo",
+      "surname": "Bettiol",
+      "homeroom": "H19",
+      "tg": "Hughes 19"
+    },
+    {
+      "combo": "0000",
+      "year": "9",
+      "extra": {
+        "Room": "MP1",
+        "UID": "78345"
+      },
+      "id": "smwx8lc04-67-1xhp",
+      "firstName": "Xavier",
+      "surname": "Borderi",
+      "homeroom": "H11",
+      "tg": "Hughes 11"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MQ34",
+        "UID": "83040"
+      },
+      "id": "smwx8lc04-69-49as",
+      "firstName": "Gianluca",
+      "surname": "Bortolotti",
+      "homeroom": "H12",
+      "tg": "Hughes 12"
+    },
+    {
+      "combo": "35 13 03",
+      "year": "7",
+      "extra": {
+        "Room": "MQ24",
+        "UID": "85901"
+      },
+      "id": "smwx8lc04-71-4x9j",
+      "firstName": "Aaron",
+      "surname": "Brewer",
+      "homeroom": "H19",
+      "tg": "Hughes 19"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MQ24",
+        "UID": "78927"
+      },
+      "id": "smwx8lc04-74-35a3",
+      "firstName": "Elijah",
+      "surname": "Byrne",
+      "homeroom": "H19",
+      "tg": "Hughes 19"
+    },
+    {
+      "combo": "34 20 06",
+      "year": "7",
+      "extra": {
+        "Room": "MQ26",
+        "UID": "88641"
+      },
+      "id": "smwx8lc04-76-4ngd",
+      "firstName": "Cruz",
+      "surname": "Caccamo",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "UID": "92538"
+      },
+      "id": "smwx8lc04-78-euvl",
+      "firstName": "Eli",
+      "surname": "Cameron",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "07 21 27",
+      "year": "7",
+      "extra": {
+        "Room": "MP3",
+        "UID": "86771"
+      },
+      "id": "smwx8lc04-80-ar92",
+      "firstName": "Toby",
+      "surname": "Campbell",
+      "homeroom": "H18",
+      "tg": "Hughes 18"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MQ34",
+        "UID": "78469"
+      },
+      "id": "smwx8lc04-82-kof0",
+      "firstName": "Ruben",
+      "surname": "Canedo",
+      "homeroom": "H12",
+      "tg": "Hughes 12"
+    },
+    {
+      "combo": "04 18 28",
+      "year": "7",
+      "extra": {
+        "Room": "MQ24",
+        "UID": "86803"
+      },
+      "id": "smwx8lc04-86-ar3w",
+      "firstName": "Joey",
+      "surname": "Caruso",
+      "homeroom": "H19",
+      "tg": "Hughes 19"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP2",
+        "UID": "78766"
+      },
+      "id": "smwx8lc04-88-l776",
+      "firstName": "Damon",
+      "surname": "Cavallin",
+      "homeroom": "H17",
+      "tg": "Hughes 17"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP4",
+        "UID": "79216"
+      },
+      "id": "smwx8lc04-90-g0te",
+      "firstName": "Julian",
+      "surname": "Cecala",
+      "homeroom": "H16",
+      "tg": "Hughes 16"
+    },
+    {
+      "combo": "00 22 32",
+      "year": "7",
+      "extra": {
+        "Room": "MQ26",
+        "UID": "84614"
+      },
+      "id": "smwx8lc04-93-k0b3",
+      "firstName": "Alexander",
+      "surname": "Chipangura",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "35 21 11",
+      "year": "7",
+      "extra": {
+        "Room": "MQ34",
+        "UID": "84617"
+      },
+      "id": "smwx8lc04-95-fjpz",
+      "firstName": "Noah",
+      "surname": "Ciccosillo",
+      "homeroom": "H12",
+      "tg": "Hughes 12"
+    },
+    {
+      "combo": "20 38 08",
+      "year": "8",
+      "extra": {
+        "Room": "MQ26",
+        "UID": "81390"
+      },
+      "id": "smwx8lc04-97-f45p",
+      "firstName": "Mitchell",
+      "surname": "Clark",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "10 24 30",
+      "year": "7",
+      "extra": {
+        "Room": "MQ24",
+        "UID": "81837"
+      },
+      "id": "smwx8lc04-100-fgdo",
+      "firstName": "Kinnon",
+      "surname": "Connley",
+      "homeroom": "H19",
+      "tg": "Hughes 19"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP4",
+        "UID": "81017"
+      },
+      "id": "smwx8lc04-102-l5h2",
+      "firstName": "Cooper",
+      "surname": "Constance",
+      "homeroom": "H16",
+      "tg": "Hughes 16"
+    },
+    {
+      "combo": "16 02 32",
+      "year": "7",
+      "extra": {
+        "Room": "MQ26",
+        "UID": "86834"
+      },
+      "id": "smwx8lc04-105-6p8c",
+      "firstName": "Alessio",
+      "surname": "Conti",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP2",
+        "UID": "82325"
+      },
+      "id": "smwx8lc04-107-dfdd",
+      "firstName": "Marko",
+      "surname": "Crljen",
+      "homeroom": "H17",
+      "tg": "Hughes 17"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MQ34",
+        "UID": "78616"
+      },
+      "id": "smwx8lc04-110-blrp",
+      "firstName": "Francesco",
+      "surname": "Cuda",
+      "homeroom": "H12",
+      "tg": "Hughes 12"
+    },
+    {
+      "combo": "08 34 24",
+      "year": "7",
+      "extra": {
+        "Room": "MP2",
+        "UID": "85977"
+      },
+      "id": "smwx8lc04-112-5p5t",
+      "firstName": "Oscar",
+      "surname": "Culmer",
+      "homeroom": "H17",
+      "tg": "Hughes 17"
+    },
+    {
+      "combo": "07 29 03",
+      "year": "7",
+      "extra": {
+        "Room": "MQ34",
+        "UID": "86860"
+      },
+      "id": "smwx8lc04-114-adbs",
+      "firstName": "Alessandro",
+      "surname": "D`Ercole",
+      "homeroom": "H12",
+      "tg": "Hughes 12"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MQ26",
+        "UID": "78892"
+      },
+      "id": "smwx8lc04-116-alas",
+      "firstName": "Riccardo",
+      "surname": "D`Ercole",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "30 04 10",
+      "year": "7",
+      "extra": {
+        "Room": "MQ24",
+        "UID": "86846"
+      },
+      "id": "smwx8lc04-118-7p8f",
+      "firstName": "Tyler",
+      "surname": "Dacey",
+      "homeroom": "H19",
+      "tg": "Hughes 19"
+    },
+    {
+      "combo": "29 15 01",
+      "year": "9",
+      "extra": {
+        "Room": "MQ26",
+        "UID": "79516"
+      },
+      "id": "smwx8lc04-120-d3dy",
+      "firstName": "Isac",
+      "surname": "Dagg",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "23 29 19",
+      "year": "8",
+      "extra": {
+        "Room": "MQ26",
+        "UID": "82975"
+      },
+      "id": "smwx8lc04-122-7qwo",
+      "firstName": "Jayden",
+      "surname": "Dang",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "01 27 09",
+      "year": "7",
+      "extra": {
+        "Room": "MP3",
+        "UID": "86850"
+      },
+      "id": "smwx8lc04-124-9yix",
+      "firstName": "Flynn",
+      "surname": "De Leur",
+      "homeroom": "H18",
+      "tg": "Hughes 18"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP1",
+        "UID": "72169"
+      },
+      "id": "smwx8lc04-126-9kj6",
+      "firstName": "Tharuka",
+      "surname": "De Silva",
+      "homeroom": "H11",
+      "tg": "Hughes 11"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MQ34",
+        "UID": "85187"
+      },
+      "id": "smwx8lc04-128-g1v0",
+      "firstName": "Sidhu",
+      "surname": "Dhavala",
+      "homeroom": "H12",
+      "tg": "Hughes 12"
+    },
+    {
+      "combo": "17 03 35",
+      "year": "9",
+      "extra": {
+        "Room": "E35",
+        "UID": "79199"
+      },
+      "id": "smwx8lc04-130-e76v",
+      "firstName": "Gabriel",
+      "surname": "Dobson",
+      "homeroom": "H15",
+      "tg": "Hughes 15"
+    },
+    {
+      "combo": "27 13 39",
+      "year": "7",
+      "extra": {
+        "Room": "E35",
+        "UID": "88053"
+      },
+      "id": "smwx8lc04-132-34tt",
+      "firstName": "Lachlan",
+      "surname": "Doncaster",
+      "homeroom": "H15",
+      "tg": "Hughes 15"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MQ24",
+        "UID": "82457"
+      },
+      "id": "smwx8lc04-135-jboh",
+      "firstName": "Ben",
+      "surname": "Doyle",
+      "homeroom": "H19",
+      "tg": "Hughes 19"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MQ24",
+        "UID": "81439"
+      },
+      "id": "smwx8lc04-137-14x9",
+      "firstName": "John",
+      "surname": "Drury",
+      "homeroom": "H19",
+      "tg": "Hughes 19"
+    },
+    {
+      "combo": "keyed locker",
+      "year": "7",
+      "extra": {
+        "Room": "MP4",
+        "UID": "86878"
+      },
+      "id": "smwx8lc04-139-jwa7",
+      "firstName": "Hayden",
+      "surname": "Duggan",
+      "homeroom": "H16",
+      "tg": "Hughes 16"
+    },
+    {
+      "combo": "23 01 27",
+      "year": "8",
+      "extra": {
+        "Room": "E35",
+        "UID": "81753"
+      },
+      "id": "smwx8lc04-142-25gy",
+      "firstName": "Riley",
+      "surname": "Eccles",
+      "homeroom": "H15",
+      "tg": "Hughes 15"
+    },
+    {
+      "combo": "26 04 34",
+      "year": "8",
+      "extra": {
+        "Room": "MQ26",
+        "UID": "82758"
+      },
+      "id": "smwx8lc04-144-7b21",
+      "firstName": "Aaron",
+      "surname": "Edwards",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "39 25 03",
+      "year": "8",
+      "extra": {
+        "Room": "MQ26",
+        "UID": "82398"
+      },
+      "id": "smwx8lc04-146-700q",
+      "firstName": "Thomas",
+      "surname": "Edwards",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "23 05 11",
+      "year": "7",
+      "extra": {
+        "Room": "MP1",
+        "UID": "86921"
+      },
+      "id": "smwx8lc04-149-c93g",
+      "firstName": "Luca",
+      "surname": "Farebrother",
+      "homeroom": "H11",
+      "tg": "Hughes 11"
+    },
+    {
+      "combo": "25 03 29",
+      "year": "9",
+      "extra": {
+        "Room": "MQ26",
+        "UID": "78815"
+      },
+      "id": "smwx8lc04-151-2me3",
+      "firstName": "Matteo",
+      "surname": "Farebrother",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "24 10 36",
+      "year": "7",
+      "extra": {
+        "Room": "MQ34",
+        "UID": "86924"
+      },
+      "id": "smwx8lc04-153-6ub0",
+      "firstName": "Joshua",
+      "surname": "Favata",
+      "homeroom": "H12",
+      "tg": "Hughes 12"
+    },
+    {
+      "combo": "10 36 02",
+      "year": "7",
+      "extra": {
+        "Room": "MP3",
+        "UID": "86931"
+      },
+      "id": "smwx8lc04-155-9quw",
+      "firstName": "Deon",
+      "surname": "Fenati",
+      "homeroom": "H18",
+      "tg": "Hughes 18"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MQ34",
+        "UID": "73130"
+      },
+      "id": "smwx8lc04-157-h0m8",
+      "firstName": "Benji",
+      "surname": "Fitzgerald",
+      "homeroom": "H12",
+      "tg": "Hughes 12"
+    },
+    {
+      "combo": "11 30 23",
+      "year": "9",
+      "extra": {
+        "Room": "MP1",
+        "UID": "79228"
+      },
+      "id": "smwx8lc04-159-5hp0",
+      "firstName": "Tinura",
+      "surname": "Fonseka",
+      "homeroom": "H11",
+      "tg": "Hughes 11"
+    },
+    {
+      "combo": "34 20 14",
+      "year": "7",
+      "extra": {
+        "Room": "E35",
+        "UID": "86944"
+      },
+      "id": "smwx8lc04-161-cjhb",
+      "firstName": "Massimo",
+      "surname": "Forgione",
+      "homeroom": "H15",
+      "tg": "Hughes 15"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP4",
+        "UID": "82359"
+      },
+      "id": "smwx8lc04-163-27q0",
+      "firstName": "Matteo",
+      "surname": "Formoso",
+      "homeroom": "H16",
+      "tg": "Hughes 16"
+    },
+    {
+      "combo": "32 14 36",
+      "year": "8",
+      "extra": {
+        "Room": "MQ26",
+        "UID": "82222"
+      },
+      "id": "smwx8lc04-165-7bax",
+      "firstName": "Charlie",
+      "surname": "French",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP3",
+        "UID": "88047"
+      },
+      "id": "smwx8lc04-167-hq1b",
+      "firstName": "Sebastian",
+      "surname": "Furfaro",
+      "homeroom": "H18",
+      "tg": "Hughes 18"
+    },
+    {
+      "combo": "12 38 32",
+      "year": "7",
+      "extra": {
+        "Room": "E35",
+        "UID": "84653"
+      },
+      "id": "smwx8lc04-169-8q3w",
+      "firstName": "Nate",
+      "surname": "Gaff",
+      "homeroom": "H15",
+      "tg": "Hughes 15"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MQ34",
+        "UID": "77250"
+      },
+      "id": "smwx8lc04-171-8ad0",
+      "firstName": "Daniel",
+      "surname": "Gaffney",
+      "homeroom": "H12",
+      "tg": "Hughes 12"
+    },
+    {
+      "combo": "35 21 15",
+      "year": "7",
+      "extra": {
+        "Room": "MQ26",
+        "UID": "84655"
+      },
+      "id": "smwx8lc04-173-c96d",
+      "firstName": "Joseph",
+      "surname": "Gaffney",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP3",
+        "UID": "82044"
+      },
+      "id": "smwx8lc04-175-fe41",
+      "firstName": "Thomas",
+      "surname": "Gagliardi",
+      "homeroom": "H18",
+      "tg": "Hughes 18"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP2",
+        "UID": "78786"
+      },
+      "id": "smwx8lc04-178-eu9a",
+      "firstName": "Parker",
+      "surname": "Gellard",
+      "homeroom": "H17",
+      "tg": "Hughes 17"
+    },
+    {
+      "combo": "24 06 00",
+      "year": "7",
+      "extra": {
+        "Room": "MP1",
+        "UID": "86972"
+      },
+      "id": "smwx8lc04-180-b4gl",
+      "firstName": "Raphael",
+      "surname": "Gerdes",
+      "homeroom": "H11",
+      "tg": "Hughes 11"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP4",
+        "UID": "82232"
+      },
+      "id": "smwx8lc04-182-i08k",
+      "firstName": "Gabriel",
+      "surname": "Gioffre",
+      "homeroom": "H16",
+      "tg": "Hughes 16"
+    },
+    {
+      "combo": "09 39 17",
+      "year": "9",
+      "extra": {
+        "Room": "E35",
+        "UID": "79527"
+      },
+      "id": "smwx8lc04-184-g2ux",
+      "firstName": "Santino",
+      "surname": "Gioffre",
+      "homeroom": "H15",
+      "tg": "Hughes 15"
+    },
+    {
+      "combo": "18 08 14",
+      "year": "8",
+      "extra": {
+        "Room": "E35",
+        "UID": "82004"
+      },
+      "id": "smwx8lc04-187-jfnr",
+      "firstName": "Noah",
+      "surname": "Gosstray",
+      "homeroom": "H15",
+      "tg": "Hughes 15"
+    },
+    {
+      "combo": "13 39 33",
+      "year": "7",
+      "extra": {
+        "Room": "MQ34",
+        "UID": "81841"
+      },
+      "id": "smwx8lc04-189-eqce",
+      "firstName": "Parker",
+      "surname": "Gray",
+      "homeroom": "H12",
+      "tg": "Hughes 12"
+    },
+    {
+      "combo": "24 06 32",
+      "year": "7",
+      "extra": {
+        "Room": "MP4",
+        "UID": "86994"
+      },
+      "id": "smwx8lc04-191-hw84",
+      "firstName": "Charlie",
+      "surname": "Grech",
+      "homeroom": "H16",
+      "tg": "Hughes 16"
+    },
+    {
+      "combo": "19 05 23",
+      "year": "7",
+      "extra": {
+        "Room": "MP4",
+        "UID": "87004"
+      },
+      "id": "smwx8lc04-193-4ez6",
+      "firstName": "Maxwell",
+      "surname": "Green",
+      "homeroom": "H16",
+      "tg": "Hughes 16"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP4",
+        "UID": "82578"
+      },
+      "id": "smwx8lc04-195-jlyu",
+      "firstName": "Cian",
+      "surname": "Hanley",
+      "homeroom": "H16",
+      "tg": "Hughes 16"
+    },
+    {
+      "combo": "18 04 10",
+      "year": "8",
+      "extra": {
+        "Room": "E35",
+        "UID": "82731"
+      },
+      "id": "smwx8lc04-197-hx9d",
+      "firstName": "Zachary",
+      "surname": "Haouchar",
+      "homeroom": "H15",
+      "tg": "Hughes 15"
+    },
+    {
+      "combo": "06 32 10",
+      "year": "7",
+      "extra": {
+        "Room": "MQ26",
+        "UID": "87037"
+      },
+      "id": "smwx8lc04-199-8d4n",
+      "firstName": "Joshua",
+      "surname": "Harding",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "39 05 39",
+      "year": "8",
+      "extra": {
+        "Room": "MQ26",
+        "UID": "82826"
+      },
+      "id": "smwx8lc04-201-cwwm",
+      "firstName": "Hudson",
+      "surname": "Harvey",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP3",
+        "UID": "82286"
+      },
+      "id": "smwx8lc04-203-m2o",
+      "firstName": "Robbie",
+      "surname": "Hawkins",
+      "homeroom": "H18",
+      "tg": "Hughes 18"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP2",
+        "UID": "81495"
+      },
+      "id": "smwx8lc04-205-30vd",
+      "firstName": "Sonal",
+      "surname": "Hemachandra",
+      "homeroom": "H17",
+      "tg": "Hughes 17"
+    },
+    {
+      "combo": "37 11 21",
+      "year": "7",
+      "extra": {
+        "Room": "MQ24",
+        "UID": "87068"
+      },
+      "id": "smwx8lc04-207-hgns",
+      "firstName": "Zakariya",
+      "surname": "Hojok",
+      "homeroom": "H19",
+      "tg": "Hughes 19"
+    },
+    {
+      "combo": "30 04 14",
+      "year": "7",
+      "extra": {
+        "Room": "MP3",
+        "UID": "87937"
+      },
+      "id": "smwx8lc04-209-czqw",
+      "firstName": "Oliver",
+      "surname": "Horton",
+      "homeroom": "H18",
+      "tg": "Hughes 18"
+    },
+    {
+      "combo": "18 04 22",
+      "year": "7",
+      "extra": {
+        "Room": "MP4",
+        "UID": "87071"
+      },
+      "id": "smwx8lc04-211-d05f",
+      "firstName": "Oscar",
+      "surname": "Hou",
+      "homeroom": "H16",
+      "tg": "Hughes 16"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP1",
+        "UID": "81506"
+      },
+      "id": "smwx8lc04-213-71ge",
+      "firstName": "Dylan",
+      "surname": "Hu",
+      "homeroom": "H11",
+      "tg": "Hughes 11"
+    },
+    {
+      "combo": "14 00 10",
+      "year": "7",
+      "extra": {
+        "Room": "MP1",
+        "UID": "87080"
+      },
+      "id": "smwx8lc04-215-46qg",
+      "firstName": "Chris",
+      "surname": "Huang",
+      "homeroom": "H11",
+      "tg": "Hughes 11"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP1",
+        "UID": "79655"
+      },
+      "id": "smwx8lc04-217-h920",
+      "firstName": "Riley",
+      "surname": "Hunter",
+      "homeroom": "H11",
+      "tg": "Hughes 11"
+    },
+    {
+      "combo": "09 23 17",
+      "year": "9",
+      "extra": {
+        "Room": "MQ26",
+        "UID": "79415"
+      },
+      "id": "smwx8lc04-219-2c6w",
+      "firstName": "Roy",
+      "surname": "Hunter",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MQ24",
+        "UID": "82338"
+      },
+      "id": "smwx8lc04-221-80n6",
+      "firstName": "Rafael",
+      "surname": "Hurstfield",
+      "homeroom": "H19",
+      "tg": "Hughes 19"
+    },
+    {
+      "combo": "02 28 14",
+      "year": "7",
+      "extra": {
+        "Room": "MQ34",
+        "UID": "87085"
+      },
+      "id": "smwx8lc04-223-axxy",
+      "firstName": "Orlando",
+      "surname": "Iacobaccio",
+      "homeroom": "H12",
+      "tg": "Hughes 12"
+    },
+    {
+      "combo": "18 04 10",
+      "year": "7",
+      "extra": {
+        "Room": "E35",
+        "UID": "87101"
+      },
+      "id": "smwx8lc04-225-e8p2",
+      "firstName": "Ricky",
+      "surname": "Inzitari",
+      "homeroom": "H15",
+      "tg": "Hughes 15"
+    },
+    {
+      "combo": "27 13 27",
+      "year": "7",
+      "extra": {
+        "Room": "E35",
+        "UID": "87096"
+      },
+      "id": "smwx8lc04-227-7a36",
+      "firstName": "Thomas",
+      "surname": "Isakhan",
+      "homeroom": "H15",
+      "tg": "Hughes 15"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP2",
+        "UID": "88718"
+      },
+      "id": "smwx8lc04-229-f2xm",
+      "firstName": "Jahleel",
+      "surname": "Jackamarra",
+      "homeroom": "H17",
+      "tg": "Hughes 17"
+    },
+    {
+      "combo": "28 10 20",
+      "year": "7",
+      "extra": {
+        "Room": "MP4",
+        "UID": "87114"
+      },
+      "id": "smwx8lc04-231-2r6a",
+      "firstName": "Thomas",
+      "surname": "Jakimov",
+      "homeroom": "H16",
+      "tg": "Hughes 16"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP3",
+        "UID": "76878"
+      },
+      "id": "smwx8lc04-233-5pv7",
+      "firstName": "Alan",
+      "surname": "Jayasuriya",
+      "homeroom": "H18",
+      "tg": "Hughes 18"
+    },
+    {
+      "combo": "35 21 03",
+      "year": "7",
+      "extra": {
+        "Room": "E35",
+        "UID": "84675"
+      },
+      "id": "smwx8lc04-235-cafw",
+      "firstName": "Shevan",
+      "surname": "Jayasuriya",
+      "homeroom": "H15",
+      "tg": "Hughes 15"
+    },
+    {
+      "combo": "23 05 23",
+      "year": "7",
+      "extra": {
+        "Room": "MP1",
+        "UID": "81892"
+      },
+      "id": "smwx8lc04-237-30j1",
+      "firstName": "Mikhail",
+      "surname": "Jayawardana",
+      "homeroom": "H11",
+      "tg": "Hughes 11"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP4",
+        "UID": "81781"
+      },
+      "id": "smwx8lc04-239-jsau",
+      "firstName": "Levi",
+      "surname": "Josevski",
+      "homeroom": "H16",
+      "tg": "Hughes 16"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MQ34",
+        "UID": "81777"
+      },
+      "id": "smwx8lc04-242-362a",
+      "firstName": "Ryder",
+      "surname": "Josevski",
+      "homeroom": "H12",
+      "tg": "Hughes 12"
+    },
+    {
+      "combo": "10 16 34",
+      "year": "8",
+      "extra": {
+        "Room": "MQ26",
+        "UID": "82684"
+      },
+      "id": "smwx8lc04-244-8ztj",
+      "firstName": "Manuel",
+      "surname": "Kaldas",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP2",
+        "UID": "82557"
+      },
+      "id": "smwx8lc04-246-ezu5",
+      "firstName": "Vasili",
+      "surname": "Kalomallos",
+      "homeroom": "H17",
+      "tg": "Hughes 17"
+    },
+    {
+      "combo": "15 01 27",
+      "year": "8",
+      "extra": {
+        "Room": "MQ26",
+        "UID": "81529"
+      },
+      "id": "smwx8lc04-248-l801",
+      "firstName": "Liam",
+      "surname": "Karovski",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP2",
+        "UID": "84576"
+      },
+      "id": "smwx8lc04-250-9a2a",
+      "firstName": "Alex",
+      "surname": "Kathalikattil Vinod",
+      "homeroom": "H17",
+      "tg": "Hughes 17"
+    },
+    {
+      "combo": "05 15 21",
+      "year": "9",
+      "extra": {
+        "Room": "E35",
+        "UID": "82714"
+      },
+      "id": "smwx8lc04-252-ddg8",
+      "firstName": "Anirudh",
+      "surname": "Kaushal",
+      "homeroom": "H15",
+      "tg": "Hughes 15"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MQ34",
+        "UID": "79544"
+      },
+      "id": "smwx8lc04-254-hvuj",
+      "firstName": "Ghadir",
+      "surname": "Khalil",
+      "homeroom": "H12",
+      "tg": "Hughes 12"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP4",
+        "UID": "79111"
+      },
+      "id": "smwx8lc04-256-bwde",
+      "firstName": "Archie",
+      "surname": "Kiernan",
+      "homeroom": "H16",
+      "tg": "Hughes 16"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP2",
+        "UID": "82039"
+      },
+      "id": "smwx8lc04-258-qyu",
+      "firstName": "Lucas",
+      "surname": "La Torre",
+      "homeroom": "H17",
+      "tg": "Hughes 17"
+    },
+    {
+      "combo": "39 25 39",
+      "year": "8",
+      "extra": {
+        "Room": "E35",
+        "UID": "82401"
+      },
+      "id": "smwx8lc04-260-eya4",
+      "firstName": "Jayden",
+      "surname": "Laba",
+      "homeroom": "H15",
+      "tg": "Hughes 15"
+    },
+    {
+      "combo": "30 04 16",
+      "year": "7",
+      "extra": {
+        "Room": "MP2",
+        "UID": "87215"
+      },
+      "id": "smwx8lc04-262-9ar5",
+      "firstName": "Dante",
+      "surname": "Lattanzio",
+      "homeroom": "H17",
+      "tg": "Hughes 17"
+    },
+    {
+      "combo": "14 00 22",
+      "year": "7",
+      "extra": {
+        "Room": "MQ26",
+        "UID": "87214"
+      },
+      "id": "smwx8lc04-264-5anz",
+      "firstName": "Xavier",
+      "surname": "Lattanzio",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MQ24",
+        "UID": "79028"
+      },
+      "id": "smwx8lc04-266-l7ew",
+      "firstName": "Addison",
+      "surname": "Li",
+      "homeroom": "H19",
+      "tg": "Hughes 19"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP3",
+        "UID": "78465"
+      },
+      "id": "smwx8lc04-268-4z3t",
+      "firstName": "Nicholas",
+      "surname": "Lim",
+      "homeroom": "H18",
+      "tg": "Hughes 18"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP3",
+        "UID": "81560"
+      },
+      "id": "smwx8lc04-270-ft98",
+      "firstName": "Livindra",
+      "surname": "Liyanage",
+      "homeroom": "H18",
+      "tg": "Hughes 18"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP2",
+        "UID": "78947"
+      },
+      "id": "smwx8lc04-272-i7n5",
+      "firstName": "Daren",
+      "surname": "Lu",
+      "homeroom": "H17",
+      "tg": "Hughes 17"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP4",
+        "UID": "81293"
+      },
+      "id": "smwx8lc04-274-gke",
+      "firstName": "Sinol",
+      "surname": "Mabima Hewalage",
+      "homeroom": "H16",
+      "tg": "Hughes 16"
+    },
+    {
+      "combo": "01 03 09",
+      "year": "8",
+      "extra": {
+        "Room": "E35",
+        "UID": "81564"
+      },
+      "id": "smwx8lc04-276-kffc",
+      "firstName": "Hunter",
+      "surname": "Maher",
+      "homeroom": "H15",
+      "tg": "Hughes 15"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MQ24",
+        "UID": "82235"
+      },
+      "id": "smwx8lc04-278-ko4y",
+      "firstName": "Jake",
+      "surname": "Maiorano",
+      "homeroom": "H19",
+      "tg": "Hughes 19"
+    },
+    {
+      "combo": "37 07 33",
+      "year": "8",
+      "extra": {
+        "Room": "E35",
+        "UID": "77187"
+      },
+      "id": "smwx8lc04-280-1eze",
+      "firstName": "Manuka",
+      "surname": "Manannalage",
+      "homeroom": "H15",
+      "tg": "Hughes 15"
+    },
+    {
+      "combo": "14 20 38",
+      "year": "8",
+      "extra": {
+        "Room": "MP1",
+        "UID": "85335"
+      },
+      "id": "smwx8lc04-282-fwri",
+      "firstName": "Isaac",
+      "surname": "Maraschiello",
+      "homeroom": "H11",
+      "tg": "Hughes 11"
+    },
+    {
+      "combo": "00 22 04",
+      "year": "8",
+      "extra": {
+        "Room": "MP1",
+        "UID": "81782"
+      },
+      "id": "smwx8lc04-285-f53h",
+      "firstName": "Reno",
+      "surname": "Mascioli",
+      "homeroom": "H11",
+      "tg": "Hughes 11"
+    },
+    {
+      "combo": "05 31 13",
+      "year": "7",
+      "extra": {
+        "Room": "MQ34",
+        "UID": "87281"
+      },
+      "id": "smwx8lc04-287-3ia",
+      "firstName": "Pierre",
+      "surname": "Matsamakis",
+      "homeroom": "H12",
+      "tg": "Hughes 12"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MQ24",
+        "UID": "82667"
+      },
+      "id": "smwx8lc04-289-3mcj",
+      "firstName": "Oliver",
+      "surname": "McKelson",
+      "homeroom": "H19",
+      "tg": "Hughes 19"
+    },
+    {
+      "combo": "15 01 23",
+      "year": "9",
+      "extra": {
+        "Room": "E35",
+        "UID": "78886"
+      },
+      "id": "smwx8lc04-291-5w36",
+      "firstName": "Ethan",
+      "surname": "Mercadante",
+      "homeroom": "H15",
+      "tg": "Hughes 15"
+    },
+    {
+      "combo": "10 24 02",
+      "year": "7",
+      "extra": {
+        "Room": "MQ24",
+        "UID": "87358"
+      },
+      "id": "smwx8lc04-293-33cq",
+      "firstName": "Brayden",
+      "surname": "Moses",
+      "homeroom": "H19",
+      "tg": "Hughes 19"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP2",
+        "UID": "81602"
+      },
+      "id": "smwx8lc04-295-kyo",
+      "firstName": "Taj",
+      "surname": "Mroz",
+      "homeroom": "H17",
+      "tg": "Hughes 17"
+    },
+    {
+      "combo": "28 14 32",
+      "year": "7",
+      "extra": {
+        "Room": "MP3",
+        "UID": "87363"
+      },
+      "id": "smwx8lc04-297-9ya7",
+      "firstName": "Leon",
+      "surname": "Nackoski",
+      "homeroom": "H18",
+      "tg": "Hughes 18"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP4",
+        "UID": "81953"
+      },
+      "id": "smwx8lc04-299-ab99",
+      "firstName": "Harrison",
+      "surname": "Nankervis",
+      "homeroom": "H16",
+      "tg": "Hughes 16"
+    },
+    {
+      "combo": "12 38 16",
+      "year": "7",
+      "extra": {
+        "Room": "E35",
+        "UID": "87373"
+      },
+      "id": "smwx8lc04-301-2tod",
+      "firstName": "Marcus",
+      "surname": "Nicolazzo",
+      "homeroom": "H15",
+      "tg": "Hughes 15"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP2",
+        "UID": "78889"
+      },
+      "id": "smwx8lc04-303-1pbe",
+      "firstName": "Kade",
+      "surname": "O'Connor",
+      "homeroom": "H17",
+      "tg": "Hughes 17"
+    },
+    {
+      "combo": "33 07 29",
+      "year": "8",
+      "extra": {
+        "Room": "E35",
+        "UID": "82344"
+      },
+      "id": "smwx8lc04-305-hp7f",
+      "firstName": "Brann",
+      "surname": "O'Donoghue",
+      "homeroom": "H15",
+      "tg": "Hughes 15"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MQ24",
+        "UID": "78675"
+      },
+      "id": "smwx8lc04-307-dfy8",
+      "firstName": "Nicholas",
+      "surname": "Ortisi",
+      "homeroom": "H19",
+      "tg": "Hughes 19"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP2",
+        "UID": "79066"
+      },
+      "id": "smwx8lc04-309-18k1",
+      "firstName": "Lachlan",
+      "surname": "Palermo",
+      "homeroom": "H17",
+      "tg": "Hughes 17"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP3",
+        "UID": "81075"
+      },
+      "id": "smwx8lc04-311-1es2",
+      "firstName": "Orlando",
+      "surname": "Palmarini",
+      "homeroom": "H18",
+      "tg": "Hughes 18"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "E35",
+        "UID": "79432"
+      },
+      "id": "smwx8lc04-313-4992",
+      "firstName": "Adis",
+      "surname": "Panicker",
+      "homeroom": "H15",
+      "tg": "Hughes 15"
+    },
+    {
+      "combo": "33 11 25",
+      "year": "8",
+      "extra": {
+        "Room": "E35",
+        "UID": "84847"
+      },
+      "id": "smwx8lc04-315-8ugg",
+      "firstName": "Jed",
+      "surname": "Panou",
+      "homeroom": "H15",
+      "tg": "Hughes 15"
+    },
+    {
+      "combo": "17 27 01",
+      "year": "8",
+      "extra": {
+        "Room": "MQ26",
+        "UID": "82176"
+      },
+      "id": "smwx8lc04-317-j11i",
+      "firstName": "James",
+      "surname": "Pantelidis",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "38 16 34",
+      "year": "9",
+      "extra": {
+        "Room": "MP1",
+        "UID": "78548"
+      },
+      "id": "smwx8lc04-319-5srx",
+      "firstName": "Oliver",
+      "surname": "Parisi",
+      "homeroom": "H11",
+      "tg": "Hughes 11"
+    },
+    {
+      "combo": "35 17 27",
+      "year": "7",
+      "extra": {
+        "Room": "MP2",
+        "UID": "87437"
+      },
+      "id": "smwx8lc05-323-2giy",
+      "firstName": "Alexander",
+      "surname": "Pasquale",
+      "homeroom": "H17",
+      "tg": "Hughes 17"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP1",
+        "UID": "79141"
+      },
+      "id": "smwx8lc05-325-c21l",
+      "firstName": "Marco",
+      "surname": "Perri",
+      "homeroom": "H11",
+      "tg": "Hughes 11"
+    },
+    {
+      "combo": "20 28 32",
+      "year": "7",
+      "extra": {
+        "Room": "MP2",
+        "UID": "87457"
+      },
+      "id": "smwx8lc05-327-hpao",
+      "firstName": "Dimitri",
+      "surname": "Petaroudas",
+      "homeroom": "H17",
+      "tg": "Hughes 17"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP3",
+        "UID": "81674"
+      },
+      "id": "smwx8lc05-329-3kf8",
+      "firstName": "Craig",
+      "surname": "Pinto",
+      "homeroom": "H18",
+      "tg": "Hughes 18"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MQ34",
+        "UID": "82467"
+      },
+      "id": "smwx8lc05-331-8rv7",
+      "firstName": "Jack",
+      "surname": "Polizzi",
+      "homeroom": "H12",
+      "tg": "Hughes 12"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP3",
+        "UID": "80208"
+      },
+      "id": "smwx8lc05-333-h51n",
+      "firstName": "Ethan",
+      "surname": "Quan",
+      "homeroom": "H18",
+      "tg": "Hughes 18"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP4",
+        "UID": "82446"
+      },
+      "id": "smwx8lc05-335-jeik",
+      "firstName": "Ronav",
+      "surname": "Ramjutton",
+      "homeroom": "H16",
+      "tg": "Hughes 16"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP4",
+        "UID": "79769"
+      },
+      "id": "smwx8lc05-338-avao",
+      "firstName": "Patrick",
+      "surname": "Rennie",
+      "homeroom": "H16",
+      "tg": "Hughes 16"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MQ34",
+        "UID": "82801"
+      },
+      "id": "smwx8lc05-340-kuwf",
+      "firstName": "Isaac",
+      "surname": "Rizio",
+      "homeroom": "H12",
+      "tg": "Hughes 12"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP2",
+        "UID": "78949"
+      },
+      "id": "smwx8lc05-343-g58b",
+      "firstName": "Tadgh",
+      "surname": "Ryan",
+      "homeroom": "H17",
+      "tg": "Hughes 17"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MQ34",
+        "UID": "81884"
+      },
+      "id": "smwx8lc05-345-68bl",
+      "firstName": "Marc-Anthony",
+      "surname": "Saliba",
+      "homeroom": "H12",
+      "tg": "Hughes 12"
+    },
+    {
+      "combo": "17 03 21",
+      "year": "7",
+      "extra": {
+        "Room": "E35",
+        "UID": "87573"
+      },
+      "id": "smwx8lc05-347-431j",
+      "firstName": "Juliano",
+      "surname": "Sanfilippo",
+      "homeroom": "H15",
+      "tg": "Hughes 15"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP2",
+        "UID": "85225"
+      },
+      "id": "smwx8lc05-349-iak",
+      "firstName": "Julian",
+      "surname": "Santo",
+      "homeroom": "H17",
+      "tg": "Hughes 17"
+    },
+    {
+      "combo": "38 16 06",
+      "year": "9",
+      "extra": {
+        "Room": "MP3",
+        "UID": "79519"
+      },
+      "id": "smwx8lc05-352-ii6f",
+      "firstName": "Peter",
+      "surname": "Schibeci",
+      "homeroom": "H18",
+      "tg": "Hughes 18"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MQ24",
+        "UID": "78860"
+      },
+      "id": "smwx8lc05-354-4txk",
+      "firstName": "Liam",
+      "surname": "Schuster",
+      "homeroom": "H19",
+      "tg": "Hughes 19"
+    },
+    {
+      "combo": "34 24 06",
+      "year": "8",
+      "extra": {
+        "Room": "MQ26",
+        "UID": "82961"
+      },
+      "id": "smwx8lc05-356-br3i",
+      "firstName": "James",
+      "surname": "Schwarz",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP4",
+        "UID": "81703"
+      },
+      "id": "smwx8lc05-358-h5by",
+      "firstName": "Jacob",
+      "surname": "Scira",
+      "homeroom": "H16",
+      "tg": "Hughes 16"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MQ24",
+        "UID": "82555"
+      },
+      "id": "smwx8lc05-360-ag4q",
+      "firstName": "Lorik",
+      "surname": "Selimi",
+      "homeroom": "H19",
+      "tg": "Hughes 19"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP3",
+        "UID": "81719"
+      },
+      "id": "smwx8lc05-364-7cdu",
+      "firstName": "Vettri",
+      "surname": "Sivapalan",
+      "homeroom": "H18",
+      "tg": "Hughes 18"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP4",
+        "UID": "78970"
+      },
+      "id": "smwx8lc05-366-3o66",
+      "firstName": "Petro",
+      "surname": "Skapetis",
+      "homeroom": "H16",
+      "tg": "Hughes 16"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MQ24",
+        "UID": "79359"
+      },
+      "id": "smwx8lc05-370-an9l",
+      "firstName": "Paxton",
+      "surname": "Smale",
+      "homeroom": "H19",
+      "tg": "Hughes 19"
+    },
+    {
+      "combo": "09 35 05",
+      "year": "7",
+      "extra": {
+        "Room": "MP4",
+        "UID": "87617"
+      },
+      "id": "smwx8lc05-372-4jz7",
+      "firstName": "Caius",
+      "surname": "Smith",
+      "homeroom": "H16",
+      "tg": "Hughes 16"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MQ34",
+        "UID": "79168"
+      },
+      "id": "smwx8lc05-374-7tp4",
+      "firstName": "Tyson",
+      "surname": "Smith",
+      "homeroom": "H12",
+      "tg": "Hughes 12"
+    },
+    {
+      "combo": "11 37 07",
+      "year": "7",
+      "extra": {
+        "Room": "MP3",
+        "UID": "87603"
+      },
+      "id": "smwx8lc05-376-6c4t",
+      "firstName": "Harry",
+      "surname": "Stafford",
+      "homeroom": "H18",
+      "tg": "Hughes 18"
+    },
+    {
+      "combo": "33 15 05",
+      "year": "7",
+      "extra": {
+        "Room": "E35",
+        "UID": "87552"
+      },
+      "id": "smwx8lc05-378-dump",
+      "firstName": "Oliver",
+      "surname": "Stainwall",
+      "homeroom": "H15",
+      "tg": "Hughes 15"
+    },
+    {
+      "combo": "38 24 30",
+      "year": "7",
+      "extra": {
+        "Room": "MP3",
+        "UID": "87549"
+      },
+      "id": "smwx8lc05-380-1ihs",
+      "firstName": "Oliver",
+      "surname": "Stanley",
+      "homeroom": "H18",
+      "tg": "Hughes 18"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP2",
+        "UID": "78586"
+      },
+      "id": "smwx8lc05-382-2yb4",
+      "firstName": "Matthew",
+      "surname": "Stibilj",
+      "homeroom": "H17",
+      "tg": "Hughes 17"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MQ26",
+        "UID": "79194"
+      },
+      "id": "smwx8lc05-384-abqr",
+      "firstName": "Hamish",
+      "surname": "Strawhorn",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP2",
+        "UID": "72172"
+      },
+      "id": "smwx8lc05-386-e7fo",
+      "firstName": "Kavindu",
+      "surname": "Sunnadeniya",
+      "homeroom": "H17",
+      "tg": "Hughes 17"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP4",
+        "UID": "81218"
+      },
+      "id": "smwx8lc05-388-c0uc",
+      "firstName": "Zachary",
+      "surname": "Swindon",
+      "homeroom": "H16",
+      "tg": "Hughes 16"
+    },
+    {
+      "combo": "21 07 01",
+      "year": "7",
+      "extra": {
+        "Room": "MP2",
+        "UID": "84768"
+      },
+      "id": "smwx8lc05-390-b6q4",
+      "firstName": "Toby",
+      "surname": "Szygalski",
+      "homeroom": "H17",
+      "tg": "Hughes 17"
+    },
+    {
+      "combo": "33 07 25",
+      "year": "7",
+      "extra": {
+        "Room": "MQ24",
+        "UID": "87675"
+      },
+      "id": "smwx8lc05-392-9t87",
+      "firstName": "Samuel",
+      "surname": "Thickins",
+      "homeroom": "H19",
+      "tg": "Hughes 19"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MQ34",
+        "UID": "82680"
+      },
+      "id": "smwx8lc05-394-5we8",
+      "firstName": "Charlie",
+      "surname": "Thomas",
+      "homeroom": "H12",
+      "tg": "Hughes 12"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP2",
+        "UID": "81817"
+      },
+      "id": "smwx8lc05-396-74e8",
+      "firstName": "Kais",
+      "surname": "Thompson",
+      "homeroom": "H17",
+      "tg": "Hughes 17"
+    },
+    {
+      "combo": "257",
+      "year": "9",
+      "extra": {
+        "Room": "MP1",
+        "UID": "81187"
+      },
+      "id": "smwx8lc05-398-jl4j",
+      "firstName": "Zein",
+      "surname": "Thompson",
+      "homeroom": "H11",
+      "tg": "Hughes 11"
+    },
+    {
+      "combo": "31 17 03",
+      "year": "7",
+      "extra": {
+        "Room": "MP4",
+        "UID": "87697"
+      },
+      "id": "smwx8lc05-400-5rw8",
+      "firstName": "Francisco",
+      "surname": "Trevean",
+      "homeroom": "H16",
+      "tg": "Hughes 16"
+    },
+    {
+      "combo": "0103",
+      "year": "9",
+      "extra": {
+        "Room": "MP1",
+        "UID": "84084"
+      },
+      "id": "smwx8lc05-402-21kx",
+      "firstName": "Deon",
+      "surname": "Triantos",
+      "homeroom": "H11",
+      "tg": "Hughes 11"
+    },
+    {
+      "combo": "22 36 06",
+      "year": "7",
+      "extra": {
+        "Room": "MQ24",
+        "UID": "84782"
+      },
+      "id": "smwx8lc05-404-849v",
+      "firstName": "Jonathan",
+      "surname": "Trigilia",
+      "homeroom": "H19",
+      "tg": "Hughes 19"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MP3",
+        "UID": "81433"
+      },
+      "id": "smwx8lc05-406-hu8t",
+      "firstName": "Anthony",
+      "surname": "Venditti",
+      "homeroom": "H18",
+      "tg": "Hughes 18"
+    },
+    {
+      "combo": "35 09 15",
+      "year": "7",
+      "extra": {
+        "Room": "MQ24",
+        "UID": "87826"
+      },
+      "id": "smwx8lc05-408-87q4",
+      "firstName": "Joseph",
+      "surname": "Viavattene",
+      "homeroom": "H19",
+      "tg": "Hughes 19"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP3",
+        "UID": "79653"
+      },
+      "id": "smwx8lc05-410-hb46",
+      "firstName": "Bryce",
+      "surname": "Waddell",
+      "homeroom": "H18",
+      "tg": "Hughes 18"
+    },
+    {
+      "combo": "26 04 30",
+      "year": "7",
+      "extra": {
+        "Room": "MQ24",
+        "UID": "87802"
+      },
+      "id": "smwx8lc05-412-8m2p",
+      "firstName": "Jude",
+      "surname": "Waddell",
+      "homeroom": "H19",
+      "tg": "Hughes 19"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MQ34",
+        "UID": "84863"
+      },
+      "id": "smwx8lc05-414-frlj",
+      "firstName": "Everett",
+      "surname": "Warnock",
+      "homeroom": "H12",
+      "tg": "Hughes 12"
+    },
+    {
+      "combo": "",
+      "year": "9",
+      "extra": {
+        "Room": "MP2",
+        "UID": "88720"
+      },
+      "id": "smwx8lc05-416-g2lq",
+      "firstName": "Marky",
+      "surname": "Waters",
+      "homeroom": "H14",
+      "tg": "Hughes 14"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MQ24",
+        "UID": "82164"
+      },
+      "id": "smwx8lc05-418-56o5",
+      "firstName": "Lachlan",
+      "surname": "Weinberg",
+      "homeroom": "H19",
+      "tg": "Hughes 19"
+    },
+    {
+      "combo": "14 00 14",
+      "year": "7",
+      "extra": {
+        "Room": "MP3",
+        "UID": "87796"
+      },
+      "id": "smwx8lc05-420-8ceh",
+      "firstName": "Max",
+      "surname": "Weinberg",
+      "homeroom": "H18",
+      "tg": "Hughes 18"
+    },
+    {
+      "combo": "37 23 01",
+      "year": "7",
+      "extra": {
+        "Room": "MP3",
+        "UID": "82077"
+      },
+      "id": "smwx8lc05-422-dru8",
+      "firstName": "Ethan",
+      "surname": "White",
+      "homeroom": "H18",
+      "tg": "Hughes 18"
+    },
+    {
+      "combo": "",
+      "year": "8",
+      "extra": {
+        "Room": "MQ34",
+        "UID": "82334"
+      },
+      "id": "smwx8lc05-424-3ulc",
+      "firstName": "Luke",
+      "surname": "Wright",
+      "homeroom": "H12",
+      "tg": "Hughes 12"
+    },
+    {
+      "combo": "23 09 39",
+      "year": "7",
+      "extra": {
+        "Room": "MP2",
+        "UID": "87857"
+      },
+      "id": "smwx8lc05-426-dy8i",
+      "firstName": "Benjamin",
+      "surname": "Yilmaz Osorio",
+      "homeroom": "H17",
+      "tg": "Hughes 17"
+    },
+    {
+      "combo": "37 19 13",
+      "year": "7",
+      "extra": {
+        "Room": "MP1",
+        "UID": "87843"
+      },
+      "id": "smwx8lc05-428-hzlu",
+      "firstName": "Immanuel",
+      "surname": "Zhang",
+      "homeroom": "H11",
+      "tg": "Hughes 11"
+    }
+  ],
+  "assign": {
+    "8": "smwx8lc04-139-jwa7",
+    "12": "smwx8lc05-335-jeik",
+    "29": "smwx8lc03-28-aqtc",
+    "30": "smwx8lc03-34-2z02",
+    "31": "smwx8lc04-149-c93g",
+    "32": "smwx8lc04-215-46qg",
+    "33": "smwx8lc04-42-af1z",
+    "36": "smwx8lc04-237-30j1",
+    "37": "smwx8lc05-325-c21l",
+    "39": "smwx8lc04-217-h920",
+    "40": "smwx8lc04-67-1xhp",
+    "41": "smwx8lc05-402-21kx",
+    "42": "smwx8lc03-30-ff4e",
+    "43": "smwx8lc04-159-5hp0",
+    "44": "smwx8lc04-126-9kj6",
+    "45": "smwx8lc03-38-7op1",
+    "46": "smwx8lc04-319-5srx",
+    "47": "smwx8lc05-406-hu8t",
+    "48": "smwx8lc04-229-f2xm",
+    "50": "smwx8lc04-282-fwri",
+    "51": "smwx8lc04-57-17qf",
+    "52": "smwx8lc03-40-f7eu",
+    "53": "smwx8lc03-36-ey3r",
+    "54": "smwx8lc04-285-f53h",
+    "55": "smwx8lc04-213-71ge",
+    "56": "smwx8lc04-246-ezu5",
+    "57": "smwx8lc04-107-dfdd",
+    "58": "smwx8lc04-258-qyu",
+    "59": "smwx8lc04-250-9a2a",
+    "60": "smwx8lc05-343-g58b",
+    "62": "smwx8lc05-396-74e8",
+    "63": "smwx8lc05-323-2giy",
+    "64": "smwx8lc05-426-dy8i",
+    "65": "smwx8lc04-112-5p5t",
+    "66": "smwx8lc05-390-b6q4",
+    "67": "smwx8lc05-327-hpao",
+    "111": "smwx8lc04-51-aflf",
+    "112": "smwx8lc04-46-jsxw",
+    "113": "smwx8lc04-82-kof0",
+    "114": "smwx8lc04-55-j5nv",
+    "115": "smwx8lc04-110-blrp",
+    "116": "smwx8lc04-69-49as",
+    "117": "smwx8lc05-414-frlj",
+    "118": "smwx8lc04-95-fjpz",
+    "119": "smwx8lc04-128-g1v0",
+    "120": "smwx8lc04-114-adbs",
+    "121": "smwx8lc04-157-h0m8",
+    "122": "smwx8lc04-153-6ub0",
+    "123": "smwx8lc04-171-8ad0",
+    "124": "smwx8lc04-189-eqce",
+    "125": "smwx8lc05-331-8rv7",
+    "126": "smwx8lc04-223-axxy",
+    "128": "smwx8lc04-242-362a",
+    "129": "smwx8lc05-340-kuwf",
+    "130": "smwx8lc04-287-3ia",
+    "131": "smwx8lc04-254-hvuj",
+    "132": "smwx8lc05-345-68bl",
+    "133": "smwx8lc05-374-7tp4",
+    "134": "smwx8lc05-394-5we8",
+    "135": "smwx8lc05-424-3ulc",
+    "300": "smwx8lc04-105-6p8c",
+    "301": "smwx8lc04-264-5anz",
+    "302": "smwx8lc04-199-8d4n",
+    "303": "smwx8lc05-356-br3i",
+    "304": "smwx8lc04-173-c96d",
+    "305": "smwx8lc04-317-j11i",
+    "306": "smwx8lc04-93-k0b3",
+    "307": "smwx8lc04-146-700q",
+    "308": "smwx8lc04-76-4ngd",
+    "309": "smwx8lc04-116-alas",
+    "310": "smwx8lc04-144-7b21",
+    "311": "smwx8lc03-32-402u",
+    "312": "smwx8lc04-201-cwwm",
+    "313": "smwx8lc04-53-a0wh",
+    "314": "smwx8lc04-244-8ztj",
+    "315": "smwx8lc05-384-abqr",
+    "317": "smwx8lc04-59-c9if",
+    "318": "smwx8lc04-248-l801",
+    "319": "smwx8lc04-120-d3dy",
+    "320": "smwx8lc04-122-7qwo",
+    "321": "smwx8lc04-219-2c6w",
+    "322": "smwx8lc04-97-f45p",
+    "323": "smwx8lc04-151-2me3",
+    "324": "smwx8lc04-165-7bax",
+    "379": "smwmvlph8-10-65hp",
+    "435": "smwx8lc04-102-l5h2",
+    "436": "smwx8lc05-372-4jz7",
+    "437": "smwx8lc05-338-avao",
+    "439": "smwx8lc04-239-jsau",
+    "440": "smwx8lc05-400-5rw8",
+    "441": "smwx8lc05-388-c0uc",
+    "442": "smwx8lc04-191-hw84",
+    "443": "smwx8lc05-366-3o66",
+    "444": "smwx8lc04-231-2r6a",
+    "445": "smwx8lc04-195-jlyu",
+    "446": "smwx8lc04-299-ab99",
+    "447": "smwx8lc04-182-i08k",
+    "449": "smwx8lc04-163-27q0",
+    "451": "smwx8lc04-256-bwde",
+    "452": "smwx8lc04-211-d05f",
+    "453": "smwx8lc04-90-g0te",
+    "454": "smwx8lc04-193-4ez6",
+    "455": "smwx8lc04-274-gke",
+    "456": "smwx8lc04-48-a7rx",
+    "457": "smwx8lc05-358-h5by",
+    "459": "smwx8lc04-44-d7az",
+    "460": "smwx8lc04-80-ar92",
+    "461": "smwx8lc05-352-ii6f",
+    "462": "smwx8lc05-420-8ceh",
+    "463": "smwx8lc04-233-5pv7",
+    "464": "smwx8lc04-209-czqw",
+    "466": "smwx8lc04-270-ft98",
+    "467": "smwx8lc05-329-3kf8",
+    "468": "smwx8lc05-422-dru8",
+    "470": "smwx8lc05-380-1ihs",
+    "471": "smwx8lc04-303-1pbe",
+    "472": "smwx8lc05-349-iak",
+    "473": "smwx8lc04-178-eu9a",
+    "474": "smwx8lc04-205-30vd",
+    "475": "smwx8lc04-309-18k1",
+    "476": "smwx8lc04-295-kyo",
+    "477": "smwx8lc05-382-2yb4",
+    "478": "smwx8lc05-416-g2lq",
+    "479": "smwx8lc05-386-e7fo",
+    "480": "smwx8lc04-272-i7n5",
+    "481": "smwx8lc04-262-9ar5",
+    "482": "smwx8lc04-88-l776",
+    "489": "smwmwi7e5-23-cx5a",
+    "490": "smwvwfs2i-36-7hnq",
+    "491": "smwmwi7e5-30-brjf",
+    "492": "smwmvlph8-1-at24",
+    "493": "smwmwi7e5-39-8eej",
+    "495": "smwmwi7e5-19-4zqk",
+    "496": "smwmvlph8-5-b3dv",
+    "497": "smwmwi7e5-16-26wd",
+    "498": "smwmvlph8-2-8yth",
+    "499": "smwmwi7e5-45-jrqv",
+    "500": "smwmvlph8-8-dv1r",
+    "501": "smwmwi7e5-25-7dsg",
+    "502": "smwmvlph8-6-v0h",
+    "503": "smwmwi7e5-28-2zam",
+    "504": "smwmvlph8-15-e9of",
+    "505": "smwmwi7e5-35-ej43",
+    "506": "smwmvlph8-0-1e88",
+    "517": "smwmvlph8-14-km6f",
+    "519": "smwx8lc04-130-e76v",
+    "520": "smwx8lc04-61-7mb5",
+    "521": "smwx8lc04-184-g2ux",
+    "522": "smwx8lc04-161-cjhb",
+    "523": "smwx8lc04-197-hx9d",
+    "524": "smwx8lc04-169-8q3w",
+    "525": "smwx8lc04-305-hp7f",
+    "527": "smwx8lc04-276-kffc",
+    "528": "smwx8lc05-378-dump",
+    "529": "smwx8lc04-313-4992",
+    "530": "smwx8lc04-132-34tt",
+    "531": "smwx8lc04-252-ddg8",
+    "532": "smwx8lc04-225-e8p2",
+    "533": "smwx8lc04-260-eya4",
+    "534": "smwx8lc04-227-7a36",
+    "537": "smwx8lc04-315-8ugg",
+    "538": "smwx8lc05-347-431j",
+    "539": "smwx8lc04-280-1eze",
+    "540": "smwx8lc04-301-2tod",
+    "541": "smwx8lc04-291-5w36",
+    "542": "smwx8lc04-235-cafw",
+    "543": "smwmvlph8-13-f5us",
+    "544": "smwmvlph8-3-d4o1",
+    "545": "smwmvlph8-7-2vab",
+    "546": "smwvwfs2i-28-f401",
+    "547": "smwmvlph8-11-hphd",
+    "548": "smwmvlph8-12-1nha",
+    "549": "smwmvlph8-4-3aye",
+    "550": "smwmvlph8-9-4amp",
+    "571": "smwx8lc04-142-25gy",
+    "573": "smwx8lc04-187-jfnr",
+    "1574": "smwx8lc04-266-l7ew",
+    "1575": "smwx8lc05-354-4txk",
+    "1576": "smwx8lc04-74-35a3",
+    "1578": "smwx8lc05-333-h51n",
+    "1579": "smwx8lc04-155-9quw",
+    "1580": "smwx8lc04-175-fe41",
+    "1582": "smwx8lc04-268-4z3t",
+    "1583": "smwx8lc04-124-9yix",
+    "1584": "smwx8lc04-311-1es2",
+    "1585": "smwx8lc04-297-9ya7",
+    "1586": "smwx8lc04-167-hq1b",
+    "1587": "smwx8lc05-376-6c4t",
+    "1588": "smwx8lc05-410-hb46",
+    "1589": "smwx8lc04-203-m2o",
+    "Q21": "smwx8lc04-71-4x9j",
+    "Q22": "smwx8lc04-86-ar3w",
+    "Q23": "smwx8lc04-100-fgdo",
+    "Q24": "smwx8lc04-118-7p8f",
+    "Q25": "smwx8lc04-207-hgns",
+    "Q26": "smwx8lc04-293-33cq",
+    "Q27": "smwx8lc05-392-9t87",
+    "Q28": "smwx8lc05-404-849v",
+    "Q34": "smwx8lc04-137-14x9",
+    "Q35": "smwx8lc04-221-80n6",
+    "Q38": "smwx8lc04-135-jboh",
+    "Q33": "smwx8lc04-63-5mxd",
+    "34": "smwx8lc04-180-b4gl",
+    "Q31": "smwx8lc04-278-ko4y",
+    "Q39": "smwx8lc04-289-3mcj",
+    "Q40": "smwx8lc04-307-dfy8",
+    "Q36": "smwx8lc05-360-ag4q",
+    "38": "smwx8lc05-398-jl4j",
+    "Q29": "smwx8lc05-408-87q4",
+    "Q30": "smwx8lc05-412-8m2p",
+    "Q32": "smwx8lc05-418-56o5",
+    "35": "smwx8lc05-428-hzlu"
+  },
+  "out": {},
+  "reserve": {},
+  "keepExisting": true,
+  "display": {
+    "homeroom": true,
+    "field": "Room",
+    "surnameInitial": false,
+    "yearColours": true,
+    "combo": false,
+    "exportPrefs": {
+      "layout": "school",
+      "format": "xlsx",
+      "yearWord": false,
+      "sort": "surname",
+      "noLocker": true,
+      "combo": true,
+      "location": "area",
+      "schoolSort": "locker"
+    }
+  }
+}

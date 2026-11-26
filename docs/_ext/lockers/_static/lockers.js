@@ -1276,6 +1276,8 @@
         table: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/>',
         reset: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
         undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+        expand: '<path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/>',
+        shrink: '<path d="M4 14h6v6"/><path d="M20 10h-6V4"/><path d="M14 10l7-7"/><path d="M3 21l7-7"/>',
         print: '<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/>',
         list: '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
         locker: '<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 2v20"/><path d="M8 11v2M16 11v2"/>',
@@ -1727,6 +1729,7 @@
                 '<span class="lk-sep"></span>' +
                 btn('undo', 'lk-btn-grey', 'undo', 'Undo', ' data-role="undo" disabled') +
                 btn('reset', 'lk-btn-grey', 'reset', 'Reset', ' title="Go back to how this page was first set up"') +
+                btn('wide', 'lk-btn-grey', 'expand', 'Full width', ' data-role="wide" aria-pressed="false" title="Use the whole browser window for the lockers"') +
                 '</div>' +
                 /* Row 2: setting up the lockers and typing allocations in */
                 '<div class="lk-toolbar-row">' +
@@ -2519,6 +2522,7 @@
             else if (a === 'print-grid') printGrid();
             else if (a === 'print-list') printList();
             else if (a === 'undo') undo();
+            else if (a === 'wide') setWide(!root.classList.contains('lk-wide'), true);
             else if (a === 'reset') resetAll();
             else if (a === 'setup') openSetup();
             else if (a === 'years') openYears();
@@ -3838,6 +3842,24 @@
             }, 30);
         }
 
+        /* ----- Full width: the tool fills the browser window; remembered in this browser ----- */
+
+        var WIDE_KEY = 'lockersFullWidth';
+        function wideRemembered() { try { return localStorage.getItem(WIDE_KEY) === '1'; } catch (e) { return false; } }
+        function setWide(on, remember) {
+            root.classList.toggle('lk-wide', on);
+            document.documentElement.classList.toggle('lk-wide-page', !!document.querySelector('.lockers.lk-wide'));
+            Array.prototype.forEach.call(root.querySelectorAll('[data-action="wide"]'), function (b) {
+                b.setAttribute('aria-pressed', on ? 'true' : 'false');
+                b.innerHTML = icon(on ? 'shrink' : 'expand') + (on ? 'Normal width' : 'Full width');
+                b.title = on ? 'Back to the normal page width' : 'Use the whole browser window for the lockers';
+            });
+            if (remember) {
+                try { localStorage.setItem(WIDE_KEY, on ? '1' : '0'); } catch (e) { /* storage blocked */ }
+                setStatus(on ? 'Full width: the lockers use the whole window. Press Normal width to go back.' : 'Back to the normal page width.');
+            }
+        }
+
         /* ----- Simple / Full controls (see ClassroomControls) ----- */
 
         function attachControls() {
@@ -3858,7 +3880,8 @@
                 '<label class="cc-find">' + icon('search') +
                 '<input type="search" data-cc-find placeholder="Find…" aria-label="Find a student or locker"></label>' +
                 b('import-json', 'lk-btn-file', 'folder', 'Open') + b('export-json', 'lk-btn-file', 'download', 'Save') +
-                b('undo', 'lk-btn-grey', 'undo', 'Undo') + '</div>';
+                b('undo', 'lk-btn-grey', 'undo', 'Undo') +
+                b('wide', 'lk-btn-grey', 'expand', 'Full width', ' aria-pressed="false"') + '</div>';
             var cc = window.ClassroomControls.attach({
                 root: root, tool: 'lockers', setting: cfg.controls,
                 toolbar: root.querySelector('.lk-toolbar'),
@@ -3891,6 +3914,7 @@
         render();
         updateUndo();
         attachControls();
+        setWide(wideRemembered(), false);
     }
 
     function init() {
