@@ -249,14 +249,31 @@ brackets. Banks in an area sit side by side, like the real lockers.
   **Start**).
 
 * You don't have to type it. Press the **⚙** button on a bank to change its
-  name, height, direction, start corner and area. Typing an area name there
-  moves the bank into that area.
+  name, locker numbers, height, direction, start corner and area. Typing an
+  area name there moves the bank into that area.
 
 .. figure:: images/lockers/lockers_bank_settings.png
-   :alt: The ⚙ panel for bank A3, which starts at the right-hand end (111 is bottom right)
+   :alt: The ⚙ panel for bank A3: its name, locker numbers 111-118, height, direction, start corner, area and year levels
    :width: 70%
 
-   The ⚙ panel for bank A3, which starts at the right-hand end (111 is bottom right).
+   The ⚙ panel for bank A3 (lockers 111–118), which starts at the right-hand end, so 111 is top right.
+
+Changing a bank's locker numbers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The **Lockers** box in a bank's **⚙** panel holds its numbers in order, e.g.
+``550-544``. Change them and press **Enter**:
+
+* ``549-544`` drops locker 550 and keeps the bank counting down from 549.
+* ``101-110, 115`` adds locker 115 to the end of the bank.
+* A range can count up (``101-110``) or down (``550-544``), and single lockers
+  are separated by commas.
+
+Lockers that stay keep their students, combinations and year levels. If a
+locker you remove has a student in it, you're asked first, and the student
+goes back on the *No locker* list. A typing mistake, or a locker that is
+already in another bank, shows a message and changes nothing. **Undo** takes
+back the change.
 
 
 Removing lockers

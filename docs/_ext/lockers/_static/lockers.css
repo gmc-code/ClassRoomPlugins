@@ -334,3 +334,6 @@ html.lk-wide-page, html.lk-wide-page body { overflow: hidden; }
 .lockers.lk-wide > * { flex: none; }
 .lockers.lk-wide > .lk-body { flex: 1 1 auto; max-height: none; min-height: 300px; }
 @media print { .lockers.lk-wide { position: static; } }
+
+/* ⚙ Lockers: the bank's numbers */
+.lockers .lk-bs-spec input { width: 16em; max-width: 100%; font-family: ui-monospace, Consolas, monospace; }

@@ -18,10 +18,13 @@ import shutil
 import sys
 from pathlib import Path
 
+# Set to True to always skip the "Delete these? (y/n)" confirmation prompt
+SKIP_CONFIRMATION = True
+
 
 def main():
     args = [a for a in sys.argv[1:] if a not in ("-y", "--yes")]
-    no_prompt = len(args) != len(sys.argv[1:])
+    no_prompt = SKIP_CONFIRMATION or len(args) != len(sys.argv[1:])
 
     script_dir = Path(__file__).resolve().parent
     # Script lives in <project>/ignore/py_tools, so the docs folder is two levels up.

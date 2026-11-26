@@ -2097,6 +2097,8 @@
             var p = make('div', 'lk-bank-settings');
             p.innerHTML =
                 '<label class="lk-bs-opt">Name <input type="text" data-bank-opt="name" data-bank="' + bi + '" value="' + esc(bank.name) + '"></label>' +
+                '<label class="lk-bs-opt lk-bs-spec" title="The locker numbers in this bank, in order: ranges such as 550-544 (counting down) or 101-110, and single lockers, separated by commas. Press Enter to apply.">Lockers ' +
+                '<input type="text" data-bank-opt="spec" data-bank="' + bi + '" value="' + esc(bank.spec || '') + '" spellcheck="false" aria-label="Locker numbers in this bank"></label>' +
                 sel('tiers', 'High', [['', 'Toolbar (' + state.tiers + ')'], [1, '1'], [2, '2'], [3, '3'], [4, '4'], [5, '5'], [6, '6']]) +
                 sel('order', 'Numbers run', [['', 'Toolbar (' + (state.order === 'down' ? 'down' : 'across') + ')'], ['down', 'Down ↓'], ['across', 'Across →']]) +
                 sel('side', 'First locker', [['', 'Toolbar (' + state.side + ')'], ['left', 'Left'], ['right', 'Right']]) +
@@ -2149,6 +2151,7 @@
             if (!bank) return;
             var v = el.value.trim();
             if (key === 'name' && !v) { el.value = bank.name; return; }
+            if (key === 'spec') { changeBankSpec(bank, el, v); return; }
             if (key === 'year' || key === 'yearrow') {
                 if (v === 'mixed') return;
                 var bix = state.banks.indexOf(bank), r = +el.getAttribute('data-row') || 0;
@@ -2173,6 +2176,51 @@
                 rebuildIndex();
             }
             changed();
+        }
+
+        /* ⚙ Lockers: new numbers for one bank, e.g. "550-544" -> "549-544". Lockers that stay keep their
+           students; students in lockers that go are put back on the No locker list (asked first). */
+        function changeBankSpec(bank, el, v) {
+            var bi = state.banks.indexOf(bank);
+            v = v.replace(/\s*,\s*/g, ', ').replace(/\s*-\s*/g, '-');
+            if (v === (bank.spec || '')) { el.value = bank.spec || ''; return; }
+            function refuse(msg) { el.value = bank.spec || ''; setStatus(bank.name + ': ' + msg, true); }
+            if (!v) return refuse('a bank needs at least one locker. To remove the bank, use its × button.');
+            var r = expandSpec(v);
+            if (r.error) return refuse(r.error + '. Nothing was changed.');
+            var seen = {}, dupes = [], clash = [];
+            r.ids.forEach(function (id) {
+                var k = id.toLowerCase();
+                if (seen[k]) dupes.push(id);
+                seen[k] = true;
+                var at = lockerIndex[k];
+                if (at && at.bank !== bi) clash.push(id + ' (in ' + state.banks[at.bank].name + ')');
+            });
+            if (dupes.length) return refuse('locker ' + dupes.slice(0, 5).join(', ') + ' is listed twice. Nothing was changed.');
+            if (clash.length) return refuse('locker ' + clash.slice(0, 4).join(', ') + (clash.length > 4 ? ' …' : '') + ' is already in another bank. Nothing was changed.');
+            var old = state._bankIds[bi] || [];
+            var gone = old.filter(function (id) { return !seen[id.toLowerCase()]; });
+            var losing = gone.filter(function (id) { return state.assign[id]; }).map(function (id) {
+                var st = studentById(state.assign[id]);
+                return id + (st ? ' (' + fullName(st) + ')' : '');
+            });
+            if (losing.length && !window.confirm('Removing ' + (losing.length === 1 ? 'locker ' : 'lockers ') + losing.slice(0, 6).join(', ') +
+                (losing.length > 6 ? ' and ' + (losing.length - 6) + ' more' : '') + ' from ' + bank.name + '. ' +
+                (losing.length === 1 ? 'That student goes' : 'Those students go') + ' back on the No locker list. (Undo brings them back.) Continue?')) {
+                el.value = bank.spec || '';
+                return;
+            }
+            pushUndo();
+            bank.spec = v;
+            openBank = bi;
+            rebuildIndex();
+            changed();
+            var added = r.ids.filter(function (id) { return !old.some(function (o) { return o.toLowerCase() === id.toLowerCase(); }); });
+            var msg = bank.name + ' now has ' + r.ids.length + ' locker' + (r.ids.length === 1 ? '' : 's') + ' (' + v + ').';
+            if (gone.length) msg += ' Removed: ' + gone.slice(0, 8).join(', ') + (gone.length > 8 ? ' …' : '') + '.';
+            if (added.length) msg += ' Added: ' + added.slice(0, 8).join(', ') + (added.length > 8 ? ' …' : '') + '.';
+            if (losing.length) msg += ' ' + losing.length + ' student' + (losing.length === 1 ? ' is' : 's are') + ' back on the No locker list.';
+            setStatus(msg);
         }
 
         function gridStyle(grid, lay, side) {
