@@ -1356,7 +1356,7 @@
 
         function newStudent(first, surname, homeroom, n, extra, year, combo) {
             var hr = parseHomeroom(homeroom, year);
-            return {
+            var st = {
                 combo: normCombo(combo),
                 year: hr.year,
                 extra: cleanExtra(extra),
@@ -1365,6 +1365,15 @@
                 surname: clean(surname) || String(n + 1),
                 homeroom: hr.room
             };
+            if (clean(homeroom)) st.tg = clean(homeroom);   /* the tutor group exactly as imported, e.g. "7C" */
+            return st;
+        }
+
+        /* Tutor group for exports: as imported; for older data, year + a letter-only room ("7" + "C" -> "7C") */
+        function tutorGroup(st) {
+            if (st.tg) return st.tg;
+            var room = st.homeroom || '';
+            return st.year && /^[A-Za-z]{1,2}$/.test(room) ? st.year + room : room;
         }
 
         function cleanExtra(e) {
@@ -1611,6 +1620,7 @@
                 var st = { id: clean(s.id) || 's-imp-' + i, firstName: clean(s.firstName) || 'Student', surname: clean(s.surname),
                     year: hr.year, homeroom: hr.room, extra: cleanExtra(s.extra) };
                 if (normCombo(s.combo)) st.combo = normCombo(s.combo);
+                if (clean(s.tg)) st.tg = clean(s.tg);
                 return st;
             });
             state.assign = {};
@@ -3011,6 +3021,7 @@
                     var changedAny = false;
                     var hr = parseHomeroom(p.homeroom, p.year);
                     if (hr.room && hr.room !== s.homeroom) { s.homeroom = hr.room; changedAny = true; }
+                    if (clean(p.homeroom) && clean(p.homeroom) !== s.tg) { s.tg = clean(p.homeroom); changedAny = true; }
                     if (hr.year && hr.year !== s.year) { s.year = hr.year; changedAny = true; }
                     s.extra = s.extra || {};
                     Object.keys(p.extra).forEach(function (k) {
@@ -3093,6 +3104,61 @@
             return rows;
         }
 
+        /* School system list, one row per allocated locker:
+           Locker ID;Location / room;Surname, firstname;Tutor group
+           Location / room is the bank's area (or its name when it has no area), or always the bank's name. */
+        function schoolRows(o) {
+            var list = [];
+            state._bankIds.forEach(function (ids, bi) {
+                var bank = state.banks[bi];
+                var where = o.location === 'bank' ? bank.name : (bank.area || bank.name);
+                ids.forEach(function (id) {
+                    if (state.out[id] || !state.assign[id]) return;
+                    var st = studentById(state.assign[id]);
+                    if (st) list.push({ id: id, where: where, st: st });
+                });
+            });
+            if (o.sort === 'surname') list.sort(function (a, b) { return bySurname(a.st, b.st); });
+            var rows = [['Locker ID', 'Location / room', 'Surname, firstname', 'Tutor group']];
+            list.forEach(function (r) {
+                var name = [r.st.surname, r.st.firstName].filter(Boolean).join(', ');
+                rows.push([r.id, r.where, name, tutorGroup(r.st)]);
+            });
+            return rows;
+        }
+
+        /* rows -> text with ; between columns (a value holding ; " or a line break is quoted) */
+        function semicolonText(rows) {
+            return rows.map(function (r) {
+                return r.map(function (v) {
+                    v = String(v == null ? '' : v);
+                    return /[;"\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+                }).join(';');
+            }).join('\r\n');
+        }
+
+        /* Copy text to the clipboard; falls back to a hidden text box where the Clipboard API is blocked */
+        function copyText(text) {
+            function fallback() {
+                return new Promise(function (resolve, reject) {
+                    var ta = document.createElement('textarea');
+                    ta.value = text;
+                    ta.setAttribute('readonly', '');
+                    ta.style.cssText = 'position:fixed;top:-1000px;left:-1000px;opacity:0';
+                    (modal || document.body).appendChild(ta);
+                    ta.select();
+                    var ok = false;
+                    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+                    ta.remove();
+                    if (ok) resolve(); else reject(new Error('This browser would not copy. Download the file instead.'));
+                });
+            }
+            if (navigator.clipboard && navigator.clipboard.writeText && window.isSecureContext !== false) {
+                return navigator.clipboard.writeText(text).catch(fallback);
+            }
+            return fallback();
+        }
+
         /* Simple list for school systems: Surname Name | First Name | Year Level | Locker number */
         function simpleRows(o) {
             var list = state.students.filter(function (s) { return o.noLocker || lockerOf(s.id); });
@@ -3136,6 +3202,13 @@
                     });
                 });
             }
+            if (format === 'semicolon') {
+                /* the school-system list: semicolons, UTF-8 without a BOM so the first heading reads cleanly */
+                var sc = semicolonText(rows);
+                return saveFile(name + '.csv', 'CSV file', 'text/csv', '.csv', function () {
+                    return Promise.resolve(new Blob([sc + '\r\n'], { type: 'text/csv' }));
+                });
+            }
             var text = rows.map(function (r) { return r.map(csvCell).join(','); }).join('\r\n');
             /* BOM so Excel opens accented names correctly */
             return saveFile(name + '.csv', 'CSV file', 'text/csv', '.csv', function () {
@@ -3148,7 +3221,8 @@
             var o = state.display.exportPrefs || {};
             o = { layout: o.layout || 'simple', format: o.format || 'xlsx', yearWord: !!o.yearWord,
                 noLocker: o.noLocker !== false, sort: o.sort || 'surname',
-                combo: o.combo != null ? !!o.combo : comboCount() > 0 };
+                combo: o.combo != null ? !!o.combo : comboCount() > 0,
+                location: o.location === 'bank' ? 'bank' : 'area', schoolSort: o.schoolSort === 'surname' ? 'surname' : 'locker' };
             function radio(name, value, label, cur) {
                 return '<label class="lk-check-row"><input type="radio" name="lk-x-' + name + '" value="' + value + '"' + (cur === value ? ' checked' : '') + '> <span>' + label + '</span></label>';
             }
@@ -3156,6 +3230,16 @@
                 '<div class="lk-x-group"><b>Columns</b>' +
                 radio('layout', 'simple', 'Simple list: <code>Surname Name</code>, <code>First Name</code>, <code>Year Level</code>, <code>Locker number</code> (and <code>Locker Combo</code>)', o.layout) +
                 radio('layout', 'full', 'Full locker list: every locker with bank, combination, name, year, homeroom, other details and status', o.layout) +
+                radio('layout', 'school', 'School system list: <code>Locker ID;Location / room;Surname, firstname;Tutor group</code>, one line per allocated locker', o.layout) +
+                '</div>' +
+                '<div class="lk-x-group lk-x-school"><b>School system list options</b>' +
+                '<label class="lk-check-row">Location / room <select data-m="location">' +
+                '<option value="area">Area (bank name if the bank has no area)</option><option value="bank">Bank name</option></select></label>' +
+                '<label class="lk-check-row">Order by <select data-m="schoolSort"><option value="locker">Locker number</option><option value="surname">Surname</option></select></label>' +
+                '<div class="lk-x-preview" data-m="preview" aria-label="First lines of the list"></div>' +
+                '<div class="lk-x-copyrow"><button type="button" class="lk-btn lk-btn-teal" data-m="copy" title="Copy the lines without the heading row, ready to paste into the school system">' +
+                icon('paste') + 'Copy without headings</button><span class="lk-x-copied" data-m="copied" role="status"></span></div>' +
+                '<p class="lk-help">Download saves a <code>.csv</code> file with semicolons between the columns and a heading row.</p>' +
                 '</div>' +
                 '<div class="lk-x-group lk-x-simple"><b>Simple list options</b>' +
                 '<label class="lk-check-row">Year Level as <select data-m="yearWord"><option value="0">7</option><option value="1">Year 7</option></select></label>' +
@@ -3163,25 +3247,21 @@
                 '<label class="lk-check-row"><input type="checkbox" data-m="noLocker"> Include students without a locker (Locker number left blank)</label>' +
                 '<label class="lk-check-row"><input type="checkbox" data-m="xcombo"> <span>Add a <code>Locker Combo</code> column</span></label>' +
                 '</div>' +
-                '<div class="lk-x-group"><b>File type</b>' +
+                '<div class="lk-x-group lk-x-filetype"><b>File type</b>' +
                 radio('format', 'xlsx', 'Excel (.xlsx)', o.format) +
                 radio('format', 'csv', 'CSV (.csv), opens in Excel and most school systems', o.format) +
                 '</div>',
                 'Download', function () {
                     var get = function (n) { var el = mui.body.querySelector('input[name="lk-x-' + n + '"]:checked'); return el ? el.value : ''; };
-                    var c = {
-                        layout: get('layout'), format: get('format'),
-                        yearWord: mui.body.querySelector('[data-m="yearWord"]').value === '1',
-                        sort: mui.body.querySelector('[data-m="sort"]').value,
-                        noLocker: mui.body.querySelector('[data-m="noLocker"]').checked,
-                        combo: mui.body.querySelector('[data-m="xcombo"]').checked
-                    };
+                    var c = choices();
                     state.display.exportPrefs = c;
                     save();
-                    var rows = c.layout === 'full' ? fullRows() : simpleRows(c);
-                    var name = fileSlug(state.title, 'lockers') + (c.layout === 'full' ? '' : '_list');
+                    var school = c.layout === 'school';
+                    var rows = c.layout === 'full' ? fullRows() : school ? schoolRows({ location: c.location, sort: c.schoolSort }) : simpleRows(c);
+                    if (school && rows.length < 2) { mui.msg.textContent = 'No lockers are allocated yet.'; return; }
+                    var name = fileSlug(state.title, 'lockers') + (c.layout === 'full' ? '' : school ? '_allocation' : '_list');
                     mui.ok.disabled = true;
-                    downloadRows(rows, name, c.format).then(function (saved) {
+                    downloadRows(rows, name, school ? 'semicolon' : c.format).then(function (saved) {
                         mui.ok.disabled = false;
                         if (!saved) return;   /* cancelled: leave the dialog open */
                         closeModal();
@@ -3191,15 +3271,53 @@
                         mui.msg.textContent = (err && err.message ? err.message : 'Excel export failed') + ' Try CSV instead.';
                     });
                 });
-            mui.body.querySelector('[data-m="yearWord"]').value = o.yearWord ? '1' : '0';
-            mui.body.querySelector('[data-m="sort"]').value = o.sort;
-            mui.body.querySelector('[data-m="noLocker"]').checked = o.noLocker;
-            mui.body.querySelector('[data-m="xcombo"]').checked = o.combo;
+            function q(m) { return mui.body.querySelector('[data-m="' + m + '"]'); }
+            function choices() {
+                var get = function (n) { var el = mui.body.querySelector('input[name="lk-x-' + n + '"]:checked'); return el ? el.value : ''; };
+                return {
+                    layout: get('layout'), format: get('format'),
+                    yearWord: q('yearWord').value === '1', sort: q('sort').value,
+                    noLocker: q('noLocker').checked, combo: q('xcombo').checked,
+                    location: q('location').value, schoolSort: q('schoolSort').value
+                };
+            }
+            q('yearWord').value = o.yearWord ? '1' : '0';
+            q('sort').value = o.sort;
+            q('noLocker').checked = o.noLocker;
+            q('xcombo').checked = o.combo;
+            q('location').value = o.location;
+            q('schoolSort').value = o.schoolSort;
             function sync() {
-                var simple = mui.body.querySelector('input[name="lk-x-layout"]:checked').value === 'simple';
-                mui.body.querySelector('.lk-x-simple').style.display = simple ? '' : 'none';
+                var layout = mui.body.querySelector('input[name="lk-x-layout"]:checked').value;
+                mui.body.querySelector('.lk-x-simple').style.display = layout === 'simple' ? '' : 'none';
+                mui.body.querySelector('.lk-x-school').style.display = layout === 'school' ? '' : 'none';
+                mui.body.querySelector('.lk-x-filetype').style.display = layout === 'school' ? 'none' : '';
+                q('copied').textContent = '';
+                if (layout === 'school') {
+                    var rows = schoolRows({ location: q('location').value, sort: q('schoolSort').value });
+                    var lines = semicolonText(rows.slice(0, 4)).split('\r\n');
+                    q('preview').textContent = rows.length < 2 ? 'No lockers are allocated yet.'
+                        : lines.join('\n') + (rows.length > 4 ? '\n… ' + (rows.length - 4) + ' more' : '');
+                    q('copy').disabled = rows.length < 2;
+                }
             }
             Array.prototype.forEach.call(mui.body.querySelectorAll('input[name="lk-x-layout"]'), function (r) { r.addEventListener('change', sync); });
+            q('location').addEventListener('change', sync);
+            q('schoolSort').addEventListener('change', sync);
+            q('copy').addEventListener('click', function () {
+                var c = choices();
+                var rows = schoolRows({ location: c.location, sort: c.schoolSort });
+                if (rows.length < 2) return;
+                state.display.exportPrefs = c;
+                save();
+                copyText(semicolonText(rows.slice(1))).then(function () {
+                    var n = rows.length - 1;
+                    q('copied').textContent = 'Copied ' + n + ' line' + (n === 1 ? '' : 's') + '. Paste with Ctrl+V.';
+                    setStatus('Copied ' + n + ' locker allocation' + (n === 1 ? '' : 's') + ' to the clipboard (no headings).');
+                }).catch(function (err) {
+                    q('copied').textContent = err && err.message ? err.message : 'Copying did not work. Download the file instead.';
+                });
+            });
             sync();
         }
 

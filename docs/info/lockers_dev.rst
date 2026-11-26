@@ -250,9 +250,24 @@ Full: ``Locker, Bank, Locker Combo, First Name, Surname, Year, Homeroom,
 <every extra column>, Status``. Status is blank, ``Free``, ``Out of service`` or
 ``No locker``.
 
-Both read back through **Import** (``Surname Name``, ``Locker number`` and
-``Locker Combo`` are recognised column names). The dialog's choices are kept in
-``display.exportPrefs``.
+School system: ``Locker ID;Location / room;Surname, firstname;Tutor group``,
+one row per allocated locker (free and out-of-service lockers are skipped), in
+locker order or by surname. *Location / room* is the bank's ``area``, or its
+``name`` when it has none (``location: "bank"`` always uses the name). The file
+is semicolon separated, UTF-8 **without** a BOM so the first heading is read
+cleanly by school systems; values containing ``;``, ``"`` or a line break are
+quoted. **Copy without headings** writes the same lines minus the heading row
+with ``navigator.clipboard.writeText`` (falling back to ``execCommand('copy')``).
+*Tutor group* comes from ``tutorGroup()``: the student's ``tg``, the homeroom
+text exactly as imported (``parseHomeroom()`` splits ``7B`` into ``year: "7"``
+and ``homeroom: "B"`` for badges, so ``tg`` keeps the original). Students saved
+before ``tg`` existed fall back to year + a letter-only room (``7`` + ``B``), else
+the room.
+
+The simple and full lists read back through **Import** (``Surname Name``,
+``Locker number`` and ``Locker Combo`` are recognised column names). The
+dialog's choices are kept in ``display.exportPrefs`` (``layout``, ``format``,
+``location``, ``schoolSort`` …).
 
 Name matching (Paste)
 ---------------------

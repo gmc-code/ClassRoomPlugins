@@ -763,13 +763,33 @@ with no new window or tab, so pop-up blockers don't get in the way. Choose
      name, year, homeroom, every other detail, status), then students with
      no locker.
 
+   * **School system list**: one line per allocated locker, with semicolons
+     between the columns, in this layout:
+
+     .. code-block:: text
+
+        Locker ID;Location / room;Surname, firstname;Tutor group
+        101;Science block;Smith, Alex;7B
+        102;Science block;Jones, Sam;7A
+
+     Free lockers and lockers that are out of service are left out.
+     *Location / room* is the bank's area, or the bank's name if it has no
+     area; choose **Bank name** to always use the bank's name. Order the
+     lines by locker number or by surname. *Tutor group* is the homeroom
+     exactly as it was in the class list (e.g. *7B*).
+
+     The dialog shows the first few lines. **Copy without headings** puts
+     the lines on the clipboard without the heading row, ready to paste
+     (**Ctrl+V**) into the school system. **Download** saves the same lines
+     as a ``.csv`` file with the heading row.
+
    After **Download**, choose where to save it: in Chrome and Edge a Save As
    box lets you pick the folder and file name; other browsers ask for a name
    and save to Downloads. Press **Cancel** in the Save As box to go back to
    the Export dialog.
 
-   Your choices are remembered for next time, and **Import** can read either
-   file back. Excel files need an internet connection (the same as importing
+   Your choices are remembered for next time, and **Import** can read the
+   simple and full lists back. Excel files need an internet connection (the same as importing
    Excel); CSV always works.
 
    .. figure:: images/lockers/lockers_export.png
