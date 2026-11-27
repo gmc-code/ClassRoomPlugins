@@ -23,7 +23,9 @@ After a bank's ranges, ``| options`` give it its own shape: ``2 high``,
 column a numbered pair, whichever number the bank starts on). ``:start:``, ``:first-row:``,
 ``:tiers:`` and ``:order:`` set the defaults for every bank. In the content,
 ``[Corridor A]`` (or ``area: Corridor A``) starts an area: the banks after it
-are shown side by side under that heading.
+are shown side by side under that heading. A line of ``---`` (or a ``---`` item
+in ``:lockers:``) ends the row of banks: the next bank starts a
+new line on the left.
 
 ``year 7: Corridor A, 201-210`` keeps lockers for a year level (bank or area
 names, ranges or single lockers; ``Corridor A top``, ``Corridor A bottom`` or
@@ -65,6 +67,7 @@ SINGLE_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9./]*$")
 BANK_LINE_RE = re.compile(r"^bank\s*:\s*(.+)$", re.IGNORECASE)
 AREA_LINE_RE = re.compile(r"^(?:area\s*:\s*(.+)|\[(.*)\])$", re.IGNORECASE)
 YEAR_LINE_RE = re.compile(r"^(?:year|yr|y)\s*(\d{1,2})\s*:\s*(.+)$", re.IGNORECASE)
+BREAK_LINE_RE = re.compile(r"^-{3,}$")
 OUT_LINE_RE = re.compile(r"^(?:unavailable|out|broken)\s*:\s*(.+)$", re.IGNORECASE)
 
 
@@ -255,7 +258,16 @@ class LockersDirective(SphinxDirective):
         env.temp_data["lockers_count"] = count + 1
         storage_id = self.options.get("storage-key") or "%s#%d" % (env.docname, count)
 
-        bank_texts = [("", b) for b in self.options.get("lockers", "").split(";") if b.strip()]
+        # (area, bank text, starts a new line); "---" puts the next bank on a new line
+        bank_texts = []
+        brk = False
+        for b in self.options.get("lockers", "").split(";"):
+            b = b.strip()
+            if BREAK_LINE_RE.match(b):
+                brk = True
+            elif b:
+                bank_texts.append(("", b, brk))
+                brk = False
         area = ""
         out_specs = []
         year_specs = []
@@ -279,13 +291,18 @@ class LockersDirective(SphinxDirective):
             line = line.strip()
             if not line or line.startswith("#"):
                 continue
+            if BREAK_LINE_RE.match(line):
+                brk = True
+                continue
             m = AREA_LINE_RE.match(line)
             if m:
                 area = (m.group(1) or m.group(2) or "").strip()
+                brk = False
                 continue
             m = BANK_LINE_RE.match(line)
             if m:
-                bank_texts.append((area, m.group(1)))
+                bank_texts.append((area, m.group(1), brk))
+                brk = False
                 continue
             m = OUT_LINE_RE.match(line)
             if m:
@@ -310,7 +327,7 @@ class LockersDirective(SphinxDirective):
 
         # --- banks ---
         banks, seen, total = [], set(), 0
-        for area_name, text in bank_texts:
+        for area_name, text, new_line in bank_texts:
             try:
                 name, spec, o = _split_bank(text)
                 ids = expand_spec(spec)
@@ -324,6 +341,8 @@ class LockersDirective(SphinxDirective):
             seen.update(i.lower() for i in ids)
             total += len(ids)
             bank = {"name": name or "Bank %d" % (len(banks) + 1), "spec": spec, "area": area_name}
+            if new_line:
+                bank["br"] = True
             bank.update(o)
             banks.append(bank)
         if total > MAX_LOCKERS:

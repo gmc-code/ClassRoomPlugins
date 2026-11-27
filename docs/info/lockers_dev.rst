@@ -113,6 +113,11 @@ Content lines
    Starts an area. The ``bank:`` lines after it belong to it and are shown
    side by side under the heading. ``[]`` ends the area.
 
+``---``
+   Ends the row of banks: the next bank starts a new line on the left (it gets
+   ``"br": true``). In ``:lockers:`` write it as its own item,
+   e.g. ``A: 1-4; ---; B: 5-8``.
+
 ``unavailable: ranges`` (also ``out:`` or ``broken:``)
    Lockers that start out of service.
 
@@ -151,7 +156,9 @@ Bank layout
 ``grid-column`` / ``grid-row`` from its position in the bank, the tiers, the
 order and the bank's start side and row (``tiers: 0`` and blank
 ``order``/``side``/``row`` use the tool-wide setting). Banks in an area are a
-flex row that wraps; 1-high banks take the full width. Print uses the same function. With 1 tier the bank is a
+flex row that wraps; 1-high banks take the full width. A bank with ``br``
+gets a full-width ``.lk-row-break`` element before it (``.lk-prow-break`` in
+Print), so it starts on a new line. Print uses the same function. With 1 tier the bank is a
 wrapping grid instead, with ``direction: rtl`` when it starts on the right.
 
 Limits: 1000 lockers per range, 2000 per tool. Locker numbers are matched
@@ -177,7 +184,8 @@ change, and **Save** writes the same object:
    {
      "title": "Year 7 lockers",
      "banks": [{ "name": "A3", "spec": "543-550", "area": "Corridor A",
-                 "tiers": 2, "order": "", "side": "right", "row": "" }],
+                 "tiers": 2, "order": "", "side": "right", "row": "",
+                 "top": "", "br": false }],
      "tiers": 2,
      "order": "down",
      "side": "left",

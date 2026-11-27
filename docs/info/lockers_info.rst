@@ -254,6 +254,28 @@ brackets. Banks in an area sit side by side, like the real lockers.
   name, locker numbers, height, direction, start corner and area. Typing an
   area name there moves the bank into that area.
 
+Starting a new line of banks
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Banks in an area sit side by side until the screen is full, then wrap. To end
+a row yourself, so the next bank starts on a new line at the left, type a
+line of three dashes, ``---``, before that bank:
+
+.. code-block:: text
+
+   [Corridor A]
+   A1: 101-104 | 2 high
+   A2: 105-108 | 2 high
+   ---
+   A3: 109-112 | 2 high
+   A4: 113-116 | 2 high
+
+A1 and A2 sit side by side, and A3 and A4 start a new line underneath, the
+way they face each other in the corridor. You can also press a bank's **⚙**
+and tick **Start a new line**. The line break is kept in **Print** and
+**Print Screen** too. A new area always starts on a new line, so you don't
+need ``---`` before an ``[Area]`` heading.
+
 .. figure:: images/lockers/lockers_bank_settings.png
    :alt: The ⚙ panel for bank A3: its name, locker numbers 111-118, height, direction, start corner, area and year levels
    :width: 70%

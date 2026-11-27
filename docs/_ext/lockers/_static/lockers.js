@@ -854,6 +854,7 @@
         '.lk-parea{font-size:16px;margin:10px 0 4px;border-bottom:1px solid #000}' +
         '.lk-pareabanks{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:flex-start}' +
         '.lk-pbank{break-inside:avoid;margin-bottom:8px}' +
+        '.lk-prow-break{flex-basis:100%;height:0}' +
         '.lk-pbank h3{font-size:12px;margin:0 0 3px}' +
         '.lk-pgrid{display:grid;gap:4px}' +
         '.lk-pcell{direction:ltr;border:1px solid #000;border-radius:3px;padding:2px 4px;min-height:44px;font-size:11px;break-inside:avoid}' +
@@ -1029,12 +1030,13 @@
 
     /* Text in the Set Up Lockers box: one bank per line, "Name: ranges" or just "ranges". */
     function parseBankText(text) {
-        var banks = [], errors = [], seen = {}, dupes = [], total = 0, area = '';
+        var banks = [], errors = [], seen = {}, dupes = [], total = 0, area = '', br = false;
         String(text || '').split(/\r?\n|;/).forEach(function (line, i) {
             line = line.trim();
             if (!line || line.charAt(0) === '#') return;
+            if (/^-{3,}$/.test(line)) { br = true; return; }   /* "---": the next bank starts a new line on the left */
             var am = line.match(/^\[(.*)\]$/);
-            if (am) { area = am[1].trim(); return; }
+            if (am) { area = am[1].trim(); br = false; return; }
             var opts = '', bar = line.indexOf('|');
             if (bar >= 0) { opts = line.slice(bar + 1).trim().toLowerCase(); line = line.slice(0, bar).trim(); }
             var name = '', spec = line, colon = line.indexOf(':');
@@ -1054,7 +1056,8 @@
                 total++;
             });
             banks.push({ name: name || 'Bank ' + (banks.length + 1), spec: spec, ids: ids, side: o.side, row: o.row,
-                tiers: o.tiers, order: o.order, top: o.top, area: area });
+                tiers: o.tiers, order: o.order, top: o.top, area: area, br: br });
+            br = false;
         });
         if (dupes.length) errors.push('Listed more than once (only the first is used): ' + dupes.slice(0, 8).join(', ') + (dupes.length > 8 ? '…' : ''));
         if (total >= MAX_LOCKERS) errors.push('At most ' + MAX_LOCKERS + ' lockers; the rest are left out.');
@@ -1086,7 +1089,7 @@
             tiers: t >= 1 && t <= 6 ? t : 0,
             order: b.order === 'down' || b.order === 'across' ? b.order : '',
             top: b.top === 'odd' || b.top === 'even' ? b.top : '',
-            area: clean(b.area) };
+            area: clean(b.area), br: !!b.br };
     }
 
     /* Grid position of locker i of n. Numbers run down each column (or across each row),
@@ -1134,6 +1137,7 @@
         var lines = [], area = '';
         banks.forEach(function (b) {
             if ((b.area || '') !== area) { area = b.area || ''; lines.push('[' + area + ']'); }
+            else if (b.br && lines.length) lines.push('---');
             var opts = [b.tiers ? b.tiers + ' high' : '', b.order, b.side, b.row, b.top ? b.top + '-top' : ''].filter(Boolean).join(' ');
             lines.push((b.name ? b.name + ': ' : '') + b.spec + (opts ? ' | ' + opts : ''));
         });
@@ -2027,6 +2031,7 @@
                 var used = 0;
                 ids.forEach(function (id) { if (state.assign[id]) used++; });
                 var tiers = bankTiers(bank), side = bankSide(bank), row = bankRow(bank), ord = bankOrder(bank);
+                if (bank.br && areaBox.children.length) areaBox.appendChild(make('div', 'lk-row-break'));
                 var box = make('div', 'lk-bank' + (tiers === 1 ? ' lk-bank-wide' : ''));
                 var head = make('div', 'lk-bank-head');
                 var title = make('div', 'lk-bank-title');
@@ -2135,6 +2140,7 @@
                         '<label class="lk-bs-opt" title="Line up a 2-high bank by number: odd (or even) numbers always in the top row, each column a pair, wherever the numbers start.">')
                     : '') +
                 '<label class="lk-bs-opt">Area <input type="text" data-bank-opt="area" data-bank="' + bi + '" value="' + esc(bank.area || '') + '" placeholder="none"></label>' +
+                '<label class="lk-bs-opt" title="End the row of banks here: this bank starts a new line on the left (--- in Lockers)"><input type="checkbox" data-bank-opt="br" data-bank="' + bi + '"' + (bank.br ? ' checked' : '') + '> Start a new line</label>' +
                 bankYearSelect(bi);
             return p;
         }
@@ -2180,6 +2186,7 @@
             if (!key) return;
             var bank = state.banks[+el.getAttribute('data-bank')];
             if (!bank) return;
+            if (key === 'br') { pushUndo(); bank.br = el.checked; changed(); return; }
             var v = el.value.trim();
             if (key === 'name' && !v) { el.value = bank.name; return; }
             if (key === 'spec') { changeBankSpec(bank, el, v); return; }
@@ -3418,6 +3425,7 @@
                     if (bi) body += '</div>';
                     body += (bank.area ? '<h2 class="lk-parea">' + esc(bank.area) + '</h2>' : '') + '<div class="lk-pareabanks">';
                 }
+                else if (bank.br) body += '<div class="lk-prow-break"></div>';
                 var lay = bankLayout(ids.length, bankTiers(bank), bankOrder(bank), side, bankRow(bank), ids, bank.top);
                 var style = lay.pos ? 'grid-template-columns:repeat(' + lay.cols + ',27mm);grid-template-rows:repeat(' + lay.rows + ',auto)'
                     : 'grid-template-columns:repeat(' + Math.min(9, ids.length) + ',27mm)' + (side === 'right' ? ';direction:rtl' : '');
