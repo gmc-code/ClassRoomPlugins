@@ -3,6 +3,7 @@
    copied into each directive's .js so every directive still works on its own; whichever loads first
    defines window.ClassroomPaste and the others reuse it. Keep the copies identical.
 
+
    Understands:
    - columns copied from Excel / Google Sheets / Word tables (tab separated), CSV or semicolon text,
      or one student per line;
