@@ -332,8 +332,14 @@ right-hand end and the numbers go up towards the left, press the bank's **⚙**
 and set **First locker** to *Right*. **First row** set to *Bottom* is for
 banks whose first locker is in the bottom row.
 
-The toolbar's **Tiers**, **Run**, **Start** and **Top / Bottom**
-set every bank at once, replacing any bank's own setting.
+The toolbar's **Tiers**, **Run**, **Start** and **Top / Bottom** change every
+bank that follows the toolbar (its **⚙** setting says *Toolbar*). A bank you
+have set yourself in **⚙**, such as one with **First locker** set to *Right*,
+keeps its setting, and a message says how many banks kept theirs.
+
+To change every bank, including the ones you set yourself, tick
+**Override banks** first, then press the toolbar button. Each bank then goes
+back to following the toolbar. **Undo** puts the banks' own settings back.
 
 You can also type it in **Lockers** after a ``|``:
 

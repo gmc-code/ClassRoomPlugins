@@ -3,7 +3,6 @@
    copied into each directive's .js so every directive still works on its own; whichever loads first
    defines window.ClassroomPaste and the others reuse it. Keep the copies identical.
 
-
    Understands:
    - columns copied from Excel / Google Sheets / Word tables (tab separated), CSV or semicolon text,
      or one student per line;
@@ -1802,6 +1801,7 @@
                 '<button type="button" class="lk-btn lk-btn-seg" data-action="row" data-row="top" title="First locker in the top row">Top</button>' +
                 '<button type="button" class="lk-btn lk-btn-seg" data-action="row" data-row="bottom" title="First locker in the bottom row">Bottom</button>' +
                 '</div>' +
+                '<label class="lk-checkbox-label" title="Tick to make Tiers, Run, Start and Top/Bottom apply to every bank, replacing any bank you have set in its ⚙ settings. Untick to change only the banks that follow the toolbar."><input type="checkbox" class="lk-checkbox" data-role="toggle-override"> Override banks</label>' +
                 '<label class="lk-checkbox-label" title="Which detail shows on each locker: year (Y7), homeroom (H13), both (7 H13), or another column such as TG">Badge: ' +
                 '<select class="lk-select" data-role="badge-field"></select></label>' +
                 '<label class="lk-checkbox-label" title="Show surnames as an initial only, e.g. Alex S."><input type="checkbox" class="lk-checkbox" data-role="toggle-initial"> Initial</label>' +
@@ -1836,7 +1836,7 @@
                 '<div class="lk-canvas" data-role="canvas"></div>' +
                 '</div>';
 
-            ['title', 'file', 'json-file', 'undo', 'keep', 'tiers', 'order', 'side', 'row', 'badge-field', 'toggle-initial', 'toggle-colours', 'toggle-combo', 'search',
+            ['title', 'file', 'json-file', 'undo', 'keep', 'tiers', 'order', 'side', 'row', 'badge-field', 'toggle-override', 'toggle-initial', 'toggle-colours', 'toggle-combo', 'search',
                 'entry-locker', 'entry-name', 'entry-combo', 'suggest', 'entry-current', 'entry-out', 'status', 'stats', 'count', 'pool', 'canvas'
             ].forEach(function (r) { ui[r] = root.querySelector('[data-role="' + r + '"]'); });
 
@@ -2612,14 +2612,27 @@
             else if (a === 'auto') autoAllocate(b.getAttribute('data-mode'));
             else if (a === 'clear-all') clearAll();
             else if (a === 'remove-year') removeYear(b.getAttribute('data-year'));
-            else if (a === 'tiers') { pushUndo(); state.tiers = +b.getAttribute('data-n'); state.banks.forEach(function (k) { k.tiers = 0; }); changed(); }
-            else if (a === 'order') { pushUndo(); state.order = b.getAttribute('data-order'); state.banks.forEach(function (k) { k.order = ''; }); changed(); }
-            else if (a === 'side') { pushUndo(); state.side = b.getAttribute('data-side'); state.banks.forEach(function (k) { k.side = ''; }); changed(); }
-            else if (a === 'row') { { pushUndo(); state.row = b.getAttribute('data-row'); state.banks.forEach(function (k) { k.row = ''; }); changed(); } }
+            else if (a === 'tiers') setLayoutDefault('tiers', +b.getAttribute('data-n'), 0);
+            else if (a === 'order') setLayoutDefault('order', b.getAttribute('data-order'), '');
+            else if (a === 'side') setLayoutDefault('side', b.getAttribute('data-side'), '');
+            else if (a === 'row') setLayoutDefault('row', b.getAttribute('data-row'), '');
             else if (a === 'bank-settings') { var k = +b.getAttribute('data-bank'); openBank = openBank === k ? -1 : k; render(); }
             else if (a === 'bank-remove' || a === 'bank-empty') bankAction(a, +b.getAttribute('data-bank'));
             else if (a === 'entry-clear') { emptyLocker(state.sel); ui['entry-name'].focus(); }
             else if (a === 'entry-out') { toggleOut(state.sel); ui['entry-name'].focus(); }
+        }
+
+        /* Toolbar Tiers / Run / Start / Top-Bottom. Banks with their own
+           setting (chosen in ⚙) keep it, unless "Override banks" is ticked. */
+        function setLayoutDefault(key, v, blank) {
+            var over = ui['toggle-override'] && ui['toggle-override'].checked;
+            var kept = over ? 0 : state.banks.filter(function (k) { return k[key] && k[key] !== v; }).length;
+            if (state[key] === v && !over) return;
+            pushUndo();
+            state[key] = v;
+            if (over) state.banks.forEach(function (k) { k[key] = blank; });
+            changed();
+            if (kept) setStatus(kept + ' bank' + (kept === 1 ? ' keeps its' : 's keep their') + ' own setting. Tick Override banks to change ' + (kept === 1 ? 'it' : 'them') + ' too.');
         }
 
         function bankAction(a, bi) {
@@ -2628,11 +2641,9 @@
             if (a === 'bank-side') {
                 pushUndo();
                 bank.side = bankSide(bank) === 'right' ? 'left' : 'right';
-                if (bank.side === state.side) bank.side = '';
             } else if (a === 'bank-row') {
                 pushUndo();
                 bank.row = bankRow(bank) === 'bottom' ? 'top' : 'bottom';
-                if (bank.row === state.row) bank.row = '';
             } else if (a === 'bank-empty') {
                 var inBank = (state._bankIds[bi] || []).filter(function (id) { return state.assign[id]; });
                 if (!inBank.length) return;
