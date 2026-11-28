@@ -153,9 +153,11 @@ The buttons are coloured by what they do:
 * **Lighter blue**: files (**Open**, **Save**, **Export**).
 * **Teal**: printing (**Print**, **Map**, **List**).
 * **Grey**: **Undo**, **Reset** and **Full width**.
-* **Amber** and **purple**: setting up and allocating (**Lockers**,
-  **Year levels**, **By Student**, **Paste lockers**, **Combos**, **A–Z**, **Random**, **Y9 top · Y7 bottom** …), and **red**
-  for **Clear** and **Remove: Y9 / Y12 / No locker**.
+* **Orange**: **Set up** and **Enter** (**Lockers**, **Year levels**,
+  **By Student**, **Paste lockers**, **Combos**).
+* **Purple**: **Allocate** (**A–Z**, **Homeroom**, **Random**,
+  **Y9 top · Y7 bottom**).
+* **Red**: **Clear** and **Remove: Y9 / Y12 / No locker**.
 
 Hover over any button to see what it does.
 

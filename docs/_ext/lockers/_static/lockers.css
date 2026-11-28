@@ -53,6 +53,11 @@
 .lk-btn-grey { background: #475569; }   .lk-btn-grey:hover { background: #334155; }
 .lk-btn-amber { background: #d97706; }  .lk-btn-amber:hover { background: #b45309; }
 .lk-btn-purple { background: #7c3aed; } .lk-btn-purple:hover { background: #6d28d9; }
+/* orange hues: Enter (By Student, Paste lockers, Combos), beside amber Set up */
+.lk-btn-orange { background: #ea580c; } .lk-btn-orange:hover { background: #c2410c; }
+/* purple hues: Allocate (A–Z and Homeroom purple, Random plum, Y9 top · Y7 bottom deep violet) */
+.lk-btn-plum { background: #9333ea; }   .lk-btn-plum:hover { background: #7e22ce; }
+.lk-btn-violet { background: #5b21b6; } .lk-btn-violet:hover { background: #4c1d95; }
 .lk-btn-teal { background: #0d9488; }   .lk-btn-teal:hover { background: #0f766e; }
 /* data buttons, apart from printing (teal): Import / Add in blue, Open / Save / Export in a lighter sky blue */
 .lk-btn-data { background: #2563eb; }   .lk-btn-data:hover { background: #1d4ed8; }

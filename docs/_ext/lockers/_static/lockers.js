@@ -1824,17 +1824,17 @@
                 btn('years', 'lk-btn-amber', 'rows', 'Year levels', ' title="Keep lockers for a year level, e.g. Year 7: 101-160. A–Z, Homeroom and Random then only put Year 7 students in them."') +
                 '<span class="lk-sep"></span>' +
                 '<span class="lk-label">Enter:</span>' +
-                btn('by-student', 'lk-btn-purple', 'keyboard', 'By Student', ' title="Type each student\'s locker number down a list"') +
-                btn('paste', 'lk-btn-purple', 'paste', 'Paste lockers', ' title="Paste locker numbers and combinations for students already on the list, e.g. from Excel"') +
-                btn('combos', 'lk-btn-purple', 'keyboard', 'Combos', ' title="Type each student\'s padlock combination down a list"') +
+                btn('by-student', 'lk-btn-orange', 'keyboard', 'By Student', ' title="Type each student\'s locker number down a list"') +
+                btn('paste', 'lk-btn-orange', 'paste', 'Paste lockers', ' title="Paste locker numbers and combinations for students already on the list, e.g. from Excel"') +
+                btn('combos', 'lk-btn-orange', 'keyboard', 'Combos', ' title="Type each student\'s padlock combination down a list"') +
                 '</div>' +
                 /* Row 3: automatic allocation and end-of-year removal */
                 '<div class="lk-toolbar-row">' +
                 '<span class="lk-label">Allocate:</span>' +
                 btn('auto', 'lk-btn-purple', 'az', 'A–Z', ' data-mode="AZ" title="Fill free lockers in surname order"') +
                 btn('auto', 'lk-btn-purple', 'rows', 'Homeroom', ' data-mode="HOMEROOM" title="Fill free lockers group by group, using whatever the Badge shows"') +
-                btn('auto', 'lk-btn-amber', 'random', 'Random', ' data-mode="RANDOM" title="Fill free lockers in random order"') +
-                btn('tiered', 'lk-btn-purple', 'rows', 'Y9 top · Y7 bottom', ' data-role="tiered" title="Year 9 in the top lockers, Year 7 in the bottom lockers, Year 8 in the rest. Each tutor group stays in the bank named after it."') +
+                btn('auto', 'lk-btn-plum', 'random', 'Random', ' data-mode="RANDOM" title="Fill free lockers in random order"') +
+                btn('tiered', 'lk-btn-violet', 'rows', 'Y9 top · Y7 bottom', ' data-role="tiered" title="Year 9 in the top lockers, Year 7 in the bottom lockers, Year 8 in the rest. Each tutor group stays in the bank named after it."') +
                 '<label class="lk-checkbox-label" title="Keep existing: ticked = only students without a locker are allocated, into free lockers; unticked = everyone is reallocated">' +
                 '<input type="checkbox" class="lk-checkbox" data-role="keep"> Keep</label>' +
                 btn('clear-all', 'lk-btn-red', 'trash', 'Clear', ' title="Take every student out of their locker"') +
@@ -4184,7 +4184,7 @@
                     b('setup', 'lk-btn-amber', 'locker', 'Set up lockers', ' title="Type the locker numbers, banks and areas"')) +
                 step(3, 'Give out lockers', '#7c3aed',
                     b('auto', 'lk-btn-purple', 'az', 'A–Z', ' data-mode="AZ" title="Give free lockers out in surname order. Students who already have a locker keep it."') +
-                    b('auto', 'lk-btn-amber', 'random', 'Random', ' data-mode="RANDOM" title="Give free lockers out in random order. Students who already have a locker keep it."')) +
+                    b('auto', 'lk-btn-plum', 'random', 'Random', ' data-mode="RANDOM" title="Give free lockers out in random order. Students who already have a locker keep it."')) +
                 step(4, 'Print', '#059669',
                     b('print-grid', 'lk-btn-teal', 'print', 'Map') + b('print-list', 'lk-btn-teal', 'list', 'List')) +
                 '<span class="cc-spacer"></span><div class="cc-end">' +
