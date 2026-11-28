@@ -2032,7 +2032,7 @@
                 ids.forEach(function (id) { if (state.assign[id]) used++; });
                 var tiers = bankTiers(bank), side = bankSide(bank), row = bankRow(bank), ord = bankOrder(bank);
                 if (bank.br && areaBox.children.length) areaBox.appendChild(make('div', 'lk-row-break'));
-                var box = make('div', 'lk-bank' + (tiers === 1 ? ' lk-bank-wide' : ''));
+                var box = make('div', 'lk-bank');
                 var head = make('div', 'lk-bank-head');
                 var title = make('div', 'lk-bank-title');
                 title.appendChild(make('span', 'lk-bank-name', bank.name));
@@ -2263,7 +2263,7 @@
 
         function gridStyle(grid, lay, side) {
             if (!lay.pos) {
-                grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(var(--lk-cell-w), 1fr))';
+                /* 1-high: one row as wide as its lockers, wrapping only when it runs out of room */
                 grid.classList.add('lk-grid-wrapfree');
                 grid.classList.toggle('lk-rtl', side === 'right');
                 return;

@@ -156,10 +156,11 @@ Bank layout
 ``grid-column`` / ``grid-row`` from its position in the bank, the tiers, the
 order and the bank's start side and row (``tiers: 0`` and blank
 ``order``/``side``/``row`` use the tool-wide setting). Banks in an area are a
-flex row that wraps; 1-high banks take the full width. A bank with ``br``
+flex row that wraps. A 1-high bank is only as wide as its lockers (a
+flex row of cells that wraps only when it runs out of room). A bank with ``br``
 gets a full-width ``.lk-row-break`` element before it (``.lk-prow-break`` in
 Print), so it starts on a new line. Print uses the same function. With 1 tier the bank is a
-wrapping grid instead, with ``direction: rtl`` when it starts on the right.
+wrapping row instead, with ``direction: rtl`` when it starts on the right.
 
 Limits: 1000 lockers per range, 2000 per tool. Locker numbers are matched
 without regard to capitals; a number listed twice is kept only the first time.
