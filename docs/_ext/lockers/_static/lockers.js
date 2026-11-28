@@ -1369,6 +1369,7 @@
                     surnameInitial: !!(cfg.display && cfg.display.surnameInitial),
                     yearColours: !(cfg.display && cfg.display.yearColours === false),
                     tgColours: !!(cfg.display && cfg.display.tgColours),
+                    hideEmpty: !!(cfg.display && cfg.display.hideEmpty),
                     combo: !!(cfg.display && cfg.display.combo)
                 },
                 sel: null
@@ -1497,6 +1498,10 @@
             el.classList.add('lk-tg');
             el.style.setProperty('--lk-tg', c);
         }
+        /* "Hide empty banks": a bank with no allocated lockers is left off the screen and Print */
+        function bankUsed(ids) { var n = 0; ids.forEach(function (id) { if (state.assign[id]) n++; }); return n; }
+        function bankHidden(ids) { return !!state.display.hideEmpty && !bankUsed(ids); }
+
         function hasTutorGroups() { return state.students.some(function (st) { return !!tutorGroup(st); }); }
         function tgLegend() {
             var m = state._tgMap;
@@ -1723,6 +1728,7 @@
                 state.display.surnameInitial = !!d.display.surnameInitial;
                 state.display.yearColours = d.display.yearColours !== false;
                 state.display.tgColours = !!d.display.tgColours;
+                state.display.hideEmpty = !!d.display.hideEmpty;
                 state.display.combo = !!d.display.combo;
                 if (d.display.exportPrefs && typeof d.display.exportPrefs === 'object') state.display.exportPrefs = d.display.exportPrefs;
             }
@@ -1855,6 +1861,7 @@
                 '<label class="lk-checkbox-label" title="Show surnames as an initial only, e.g. Alex S."><input type="checkbox" class="lk-checkbox" data-role="toggle-initial"> Initial</label>' +
                 '<label class="lk-checkbox-label" title="Colour each locker by the student\'s year level"><input type="checkbox" class="lk-checkbox" data-role="toggle-colours"> Year colours</label>' +
                 '<label class="lk-checkbox-label" title="Colour the top line of each locker (number and badge) by the student\'s tutor group: 9 colours"><input type="checkbox" class="lk-checkbox" data-role="toggle-tgcolours"> Tutor group colours</label>' +
+                '<label class="lk-checkbox-label" title="Hide banks that have no lockers allocated, on screen and in Print"><input type="checkbox" class="lk-checkbox" data-role="toggle-hideempty"> Hide empty banks</label>' +
                 '<label class="lk-checkbox-label" title="Show each lock\'s combination on a new line under the name"><input type="checkbox" class="lk-checkbox" data-role="toggle-combo"> Combos</label>' +
                 '</div>' +
                 '</div>' +
@@ -1885,7 +1892,7 @@
                 '<div class="lk-canvas" data-role="canvas"></div>' +
                 '</div>';
 
-            ['title', 'file', 'json-file', 'undo', 'keep', 'tiers', 'order', 'side', 'row', 'badge-field', 'toggle-override', 'toggle-initial', 'toggle-colours', 'toggle-tgcolours', 'toggle-combo', 'search',
+            ['title', 'file', 'json-file', 'undo', 'keep', 'tiers', 'order', 'side', 'row', 'badge-field', 'toggle-override', 'toggle-initial', 'toggle-colours', 'toggle-tgcolours', 'toggle-hideempty', 'toggle-combo', 'search',
                 'entry-locker', 'entry-name', 'entry-combo', 'suggest', 'entry-current', 'entry-out', 'status', 'stats', 'count', 'pool', 'canvas'
             ].forEach(function (r) { ui[r] = root.querySelector('[data-role="' + r + '"]'); });
 
@@ -1909,6 +1916,7 @@
             ui['toggle-initial'].addEventListener('change', function () { state.display.surnameInitial = ui['toggle-initial'].checked; changed(); });
             ui['toggle-colours'].addEventListener('change', function () { state.display.yearColours = ui['toggle-colours'].checked; changed(); });
             ui['toggle-tgcolours'].addEventListener('change', function () { state.display.tgColours = ui['toggle-tgcolours'].checked; changed(); });
+            ui['toggle-hideempty'].addEventListener('change', function () { state.display.hideEmpty = ui['toggle-hideempty'].checked; changed(); });
             ui['toggle-combo'].addEventListener('change', function () { state.display.combo = ui['toggle-combo'].checked; changed(); });
             ui.search.addEventListener('input', applySearch);
             ui.search.addEventListener('keydown', function (e) {
@@ -2041,6 +2049,7 @@
             ui['toggle-colours'].parentNode.style.display = hasYears() ? '' : 'none';
             ui['toggle-tgcolours'].checked = !!state.display.tgColours;
             ui['toggle-tgcolours'].parentNode.style.display = hasTutorGroups() ? '' : 'none';
+            ui['toggle-hideempty'].checked = !!state.display.hideEmpty;
             ui['toggle-combo'].checked = !!state.display.combo;
             Array.prototype.forEach.call(root.querySelectorAll('[data-action="remove-year"]'), function (b) {
                 var y = b.getAttribute('data-year');
@@ -2066,9 +2075,10 @@
                     'or <code>Corridor A: A1-A40</code>.';
                 canvas.appendChild(empty);
             }
-            var areaBox = null, areaName = null;
+            var areaBox = null, areaName = null, hiddenBanks = 0;
             state._bankIds.forEach(function (ids, bi) {
                 var bank = state.banks[bi];
+                if (bankHidden(ids)) { hiddenBanks++; return; }
                 if (areaBox === null || (bank.area || '') !== areaName) {
                     areaName = bank.area || '';
                     var areaEl = make('div', 'lk-area');
@@ -2143,6 +2153,12 @@
                 (waiting.length > free && state.students.length ? '<div class="lk-warn">Not enough free lockers for everyone</div>' : '') +
                 yearStats();
 
+            if (hiddenBanks) {
+                var hn = make('div', 'lk-hidden-note', hiddenBanks + (hiddenBanks === 1 ? ' bank has' : ' banks have') +
+                    ' no lockers allocated and ' + (hiddenBanks === 1 ? 'is' : 'are') + ' hidden. Untick Hide empty banks to see ' + (hiddenBanks === 1 ? 'it.' : 'them.'));
+                if (hiddenBanks === state._bankIds.length) hn.textContent = 'Every bank is empty, so they are all hidden. Untick Hide empty banks to see them.';
+                canvas.insertBefore(hn, canvas.firstChild);
+            }
             var tgl = tgLegend();
             if (tgl && order.length) canvas.insertBefore(tgl, canvas.firstChild);
             var legend = yearLegend();
@@ -3472,10 +3488,13 @@
         function printGrid() {
             if (!order.length) { setStatus('There are no lockers to print.'); return; }
             var body = '<h1>' + esc(state.title) + '</h1><p class="lk-sub">' + Object.keys(state.assign).length + ' of ' + order.length + ' lockers allocated</p>';
+            var pArea = null;
             state._bankIds.forEach(function (ids, bi) {
                 var bank = state.banks[bi], side = bankSide(bank);
-                if (bi === 0 || (bank.area || '') !== (state.banks[bi - 1].area || '')) {
-                    if (bi) body += '</div>';
+                if (bankHidden(ids)) return;
+                if (pArea === null || (bank.area || '') !== pArea) {
+                    if (pArea !== null) body += '</div>';
+                    pArea = bank.area || '';
                     body += (bank.area ? '<h2 class="lk-parea">' + esc(bank.area) + '</h2>' : '') + '<div class="lk-pareabanks">';
                 }
                 else if (bank.br) body += '<div class="lk-prow-break"></div>';
@@ -3497,7 +3516,7 @@
                 });
                 body += '</div></div>';
             });
-            if (order.length) body += '</div>';
+            if (pArea !== null) body += '</div>';
             openPrintWindow(state.title, body, true);
         }
 

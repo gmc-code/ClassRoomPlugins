@@ -353,3 +353,6 @@ html.lk-wide-page, html.lk-wide-page body { overflow: hidden; }
 
 /* ⚙ Lockers: the bank's numbers */
 .lockers .lk-bs-spec input { width: 16em; max-width: 100%; font-family: ui-monospace, Consolas, monospace; }
+
+/* "Hide empty banks" note above the lockers */
+.lockers .lk-hidden-note { font-size: 12px; color: #64748b; font-style: italic; margin: 0 0 8px; }

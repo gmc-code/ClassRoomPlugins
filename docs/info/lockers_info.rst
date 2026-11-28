@@ -797,6 +797,15 @@ in the **No locker** list get a coloured line underneath, and **Print** shows
 the coloured top line too. The tick box only shows when students have a tutor
 group.
 
+Hiding empty banks
+------------------
+
+Tick **Hide empty banks** in the toolbar to leave out every bank that has no
+lockers allocated yet, so you only see the banks in use. A note above the
+lockers says how many banks are hidden, and an area with no banks left showing
+is hidden too. **Print** leaves the empty banks out as well. Untick it to see
+every bank again; your choice is saved with the allocations.
+
 Finding a student or locker
 ---------------------------
 

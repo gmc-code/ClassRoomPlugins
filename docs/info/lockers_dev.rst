@@ -90,9 +90,10 @@ Options
    A CSV or ``.xlsx`` file, relative to the page. Columns as for **Import
    Roster**, including an optional **Locker** column.
 
-``:surname-initial:``, ``:hide-homeroom:``, ``:tutor-group-colours:``
-   Starting display options. ``:tutor-group-colours:`` starts with
-   **Tutor group colours** ticked.
+``:surname-initial:``, ``:hide-homeroom:``, ``:tutor-group-colours:``, ``:hide-empty-banks:``
+   Starting display options. ``:tutor-group-colours:`` and
+   ``:hide-empty-banks:`` start with **Tutor group colours** or
+   **Hide empty banks** ticked.
 
 ``:storage-key:``
    Browser storage name. Defaults to ``<docname>#<n>``. Give two pages the same
@@ -249,6 +250,11 @@ line with the number and badge) by tutor group (``tutorGroup()``: the
 from the start if there are more groups. The strip is a ``::before`` on
 ``.lk-cell.lk-tg`` (``--lk-tg``), so it sits over the year colour; **Print**
 draws it as a 15 px band.
+
+``display.hideEmpty`` leaves banks with no allocated lockers (``bankHidden()``)
+out of the screen and **Print**; an area whose banks are all hidden loses its
+heading too, and a ``.lk-hidden-note`` above the lockers says how many are
+hidden. Out-of-service and reserved lockers don't count as allocated.
 
 Paste reads a heading row when the first line has a recognised heading
 (surname, first name or locker); otherwise each line is split on tabs, commas
