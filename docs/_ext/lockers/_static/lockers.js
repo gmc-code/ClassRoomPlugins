@@ -1837,6 +1837,7 @@
                 '<span class="lk-label" title="Remove a whole year group, e.g. at the end of the year">Remove:</span>' +
                 btn('remove-year', 'lk-btn-red lk-btn-remove', '', 'Y9', ' data-year="9" data-role="remove-y9" title="Remove every Year 9 student (e.g. at the end of the year): they come off the list and their lockers become free"') +
                 btn('remove-year', 'lk-btn-red lk-btn-remove', '', 'Y12', ' data-year="12" data-role="remove-y12" title="Remove every Year 12 student (e.g. at the end of the year): they come off the list and their lockers become free"') +
+                btn('remove-unplaced', 'lk-btn-red lk-btn-remove', '', 'No locker', ' data-role="remove-unplaced" title="Remove every student in the No locker list (students who have a locker stay)"') +
                 '</div>' +
                 /* Row 4: how the banks are drawn and what each locker shows */
                 '<div class="lk-toolbar-row lk-toolbar-row--options">' +
@@ -1885,14 +1886,15 @@
                 '<div class="lk-body">' +
                 '<div class="lk-sidebar">' +
                 '<div class="lk-stats" data-role="stats"></div>' +
-                '<div class="lk-side-title">No locker (<span data-role="count">0</span>)</div>' +
+                '<div class="lk-side-title"><span>No locker (<span data-role="count">0</span>)</span>' +
+                '<button type="button" class="lk-side-remove" data-action="remove-unplaced" data-role="remove-unplaced-side" title="Remove every student in the No locker list (students who have a locker stay)">Remove all</button></div>' +
                 '<div class="lk-side-hint">Type a locker number in the Locker box, then click a name or drag it onto the box (or onto any locker).</div>' +
                 '<div class="lk-pool" data-role="pool"></div>' +
                 '</div>' +
                 '<div class="lk-canvas" data-role="canvas"></div>' +
                 '</div>';
 
-            ['title', 'file', 'json-file', 'undo', 'keep', 'tiers', 'order', 'side', 'row', 'badge-field', 'toggle-override', 'toggle-initial', 'toggle-colours', 'toggle-tgcolours', 'toggle-hideempty', 'toggle-combo', 'search',
+            ['title', 'file', 'json-file', 'undo', 'keep', 'tiers', 'order', 'side', 'row', 'badge-field', 'toggle-override', 'toggle-initial', 'toggle-colours', 'toggle-tgcolours', 'toggle-hideempty', 'remove-unplaced', 'remove-unplaced-side', 'toggle-combo', 'search',
                 'entry-locker', 'entry-name', 'entry-combo', 'suggest', 'entry-current', 'entry-out', 'status', 'stats', 'count', 'pool', 'canvas'
             ].forEach(function (r) { ui[r] = root.querySelector('[data-role="' + r + '"]'); });
 
@@ -2051,6 +2053,12 @@
             ui['toggle-tgcolours'].parentNode.style.display = hasTutorGroups() ? '' : 'none';
             ui['toggle-hideempty'].checked = !!state.display.hideEmpty;
             ui['toggle-combo'].checked = !!state.display.combo;
+            var unplaced = state.students.filter(function (st) { return !lockerOf(st.id); }).length;
+            [ui['remove-unplaced'], ui['remove-unplaced-side']].forEach(function (b) {
+                b.disabled = !unplaced;
+                b.title = unplaced ? 'Remove the ' + unplaced + ' student' + (unplaced === 1 ? '' : 's') + ' in the No locker list (students who have a locker stay)' : 'Every student has a locker';
+            });
+            ui['remove-unplaced-side'].style.display = unplaced ? '' : 'none';
             Array.prototype.forEach.call(root.querySelectorAll('[data-action="remove-year"]'), function (b) {
                 var y = b.getAttribute('data-year');
                 var n = state.students.filter(function (st) { return String(st.year) === y; }).length;
@@ -2359,7 +2367,14 @@
                 cell.appendChild(make('div', 'lk-first', s.firstName));
                 cell.appendChild(make('div', 'lk-last', displaySurname(s)));
                 if (badgeOf(s)) cell.appendChild(make('span', 'lk-hr lk-cell-badge', badgeOf(s)));   /* top-right corner */
-                cell.title = 'Locker ' + id + ': ' + studentInfo(s) + '\nDrag to move or swap; right-click: out of service.';
+                var rm = make('button', 'lk-cell-x', '\u00d7');   /* bottom-right: take the student out */
+                rm.type = 'button';
+                rm.setAttribute('data-remove', id);
+                rm.title = 'Take ' + fullName(s) + ' out of locker ' + id;
+                rm.setAttribute('aria-label', rm.title);
+                rm.draggable = false;
+                cell.appendChild(rm);
+                cell.title = 'Locker ' + id + ': ' + studentInfo(s) + '\nDrag to move or swap; × or Delete: take out; right-click: out of service.';
             } else {
                 cell.classList.add('lk-free');
                 cell.title = 'Locker ' + id + ' is free. Click, then type a name. Right-click: out of service.';
@@ -2560,9 +2575,10 @@
                 if (v === 'x') { toggleOut(state.sel); advance(); return; }
                 if (suggestions.length) commitEntry(suggestions[suggestPos].s.id);
                 else setStatus('No student matches "' + ui['entry-name'].value.trim() + '".');
-            } else if (e.key === 'Backspace' && e.shiftKey === false && e.ctrlKey && !ui['entry-name'].value) {
+            } else if ((e.key === 'Delete' || (e.key === 'Backspace' && e.ctrlKey && !e.shiftKey)) && !ui['entry-name'].value) {
+                /* Delete (with the Name box empty) takes the student out of the selected locker */
                 e.preventDefault();
-                emptyLocker(state.sel);
+                if (state.sel && state.assign[state.sel]) emptyLocker(state.sel);
             }
         }
 
@@ -2604,9 +2620,11 @@
 
         function emptyLocker(id) {
             if (!id || !state.assign[id]) return;
+            var st = studentById(state.assign[id]);
             pushUndo();
             delete state.assign[id];
             changed();
+            if (st) setStatus(fullName(st) + ' is out of locker ' + id + ' and back in the No locker list. Undo puts them back.');
         }
 
         function toggleOut(id) {
@@ -2656,6 +2674,8 @@
         /* ----- toolbar ----- */
 
         function onRootClick(e) {
+            var rmb = e.target.closest('.lk-cell-x');
+            if (rmb && ui.canvas.contains(rmb)) { e.stopPropagation(); emptyLocker(rmb.getAttribute('data-remove')); return; }
             var cell = e.target.closest('.lk-cell');
             if (cell && ui.canvas.contains(cell)) { selectLocker(cell.getAttribute('data-id'), true); return; }
             var item = e.target.closest('.lk-pool-item');
@@ -2688,6 +2708,7 @@
             else if (a === 'auto') autoAllocate(b.getAttribute('data-mode'));
             else if (a === 'clear-all') clearAll();
             else if (a === 'remove-year') removeYear(b.getAttribute('data-year'));
+            else if (a === 'remove-unplaced') removeUnplaced();
             else if (a === 'tiers') setLayoutDefault('tiers', +b.getAttribute('data-n'), 0);
             else if (a === 'order') setLayoutDefault('order', b.getAttribute('data-order'), '');
             else if (a === 'side') setLayoutDefault('side', b.getAttribute('data-side'), '');
@@ -3055,6 +3076,21 @@
             changed();
             setStatus(leaving.length + ' Year ' + year + ' student' + (leaving.length === 1 ? '' : 's') + ' removed' +
                 (withLocker ? '; ' + withLocker + ' locker' + (withLocker === 1 ? ' is' : 's are') + ' now free' : '') + '. Undo brings them back.', true);
+        }
+
+        /* take every student without a locker off the list (e.g. students who have left) */
+        function removeUnplaced() {
+            var leaving = state.students.filter(function (st) { return !lockerOf(st.id); });
+            if (!leaving.length) { setStatus('Every student has a locker, so there is no one to remove.'); return; }
+            var names = leaving.slice(0, 8).map(fullName).join(', ') + (leaving.length > 8 ? ' and ' + (leaving.length - 8) + ' more' : '');
+            if (!window.confirm('Remove the ' + leaving.length + ' student' + (leaving.length === 1 ? '' : 's') + ' with no locker?\n\n' + names +
+                '\n\nStudents who have a locker stay. Undo can bring them back.')) return;
+            pushUndo();
+            var gone = {};
+            leaving.forEach(function (st) { gone[st.id] = true; });
+            state.students = state.students.filter(function (st) { return !gone[st.id]; });
+            changed();
+            setStatus(leaving.length + ' student' + (leaving.length === 1 ? '' : 's') + ' with no locker removed. Undo brings them back.', true);
         }
 
         function resetAll() {
@@ -3529,7 +3565,7 @@
                 if (/lockers\.css/.test(l.href)) css = l.href;
             });
             var clone = ui.canvas.cloneNode(true);
-            Array.prototype.forEach.call(clone.querySelectorAll('.lk-bank-tools, .lk-bank-settings, .lk-done-bar'), function (n) { n.remove(); });
+            Array.prototype.forEach.call(clone.querySelectorAll('.lk-bank-tools, .lk-bank-settings, .lk-done-bar, .lk-cell-x'), function (n) { n.remove(); });
             Array.prototype.forEach.call(clone.querySelectorAll('.lk-selected, .lk-hit, .lk-drag-over'), function (n) {
                 n.classList.remove('lk-selected', 'lk-hit', 'lk-drag-over');
             });

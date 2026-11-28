@@ -147,7 +147,7 @@ The buttons are coloured by what they do:
 * **Grey**: **Undo**, **Reset** and **Full width**.
 * **Amber** and **purple**: setting up and allocating (**Lockers**,
   **Year levels**, **By Student**, **Paste lockers**, **Combos**, **A–Z**, **Random** …), and **red**
-  for **Clear** and **Remove: Y9 / Y12**.
+  for **Clear** and **Remove: Y9 / Y12 / No locker**.
 
 Hover over any button to see what it does.
 
@@ -597,6 +597,19 @@ Clicking names and dragging
 * Drag one locker onto another to swap the two students.
 * Drag a locker back onto the list to empty it.
 
+Taking a student out of a locker
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You don't need to drag. Either:
+
+* point at the locker and press the red **×** in its bottom-right corner (on
+  a tablet the **×** is always showing), or
+* click the locker, then press **Delete** on the keyboard.
+
+The student goes back to the **No locker** list, the message line says who
+came out of which locker, and **Undo** puts them back. **Delete** only works
+while the name box is empty, so it never fires while you're typing a name.
+
 Allocate A → Z, Homeroom or Random
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -636,6 +649,16 @@ lockers are now free.
   before removing them.
 * Then use **Add** to bring in the new students and **A–Z** (with **Keep**
   ticked) to give them the free lockers.
+
+Removing everyone with no locker
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To clear out the **No locker** list, for example students who have left or
+were imported by mistake, press **Remove all** beside the *No locker*
+heading (or **No locker** next to **Remove:** in the Full toolbar). You see
+the names and are asked to confirm first. Only students without a locker come
+off the list; everyone with a locker stays where they are. **Undo** brings them
+back. **Remove all** only shows when someone is waiting for a locker.
 
 By Student (enter lockers down a list)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

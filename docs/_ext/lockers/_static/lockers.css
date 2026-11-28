@@ -283,6 +283,15 @@
 /* badge (Y7 / H13 / 7H13 / TG) in the top-right corner of each locker */
 .lockers .lk-cell .lk-cell-badge { position: absolute; top: 3px; right: 4px; margin: 0; line-height: 1.35; }
 .lockers .lk-cell.lk-filled .lk-first { padding-right: 2px; }
+/* × on a filled locker: take the student out (shows on hover, or when the locker is selected) */
+.lockers .lk-cell-x {
+    position: absolute; right: 3px; bottom: 3px; z-index: 2; width: 18px; height: 18px; padding: 0;
+    border: 1px solid #94a3b8; border-radius: 50%; background: #fff; color: #b91c1c;
+    font: 700 13px/15px system-ui, sans-serif; cursor: pointer; opacity: 0; transition: opacity .1s;
+}
+.lockers .lk-cell:hover .lk-cell-x, .lockers .lk-cell.lk-selected .lk-cell-x, .lockers .lk-cell-x:focus-visible { opacity: 1; }
+.lockers .lk-cell-x:hover { background: #fee2e2; border-color: #b91c1c; }
+@media (hover: none) { .lockers .lk-cell-x { opacity: .85; } }
 
 /* every student has a locker: the No locker list is hidden and the lockers use the full width */
 .lockers.lk-all-placed .lk-sidebar { display: none; }
@@ -356,3 +365,11 @@ html.lk-wide-page, html.lk-wide-page body { overflow: hidden; }
 
 /* "Hide empty banks" note above the lockers */
 .lockers .lk-hidden-note { font-size: 12px; color: #64748b; font-style: italic; margin: 0 0 8px; }
+
+/* "Remove all" beside the No locker heading: takes every student without a locker off the list */
+.lockers .lk-side-title { display: flex; align-items: center; gap: 6px; }
+.lockers .lk-side-remove {
+    margin-left: auto; padding: 1px 7px; font-size: 11px; font-weight: 600; text-transform: none; letter-spacing: 0;
+    border: 1px solid #fca5a5; border-radius: 4px; background: #fff; color: #b91c1c; cursor: pointer;
+}
+.lockers .lk-side-remove:hover { background: #fee2e2; border-color: #b91c1c; }
