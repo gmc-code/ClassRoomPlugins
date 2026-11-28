@@ -1791,7 +1791,14 @@
 
         function build() {
             root.innerHTML =
+                /* top bar: title, then Find and Full width beside the Simple / Full switch (both views) */
+                '<div class="lk-topbar">' +
                 '<div class="lk-title" data-role="title" title="Click to edit the title"></div>' +
+                '<div class="lk-top-tools">' +
+                '<div class="lk-search">' + icon('search') +
+                '<input type="search" data-role="search" placeholder="Find…" title="Find a student, locker number, year (y7) or homeroom" aria-label="Find a student or locker"></div>' +
+                btn('wide', 'lk-btn-grey', 'expand', 'Full width', ' data-role="wide" aria-pressed="false" title="Use the whole browser window for the lockers"') +
+                '</div></div>' +
                 '<div class="lk-toolbar">' +
                 '<div class="lk-toolbar-row">' +
                 btn('import', 'lk-btn-data', 'upload', 'Import', ' title="Import a class list (Excel or CSV), replacing the students already here"') +
@@ -1820,9 +1827,6 @@
                 btn('by-student', 'lk-btn-purple', 'keyboard', 'By Student', ' title="Type each student\'s locker number down a list"') +
                 btn('paste', 'lk-btn-purple', 'paste', 'Paste lockers', ' title="Paste locker numbers and combinations for students already on the list, e.g. from Excel"') +
                 btn('combos', 'lk-btn-purple', 'keyboard', 'Combos', ' title="Type each student\'s padlock combination down a list"') +
-                '<div class="lk-search">' + icon('search') +
-                '<input type="search" data-role="search" placeholder="Find…" title="Find a student, locker number, year (y7) or homeroom" aria-label="Find a student or locker"></div>' +
-                btn('wide', 'lk-btn-grey', 'expand', 'Full width', ' data-role="wide" aria-pressed="false" title="Use the whole browser window for the lockers"') +
                 '</div>' +
                 /* Row 3: automatic allocation and end-of-year removal */
                 '<div class="lk-toolbar-row">' +
@@ -4184,12 +4188,9 @@
                 step(4, 'Print', '#059669',
                     b('print-grid', 'lk-btn-teal', 'print', 'Map') + b('print-list', 'lk-btn-teal', 'list', 'List')) +
                 '<span class="cc-spacer"></span><div class="cc-end">' +
-                '<label class="cc-find">' + icon('search') +
-                '<input type="search" data-cc-find placeholder="Find…" aria-label="Find a student or locker"></label>' +
                 b('import-json', 'lk-btn-file', 'folder', 'Open') + b('export-json', 'lk-btn-file', 'download', 'Save') +
-                b('undo', 'lk-btn-grey', 'undo', 'Undo') +
-                b('wide', 'lk-btn-grey', 'expand', 'Full width', ' aria-pressed="false"') + '</div>';
-            var cc = window.ClassroomControls.attach({
+                b('undo', 'lk-btn-grey', 'undo', 'Undo') + '</div>';
+            window.ClassroomControls.attach({
                 root: root, tool: 'lockers', setting: cfg.controls,
                 toolbar: root.querySelector('.lk-toolbar'),
                 simple: simple,
@@ -4199,15 +4200,6 @@
                     return n ? 'Year levels on: ' + n + ' locker' + (n === 1 ? '' : 's') + ' kept for a year' : '';
                 }
             });
-            /* the Simple Find box drives the Full one */
-            var find = cc.bar.querySelector('[data-cc-find]');
-            find.addEventListener('input', function () { ui.search.value = find.value; applySearch(); });
-            find.addEventListener('keydown', function (e) {
-                ui.search.value = find.value;
-                ui.search.dispatchEvent(new KeyboardEvent('keydown', { key: e.key, bubbles: false }));
-                if (e.key === 'Escape') find.value = ui.search.value;
-            });
-            ui.search.addEventListener('input', function () { if (find.value !== ui.search.value) find.value = ui.search.value; });
         }
 
         /* ----- start ----- */

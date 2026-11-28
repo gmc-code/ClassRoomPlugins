@@ -45,8 +45,10 @@ The Simple toolbar
 ~~~~~~~~~~~~~~~~~~
 
 In Simple, the toolbar is one row of four numbered steps. Work from left to
-right, from **1** to **4**. **Find**, **Open**, **Save** and **Undo** sit at
-the right end. Hover over a button to see what it does.
+right, from **1** to **4**. **Open**, **Save** and **Undo** sit at the right
+end. **Find** and **Full width** are in the dark bar at the very top, beside
+the **Simple / Full** switch, in both views. Hover over a button to see what
+it does.
 
 .. figure:: images/lockers/lockers_simple_toolbar.png
    :alt: The Simple toolbar: four numbered steps, with Find, Open, Save and Undo at the right, and the hint strip showing that year levels are on
@@ -101,7 +103,7 @@ locker, switch to Full and untick **Keep**.
 Find, Open, Save, Undo and Full width
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Find**
+**Find** (top bar)
    Type part of a name or a locker number to find it (see
    `Finding a student or locker`_).
 
@@ -114,7 +116,7 @@ Find, Open, Save, Undo and Full width
 **Undo**
    Take back the last change.
 
-**Full width**
+**Full width** (top bar)
    Use the whole browser window for the lockers (see `Full width`_).
 
 Giving out lockers by hand
@@ -133,11 +135,12 @@ The Full toolbar
 
 Everything below is in the **Full** view.
 
-The toolbar has five rows:
+The toolbar has five rows (**Find** and **Full width** stay in the dark bar
+at the top, beside the **Simple / Full** switch):
 
 1. Files, printing, **Undo** and **Reset**.
-2. **Set up** (**Lockers**, **Year levels**), **Enter** (**By Student**,
-   **Paste lockers**, **Combos**), **Find** and **Full width**.
+2. **Set up** (**Lockers**, **Year levels**) and **Enter** (**By Student**,
+   **Paste lockers**, **Combos**).
 3. **Allocate** and **Remove**.
 4. **Banks**: how the banks are drawn (**Tiers**, **Run**, **Start**,
    **Top / Bottom**, **Override banks**).
@@ -861,7 +864,7 @@ every bank again; your choice is saved with the allocations.
 Finding a student or locker
 ---------------------------
 
-Type in **Find…** (right-hand end of the top row). Matching lockers light up
+Type in **Find…** (in the dark bar at the top, beside **Simple / Full**). Matching lockers light up
 yellow, the rest fade, and matching names in the **No locker** list light up.
 Press **Enter** to select the first match.
 

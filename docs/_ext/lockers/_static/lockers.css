@@ -15,6 +15,16 @@
 }
 .lockers *, .lk-modal * { box-sizing: border-box; }
 
+/* top bar: title on the left; Find and Full width on the right, just left of the Simple / Full switch */
+.lockers .lk-topbar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; background: #0f172a; padding-right: 8px;
+}
+.lockers.cc-has-pill .lk-topbar { padding-right: 136px; }   /* room for the Simple / Full switch */
+.lockers .lk-topbar .lk-title { flex: 1 1 200px; min-width: 0; }
+.lockers .lk-top-tools { display: flex; align-items: center; gap: 6px; padding: 3px 0; }
+.lockers .lk-top-tools .lk-search { margin-left: 0; height: 28px; box-sizing: border-box; }
+.lockers .lk-top-tools .lk-btn { padding-top: 4px; padding-bottom: 4px; }
+@media print { .lockers .lk-top-tools { display: none !important; } }
 .lockers .lk-title {
     background: #0f172a; color: #fff; font-weight: 600; padding: 8px 14px;
     outline: none; cursor: text; user-select: text; transition: background-color .2s;
