@@ -1809,7 +1809,6 @@
                 '<span class="lk-sep"></span>' +
                 btn('undo', 'lk-btn-grey', 'undo', 'Undo', ' data-role="undo" disabled') +
                 btn('reset', 'lk-btn-grey', 'reset', 'Reset', ' title="Go back to how this page was first set up"') +
-                btn('wide', 'lk-btn-grey', 'expand', 'Full width', ' data-role="wide" aria-pressed="false" title="Use the whole browser window for the lockers"') +
                 '</div>' +
                 /* Row 2: setting up the lockers and typing allocations in */
                 '<div class="lk-toolbar-row">' +
@@ -1823,6 +1822,7 @@
                 btn('combos', 'lk-btn-purple', 'keyboard', 'Combos', ' title="Type each student\'s padlock combination down a list"') +
                 '<div class="lk-search">' + icon('search') +
                 '<input type="search" data-role="search" placeholder="Find…" title="Find a student, locker number, year (y7) or homeroom" aria-label="Find a student or locker"></div>' +
+                btn('wide', 'lk-btn-grey', 'expand', 'Full width', ' data-role="wide" aria-pressed="false" title="Use the whole browser window for the lockers"') +
                 '</div>' +
                 /* Row 3: automatic allocation and end-of-year removal */
                 '<div class="lk-toolbar-row">' +
@@ -1830,6 +1830,7 @@
                 btn('auto', 'lk-btn-purple', 'az', 'A–Z', ' data-mode="AZ" title="Fill free lockers in surname order"') +
                 btn('auto', 'lk-btn-purple', 'rows', 'Homeroom', ' data-mode="HOMEROOM" title="Fill free lockers group by group, using whatever the Badge shows"') +
                 btn('auto', 'lk-btn-amber', 'random', 'Random', ' data-mode="RANDOM" title="Fill free lockers in random order"') +
+                btn('tiered', 'lk-btn-purple', 'rows', 'Y9 top · Y7 bottom', ' data-role="tiered" title="Year 9 in the top lockers, Year 7 in the bottom lockers, Year 8 in the rest. Each tutor group stays in the bank named after it."') +
                 '<label class="lk-checkbox-label" title="Keep existing: ticked = only students without a locker are allocated, into free lockers; unticked = everyone is reallocated">' +
                 '<input type="checkbox" class="lk-checkbox" data-role="keep"> Keep</label>' +
                 btn('clear-all', 'lk-btn-red', 'trash', 'Clear', ' title="Take every student out of their locker"') +
@@ -1839,8 +1840,9 @@
                 btn('remove-year', 'lk-btn-red lk-btn-remove', '', 'Y12', ' data-year="12" data-role="remove-y12" title="Remove every Year 12 student (e.g. at the end of the year): they come off the list and their lockers become free"') +
                 btn('remove-unplaced', 'lk-btn-red lk-btn-remove', '', 'No locker', ' data-role="remove-unplaced" title="Remove every student in the No locker list (students who have a locker stay)"') +
                 '</div>' +
-                /* Row 4: how the banks are drawn and what each locker shows */
+                /* Row 4: how the banks are drawn */
                 '<div class="lk-toolbar-row lk-toolbar-row--options">' +
+                '<span class="lk-label">Banks:</span>' +
                 '<span class="lk-label" title="How many lockers high each bank is">Tiers:</span><div class="lk-seg" data-role="tiers">' +
                 [1, 2, 3, 4, 5, 6].map(function (n) { return '<button type="button" class="lk-btn lk-btn-seg" data-action="tiers" data-n="' + n + '">' + n + '</button>'; }).join('') +
                 '</div>' +
@@ -1857,6 +1859,10 @@
                 '<button type="button" class="lk-btn lk-btn-seg" data-action="row" data-row="bottom" title="First locker in the bottom row">Bottom</button>' +
                 '</div>' +
                 '<label class="lk-checkbox-label" title="Tick to make Tiers, Run, Start and Top/Bottom apply to every bank, replacing any bank you have set in its ⚙ settings. Untick to change only the banks that follow the toolbar."><input type="checkbox" class="lk-checkbox" data-role="toggle-override"> Override banks</label>' +
+                '</div>' +
+                /* Row 5: what each locker shows */
+                '<div class="lk-toolbar-row lk-toolbar-row--options">' +
+                '<span class="lk-label">Show:</span>' +
                 '<label class="lk-checkbox-label" title="Which detail shows on each locker: year (Y7), homeroom (H13), both (7 H13), or another column such as TG">Badge: ' +
                 '<select class="lk-select" data-role="badge-field"></select></label>' +
                 '<label class="lk-checkbox-label" title="Show surnames as an initial only, e.g. Alex S."><input type="checkbox" class="lk-checkbox" data-role="toggle-initial"> Initial</label>' +
@@ -2706,6 +2712,7 @@
             else if (a === 'paste-roster') openPasteRoster();
             else if (a === 'combos') openCombos();
             else if (a === 'auto') autoAllocate(b.getAttribute('data-mode'));
+            else if (a === 'tiered') tieredAllocate();
             else if (a === 'clear-all') clearAll();
             else if (a === 'remove-year') removeYear(b.getAttribute('data-year'));
             else if (a === 'remove-unplaced') removeUnplaced();
@@ -2826,6 +2833,98 @@
                     : ' (not enough free lockers)'));
             }
             setStatus(n + ' student' + (n === 1 ? '' : 's') + ' given lockers' + (notes.length ? '. ' + notes.join('. ') + '.' : '.'), !!notes.length);
+        }
+
+        /* "Y9 top · Y7 bottom": Year 9 in the top row of each bank, Year 7 in the bottom row, Year 8
+           (and anyone else) in the rest - middle rows, 1-high banks, then any top or bottom lockers
+           left over. A tutor group with a bank (or area) of the same name is placed in it first;
+           everyone else, and anyone who doesn't fit, goes in the free lockers left. Lockers kept
+           for a year level still only go to that year. */
+        var TIER_TOP = '9', TIER_BOTTOM = '7';
+        function tieredAllocate() {
+            if (!order.length) { setStatus('Set up the lockers first.'); return; }
+            if (!state.students.length) { setStatus('Import a class list first.'); return; }
+            if (!hasYears()) { setStatus('Students need a year level (a Year or Year Level column) for Y9 top · Y7 bottom.'); return; }
+            var keep = state.keepExisting || root.classList.contains('cc-simple');
+            var students = state.students.filter(function (st) { return !keep || !lockerOf(st.id); });
+            if (!students.length) { setStatus('Everyone already has a locker. Untick "Keep" to reallocate everyone.'); return; }
+            if (!keep && Object.keys(state.assign).length &&
+                !window.confirm('Reallocate every student? Year 9 go in the top lockers, Year 7 in the bottom lockers and Year 8 in the rest. Their current lockers will change.')) return;
+            pushUndo();
+            if (!keep) state.assign = {};
+
+            /* free lockers of a set of banks, split into top / bottom / rest */
+            function tiersOf(bis) {
+                var t = { top: [], bottom: [], rest: [] };
+                bis.forEach(function (bi) {
+                    var n = bankRowCount(bi);
+                    for (var r = 1; r <= n; r++) {
+                        var key = n < 2 ? 'rest' : r === 1 ? 'top' : r === n ? 'bottom' : 'rest';
+                        bankRowIds(bi, r).forEach(function (id) { if (!state.out[id] && !state.assign[id]) t[key].push(id); });
+                    }
+                });
+                return t;
+            }
+            function takeFrom(list, st) {
+                var y = String(st.year || '');
+                for (var i = 0; i < list.length; i++) {
+                    var ry = state.reserve[list[i]];
+                    if (!ry || ry === y) return list.splice(i, 1)[0];
+                }
+                return null;
+            }
+            var placed = { top: 0, bottom: 0, rest: 0 }, wrong = 0;
+            function place(group, t) {
+                var y9 = [], y7 = [], others = [], left = [];
+                group.forEach(function (st) { var y = String(st.year || ''); (y === TIER_TOP ? y9 : y === TIER_BOTTOM ? y7 : others).push(st); });
+                [[y9, ['top', 'rest', 'bottom'], 'top'], [y7, ['bottom', 'rest', 'top'], 'bottom'], [others, ['rest', 'top', 'bottom'], 'rest']].forEach(function (g) {
+                    g[0].forEach(function (st) {
+                        for (var k = 0; k < g[1].length; k++) {
+                            var id = takeFrom(t[g[1][k]], st);
+                            if (id) {
+                                state.assign[id] = st.id;
+                                placed[g[1][k]]++;
+                                if (g[1][k] !== g[2] && g[2] !== 'rest') wrong++;
+                                return;
+                            }
+                        }
+                        left.push(st);
+                    });
+                });
+                return left;
+            }
+            students.sort(bySurname);
+            /* tutor groups with a bank or area of the same name */
+            var byName = {};
+            state.banks.forEach(function (bank, bi) {
+                [bank.name, bank.area].forEach(function (nm) {
+                    var k = norm(nm || '');
+                    if (k) (byName[k] = byName[k] || []).indexOf(bi) < 0 && byName[k].push(bi);
+                });
+            });
+            var groups = {}, rest = [], ownBanks = 0;
+            students.forEach(function (st) {
+                var k = norm(tutorGroup(st) || '');
+                if (k && byName[k]) (groups[k] = groups[k] || []).push(st); else rest.push(st);
+            });
+            Object.keys(groups).forEach(function (k) {
+                ownBanks++;
+                rest = rest.concat(place(groups[k], tiersOf(byName[k])));
+            });
+            /* everyone else: grouped by tutor group (or whatever the badge shows), then surname */
+            rest.sort(function (a, b) {
+                var x = tutorGroup(a) || '', y = tutorGroup(b) || '';
+                if (!x !== !y) return x ? -1 : 1;
+                return x.localeCompare(y, undefined, { numeric: true, sensitivity: 'base' }) || bySurname(a, b);
+            });
+            var allBanks = state.banks.map(function (b, bi) { return bi; });
+            var waiting = place(rest, tiersOf(allBanks));
+            changed();
+            var n = students.length - waiting.length;
+            setStatus(n + ' student' + (n === 1 ? '' : 's') + ' given lockers: Year 9 on top, Year 7 underneath, Year 8 in the rest' +
+                (ownBanks ? ' (' + ownBanks + ' tutor group' + (ownBanks === 1 ? '' : 's') + ' in the bank named after ' + (ownBanks === 1 ? 'it' : 'them') + ')' : '') + '.' +
+                (wrong ? ' ' + wrong + ' Year 9 or Year 7 student' + (wrong === 1 ? '' : 's') + ' didn\'t fit in the right row and went in another locker.' : '') +
+                (waiting.length ? ' ' + waiting.length + ' still need one (not enough free lockers).' : ''), !!(wrong || waiting.length));
         }
 
         /* ----- year levels: lockers kept for one year ----- */

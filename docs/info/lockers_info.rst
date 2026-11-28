@@ -133,11 +133,16 @@ The Full toolbar
 
 Everything below is in the **Full** view.
 
-The toolbar has four rows: files, printing and **Undo** on the first;
-**Set up** (**Lockers**, **Year levels**), **Enter** (**By Student**,
-**Paste lockers**, **Combos**) and **Find** on the second; **Allocate** and
-**Remove** on the third; and how the banks are drawn and what each locker
-shows on the fourth.
+The toolbar has five rows:
+
+1. Files, printing, **Undo** and **Reset**.
+2. **Set up** (**Lockers**, **Year levels**), **Enter** (**By Student**,
+   **Paste lockers**, **Combos**), **Find** and **Full width**.
+3. **Allocate** and **Remove**.
+4. **Banks**: how the banks are drawn (**Tiers**, **Run**, **Start**,
+   **Top / Bottom**, **Override banks**).
+5. **Show**: what each locker shows (**Badge**, **Initial**, **Year colours**,
+   **Tutor group colours**, **Hide empty banks**, **Combos**).
 
 The buttons are coloured by what they do:
 
@@ -146,7 +151,7 @@ The buttons are coloured by what they do:
 * **Teal**: printing (**Print**, **Map**, **List**).
 * **Grey**: **Undo**, **Reset** and **Full width**.
 * **Amber** and **purple**: setting up and allocating (**Lockers**,
-  **Year levels**, **By Student**, **Paste lockers**, **Combos**, **A–Z**, **Random** …), and **red**
+  **Year levels**, **By Student**, **Paste lockers**, **Combos**, **A–Z**, **Random**, **Y9 top · Y7 bottom** …), and **red**
   for **Clear** and **Remove: Y9 / Y12 / No locker**.
 
 Hover over any button to see what it does.
@@ -624,6 +629,30 @@ and keeping to any year levels (see `Keeping lockers for a year level`_):
 With **Keep** ticked (the usual setting), only students without a
 locker are allocated. Untick it to reallocate *everyone* from the first
 locker; you are asked to confirm.
+
+Year 9 on top, Year 7 underneath
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Y9 top · Y7 bottom** (in the **Allocate:** row of Full) puts Year 9
+students in the top lockers, Year 7 students in the bottom lockers and Year 8
+in the rest, so the younger students get the lockers nearest the floor:
+
+* **Top** and **bottom** are the top and bottom rows of each bank. Middle rows
+  (in banks 3 or more high) and 1-high banks count as *the rest*, and Year 8
+  also take any top or bottom lockers that Year 9 and Year 7 don't need.
+* **Tutor groups stay together.** When a bank (or area) has the same name as a
+  tutor group, for example a bank called *Hughes 11*, that tutor group's
+  students go in it first, sorted A–Z. Tutor groups without their own bank,
+  and anyone who doesn't fit, go in the free lockers left over, one tutor
+  group after another.
+* If a bank has more Year 9s than top lockers, the extra Year 9s go in the
+  middle rows first, then the bottom row (Year 7 the same way, the other way
+  up). The message line says how many didn't fit in the right row.
+* It follows **Keep** like the other buttons: ticked, only students without a
+  locker are placed; unticked, everyone is reallocated (you are asked first).
+  Lockers kept for a year level still only go to that year.
+
+Students need a year level (a **Year** or **Year Level** column).
 
 **Clear** takes every student out of their locker. To clear just one bank,
 press **Empty** at the top of that bank: its students go back to the
