@@ -252,12 +252,14 @@ from the start if there are more groups. The strip is a ``::before`` on
 draws it as a 15 px band.
 
 ``display.tierPrefs`` holds the **Y9 top · Y7 bottom…** choices:
-``{top, bottom, ends: {year: "left"|"right"|"number"}, restEnd, ownBank}``
-(defaults ``9``, ``7``, locker-number order, ``ownBank: true``).
+``{top, bottom, ends: {year: "left"|"right"|"asc"|"desc"}, restEnd, ownBank}``
+(defaults ``9``, ``7``, ``asc``, ``ownBank: true``; an old ``"number"`` is
+read as ``asc``).
 ``tieredAllocate()`` splits each bank's free lockers into top row, bottom row
 and the rest (``bankLayout`` rows; 1-high banks are all *rest*) and takes them
-bank by bank, choosing within a bank by screen column (``left``/``right``) or
-index (``number``).
+across the whole group: ``left``/``right`` by bank position in the group, then
+screen column (``right`` from the last bank backwards); ``asc``/``desc`` by a
+natural-sort rank of the locker numbers across the group's banks.
 
 ``display.hideEmpty`` leaves banks with no allocated lockers (``bankHidden()``)
 out of the screen and **Print**; an area whose banks are all hidden loses its
@@ -322,12 +324,14 @@ have a locker come after those who do not.
 Styling
 -------
 
-All classes start ``lk-``. The locker width is the CSS variable
-``--lk-cell-w`` (default ``112px``) on ``.lockers``:
+All classes start ``lk-``. Each column of a bank is as wide as its longest
+name (``fit-content``), between two CSS variables on ``.lockers``:
+``--lk-cell-w`` (narrowest, default ``84px``) and ``--lk-cell-max`` (widest,
+default ``170px``; longer names end in …):
 
 .. code-block:: css
 
-   .lockers.wide-lockers { --lk-cell-w: 140px; }
+   .lockers.wide-lockers { --lk-cell-w: 110px; --lk-cell-max: 200px; }
 
 Main states: ``.lk-cell.lk-free``, ``.lk-filled``, ``.lk-out``,
 ``.lk-selected``, ``.lk-hit`` (search match), ``.lk-drag-over``.

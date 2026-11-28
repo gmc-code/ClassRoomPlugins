@@ -2,7 +2,8 @@
    Colours and buttons match the seatingplan directive. */
 
 .lockers {
-    --lk-cell-w: 112px;
+    --lk-cell-w: 84px;       /* narrowest a locker gets; it widens for a longer name */
+    --lk-cell-max: 170px;    /* widest; longer names are cut short with … */
     margin: 1em 0;
     border: 1px solid #cbd5e1;
     border-radius: 8px;
@@ -187,7 +188,8 @@
 .lockers .lk-grid, .lockers .lk-area, .lockers .lk-area-banks, .lockers .lk-bank { margin: 0; }
 .lockers .lk-grid { display: grid; gap: 4px; width: max-content; min-width: 100%; }
 .lockers .lk-grid.lk-grid-wrapfree { display: flex; flex-wrap: wrap; width: max-content; min-width: 0; max-width: 100%; }
-.lockers .lk-grid.lk-grid-wrapfree > .lk-cell { flex: 0 0 var(--lk-cell-w); width: var(--lk-cell-w); }
+.lockers .lk-grid.lk-grid-wrapfree > .lk-cell { flex: 0 0 auto; width: auto; }
+.lockers .lk-cell { min-width: var(--lk-cell-w); max-width: var(--lk-cell-max); box-sizing: border-box; }
 
 .lockers .lk-cell {
     position: relative; min-height: 58px; padding: 3px 6px 4px; border-radius: 5px;

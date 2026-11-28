@@ -2356,7 +2356,8 @@
                 grid.classList.toggle('lk-rtl', side === 'right');
                 return;
             }
-            grid.style.gridTemplateColumns = 'repeat(' + lay.cols + ', var(--lk-cell-w))';
+            /* each column as wide as its longest name, between --lk-cell-w and --lk-cell-max */
+            grid.style.gridTemplateColumns = 'repeat(' + lay.cols + ', fit-content(var(--lk-cell-max)))';
             grid.style.gridTemplateRows = 'repeat(' + lay.rows + ', auto)';
         }
 
@@ -2846,7 +2847,7 @@
            left over). Each year can fill its lockers from the left end of each bank, the right end,
            or in locker-number order. A tutor group with a bank (or area) of the same name is placed
            in it first. Lockers kept for a year level still only go to that year.
-           Settings: state.display.tierPrefs = {top, bottom, ends: {year: 'left'|'right'|'number'},
+           Settings: state.display.tierPrefs = {top, bottom, ends: {year: 'left'|'right'|'asc'|'desc'},
            restEnd, ownBank}. */
         function tierPrefs() {
             var p = state.display.tierPrefs || {};
@@ -2854,7 +2855,7 @@
                 top: p.top != null ? String(p.top) : '9',
                 bottom: p.bottom != null ? String(p.bottom) : '7',
                 ends: p.ends && typeof p.ends === 'object' ? p.ends : {},
-                restEnd: p.restEnd || 'number',
+                restEnd: endKey(p.restEnd),
                 ownBank: p.ownBank !== false
             };
         }
@@ -2868,7 +2869,9 @@
             state.students.forEach(function (st) { if (st.year) seen[String(st.year)] = true; });
             return Object.keys(seen).sort(numSort);
         }
-        var END_NAMES = { left: 'Left end first', right: 'Right end first', number: 'Locker number order' };
+        var END_NAMES = { left: 'Left end first', right: 'Right end first', asc: 'Locker number ascending', desc: 'Locker number descending' };
+        var END_KEYS = ['left', 'right', 'asc', 'desc'];
+        function endKey(e) { return END_KEYS.indexOf(e) >= 0 ? e : 'asc'; }   /* old saves said "number" */
 
         function openTiered() {
             if (!order.length) { setStatus('Set up the lockers first.'); return; }
@@ -2881,14 +2884,16 @@
                     years.map(function (y) { return '<option value="' + esc(y) + '"' + (y === cur ? ' selected' : '') + '>Year ' + esc(y) + '</option>'; }).join('') + '</select>';
             }
             function endSel(m, cur) {
-                return '<select class="lk-select" data-m="' + m + '">' + ['left', 'right', 'number'].map(function (e) {
+                cur = endKey(cur);
+                return '<select class="lk-select" data-m="' + m + '">' + END_KEYS.map(function (e) {
                     return '<option value="' + e + '"' + (e === cur ? ' selected' : '') + '>' + END_NAMES[e] + '</option>';
                 }).join('') + '</select>';
             }
             openModal('Fill top and bottom lockers by year',
                 '<p class="lk-help">Choose which year goes in the <b>top row</b> of each bank and which in the <b>bottom row</b>. ' +
                 'Everyone else goes in the rest: middle rows, 1-high banks, then any top or bottom lockers left over. ' +
-                'For each year, choose which end of each bank it fills first.</p>' +
+                'For each year, choose where it starts: the left or right end of the row of banks (it fills across all the banks ' +
+                'in the group, not bank by bank), or by locker number, lowest or highest first.</p>' +
                 '<table class="lk-tier-table"><thead><tr><th>Lockers</th><th>Year</th><th>Fill from</th></tr></thead><tbody>' +
                 '<tr><td><b>Top row</b></td><td>' + yearSel('top', p.top) + '</td><td data-m="topEndCell"></td></tr>' +
                 '<tr><td><b>Bottom row</b></td><td>' + yearSel('bottom', p.bottom) + '</td><td data-m="bottomEndCell"></td></tr>' +
@@ -2915,7 +2920,7 @@
                 if (q('restEnd')) p.restEnd = q('restEnd').value;
                 var t = q('top').value, b = q('bottom').value;
                 function endFor(y) {
-                    return y ? endSel('end-' + y, p.ends[y] || 'number').replace('<select ', '<select data-end-year="' + esc(y) + '" ') : '<span class="lk-help">—</span>';
+                    return y ? endSel('end-' + y, p.ends[y] || 'asc').replace('<select ', '<select data-end-year="' + esc(y) + '" ') : '<span class="lk-help">—</span>';
                 }
                 q('topEndCell').innerHTML = endFor(t);
                 q('bottomEndCell').innerHTML = b && b === t ? '<span class="lk-help">same as the top row</span>' : endFor(b);
@@ -2963,9 +2968,16 @@
                         t[key].push({ id: id, b: bo, c: c, i: i, r: r });
                     });
                 });
+                /* locker-number rank across every bank in the group (natural order: 2 before 10, Q21 after 99) */
+                var all = t.top.concat(t.bottom, t.rest).slice().sort(function (x, y) {
+                    return x.id.localeCompare(y.id, undefined, { numeric: true, sensitivity: 'base' });
+                });
+                all.forEach(function (it, k) { it.n = k; });
                 return t;
             }
-            /* next locker for a student: bank by bank, and within a bank from the chosen end */
+            /* next locker for a student. left / right: across the whole row of banks in the group, as
+               they sit on screen (left: first bank's left end onwards; right: last bank's right end
+               back towards the first). asc / desc: by locker number across all the group's banks. */
             function takeFrom(list, st, end) {
                 var y = String(st.year || ''), best = -1;
                 for (var k = 0; k < list.length; k++) {
@@ -2973,16 +2985,16 @@
                     if (ry && ry !== y) continue;
                     if (best < 0) { best = k; continue; }
                     var bb = list[best];
-                    var better = it.b !== bb.b ? it.b < bb.b
-                        : end === 'left' ? (it.c !== bb.c ? it.c < bb.c : it.r < bb.r)
-                        : end === 'right' ? (it.c !== bb.c ? it.c > bb.c : it.r < bb.r)
-                        : it.i < bb.i;
+                    var better = end === 'left' ? (it.b !== bb.b ? it.b < bb.b : it.c !== bb.c ? it.c < bb.c : it.r < bb.r)
+                        : end === 'right' ? (it.b !== bb.b ? it.b > bb.b : it.c !== bb.c ? it.c > bb.c : it.r < bb.r)
+                        : end === 'desc' ? it.n > bb.n
+                        : it.n < bb.n;
                     if (better) best = k;
                 }
                 return best < 0 ? null : list.splice(best, 1)[0].id;
             }
             function endOf(y) {
-                if (y && (y === P.top || y === P.bottom)) return P.ends[y] || 'number';
+                if (y && (y === P.top || y === P.bottom)) return endKey(P.ends[y]);
                 return P.restEnd;
             }
             var wrong = 0;

@@ -648,7 +648,8 @@ Setting            What it does
 **Top row**        Which year goes in the top row (or *Nobody*).
 **Bottom row**     Which year goes in the bottom row (or *Nobody*).
 **Fill from**      For each year: **Left end first**, **Right end
-                   first** or **Locker number order**, in every bank.
+                   first**, **Locker number ascending** or
+                   **Locker number descending**.
 **The rest**       Everyone else, and the end they fill from.
 =================  ==================================================
 
@@ -658,10 +659,16 @@ kept when you **Save**), and the button shows them, e.g. *Y7 top · Y9 bottom…
 * **Top** and **bottom** are the top and bottom rows of each bank. Middle rows
   (in banks 3 or more high) and 1-high banks count as *the rest*, and the rest
   also take any top or bottom lockers the two chosen years don't need.
-* **Fill from** works bank by bank: with **Right end first**, each bank's
-  row fills from its right-hand end, whatever way the numbers run. The choice
-  goes with the year, so if you swap the years between the rows, each keeps
-  its own end.
+* **Fill from** works across all the banks in a group, not bank by bank. With
+  **Left end first**, the row fills from the left-hand end of the first bank
+  and carries on into the next bank; with **Right end first**, it starts at
+  the right-hand end of the last bank and works back towards the first,
+  whatever way the numbers run. **Locker number ascending** takes the lowest
+  numbers first (101, 102 … then 201 …) across the banks, and **descending**
+  the highest first. A *group* is the banks named after a tutor group (see
+  below), or, for everyone else, all the banks in the order they are shown.
+* The choice goes with the year, so if you swap the years between the rows,
+  each keeps its own order.
 * **Tutor groups stay together** (tick box, on to start with). When a bank or
   area has the same name as a tutor group, for example a bank called
   *Hughes 11*, that tutor group's students go in it first, sorted A–Z. Tutor
@@ -1002,6 +1009,11 @@ tool opens the same way next time. Printing is not affected.
 
 Display options
 ---------------
+
+Lockers are drawn as narrow as they can be. A column of lockers only widens
+when a name in it is longer, so short names keep the banks compact and more
+lockers fit across the screen. Very long names are cut short with … (hover
+over the locker to see the whole name).
 
 * **Badge** chooses which detail shows in lockers and lists: Year (*Y7*),
   Homeroom (*H13*), Year + Homeroom (*7 H13*), another column such as TG, or
