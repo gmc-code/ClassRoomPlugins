@@ -251,6 +251,14 @@ from the start if there are more groups. The strip is a ``::before`` on
 ``.lk-cell.lk-tg`` (``--lk-tg``), so it sits over the year colour; **Print**
 draws it as a 15 px band.
 
+``display.tierPrefs`` holds the **Y9 top · Y7 bottom…** choices:
+``{top, bottom, ends: {year: "left"|"right"|"number"}, restEnd, ownBank}``
+(defaults ``9``, ``7``, locker-number order, ``ownBank: true``).
+``tieredAllocate()`` splits each bank's free lockers into top row, bottom row
+and the rest (``bankLayout`` rows; 1-high banks are all *rest*) and takes them
+bank by bank, choosing within a bank by screen column (``left``/``right``) or
+index (``number``).
+
 ``display.hideEmpty`` leaves banks with no allocated lockers (``bankHidden()``)
 out of the screen and **Print**; an area whose banks are all hidden loses its
 heading too, and a ``.lk-hidden-note`` above the lockers says how many are

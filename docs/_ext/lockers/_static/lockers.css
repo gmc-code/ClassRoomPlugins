@@ -388,3 +388,15 @@ html.lk-wide-page, html.lk-wide-page body { overflow: hidden; }
     border: 1px solid #fca5a5; border-radius: 4px; background: #fff; color: #b91c1c; cursor: pointer;
 }
 .lockers .lk-side-remove:hover { background: #fee2e2; border-color: #b91c1c; }
+
+/* Simple + Full width: everything lines up on the left, with Open / Save / Undo first */
+.lockers.lk-wide .cc-simplebar { justify-content: flex-start; }
+.lockers.lk-wide .cc-simplebar .cc-spacer { display: none; }
+.lockers.lk-wide .cc-simplebar .cc-end { order: -1; align-self: flex-end; border-right: 1px solid #334155; padding: 0 12px 0 8px; }
+
+/* Top / bottom by year dialog (the dialog sits outside .lockers) */
+.lk-tier-table { border-collapse: collapse; margin: 6px 0 12px; font-size: 13px; }
+.lk-tier-table th { text-align: left; font-size: 11px; color: #64748b; font-weight: 700; padding: 4px 16px 4px 0; border-bottom: 1px solid #e2e8f0; }
+.lk-tier-table td { text-align: left; padding: 6px 16px 6px 0; border-bottom: 1px solid #f1f5f9; vertical-align: middle; color: #0f172a; }
+.lk-tier-table select { font: inherit; font-size: 13px; padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 4px; background: #fff; color: #0f172a; }
+.lk-tier-own { color: #0f172a; display: flex; gap: 8px; align-items: center; font-size: 13px; margin: 4px 0; }

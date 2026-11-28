@@ -156,7 +156,7 @@ The buttons are coloured by what they do:
 * **Orange**: **Set up** and **Enter** (**Lockers**, **Year levels**,
   **By Student**, **Paste lockers**, **Combos**).
 * **Purple**: **Allocate** (**A–Z**, **Homeroom**, **Random**,
-  **Y9 top · Y7 bottom**).
+  **Y9 top · Y7 bottom…**).
 * **Red**: **Clear** and **Remove: Y9 / Y12 / No locker**.
 
 Hover over any button to see what it does.
@@ -638,24 +638,42 @@ locker; you are asked to confirm.
 Year 9 on top, Year 7 underneath
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Y9 top · Y7 bottom** (in the **Allocate:** row of Full) puts Year 9
-students in the top lockers, Year 7 students in the bottom lockers and Year 8
-in the rest, so the younger students get the lockers nearest the floor:
+**Y9 top · Y7 bottom…** (in the **Allocate:** row of Full) fills the top row of
+each bank with one year and the bottom row with another, so, for example, the
+younger students get the lockers nearest the floor. It opens a small window:
+
+=================  ==================================================
+Setting            What it does
+=================  ==================================================
+**Top row**        Which year goes in the top row (or *Nobody*).
+**Bottom row**     Which year goes in the bottom row (or *Nobody*).
+**Fill from**      For each year: **Left end first**, **Right end
+                   first** or **Locker number order**, in every bank.
+**The rest**       Everyone else, and the end they fill from.
+=================  ==================================================
+
+Press **Allocate** to give out the lockers. Your choices are remembered (and
+kept when you **Save**), and the button shows them, e.g. *Y7 top · Y9 bottom…*.
 
 * **Top** and **bottom** are the top and bottom rows of each bank. Middle rows
-  (in banks 3 or more high) and 1-high banks count as *the rest*, and Year 8
-  also take any top or bottom lockers that Year 9 and Year 7 don't need.
-* **Tutor groups stay together.** When a bank (or area) has the same name as a
-  tutor group, for example a bank called *Hughes 11*, that tutor group's
-  students go in it first, sorted A–Z. Tutor groups without their own bank,
-  and anyone who doesn't fit, go in the free lockers left over, one tutor
-  group after another.
-* If a bank has more Year 9s than top lockers, the extra Year 9s go in the
-  middle rows first, then the bottom row (Year 7 the same way, the other way
-  up). The message line says how many didn't fit in the right row.
-* It follows **Keep** like the other buttons: ticked, only students without a
-  locker are placed; unticked, everyone is reallocated (you are asked first).
-  Lockers kept for a year level still only go to that year.
+  (in banks 3 or more high) and 1-high banks count as *the rest*, and the rest
+  also take any top or bottom lockers the two chosen years don't need.
+* **Fill from** works bank by bank: with **Right end first**, each bank's
+  row fills from its right-hand end, whatever way the numbers run. The choice
+  goes with the year, so if you swap the years between the rows, each keeps
+  its own end.
+* **Tutor groups stay together** (tick box, on to start with). When a bank or
+  area has the same name as a tutor group, for example a bank called
+  *Hughes 11*, that tutor group's students go in it first, sorted A–Z. Tutor
+  groups without their own bank, and anyone who doesn't fit, go in the free
+  lockers left over, one tutor group after another.
+* If a bank has more students of the top year than top lockers, the extras go
+  in the middle rows first, then the bottom row (the bottom year the same way,
+  the other way up). The message line says how many didn't fit in their row.
+* It follows **Keep** like the other buttons (the window says which): ticked,
+  only students without a locker are placed; unticked, everyone is
+  reallocated (you are asked first). Lockers kept for a year level still only
+  go to that year.
 
 Students need a year level (a **Year** or **Year Level** column).
 
@@ -977,8 +995,9 @@ Full width
 
 **Full width** spreads the lockers across the whole browser window, covering
 the menu and page around them, so more lockers fit on the screen. All the
-buttons work as usual. Press **Normal width** (the same button) to go back to
-the page. The setting is remembered in this browser on this computer, so the
+buttons work as usual. In Simple, the buttons line up from the left, with
+**Open**, **Save** and **Undo** first. Press **Normal width** (the same
+button) to go back to the page. The setting is remembered in this browser on this computer, so the
 tool opens the same way next time. Printing is not affected.
 
 Display options
