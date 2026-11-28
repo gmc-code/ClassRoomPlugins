@@ -90,8 +90,9 @@ Options
    A CSV or ``.xlsx`` file, relative to the page. Columns as for **Import
    Roster**, including an optional **Locker** column.
 
-``:surname-initial:``, ``:hide-homeroom:``
-   Starting display options.
+``:surname-initial:``, ``:hide-homeroom:``, ``:tutor-group-colours:``
+   Starting display options. ``:tutor-group-colours:`` starts with
+   **Tutor group colours** ticked.
 
 ``:storage-key:``
    Browser storage name. Defaults to ``<docname>#<n>``. Give two pages the same
@@ -240,6 +241,14 @@ typed. Combination columns (``Locker Combo``, ``Combo``, ``Combination``,
 ``Lock Combo``, ``Locker Combination``) are read by **Import**, **Add**,
 **Paste** (heading rows) and by ``:roster:`` files at build time.
 ``display.combo`` shows them under the name.
+
+``display.tgColours`` colours a strip along the top of each filled locker (the
+line with the number and badge) by tutor group (``tutorGroup()``: the
+``tg`` column, else year + homeroom). Groups are sorted naturally
+(``7A`` … ``7I``) and given ``TG_COLOURS`` in turn: nine colours, used again
+from the start if there are more groups. The strip is a ``::before`` on
+``.lk-cell.lk-tg`` (``--lk-tg``), so it sits over the year colour; **Print**
+draws it as a 15 px band.
 
 Paste reads a heading row when the first line has a recognised heading
 (surname, first name or locker); otherwise each line is split on tabs, commas

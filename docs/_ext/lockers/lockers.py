@@ -245,6 +245,7 @@ class LockersDirective(SphinxDirective):
         "roster": directives.path,
         "surname-initial": directives.flag,
         "hide-homeroom": directives.flag,
+        "tutor-group-colours": directives.flag,
         "storage-key": directives.unchanged,
         "class": directives.class_option,
     }
@@ -396,6 +397,7 @@ class LockersDirective(SphinxDirective):
             "display": {
                 "surnameInitial": "surname-initial" in self.options,
                 "homeroom": "hide-homeroom" not in self.options,
+                "tgColours": "tutor-group-colours" in self.options,
             },
             "students": students,
         }

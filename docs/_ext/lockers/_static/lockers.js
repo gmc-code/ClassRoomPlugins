@@ -863,6 +863,7 @@
         '.lk-pcell .ry{display:block;font-size:10px;color:#555}' +
         '.lk-pcell .cb{display:block;font-family:Consolas,monospace;font-size:10px;letter-spacing:.5px}' +
         '.lk-pcell .bd{float:right;font-size:9px;font-weight:700;border:1px solid #999;border-radius:2px;padding:0 2px;margin-left:3px}' +
+        '.lk-pcell.tg{background:linear-gradient(var(--tg) 0 15px,transparent 15px);-webkit-print-color-adjust:exact;print-color-adjust:exact}' +
         '.lk-pcell.out{background:repeating-linear-gradient(45deg,#fff,#fff 4px,#ddd 4px,#ddd 8px);color:#444}' +
         'table{border-collapse:collapse;width:100%;font-size:12px}' +
         'th,td{border:1px solid #999;padding:3px 6px;text-align:left}' +
@@ -945,6 +946,11 @@
         12: ['#ccfbf1', '#14b8a6']    /* teal */
     };
     var EXTRA_COLOURS = [['#fee2e2', '#ef4444'], ['#e0e7ff', '#6366f1'], ['#ffedd5', '#f97316'], ['#f1f5f9', '#64748b']];
+    /* tutor group colours: 9 strong, clearly different colours for the strip along the top of a
+       locker (number and badge), so they still show over the year-level background */
+    var TG_COLOURS = ['#f87171', '#fb923c', '#facc15', '#4ade80', '#2dd4bf', '#60a5fa', '#a78bfa', '#f472b6', '#a3a3a3'];
+    var TG_NAMES = ['red', 'orange', 'yellow', 'green', 'teal', 'blue', 'purple', 'pink', 'grey'];
+
     function yearColour(y) {
         var n = parseInt(y, 10);
         if (!n) return null;
@@ -1362,6 +1368,7 @@
                     field: cfg.display && cfg.display.homeroom === false ? 'none' : 'auto',
                     surnameInitial: !!(cfg.display && cfg.display.surnameInitial),
                     yearColours: !(cfg.display && cfg.display.yearColours === false),
+                    tgColours: !!(cfg.display && cfg.display.tgColours),
                     combo: !!(cfg.display && cfg.display.combo)
                 },
                 sel: null
@@ -1468,6 +1475,42 @@
             el.classList.add('lk-yr');
             el.style.setProperty('--lk-yr-bg', c[0]);
             el.style.setProperty('--lk-yr-bd', c[1]);
+        }
+
+        /* tutor groups in order (7A, 7B ... 7I, 8A ...), each with its colour */
+        function tgColourMap() {
+            var seen = {};
+            state.students.forEach(function (st) { var g = tutorGroup(st); if (g) seen[g] = (seen[g] || 0) + 1; });
+            var groups = Object.keys(seen).sort(function (a, b) { return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }); });
+            var map = {};
+            groups.forEach(function (g, i) { map[g] = { colour: TG_COLOURS[i % TG_COLOURS.length], count: seen[g], name: TG_NAMES[i % TG_NAMES.length] }; });
+            return { groups: groups, map: map };
+        }
+        function tgColourOf(st) {
+            if (!state.display.tgColours || !st) return null;
+            var g = tutorGroup(st), m = state._tgMap;
+            return g && m && m.map[g] ? m.map[g].colour : null;
+        }
+        function paintTg(el, st) {
+            var c = tgColourOf(st);
+            if (!c) return;
+            el.classList.add('lk-tg');
+            el.style.setProperty('--lk-tg', c);
+        }
+        function hasTutorGroups() { return state.students.some(function (st) { return !!tutorGroup(st); }); }
+        function tgLegend() {
+            var m = state._tgMap;
+            if (!state.display.tgColours || !m || !m.groups.length) return null;
+            var box = make('div', 'lk-legend lk-tg-legend');
+            box.appendChild(make('span', 'lk-legend-label', 'Tutor groups:'));
+            m.groups.forEach(function (g) {
+                var chip = make('span', 'lk-legend-chip lk-tg-chip', g + ' (' + m.map[g].count + ')');
+                chip.style.setProperty('--lk-tg', m.map[g].colour);
+                chip.title = g + ': ' + m.map[g].name;
+                box.appendChild(chip);
+            });
+            if (m.groups.length > TG_COLOURS.length) box.appendChild(make('span', 'lk-legend-note', 'More than ' + TG_COLOURS.length + ' tutor groups, so some colours are used twice.'));
+            return box;
         }
 
         /* key of year colours with how many students are in each year */
@@ -1679,6 +1722,7 @@
                 state.display.field = typeof d.display.field === 'string' ? d.display.field : (state.display.homeroom ? 'auto' : 'none');
                 state.display.surnameInitial = !!d.display.surnameInitial;
                 state.display.yearColours = d.display.yearColours !== false;
+                state.display.tgColours = !!d.display.tgColours;
                 state.display.combo = !!d.display.combo;
                 if (d.display.exportPrefs && typeof d.display.exportPrefs === 'object') state.display.exportPrefs = d.display.exportPrefs;
             }
@@ -1810,6 +1854,7 @@
                 '<select class="lk-select" data-role="badge-field"></select></label>' +
                 '<label class="lk-checkbox-label" title="Show surnames as an initial only, e.g. Alex S."><input type="checkbox" class="lk-checkbox" data-role="toggle-initial"> Initial</label>' +
                 '<label class="lk-checkbox-label" title="Colour each locker by the student\'s year level"><input type="checkbox" class="lk-checkbox" data-role="toggle-colours"> Year colours</label>' +
+                '<label class="lk-checkbox-label" title="Colour the top line of each locker (number and badge) by the student\'s tutor group: 9 colours"><input type="checkbox" class="lk-checkbox" data-role="toggle-tgcolours"> Tutor group colours</label>' +
                 '<label class="lk-checkbox-label" title="Show each lock\'s combination on a new line under the name"><input type="checkbox" class="lk-checkbox" data-role="toggle-combo"> Combos</label>' +
                 '</div>' +
                 '</div>' +
@@ -1840,7 +1885,7 @@
                 '<div class="lk-canvas" data-role="canvas"></div>' +
                 '</div>';
 
-            ['title', 'file', 'json-file', 'undo', 'keep', 'tiers', 'order', 'side', 'row', 'badge-field', 'toggle-override', 'toggle-initial', 'toggle-colours', 'toggle-combo', 'search',
+            ['title', 'file', 'json-file', 'undo', 'keep', 'tiers', 'order', 'side', 'row', 'badge-field', 'toggle-override', 'toggle-initial', 'toggle-colours', 'toggle-tgcolours', 'toggle-combo', 'search',
                 'entry-locker', 'entry-name', 'entry-combo', 'suggest', 'entry-current', 'entry-out', 'status', 'stats', 'count', 'pool', 'canvas'
             ].forEach(function (r) { ui[r] = root.querySelector('[data-role="' + r + '"]'); });
 
@@ -1863,6 +1908,7 @@
             });
             ui['toggle-initial'].addEventListener('change', function () { state.display.surnameInitial = ui['toggle-initial'].checked; changed(); });
             ui['toggle-colours'].addEventListener('change', function () { state.display.yearColours = ui['toggle-colours'].checked; changed(); });
+            ui['toggle-tgcolours'].addEventListener('change', function () { state.display.tgColours = ui['toggle-tgcolours'].checked; changed(); });
             ui['toggle-combo'].addEventListener('change', function () { state.display.combo = ui['toggle-combo'].checked; changed(); });
             ui.search.addEventListener('input', applySearch);
             ui.search.addEventListener('keydown', function (e) {
@@ -1976,6 +2022,7 @@
         /* ----- rendering ----- */
 
         function render() {
+            state._tgMap = state.display.tgColours ? tgColourMap() : null;
             ui.title.textContent = state.title;
             ui.keep.checked = state.keepExisting;
             var fields = extraFields();
@@ -1992,6 +2039,8 @@
             ui['toggle-initial'].checked = state.display.surnameInitial;
             ui['toggle-colours'].checked = state.display.yearColours;
             ui['toggle-colours'].parentNode.style.display = hasYears() ? '' : 'none';
+            ui['toggle-tgcolours'].checked = !!state.display.tgColours;
+            ui['toggle-tgcolours'].parentNode.style.display = hasTutorGroups() ? '' : 'none';
             ui['toggle-combo'].checked = !!state.display.combo;
             Array.prototype.forEach.call(root.querySelectorAll('[data-action="remove-year"]'), function (b) {
                 var y = b.getAttribute('data-year');
@@ -2070,6 +2119,7 @@
                 item.draggable = true;
                 item.setAttribute('data-sid', s.id);
                 paintYear(item, s);
+                paintTg(item, s);
                 item.appendChild(make('span', 'lk-pool-name', s.surname + ', ' + s.firstName));
                 if (badgeOf(s)) item.appendChild(make('span', 'lk-hr', badgeOf(s)));
                 item.title = studentInfo(s) + '\nClick to put in the locker typed above, or drag onto a locker';
@@ -2093,6 +2143,8 @@
                 (waiting.length > free && state.students.length ? '<div class="lk-warn">Not enough free lockers for everyone</div>' : '') +
                 yearStats();
 
+            var tgl = tgLegend();
+            if (tgl && order.length) canvas.insertBefore(tgl, canvas.firstChild);
             var legend = yearLegend();
             if (legend && order.length) canvas.insertBefore(legend, canvas.firstChild);
 
@@ -2285,6 +2337,7 @@
             } else if (s) {
                 cell.classList.add('lk-filled');
                 paintYear(cell, s);
+                paintTg(cell, s);
                 cell.draggable = true;
                 cell.setAttribute('data-sid', s.id);
                 cell.appendChild(make('div', 'lk-first', s.firstName));
@@ -3433,7 +3486,9 @@
                 ids.forEach(function (id, i) {
                     var s = state.assign[id] ? studentById(state.assign[id]) : null;
                     var at = lay.pos ? ' style="grid-column:' + lay.pos[i].c + ';grid-row:' + lay.pos[i].r + '"' : '';
-                    body += '<div class="lk-pcell' + (state.out[id] ? ' out' : '') + '"' + at + '>' +
+                    var tgc = s && !state.out[id] ? tgColourOf(s) : null;
+                    if (tgc) at = (at ? at.slice(0, -1) + ';' : ' style="') + '--tg:' + tgc + '"';
+                    body += '<div class="lk-pcell' + (state.out[id] ? ' out' : '') + (tgc ? ' tg' : '') + '"' + at + '>' +
                         (s && !state.out[id] && badgeOf(s) ? '<small class="bd">' + esc(badgeOf(s)) + '</small>' : '') +
                         '<b>' + esc(id) + '</b>' +
                         (state.out[id] ? 'Out of service' : s ? '<span class="n">' + esc(s.firstName) + '</span> ' + esc(displaySurname(s))

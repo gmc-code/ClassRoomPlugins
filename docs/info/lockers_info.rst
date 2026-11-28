@@ -776,6 +776,27 @@ Untick **Year colours** in the toolbar to turn the colours off. The tick box
 only shows when students have a year level. **Print** keeps the colours;
 **Map** stays black and white.
 
+Tutor group colours
+-------------------
+
+Tick **Tutor group colours** in the toolbar to colour the top line of each
+locker, the line with the locker number and badge, by the student's tutor
+group. The rest of the locker keeps its year colour, so you can see both at
+once. A second key above the lockers shows each tutor group's colour and how
+many students are in it.
+
+There are nine colours: red, orange, yellow, green, teal, blue, purple, pink
+and grey. Tutor groups are given them in order, so 7A is red, 7B orange, and
+so on. With more than nine tutor groups the colours start again from red, and
+the key says so.
+
+The tutor group is the **Homeroom** column as you imported it (a column
+called **Tutor group**, **TG** or **Form** works too), so ``7C`` or
+``Hughes 13`` each get their own colour. Names
+in the **No locker** list get a coloured line underneath, and **Print** shows
+the coloured top line too. The tick box only shows when students have a tutor
+group.
+
 Finding a student or locker
 ---------------------------
 
